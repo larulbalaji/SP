@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <SPRight displayName="SIQStatsRight" name="SIQStatsRight"/>
+  <SPRight displayName="siqstatsRESTAllow" name="siqstatsRESTAllow"/>
+  <SPRight displayName="SIQStatsPluginRight" name="SIQStatsPluginRight"/>
+  
+    <Capability displayName="SIQStatsWidget" name="SIQStatsWidget">
+        <Description>Allow access to Most Entitlements Widget Plugin</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="SIQStatsRight"/>
+            <Reference class="sailpoint.object.SPRight" name="siqstatsRESTAllow"/>
+            <Reference class="sailpoint.object.SPRight" name="SIQStatsPluginRight"/>
+        </RightRefs>
+    </Capability>
+</sailpoint>

@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Workflow explicitTransitions="true" name="ConnectorRegistry" type="SERI">
+  <Variable initializer="false" name="transient">
+    <Description>
+        Set to false to cause workflow-related objects, such as approval work items, to be saved in the database even if they are only viewed by the person registering.
+    </Description>
+  </Variable>
+  <Variable initializer="false" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace will be sent to stdout</Description>
+  </Variable>
+  <Variable input="true" name="requester">
+    <Description>Identity of the user who launched the workflow</Description>
+  </Variable>
+  <Variable name="connectorList">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Configuration;
+import sailpoint.object.Application;
+Configuration confConnectorRegistry = context.getObjectByName(Configuration.class,"ConnectorRegistry");
+List connectorList = new ArrayList();
+List connectors = confConnectorRegistry.getList("applicationTemplates");
+for (Application connector : connectors) {
+  String bCAConnector = connector.getAttributeValue("CAConnector");
+  if (bCAConnector!=null) {
+    if (bCAConnector.equals("true")) {
+      connectorList.add(connector.getName());
+    }
+  }
+}
+return connectorList;
+      ]]></Source>
+    </Script>
+  </Variable>
+  <Variable name="connector"/>
+  <Variable initializer="false" name="exitWorkflow"/>
+  <Step icon="Start" name="Start">
+    <Transition to="SelectConnector"/>
+  </Step>
+  <Step icon="Task" name="SelectConnector" posX="100">
+    <Approval name="SelectConnectorForm" owner="ref:requester" return="connector,exitWorkflow" send="connectorList,connector">
+      <Form name="SelectConnectorForm">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Select Connector to Enable"/>
+          </Map>
+        </Attributes>
+        <Button action="next" label="Enable"/>
+        <Button action="back" label="Cancel" parameter="exitWorkflow" value="true"/>
+        <Section>
+          <Field displayName="Connector: " displayType="combobox" name="connector" required="true" type="string">
+            <AllowedValuesDefinition>
+              <Script>
+                <Source><![CDATA[
+return connectorList;
+                ]]></Source>
+              </Script>
+            </AllowedValuesDefinition>
+          </Field>
+        </Section>
+      </Form>
+    </Approval>
+    <Transition to="Stop" when="script:return exitWorkflow;"/>
+    <Transition to="EnableConnector"/>
+  </Step>
+  <Step icon="Task" name="EnableConnector" posX="202" posY="80">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Configuration;
+import sailpoint.object.Application;
+Configuration confConnectorRegistry = context.getObjectByName(Configuration.class,"ConnectorRegistry");
+List conns = confConnectorRegistry.getList("applicationTemplates");
+for (Application conn : conns) {
+  if (conn.getName().equals(connector)) {
+    conn.setAttribute("CAConnector","false");
+  }
+}
+    ]]></Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="304"/>
+</Workflow>
+</sailpoint>

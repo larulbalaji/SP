@@ -1,0 +1,46 @@
+Accounts_All
+	AccountsPayable
+	AccountsReceivable
+
+DEV_All
+	DEV_Internal
+	DEV_Mgmt
+	DEV_Projects
+		DEV_WestCoast
+		DEV_EastCoast
+		DEV_Europe
+			ENG_All
+	DEV_Stage
+	
+
+ENG_All
+	DEV_All
+	ENG_Internal
+	ENG_Mgmt
+	ENG_Prod
+		ENG_WestCoast
+		ENG_EastCoast
+		ENG_External
+	ENG_Stage
+
+HR_All
+	HR External
+	HR Internal
+
+
+Payroll_All
+	PayrollAnalysis
+	PayrollControls
+	PayrollManager
+	PayrollProjects
+		PayrollManager
+
+PCI_All
+	PCI_General
+	PCI_Admin
+	PCI_Mgmt
+
+PCI_General
+	PCI_Mgmt
+
+

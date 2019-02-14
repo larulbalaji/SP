@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Rule language="beanshell" name="PreIterate-XLSXToCSV" type="PreIterate">
+    <Description>This rule is called before the connector processes the
+      data in a file.</Description>
+    <Signature returnType="void">
+      <Inputs>
+        <Argument type="application">
+          <Description>
+            Application being iterated.
+          </Description>
+        </Argument>
+        <Argument type="schema">
+          <Description>
+            Schema representing the data being iterated.
+          </Description>
+        </Argument>
+        <Argument type="stats">
+          <Description>
+            A map passed by the connector of the stats for the file about to be
+            iterated.
+            Contains keys:
+            fileName : (String) filename of the file about to be processed
+            absolutePath : (String) absolute filename
+            length : (Long) length in bytes
+            lastModified : (Long) last time the file was updated Java GMT
+          </Description>
+        </Argument>
+      </Inputs>
+      <Returns>
+      </Returns>
+    </Signature>
+    <!--ReferencedRules> <Reference class="sailpoint.object.Rule" name=""/> 
+      </ReferencedRules -->
+    <Source><![CDATA[
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.util.Iterator;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.PreIterate-XLSXToCSV");
+
+    serilog.debug("Entering PreIterate XLSX To CSV");
+ 	String filepath = (String) stats.get("absolutePath");
+	serilog.debug("FileName from Config is " + filepath);
+	String outputFile = "Converted.csv";
+	
+    StringBuffer data = new StringBuffer();
+    FileOutputStream fos = null;
+    FileInputStream fis = null;
+    try {
+       fos = new FileOutputStream(outputFile);
+       // Get the workbook object for XLSX file
+       XSSFWorkbook wBook = new XSSFWorkbook(new FileInputStream(filepath));
+       serilog.debug("Loaded XLSX file into XSSFWorkbook");
+       // Get first sheet from the workbook
+       XSSFSheet sheet = wBook.getSheetAt(0);
+       Row row;
+       Cell cell;
+       // Iterate through each row from first sheet
+       Iterator rowIterator = sheet.iterator();
+       int rowCount = 1;
+       int columnCount = 1;
+       serilog.debug("Iterating over each row from first sheet");
+       while (rowIterator.hasNext()) {
+          row = rowIterator.next();
+
+          // For each row, iterate through each columns
+          Iterator cellIterator = row.cellIterator();
+          while (cellIterator.hasNext()) {
+             serilog.trace("Row " + rowCount + " , Column " + columnCount);
+             
+             cell = cellIterator.next();
+             switch (cell.getCellType()) {
+                case Cell.CELL_TYPE_BOOLEAN:
+                   data.append(cell.getBooleanCellValue() + ",");
+                   break;
+                case Cell.CELL_TYPE_NUMERIC:
+                   data.append(cell.getNumericCellValue() + ",");
+                   break;
+                case Cell.CELL_TYPE_STRING:
+                
+                   String cellValue = cell.getStringCellValue();
+                   if (cellValue.contains(",")) {
+                      //Handle cells with multiple values.  (eg. value1,value2,value3)
+                      //Escape the values with quotes
+                      data.append("\"");
+                      data.append(cellValue);
+                      data.append("\",");
+                   } else {
+                      data.append(cell.getStringCellValue() + ",");
+                   }
+                   break;
+                case Cell.CELL_TYPE_BLANK:
+                   data.append("" + ",");
+                   break;
+                default:
+                   data.append(cell + ",");
+              }
+              columnCount++;
+           }
+           rowCount++;
+           //Reached the end of the row.   Appending MS type return chars
+           data.append("\r\n");
+        }
+
+        serilog.debug("Writing converted file");
+        fos.write(data.toString().getBytes());
+        fos.close();
+
+        } catch (Exception ioe) {
+            ioe.printStackTrace();
+        }
+        
+        
+    
+    //testing the application 
+        serilog.debug("Returning FileInputStream");
+		fis = new FileInputStream(outputFile);
+      
+		return fis;
+  ]]></Source>
+  </Rule>
+</sailpoint>

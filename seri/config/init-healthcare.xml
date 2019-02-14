@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+  <ImportAction name='include' value='seri/catalog/UseCase-QuickLink-CreateUser/setup-CreateVendor.xml'/>  
+<!--   <ImportAction name='include' value='seri/catalog/UseCase-QuickLink-CreateUser/setup.xml'/> -->
+  <ImportAction name='include' value='seri/catalog/Resource-EPIC/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Demo-HealthCare/setup.xml'/>
+  
+  <!-- Here we are importing the modified version of Workflow-CreateUser.xml that has the updated parameters -->
+  <ImportAction name='include' value='build/extract/WEB-INF/config/seri/catalog/UseCase-QuickLink-CreateUser/Workflow-CreateUser.xml'/>
+</sailpoint>

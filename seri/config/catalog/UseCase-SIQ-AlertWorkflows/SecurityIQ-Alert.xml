@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="SecurityIQ-Alert"
+  type="Alert">
+  <Variable initializer="ref:identityName" input="true" name="identityName" />
+  <Description>SecurityIQ Alert</Description>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Alert" />
+  </Step>
+  <Step icon="Stop" name="Stop" posX="168" posY="10" />
+  <Step icon="Analysis" name="Alert" posX="98" posY="10">
+    <Script>
+      <Source><![CDATA[
+        
+          import sailpoint.Version;
+          import sailpoint.object.Identity;
+          import sailpoint.object.Link;
+          import java.text.*;
+          import sailpoint.tools.xml.XMLObjectFactory;
+          import sailpoint.object.ObjectAttribute;
+          import sailpoint.object.ObjectConfig;
+          import sailpoint.server.Auditor;
+          import bsh.*;
+
+
+
+          SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+          Date date = new Date();
+
+
+          Identity identity = context.getObjectByName(Identity.class, identityName);
+          String email = identity.getEmail();
+          String dept = identity.getAttribute("department");
+          String displayName = identity.getDisplayName();
+          Identity manager = identity.getManager();
+
+
+          System.out.println(date + " ========================================");
+          System.out.println(date + " SecurityIQ ALERT: Regarding - " +
+          identityName + " Needs further investigation.");
+          System.out.println(date + " Email: " + email);
+          System.out.println(date + " Department: " + dept);
+          System.out.println(date + " Manager: " + manager.getName());
+
+
+
+
+          System.out.println(date + "
+          ========================================");
+
+          Auditor.logAs(null, "SIQ-Alert", identityName, email, dept,
+          "Manager: " + manager.getName(), "Reason: SecurityIQ Policy
+          Violation");
+          context.commitTransaction();
+
+        ]]></Source>
+    </Script>
+    <Transition to="Stop" />
+  </Step>
+</Workflow>

@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule  language="beanshell" modified="1494273742217" name="Determine Lifecycle State" type="IdentityAttribute">
+  <Attributes>
+    <Map>
+      <entry key="requiresPeriodicRefresh" value="true"/>
+    </Map>
+    </Attributes>
+  <Description>Determines lifecycle state give a start and end date.</Description>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="context">
+        <Description>A SailPointContext object used if its necessary to query objects from the database.</Description>
+      </Argument>
+      <Argument name="environment" type="Map">
+        <Description>Arguments passed to the aggregation or refresh task.</Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>The Identity object that represents the user that is being aggregated.</Description>
+      </Argument>
+      <Argument name="attributeDefinition">
+        <Description>The AttributeDefinition object for this attribute.</Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="attributeValue">
+        <Description>The value of the attribute that should be populated. The rule should return this value.</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+	import sailpoint.object.*;
+	import java.text.DateFormat;
+	import java.text.ParseException;
+	import java.text.SimpleDateFormat;
+	import java.util.Date;
+	import java.util.Locale;
+		
+	public static String determineState ( String startDateString, String endDateString, String dateFormat ){
+		
+		DateFormat dateFormater = new SimpleDateFormat( dateFormat);
+		
+		Date endDate = null;
+		Date startDate = null;
+		
+		try {
+			endDate = ( endDateString != null ) ? dateFormater.parse( endDateString ) : null;
+			startDate = ( startDateString != null ) ? dateFormater.parse( startDateString ) : null; 
+			return determineState ( startDate, endDate );
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		} 
+	}
+	
+	public static String determineState ( Date startDate, Date endDate ){
+	
+		final String STATE_PREHIRE = "prehire";
+		final String STATE_ACTIVE = "active";
+		final String STATE_DISABLED = "terminated";
+		
+		Date today = new Date();
+		
+		if ( startDate == null ) {
+			return null;
+		
+		} else if ( ( endDate != null ) &amp;&amp; ( today.after( endDate ) ) ) {
+			return STATE_DISABLED;
+		
+		} else if ( ( startDate != null ) &amp;&amp; ( today.before( startDate ) ) ) {
+			return STATE_PREHIRE;
+		
+		} else if ( ( startDate != null ) &amp;&amp; ( today.after( startDate ) ) ) {
+			return STATE_ACTIVE;
+		
+		} else {
+			return null;}		
+	}
+	
+	/*
+	 * These are variables which will hold the attributes.
+	 */
+	String startDateString = identity.getAttribute( "startDate" );  
+	String endDateString = identity.getAttribute( "endDate" );		
+	 if (startDateString == null)
+	 	return "start is null";
+	/*
+	 * Determine the state now that we have dates figured out.
+	 */
+	return determineState( startDateString, endDateString, "MM/dd/yy" );
+	
+	</Source>
+</Rule>

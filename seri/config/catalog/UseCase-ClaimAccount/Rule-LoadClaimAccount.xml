@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Load Claim Identity">
+  <Description>
+   Returns a list of all available values for a specific identity attribute. i.e. get all identity attribute job titles from the jobTitle attribute.
+  </Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="month"/>
+      <Argument name="day"/>
+      <Argument name="employeeId"/>
+      <Argument name="lastname"/>
+      <Argument name="userName"/>
+     </Inputs>
+  </Signature>
+  <Source><![CDATA[
+  
+import sailpoint.obj.messages.MessageKeys;
+import sailpoint.tools.Message;
+import sailpoint.object.Identity;
+import sailpoint.object.*;
+import sailpoint.connector.*;
+import sailpoint.api.*;
+import sailpoint.tools.xml.*;
+import sailpoint.tools.Util; 
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.LoadClaimAccount");
+
+serilog.debug("employeeId:" + employeeId);
+serilog.debug("lastname:" + lastname);
+serilog.debug("month:" + month);
+serilog.debug("day:" + day);
+serilog.debug("userName:" + userName);
+
+
+if (employeeId == null || employeeId == void) {
+  serilog.debug("employeeId is null");
+  return null;
+}
+
+if (month == null || month == void) {
+  serilog.debug("month is null");
+  return null;
+}
+
+if (dayu == null || day == void) {
+  serilog.debug("day is null");
+  return null;
+}
+
+if (month.length() < 2) {
+    month = "0" + month;
+}
+
+if (day.length() < 2) {
+    day = "0" + day;
+}
+
+String birthDate = month + day; 
+serilog.debug("birthDate:" + birthDate);
+QueryOptions qo = new QueryOptions();
+
+if (!(lastname == null || lastname == void)) {
+    qo.addFilter(Filter.eq("lastname", lastname));
+}
+
+qo.addFilter(Filter.eq("employeeId", employeeId));
+qo.addFilter(Filter.eq("birthDate", birthDate));
+List ids = context.getObjects(Identity.class,qo);
+boolean found = false;
+Identity foundId = null;
+for (Identity id : ids)
+{
+    foundId = id;
+}
+
+if (foundId != null) {
+    serilog.debug("foundId:" + foundId.getName());
+} else {
+    serilog.debug("foundId is null");
+    return null;
+}
+
+if (userName == null || userName == void) {
+    //no user name provide return the identity
+    return foundId;
+}
+
+//authSearchAttributes is the attribute on AD that denotes possible user name attributes
+boolean foundUserName = false;
+List links = foundId.getLinks();
+for (Link link : Util.safeIterable(links)) {
+    Application app = link.getApplication();
+    //serilog.debug("link:" + link.toXml());
+    serilog.debug("appName:" + app.getName());
+    
+    //not returning true when it should serilog.debug("app.isAuthenticationResource():" + app.isAuthenticationResource() );
+    serilog.debug("app.getType():" + app.getType() );
+    if (app != null && "Active Directory - Direct".equalsIgnoreCase(app.getType()) ) {
+        serilog.debug("found link of AD type and isAuthResource");
+        //find the attribute matches username using authSearchAttributes
+        List authSearchAttributes = app.getListAttributeValue("authSearchAttributes");
+        serilog.debug("authSearchAttributes:" + authSearchAttributes);
+        for (String attrName : Util.safeIterable(authSearchAttributes)) {
+            String attrValue = (String) link.getAttribute(attrName);
+            if (userName.equalsIgnoreCase(attrValue)) {
+                foundUserName = true;
+                serilog.debug("foundUserName on app:" + app.getName());
+            }
+        }
+    }
+}
+
+if (foundUserName) {
+    //if we can't assume users are working against a single AD app 
+    //we will need to return a map with the application name and identitiy
+    return foundId;
+}
+
+serilog.debug("foundUserName is false returning null");
+return null;
+
+    ]]></Source>
+</Rule>

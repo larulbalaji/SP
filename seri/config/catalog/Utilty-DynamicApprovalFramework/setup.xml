@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+   <ImportAction name='include' value='Form-ConfigureFilterApprovalStepForm.xml'/>
+   <ImportAction name='include' value='Rule-BuildDynamicApprovalOwner.xml'/>
+   <ImportAction name='include' value='Rule-FilterDynamicApprovalSet.xml'/>
+   <ImportAction name='include' value='Rule-UtilDynamicApproval.xml'/>
+   <ImportAction name='include' value='Workflow-DynamicApproveAndProvisionSubprocess.xml'/>
+   <ImportAction name='include' value='Workflow-DynamicIdentityRequestApprove.xml'/>
+   <ImportAction name='include' value='Workflow-DynamicIdentityRequestApproveSubprocess.xml'/>
+   <ImportAction name='include' value='Workflow-DynamicLcmProvisioning.xml'/>
+   <ImportAction name='include' value='Workflow-GenericStepLibrary.xml'/>
+   <ImportAction name='include' value='Rule-ApprovalRequired.xml'/>
+   <ImportAction name='include' value='Rule-AutoApprove.xml'/>
+   <ImportAction name='include' value='Configuration-SystemConfiguration-merge.xml'/>
+</sailpoint>

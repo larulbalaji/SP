@@ -1,0 +1,228 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Form - Update Non Employee" type="RegisterIdentity">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Update Non-Employee Information"/>
+      <entry key="subtitle" value="Please review and update the following user information User."/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Submit"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Description>This form is used to for self-service user update. Form will changed based on the type of user you are.</Description>
+ 
+  <Section columns="2" label="User Information">
+    <Field displayName="user_name" dynamic="true" name="name" readOnly="true" required="true" type="string"/>
+    <Field displayName="Worker Type" name="workerType" readOnly="true" required="true" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[ 
+            
+List myValues = new ArrayList();
+myValues.add("Employee");
+myValues.add("Contractor");
+myValues.add("Vendor");
+myValues.add("IBM");
+myValues.add("Partner");
+return myValues;
+
+          ]]></Source> 
+        </Script>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="Start Date" name="startDate" type="date">
+      <Attributes>
+        <Map>
+          <entry key="readOnly">
+            <value>
+              <Script>
+                <Source>  
+return true;
+                </Source> 
+              </Script> 
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="End Date" dynamic="true" name="expirationDate" required="true" type="date"/>
+    <Field  displayName="Sponsor" name="sponsor" required="true" type="Identity" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[  
+import sailpoint.object.Rule;  
+     
+if(form.getField("workerType").getValue()==null || form.getField("workerType").getValue().equals("Employee")) {
+  return true; 
+} 
+
+Map args = new HashMap();
+args.put("permission","ViewSponsor");
+Rule rule = context.getObjectByName(Rule.class, "hasViewPermission");
+return context.runRule(rule, args);
+                ]]></Source>  
+              </Script>
+            </value>   
+          </entry> 
+          <entry key="readOnly">
+            <value>
+              <Script>
+                <Source><![CDATA[ 
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","EditSponsor");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+return context.runRule(rule, args);
+                ]]></Source>
+              </Script>
+            </value>
+          </entry> 
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[ 
+if(field.isHidden()) {
+ return null;
+}
+return field.getValue();                                  
+        ]]></Source>
+      </Script>
+    </Field>
+    <Field  displayName="Manager" name="manager" required="true" type="Identity" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[ 
+import sailpoint.object.Rule;    
+ 
+if(form.getField("workerType").getValue()!= null && form.getField("workerType").getValue().equals("Employee") == false) {
+  return true;
+}
+                        
+Map args = new HashMap();
+args.put("permission","ViewManager");
+Rule rule = context.getObjectByName(Rule.class, "hasViewPermission");
+return context.runRule(rule, args);
+                ]]></Source> 
+              </Script>
+            </value>
+          </entry>
+          <entry key="readOnly">
+            <value>
+              <Script>
+                <Source><![CDATA[ 
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","EditManager");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+return context.runRule(rule, args);
+                ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[ 
+if(field.isHidden()) {
+  return null;
+}   
+return field.getValue();
+        ]]></Source>
+      </Script>
+    </Field>
+  </Section>
+  <Section columns="2" label="Name Information">
+    <Field columnSpan="2" displayName="Display Name" name="displayName" type="string"/>
+    <Field displayName="Preferred First Name" name="preferredFirstName" type="string"/>
+    <Field displayName="Preferred Last Name" name="preferredLastName" type="string"/>
+    <Field displayName="Legal First Name" name="firstname" readOnly="true" required="true" type="string"/>
+    <Field displayName="Legal Middle Name" name="middlename" readOnly="true" type="string"/>
+    <Field columnSpan="2" displayName="Legal Last Name" name="lastname" readOnly="true" required="true" type="string"/>
+  </Section>
+  <Section columns="2" label="Position Information">
+    <Field columnSpan="2" displayName="Job Title" name="jobTitle" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field columnSpan="2" displayName="Department" name="department" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field columnSpan="2" displayName="Company" name="company" required="true" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+      </AllowedValuesDefinition>
+    </Field>
+  </Section>
+  <Section label="Contact Information">
+    <Field displayName="Email" name="email" type="string"/>
+    <Field displayName="Office Phone" name="workNumber" readOnly="true" type="string"/>
+    <Field displayName="Mobile Phone" name="mobileNumber" readOnly="true" type="string"/>
+    <Field displayName="Fax Phone" name="faxNumber" readOnly="true" type="string"/>
+    <Field displayName="Pager Phone" name="pagerNumber" readOnly="true" type="string"/>
+  </Section>
+  <Section columns="2" label="Location Information">
+    <Field columnSpan="2" displayName="Location" name="location" type="string"> 
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field columnSpan="2" hidden="true" name="streetAddress" type="string">
+      <Script>
+        <Source><![CDATA[  
+if(form.getField("addressLine1").getValue()!= null) {
+  return form.getField("addressLine1").getValue()+" : "+form.getField("addressLine2").getValue();
+}
+return null;
+        ]]></Source> 
+      </Script>
+    </Field>
+    <Field columnSpan="2" displayName="Office Location" name="officeLocation" readOnly="true" type="string"/>
+    <Field columnSpan="2" displayName="Address Line 1" name="addressLine1" readOnly="true" type="string">
+      <Script>
+        <Source><![CDATA[ 
+if(form.getField("streetAddress").getValue()!= null) {
+  String[] splits = ((String)form.getField("streetAddress").getValue()).split(":");
+  return splits[0];
+}
+return null;
+        ]]></Source> 
+      </Script>
+    </Field>
+    <Field columnSpan="2" displayName="Address Line 2" name="addressLine2" readOnly="true" type="string">
+      <Script>
+        <Source><![CDATA[ 
+if(form.getField("streetAddress").getValue()!= null) {
+  String[] splits = ((String)form.getField("streetAddress").getValue()).split(":");
+  if(splits.length>1)
+  {
+    return splits[1];
+  }
+}
+return null;
+        ]]></Source> 
+      </Script>
+    </Field>
+    <Field displayName="City" name="city" readOnly="true" type="string"/>
+    <Field displayName="State/Prov Name" name="state" readOnly="true" type="string"/>
+    <Field displayName="Postal Code" name="postalCode" readOnly="true" type="string"/>
+    <Field displayName="Country" name="country" readOnly="true" type="string"/>
+  </Section>
+ 
+</Form>

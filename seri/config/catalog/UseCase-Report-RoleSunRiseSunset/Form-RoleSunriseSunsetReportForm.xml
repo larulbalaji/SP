@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Role Sunrise Sunset Report Form">
+  <Section columns="2" label="Select Users" name="customProperties">
+    <Field displayName="Identities" multi="true" name="identities" value="ref:identities" type="Identity" filterString="correlated == true" />  
+  </Section>
+</Form>

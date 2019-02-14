@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin certificationLevel="None" displayName="MS Azure AD Integration Plugin" minSystemVersion="7.1" name="LauncherPlugin" version="1.3.2">
+    <Attributes>
+        <Map>
+            <entry key="minUpgradableVersion" value="1.0.0" />
+            <entry key="serviceExecutors">
+                <value>
+                    <List>
+                        <String>sailpoint.plugin.launcher.server.LauncherServiceExecutor</String>
+                    </List>
+                </value>
+            </entry>
+            <entry key="settings">
+                <value>
+                    <List>
+                        <Setting dataType="string" helpText="Customizable string that determines how the role name is created (%a = application name, %p = permission name)" label="Role Name Format String" name="roleNameFormat" defaultValue="%a_SSOApplication_%p"/>
+                        <Setting dataType="string" helpText="Customizable string that determines how the role display name is created (%a = application name, %p = permission name)" label="Role Display Name Format String" name="roleDisplayNameFormat" defaultValue="%a SSO Application %p Role"/>
+                        <Setting dataType="string" helpText="Customizable string that determines how the role descriptions are created (%a = application name, %p = permission name)" label="Role Description Format String" name="roleDescriptionFormat" defaultValue="%a SSO Application %p Role"/>
+                    </List>
+                </value>
+            </entry>
+        </Map>
+    </Attributes>
+</Plugin>
+

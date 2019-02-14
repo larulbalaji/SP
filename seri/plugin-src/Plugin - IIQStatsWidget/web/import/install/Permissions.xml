@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <SPRight displayName="iiqstatsRight" name="iiqstatsRight"/>
+  <SPRight displayName="iiqstatsRESTAllow" name="iiqstatsRESTAllow"/>
+  <SPRight displayName="IIQStatsPluginRight" name="IIQStatsPluginRight"/>
+    <Capability displayName="iiqstatsWidget" name="iiqstatsWidget">
+        <Description>Allow access to IIQStats Widget Plugin</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="iiqstatsRight"/>
+            <Reference class="sailpoint.object.SPRight" name="iiqstatsRESTAllow"/>
+            <Reference class="sailpoint.object.SPRight" name="IIQStatsPluginRight"/>
+        </RightRefs>
+    </Capability>
+</sailpoint>

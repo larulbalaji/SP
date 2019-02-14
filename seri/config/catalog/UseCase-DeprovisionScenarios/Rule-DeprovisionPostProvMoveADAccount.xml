@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Account Deprovisioning - PostProvisioning - Move AD Account" type="Workflow">
+  <Description>Moves the AD Link on a cube - as well as any entitlement groups found</Description>
+  <Source><![CDATA[
+import sailpoint.object.*;
+import sailpoint.api.*;
+
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String identityName
+// Expect: java.lang.String nativeIdentity
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.MoveADAccountPostProvisioning");
+
+serilog.debug("Setting the new plan:    "+ nativeIdentity);
+
+Identity cube = context.getObjectByName(Identity.class, identityName);
+Application app = context.getObjectByName(Application.class, applicationName);
+
+// Find out where we should be putting the disabled users
+String newParent=null;
+     
+Configuration conf=context.getObjectByName(Configuration.class, "Deprovisioning Configuration");
+if(conf!=null){
+  newParent=conf.get("ADDisabledContainer");
+}
+
+if(newParent==null) {
+  serilog.warn("Not moving AD Account for "+identityName+", no Disabled container configured");
+  return;
+}
+      
+// Get the link
+IdentityService is = new IdentityService(context);
+Link link = is.getLink(cube, app, null, nativeIdentity);
+serilog.debug("Link Is:    "+ link);
+
+// Save the old location on the cube in case we want to put it back
+String oldDN = link.getNativeIdentity();
+cube.setAttribute( "originalADContainer", oldDN.substring(oldDN.indexOf(",")+1) ); 
+context.saveObject(cube);
+      
+// Create the new DN
+String cn = link.getAttribute("cn");
+String newDN="cn="+cn+","+newParent;
+serilog.debug("newDN is "+newDN);
+
+// Put it on the link
+link.setNativeIdentity(newDN);
+link.setAttribute("distinguishedName", newDN);
+serilog.debug("link is "+link.toXml());
+
+context.saveObject(link);
+
+List appList = new ArrayList();
+appList.add(app);
+List entGroups =  cube.getExceptions(appList);
+serilog.debug("entGroups:    "+ entGroups);
+
+if(entGroups!=null) {
+  for(EntitlementGroup aEG: entGroups) {
+    serilog.debug("Got an EntitlementGroup :   "+ aEG);
+    if( aEG.getNativeIdentity().equalsIgnoreCase(oldDN) ) {     
+      serilog.debug("Matches:    ");
+      //set the displayName here too if need be
+
+      aEG.setNativeIdentity(newDN);
+      context.saveObject(aEG);
+    } 
+  }
+}
+
+
+serilog.debug("cube now="+cube.toXml());
+      
+// Now save all the changes we made      
+context.commitTransaction();
+context.decache();
+
+      
+serilog.debug("Saved NativeIdentity AFTER COMMIT = " + link.getNativeIdentity());
+  ]]></Source>
+</Rule>

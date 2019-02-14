@@ -1,0 +1,762 @@
+Accounts_All;CN=AccountsPayable,ou=Groups;AccountsPayable
+Accounts_All;CN=AccountsReceivable,ou=Groups;AccountsReceivable
+DEV_All;CN=DEV_Internal,ou=Groups;DEV_Internal
+DEV_All;CN=DEV_Mgmt,ou=Groups;DEV_Mgmt
+DEV_All;CN=DEV_Projects,ou=Groups;DEV_Projects
+DEV_All;CN=DEV_Stage,ou=Groups;DEV_Stage
+DEV_Projects;CN=DEV_WestCoast,ou=Groups;DEV_WestCoast
+DEV_Projects;CN=DEV_EastCoast,ou=Groups;DEV_EastCoast
+DEV_Projects;CN=DEV_Europe,ou=Groups;DEV_Europe
+DEV_Europe;CN=ENG_All,ou=Groups;ENG_All
+ENG_All;CN=DEV_All,ou=Groups;DEV_All
+ENG_All;CN=ENG_Internal,ou=Groups;ENG_Internal
+ENG_All;CN=ENG_Mgmt,ou=Groups;ENG_Mgmt
+ENG_All;CN=ENG_Prod,ou=Groups;ENG_Prod
+ENG_All;CN=ENG_Stage,ou=Groups;ENG_Stage
+ENG_Prod;CN=ENG_WestCoast,ou=Groups;ENG_WestCoast
+ENG_Prod;CN=ENG_EastCoast,ou=Groups;ENG_EastCoast
+ENG_Prod;CN=ENG_External,ou=Groups;ENG_External
+HR_All;CN=HR_External,ou=Groups;HR_External
+HR_All;CN=HR_Internal,ou=Groups;HR_Internal
+Payroll_All;CN=PayrollAnalysis,ou=Groups;PayrollAnalysis
+Payroll_All;CN=PayrollControls,ou=Groups;PayrollControls
+Payroll_All;CN=PayrollManager,ou=Groups;PayrollManager
+Payroll_All;CN=PayrollProjects,ou=Groups;PayrollProjects
+PayrollProjects;CN=PayrollManager,ou=Groups;PayrollManager
+PCI_All;CN=PCI_General,ou=Groups;PCI_General
+PCI_All;CN=PCI_Admin,ou=Groups;PCI_Admin
+PCI_All;CN=PCI_Mgmt,ou=Groups;PCI_Mgmt
+PCI_General;CN=PCI_Mgmt,ou=Groups;PCI_Mgmt
+customerDataCenter;CN=James Smith,ou=Austin,ou=Americas;JamesSmith
+HostingVPN;CN=James Smith,ou=Austin,ou=Americas;JamesSmith
+All_Users;CN=James Smith,ou=Austin,ou=Americas;JamesSmith
+DataComm;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+DBAs;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+GlobalComm;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+HelpDesk;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+SysAdministration;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+TCOMControls;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+Telecom;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+UnixAdministration;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+All_Users;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+WindowsAdministration;CN=Mary Johnson,ou=Austin,ou=Americas;MaryJohnson
+DataArchive;CN=Robert Brown,ou=Austin,ou=Americas;RobertBrown
+DBAs;CN=Robert Brown,ou=Austin,ou=Americas;RobertBrown
+SecurityAnalysis;CN=Robert Brown,ou=Austin,ou=Americas;RobertBrown
+All_Users;CN=Robert Brown,ou=Austin,ou=Americas;RobertBrown
+campusAccess;CN=Joseph Thompson,ou=Austin,ou=Americas;JosephThompson
+DBAs;CN=Joseph Thompson,ou=Austin,ou=Americas;JosephThompson
+All_Users;CN=Joseph Thompson,ou=Austin,ou=Americas;JosephThompson
+DBAs;CN=Margaret Garcia,ou=Austin,ou=Americas;MargaretGarcia
+HostingVPN;CN=Margaret Garcia,ou=Austin,ou=Americas;MargaretGarcia
+Remote;CN=Margaret Garcia,ou=Austin,ou=Americas;MargaretGarcia
+All_Users;CN=Margaret Garcia,ou=Austin,ou=Americas;MargaretGarcia
+DBAs;CN=Thomas Martinez,ou=Austin,ou=Americas;ThomasMartinez
+All_Users;CN=Thomas Martinez,ou=Austin,ou=Americas;ThomasMartinez
+VendorCare;CN=Thomas Martinez,ou=Austin,ou=Americas;ThomasMartinez
+customerDataCenter;CN=Dorothy Robinson,ou=Austin,ou=Americas;DorothyRobinson
+DBAs;CN=Dorothy Robinson,ou=Austin,ou=Americas;DorothyRobinson
+InternalAudit;CN=Dorothy Robinson,ou=Austin,ou=Americas;DorothyRobinson
+All_Users;CN=Dorothy Robinson,ou=Austin,ou=Americas;DorothyRobinson
+DBAs;CN=Christopher Clark,ou=Austin,ou=Americas;ChristopherClark
+ServerRoomToken;CN=Christopher Clark,ou=Austin,ou=Americas;ChristopherClark
+All_Users;CN=Christopher Clark,ou=Austin,ou=Americas;ChristopherClark
+SecCompliance;CN=Linda Davis,ou=Austin,ou=Americas;LindaDavis
+SecurityAnalysis;CN=Linda Davis,ou=Austin,ou=Americas;LindaDavis
+ServerRoomToken;CN=Linda Davis,ou=Austin,ou=Americas;LindaDavis
+All_Users;CN=Linda Davis,ou=Austin,ou=Americas;LindaDavis
+globalExport;CN=Lisa Rodriguez,ou=Austin,ou=Americas;LisaRodriguez
+SecCompliance;CN=Lisa Rodriguez,ou=Austin,ou=Americas;LisaRodriguez
+SecurityAnalysis;CN=Lisa Rodriguez,ou=Austin,ou=Americas;LisaRodriguez
+All_Users;CN=Lisa Rodriguez,ou=Austin,ou=Americas;LisaRodriguez
+Remote;CN=Daniel Lewis,ou=Austin,ou=Americas;DanielLewis
+All_Users;CN=Daniel Lewis,ou=Austin,ou=Americas;DanielLewis
+SecurityAnalysis;CN=Nancy Lee,ou=Austin,ou=Americas;NancyLee
+All_Users;CN=Nancy Lee,ou=Austin,ou=Americas;NancyLee
+campusAccess;CN=Paul Walker,ou=Austin,ou=Americas;PaulWalker
+SecurityAnalysis;CN=Paul Walker,ou=Austin,ou=Americas;PaulWalker
+All_Users;CN=Paul Walker,ou=Austin,ou=Americas;PaulWalker
+ENG_Prod;CN=Karen Hall,ou=Austin,ou=Americas;KarenHall
+SecurityAnalysis;CN=Karen Hall,ou=Austin,ou=Americas;KarenHall
+All_Users;CN=Karen Hall,ou=Austin,ou=Americas;KarenHall
+Development;CN=Michael Miller,ou=Austin,ou=Americas;MichaelMiller
+ENG_Mgmt;CN=Michael Miller,ou=Austin,ou=Americas;MichaelMiller
+ENG_Prod;CN=Michael Miller,ou=Austin,ou=Americas;MichaelMiller
+QualityAssurance;CN=Michael Miller,ou=Austin,ou=Americas;MichaelMiller
+All_Users;CN=Michael Miller,ou=Austin,ou=Americas;MichaelMiller
+DataArchive;CN=Mark Allen,ou=Austin,ou=Americas;MarkAllen
+Development;CN=Mark Allen,ou=Austin,ou=Americas;MarkAllen
+ENG_Prod;CN=Mark Allen,ou=Austin,ou=Americas;MarkAllen
+All_Users;CN=Mark Allen,ou=Austin,ou=Americas;MarkAllen
+Development;CN=Betty Young,ou=Austin,ou=Americas;BettyYoung
+ENG_Prod;CN=Betty Young,ou=Austin,ou=Americas;BettyYoung
+Remote;CN=Betty Young,ou=Austin,ou=Americas;BettyYoung
+All_Users;CN=Betty Young,ou=Austin,ou=Americas;BettyYoung
+Development;CN=Donald Hernandez,ou=Austin,ou=Americas;DonaldHernandez
+ENG_Prod;CN=Donald Hernandez,ou=Austin,ou=Americas;DonaldHernandez
+All_Users;CN=Donald Hernandez,ou=Austin,ou=Americas;DonaldHernandez
+Development;CN=Helen King,ou=Austin,ou=Americas;HelenKing
+ENG_Prod;CN=Helen King,ou=Austin,ou=Americas;HelenKing
+InternalAudit;CN=Helen King,ou=Austin,ou=Americas;HelenKing
+All_Users;CN=Helen King,ou=Austin,ou=Americas;HelenKing
+Development;CN=George Wright,ou=Austin,ou=Americas;GeorgeWright
+ENG_Prod;CN=George Wright,ou=Austin,ou=Americas;GeorgeWright
+All_Users;CN=George Wright,ou=Austin,ou=Americas;GeorgeWright
+Development;CN=Barbara Wilson,ou=Austin,ou=Americas;BarbaraWilson
+ENG_Mgmt;CN=Barbara Wilson,ou=Austin,ou=Americas;BarbaraWilson
+ENG_Prod;CN=Barbara Wilson,ou=Austin,ou=Americas;BarbaraWilson
+QualityAssurance;CN=Barbara Wilson,ou=Austin,ou=Americas;BarbaraWilson
+All_Users;CN=Barbara Wilson,ou=Austin,ou=Americas;BarbaraWilson
+ENG_Prod;CN=Sandra Lopez,ou=Austin,ou=Americas;SandraLopez
+QualityAssurance;CN=Sandra Lopez,ou=Austin,ou=Americas;SandraLopez
+SecCompliance;CN=Sandra Lopez,ou=Austin,ou=Americas;SandraLopez
+All_Users;CN=Sandra Lopez,ou=Austin,ou=Americas;SandraLopez
+ENG_Prod;CN=Kenneth Hill,ou=Austin,ou=Americas;KennethHill
+QualityAssurance;CN=Kenneth Hill,ou=Austin,ou=Americas;KennethHill
+Remote;CN=Kenneth Hill,ou=Austin,ou=Americas;KennethHill
+All_Users;CN=Kenneth Hill,ou=Austin,ou=Americas;KennethHill
+ENG_Prod;CN=Donna Scott,ou=Austin,ou=Americas;DonnaScott
+QualityAssurance;CN=Donna Scott,ou=Austin,ou=Americas;DonnaScott
+All_Users;CN=Donna Scott,ou=Austin,ou=Americas;DonnaScott
+ENG_Prod;CN=Steven Green,ou=Austin,ou=Americas;StevenGreen
+HostingVPN;CN=Steven Green,ou=Austin,ou=Americas;StevenGreen
+QualityAssurance;CN=Steven Green,ou=Austin,ou=Americas;StevenGreen
+All_Users;CN=Steven Green,ou=Austin,ou=Americas;StevenGreen
+ENG_Prod;CN=Carol Adams,ou=Austin,ou=Americas;CarolAdams
+QualityAssurance;CN=Carol Adams,ou=Austin,ou=Americas;CarolAdams
+ServerRoomToken;CN=Carol Adams,ou=Austin,ou=Americas;CarolAdams
+All_Users;CN=Carol Adams,ou=Austin,ou=Americas;CarolAdams
+campusAccess;CN=John Williams,ou=Brazil,ou=Americas;JohnWilliams
+All_Users;CN=John Williams,ou=Brazil,ou=Americas;JohnWilliams
+VendorCare;CN=John Williams,ou=Brazil,ou=Americas;JohnWilliams
+RecruitCouncil;CN=William Moore,ou=Brazil,ou=Americas;WilliamMoore
+Recruiting;CN=William Moore,ou=Brazil,ou=Americas;WilliamMoore
+Training;CN=William Moore,ou=Brazil,ou=Americas;WilliamMoore
+All_Users;CN=William Moore,ou=Brazil,ou=Americas;WilliamMoore
+campusAccess;CN=Edward Baker,ou=Brazil,ou=Americas;EdwardBaker
+Recruiting;CN=Edward Baker,ou=Brazil,ou=Americas;EdwardBaker
+All_Users;CN=Edward Baker,ou=Brazil,ou=Americas;EdwardBaker
+InvntryAnalysis;CN=Ruth Gonzalez,ou=Brazil,ou=Americas;RuthGonzalez
+Recruiting;CN=Ruth Gonzalez,ou=Brazil,ou=Americas;RuthGonzalez
+Remote;CN=Ruth Gonzalez,ou=Brazil,ou=Americas;RuthGonzalez
+All_Users;CN=Ruth Gonzalez,ou=Brazil,ou=Americas;RuthGonzalez
+customerDataCenter;CN=Brian Nelson,ou=Brazil,ou=Americas;BrianNelson
+Recruiting;CN=Brian Nelson,ou=Brazil,ou=Americas;BrianNelson
+All_Users;CN=Brian Nelson,ou=Brazil,ou=Americas;BrianNelson
+DataArchive;CN=Sharon Carter,ou=Brazil,ou=Americas;SharonCarter
+InternalAudit;CN=Sharon Carter,ou=Brazil,ou=Americas;SharonCarter
+Recruiting;CN=Sharon Carter,ou=Brazil,ou=Americas;SharonCarter
+All_Users;CN=Sharon Carter,ou=Brazil,ou=Americas;SharonCarter
+campusAccess;CN=Ronald Mitchell,ou=Brazil,ou=Americas;RonaldMitchell
+Recruiting;CN=Ronald Mitchell,ou=Brazil,ou=Americas;RonaldMitchell
+All_Users;CN=Ronald Mitchell,ou=Brazil,ou=Americas;RonaldMitchell
+InternalAudit;CN=Elizabeth Taylor,ou=Brazil,ou=Americas;ElizabethTaylor
+Training;CN=Elizabeth Taylor,ou=Brazil,ou=Americas;ElizabethTaylor
+All_Users;CN=Elizabeth Taylor,ou=Brazil,ou=Americas;ElizabethTaylor
+SecCompliance;CN=Michelle Perez,ou=Brazil,ou=Americas;MichellePerez
+Training;CN=Michelle Perez,ou=Brazil,ou=Americas;MichellePerez
+All_Users;CN=Michelle Perez,ou=Brazil,ou=Americas;MichellePerez
+Remote;CN=Anthony Roberts,ou=Brazil,ou=Americas;AnthonyRoberts
+All_Users;CN=Anthony Roberts,ou=Brazil,ou=Americas;AnthonyRoberts
+globalExport;CN=Laura Turner,ou=Brazil,ou=Americas;LauraTurner
+Training;CN=Laura Turner,ou=Brazil,ou=Americas;LauraTurner
+All_Users;CN=Laura Turner,ou=Brazil,ou=Americas;LauraTurner
+campusAccess;CN=Kevin Phillips,ou=Brazil,ou=Americas;KevinPhillips
+Training;CN=Kevin Phillips,ou=Brazil,ou=Americas;KevinPhillips
+All_Users;CN=Kevin Phillips,ou=Brazil,ou=Americas;KevinPhillips
+ENG_Prod;CN=Sarah Campbell,ou=Brazil,ou=Americas;SarahCampbell
+Training;CN=Sarah Campbell,ou=Brazil,ou=Americas;SarahCampbell
+All_Users;CN=Sarah Campbell,ou=Brazil,ou=Americas;SarahCampbell
+Buyer;CN=David Anderson,ou=Brazil,ou=Americas;DavidAnderson
+Cost-SavingsAnalysis;CN=David Anderson,ou=Brazil,ou=Americas;DavidAnderson
+InventoryMgmt;CN=David Anderson,ou=Brazil,ou=Americas;DavidAnderson
+ProcureAnalysis;CN=David Anderson,ou=Brazil,ou=Americas;DavidAnderson
+All_Users;CN=David Anderson,ou=Brazil,ou=Americas;DavidAnderson
+ProcureAnalysis;CN=Jason Parker,ou=Brazil,ou=Americas;JasonParker
+All_Users;CN=Jason Parker,ou=Brazil,ou=Americas;JasonParker
+VendorCare;CN=Jason Parker,ou=Brazil,ou=Americas;JasonParker
+InvntryAnalysis;CN=Kimberly Evans,ou=Brazil,ou=Americas;KimberlyEvans
+ProcureAnalysis;CN=Kimberly Evans,ou=Brazil,ou=Americas;KimberlyEvans
+Remote;CN=Kimberly Evans,ou=Brazil,ou=Americas;KimberlyEvans
+All_Users;CN=Kimberly Evans,ou=Brazil,ou=Americas;KimberlyEvans
+campusAccess;CN=Matthew Edwards,ou=Brazil,ou=Americas;MatthewEdwards
+ProcureAnalysis;CN=Matthew Edwards,ou=Brazil,ou=Americas;MatthewEdwards
+All_Users;CN=Matthew Edwards,ou=Brazil,ou=Americas;MatthewEdwards
+All_Users;CN=Deborah Collins,ou=Brazil,ou=Americas;DeborahCollins
+customerDataCenter;CN=Gary Stewart,ou=Brazil,ou=Americas;GaryStewart
+ProcureAnalysis;CN=Gary Stewart,ou=Brazil,ou=Americas;GaryStewart
+ServerRoomToken;CN=Gary Stewart,ou=Brazil,ou=Americas;GaryStewart
+All_Users;CN=Gary Stewart,ou=Brazil,ou=Americas;GaryStewart
+Cost-SavingsAnalysis;CN=Jennifer Thomas,ou=Brazil,ou=Americas;JenniferThomas
+InventoryMgmt;CN=Jennifer Thomas,ou=Brazil,ou=Americas;JenniferThomas
+SecCompliance;CN=Jennifer Thomas,ou=Brazil,ou=Americas;JenniferThomas
+All_Users;CN=Jennifer Thomas,ou=Brazil,ou=Americas;JenniferThomas
+Cost-SavingsAnalysis;CN=Jessica Sanchez,ou=Brazil,ou=Americas;JessicaSanchez
+HostingVPN;CN=Jessica Sanchez,ou=Brazil,ou=Americas;JessicaSanchez
+SecCompliance;CN=Jessica Sanchez,ou=Brazil,ou=Americas;JessicaSanchez
+All_Users;CN=Jessica Sanchez,ou=Brazil,ou=Americas;JessicaSanchez
+Cost-SavingsAnalysis;CN=Timothy Morris,ou=Brazil,ou=Americas;TimothyMorris
+DataArchive;CN=Timothy Morris,ou=Brazil,ou=Americas;TimothyMorris
+Remote;CN=Timothy Morris,ou=Brazil,ou=Americas;TimothyMorris
+All_Users;CN=Timothy Morris,ou=Brazil,ou=Americas;TimothyMorris
+Cost-SavingsAnalysis;CN=Shirley Rogers,ou=Brazil,ou=Americas;ShirleyRogers
+SupplyChain;CN=Shirley Rogers,ou=Brazil,ou=Americas;ShirleyRogers
+All_Users;CN=Shirley Rogers,ou=Brazil,ou=Americas;ShirleyRogers
+Cost-SavingsAnalysis;CN=Jose Reed,ou=Brazil,ou=Americas;JoseReed
+globalExport;CN=Jose Reed,ou=Brazil,ou=Americas;JoseReed
+All_Users;CN=Jose Reed,ou=Brazil,ou=Americas;JoseReed
+VendorCare;CN=Jose Reed,ou=Brazil,ou=Americas;JoseReed
+Cost-SavingsAnalysis;CN=Cynthia Cook,ou=Brazil,ou=Americas;CynthiaCook
+ENG_Prod;CN=Cynthia Cook,ou=Brazil,ou=Americas;CynthiaCook
+All_Users;CN=Cynthia Cook,ou=Brazil,ou=Americas;CynthiaCook
+All_Users;CN=Patricia Jones,ou=San Jose,ou=Americas;PatriciaJones
+All_Users;CN=Richard Jackson,ou=San Jose,ou=Americas;RichardJackson
+campusAccess;CN=Larry Morgan,ou=San Jose,ou=Americas;LarryMorgan
+All_Users;CN=Larry Morgan,ou=San Jose,ou=Americas;LarryMorgan
+All_Users;CN=Angela Bell,ou=San Jose,ou=Americas;AngelaBell
+AccountingGeneral;CN=Angela Bell,ou=San Jose,ou=Americas;AngelaBell
+All_Users;CN=Jeffrey Murphy,ou=San Jose,ou=Americas;JeffreyMurphy
+InternalAudit;CN=Melissa Bailey,ou=San Jose,ou=Americas;MelissaBailey
+All_Users;CN=Melissa Bailey,ou=San Jose,ou=Americas;MelissaBailey
+campusAccess;CN=Frank Rivera,ou=San Jose,ou=Americas;FrankRivera
+AccountsPayable;CN=Frank Rivera,ou=San Jose,ou=Americas;FrankRivera
+AccountsReceivable;CN=Frank Rivera,ou=San Jose,ou=Americas;FrankRivera
+AccountingGeneral;CN=Frank Rivera,ou=San Jose,ou=Americas;FrankRivera
+All_Users;CN=Frank Rivera,ou=San Jose,ou=Americas;FrankRivera
+DataArchive;CN=Maria White,ou=San Jose,ou=Americas;MariaWhite
+All_Users;CN=Maria White,ou=San Jose,ou=Americas;MariaWhite
+AccountingGeneral;CN=Maria White,ou=San Jose,ou=Americas;MariaWhite
+SecCompliance;CN=Brenda Cooper,ou=San Jose,ou=Americas;BrendaCooper
+All_Users;CN=Brenda Cooper,ou=San Jose,ou=Americas;BrendaCooper
+Remote;CN=Scott Richardson,ou=San Jose,ou=Americas;ScottRichardson
+All_Users;CN=Scott Richardson,ou=San Jose,ou=Americas;ScottRichardson
+AccountingGeneral;CN=Scott Richardson,ou=San Jose,ou=Americas;ScottRichardson
+AccountsReceivable;CN=Scott Richardson,ou=San Jose,ou=Americas;ScottRichardson
+All_Users;CN=Amy Cox,ou=San Jose,ou=Americas;AmyCox
+campusAccess;CN=Eric Howard,ou=San Jose,ou=Americas;EricHoward
+All_Users;CN=Eric Howard,ou=San Jose,ou=Americas;EricHoward
+AccountingGeneral;CN=Eric Howard,ou=San Jose,ou=Americas;EricHoward
+DataArchive;CN=Anna Ward,ou=San Jose,ou=Americas;AnnaWard
+ServerRoomToken;CN=Anna Ward,ou=San Jose,ou=Americas;AnnaWard
+AccountsReceivable;CN=Anna Ward,ou=San Jose,ou=Americas;AnnaWard
+AccountingGeneral;CN=Anna Ward,ou=San Jose,ou=Americas;AnnaWard
+All_Users;CN=Anna Ward,ou=San Jose,ou=Americas;AnnaWard
+All_Users;CN=Charles Harris,ou=San Jose,ou=Americas;CharlesHarris
+All_Users;CN=Stephen Torres,ou=San Jose,ou=Americas;StephenTorres
+Remote;CN=Rebecca Peterson,ou=San Jose,ou=Americas;RebeccaPeterson
+All_Users;CN=Rebecca Peterson,ou=San Jose,ou=Americas;RebeccaPeterson
+HostingVPN;CN=Andrew Gray,ou=San Jose,ou=Americas;AndrewGray
+All_Users;CN=Andrew Gray,ou=San Jose,ou=Americas;AndrewGray
+customerDataCenter;CN=Virginia Ramirez,ou=San Jose,ou=Americas;VirginiaRamirez
+All_Users;CN=Virginia Ramirez,ou=San Jose,ou=Americas;VirginiaRamirez
+All_Users;CN=Raymond James,ou=San Jose,ou=Americas;RaymondJames
+All_Users;CN=Susan Martin,ou=San Jose,ou=Americas;SusanMartin
+SecCompliance;CN=Kathleen Watson,ou=San Jose,ou=Americas;KathleenWatson
+All_Users;CN=Kathleen Watson,ou=San Jose,ou=Americas;KathleenWatson
+Remote;CN=Gregory Brooks,ou=San Jose,ou=Americas;GregoryBrooks
+All_Users;CN=Gregory Brooks,ou=San Jose,ou=Americas;GregoryBrooks
+All_Users;CN=Pamela Kelly,ou=San Jose,ou=Americas;PamelaKelly
+All_Users;CN=Joshua Sanders,ou=San Jose,ou=Americas;JoshuaSanders
+ENG_Prod;CN=Martha Price,ou=San Jose,ou=Americas;MarthaPrice
+All_Users;CN=Martha Price,ou=San Jose,ou=Americas;MarthaPrice
+campusAccess;CN=Jerry Bennett,ou=Brussels,ou=Europe;JerryBennett
+globalExport;CN=Jerry Bennett,ou=Brussels,ou=Europe;JerryBennett
+All_Users;CN=Jerry Bennett,ou=Brussels,ou=Europe;JerryBennett
+InvntryAnalysis;CN=Debra Wood,ou=Brussels,ou=Europe;DebraWood
+SupplyChain;CN=Debra Wood,ou=Brussels,ou=Europe;DebraWood
+All_Users;CN=Debra Wood,ou=Brussels,ou=Europe;DebraWood
+SecCompliance;CN=Walter Henderson,ou=Brussels,ou=Europe;WalterHenderson
+SecurityArchitect;CN=Walter Henderson,ou=Brussels,ou=Europe;WalterHenderson
+ServerRoomToken;CN=Walter Henderson,ou=Brussels,ou=Europe;WalterHenderson
+All_Users;CN=Walter Henderson,ou=Brussels,ou=Europe;WalterHenderson
+campusAccess;CN=Carl Foster,ou=Brussels,ou=Europe;CarlFoster
+SecurityArchitect;CN=Carl Foster,ou=Brussels,ou=Europe;CarlFoster
+All_Users;CN=Carl Foster,ou=Brussels,ou=Europe;CarlFoster
+Remote;CN=Frances Gonzales,ou=Brussels,ou=Europe;FrancesGonzales
+SecurityArchitect;CN=Frances Gonzales,ou=Brussels,ou=Europe;FrancesGonzales
+All_Users;CN=Frances Gonzales,ou=Brussels,ou=Europe;FrancesGonzales
+SecurityArchitect;CN=Arthur Bryant,ou=Brussels,ou=Europe;ArthurBryant
+All_Users;CN=Arthur Bryant,ou=Brussels,ou=Europe;ArthurBryant
+VendorCare;CN=Arthur Bryant,ou=Brussels,ou=Europe;ArthurBryant
+ENG_Prod;CN=Ann Alexander,ou=Brussels,ou=Europe;AnnAlexander
+SecurityArchitect;CN=Ann Alexander,ou=Brussels,ou=Europe;AnnAlexander
+ServerRoomToken;CN=Ann Alexander,ou=Brussels,ou=Europe;AnnAlexander
+All_Users;CN=Ann Alexander,ou=Brussels,ou=Europe;AnnAlexander
+Admins;CN=Ryan Russell,ou=Brussels,ou=Europe;RyanRussell
+SecurityArchitect;CN=Ryan Russell,ou=Brussels,ou=Europe;RyanRussell
+All_Users;CN=Ryan Russell,ou=Brussels,ou=Europe;RyanRussell
+DataComm;CN=Stephanie Coleman,ou=Brussels,ou=Europe;StephanieColeman
+SecurityArchitect;CN=Stephanie Coleman,ou=Brussels,ou=Europe;StephanieColeman
+SysAdministration;CN=Stephanie Coleman,ou=Brussels,ou=Europe;StephanieColeman
+TCOMControls;CN=Stephanie Coleman,ou=Brussels,ou=Europe;StephanieColeman
+Telecom;CN=Stephanie Coleman,ou=Brussels,ou=Europe;StephanieColeman
+All_Users;CN=Stephanie Coleman,ou=Brussels,ou=Europe;StephanieColeman
+InvntryAnalysis;CN=Joyce Griffin,ou=Brussels,ou=Europe;JoyceGriffin
+SysAdministration;CN=Joyce Griffin,ou=Brussels,ou=Europe;JoyceGriffin
+Telecom;CN=Joyce Griffin,ou=Brussels,ou=Europe;JoyceGriffin
+All_Users;CN=Joyce Griffin,ou=Brussels,ou=Europe;JoyceGriffin
+Remote;CN=Roger Diaz,ou=Brussels,ou=Europe;RogerDiaz
+SysAdministration;CN=Roger Diaz,ou=Brussels,ou=Europe;RogerDiaz
+Telecom;CN=Roger Diaz,ou=Brussels,ou=Europe;RogerDiaz
+All_Users;CN=Roger Diaz,ou=Brussels,ou=Europe;RogerDiaz
+customerDataCenter;CN=Diane Hayes,ou=Brussels,ou=Europe;DianeHayes
+HostingVPN;CN=Diane Hayes,ou=Brussels,ou=Europe;DianeHayes
+Telecom;CN=Diane Hayes,ou=Brussels,ou=Europe;DianeHayes
+All_Users;CN=Diane Hayes,ou=Brussels,ou=Europe;DianeHayes
+DataComm;CN=Joe Myers,ou=Brussels,ou=Europe;JoeMyers
+SecCompliance;CN=Joe Myers,ou=Brussels,ou=Europe;JoeMyers
+Telecom;CN=Joe Myers,ou=Brussels,ou=Europe;JoeMyers
+All_Users;CN=Joe Myers,ou=Brussels,ou=Europe;JoeMyers
+DataComm;CN=Alice Ford,ou=Brussels,ou=Europe;AliceFord
+Telecom;CN=Alice Ford,ou=Brussels,ou=Europe;AliceFord
+All_Users;CN=Alice Ford,ou=Brussels,ou=Europe;AliceFord
+Development;CN=Patrick Jenkins,ou=Brussels,ou=Europe;PatrickJenkins
+ENG_Mgmt;CN=Patrick Jenkins,ou=Brussels,ou=Europe;PatrickJenkins
+ENG_Stage;CN=Patrick Jenkins,ou=Brussels,ou=Europe;PatrickJenkins
+QualityAssurance;CN=Patrick Jenkins,ou=Brussels,ou=Europe;PatrickJenkins
+All_Users;CN=Patrick Jenkins,ou=Brussels,ou=Europe;PatrickJenkins
+Development;CN=Juan Hamilton,ou=Brussels,ou=Europe;JuanHamilton
+ENG_Stage;CN=Juan Hamilton,ou=Brussels,ou=Europe;JuanHamilton
+All_Users;CN=Juan Hamilton,ou=Brussels,ou=Europe;JuanHamilton
+DataArchive;CN=Julie Graham,ou=Brussels,ou=Europe;JulieGraham
+Development;CN=Julie Graham,ou=Brussels,ou=Europe;JulieGraham
+ENG_Stage;CN=Julie Graham,ou=Brussels,ou=Europe;JulieGraham
+Remote;CN=Julie Graham,ou=Brussels,ou=Europe;JulieGraham
+All_Users;CN=Julie Graham,ou=Brussels,ou=Europe;JulieGraham
+Development;CN=Jack Sullivan,ou=Brussels,ou=Europe;JackSullivan
+ENG_Prod;CN=Jack Sullivan,ou=Brussels,ou=Europe;JackSullivan
+ENG_Stage;CN=Jack Sullivan,ou=Brussels,ou=Europe;JackSullivan
+All_Users;CN=Jack Sullivan,ou=Brussels,ou=Europe;JackSullivan
+Development;CN=Heather Wallace,ou=Brussels,ou=Europe;HeatherWallace
+ENG_Stage;CN=Heather Wallace,ou=Brussels,ou=Europe;HeatherWallace
+All_Users;CN=Heather Wallace,ou=Brussels,ou=Europe;HeatherWallace
+Development;CN=Albert Woods,ou=Brussels,ou=Europe;AlbertWoods
+ENG_Stage;CN=Albert Woods,ou=Brussels,ou=Europe;AlbertWoods
+InvntryAnalysis;CN=Albert Woods,ou=Brussels,ou=Europe;AlbertWoods
+All_Users;CN=Albert Woods,ou=Brussels,ou=Europe;AlbertWoods
+Development;CN=Carolyn Perry,ou=Brussels,ou=Europe;CarolynPerry
+ENG_Mgmt;CN=Carolyn Perry,ou=Brussels,ou=Europe;CarolynPerry
+ENG_Stage;CN=Carolyn Perry,ou=Brussels,ou=Europe;CarolynPerry
+QualityAssurance;CN=Carolyn Perry,ou=Brussels,ou=Europe;CarolynPerry
+All_Users;CN=Carolyn Perry,ou=Brussels,ou=Europe;CarolynPerry
+ENG_Stage;CN=Teresa Cole,ou=Brussels,ou=Europe;TeresaCole
+QualityAssurance;CN=Teresa Cole,ou=Brussels,ou=Europe;TeresaCole
+All_Users;CN=Teresa Cole,ou=Brussels,ou=Europe;TeresaCole
+ENG_Stage;CN=Jonathan West,ou=Brussels,ou=Europe;JonathanWest
+InternalAudit;CN=Jonathan West,ou=Brussels,ou=Europe;JonathanWest
+QualityAssurance;CN=Jonathan West,ou=Brussels,ou=Europe;JonathanWest
+All_Users;CN=Jonathan West,ou=Brussels,ou=Europe;JonathanWest
+ENG_Stage;CN=Doris Jordan,ou=Brussels,ou=Europe;DorisJordan
+QualityAssurance;CN=Doris Jordan,ou=Brussels,ou=Europe;DorisJordan
+ServerRoomToken;CN=Doris Jordan,ou=Brussels,ou=Europe;DorisJordan
+All_Users;CN=Doris Jordan,ou=Brussels,ou=Europe;DorisJordan
+ENG_Stage;CN=Justin Owens,ou=Brussels,ou=Europe;JustinOwens
+QualityAssurance;CN=Justin Owens,ou=Brussels,ou=Europe;JustinOwens
+SecCompliance;CN=Justin Owens,ou=Brussels,ou=Europe;JustinOwens
+All_Users;CN=Justin Owens,ou=Brussels,ou=Europe;JustinOwens
+ENG_Stage;CN=Gloria Reynolds,ou=Brussels,ou=Europe;GloriaReynolds
+QualityAssurance;CN=Gloria Reynolds,ou=Brussels,ou=Europe;GloriaReynolds
+All_Users;CN=Gloria Reynolds,ou=Brussels,ou=Europe;GloriaReynolds
+DataArchive;CN=Dennis Barnes,ou=Munich,ou=Europe;DennisBarnes
+All_Users;CN=Dennis Barnes,ou=Munich,ou=Europe;DennisBarnes
+VendorCare;CN=Dennis Barnes,ou=Munich,ou=Europe;DennisBarnes
+campusAccess;CN=Peter Powell,ou=Munich,ou=Europe;PeterPowell
+Compensation;CN=Peter Powell,ou=Munich,ou=Europe;PeterPowell
+All_Users;CN=Peter Powell,ou=Munich,ou=Europe;PeterPowell
+Compensation;CN=Terry Fisher,ou=Munich,ou=Europe;TerryFisher
+SupplyChain;CN=Terry Fisher,ou=Munich,ou=Europe;TerryFisher
+All_Users;CN=Terry Fisher,ou=Munich,ou=Europe;TerryFisher
+Compensation;CN=Evelyn Ellis,ou=Munich,ou=Europe;EvelynEllis
+All_Users;CN=Evelyn Ellis,ou=Munich,ou=Europe;EvelynEllis
+VendorCare;CN=Evelyn Ellis,ou=Munich,ou=Europe;EvelynEllis
+Compensation;CN=Gerald Harrison,ou=Munich,ou=Europe;GeraldHarrison
+ENG_Prod;CN=Gerald Harrison,ou=Munich,ou=Europe;GeraldHarrison
+All_Users;CN=Gerald Harrison,ou=Munich,ou=Europe;GeraldHarrison
+campusAccess;CN=Jean Gibson,ou=Munich,ou=Europe;JeanGibson
+Compensation;CN=Jean Gibson,ou=Munich,ou=Europe;JeanGibson
+All_Users;CN=Jean Gibson,ou=Munich,ou=Europe;JeanGibson
+Compensation;CN=Keith Mcdonald,ou=Munich,ou=Europe;KeithMcdonald
+DataArchive;CN=Keith Mcdonald,ou=Munich,ou=Europe;KeithMcdonald
+HostingVPN;CN=Keith Mcdonald,ou=Munich,ou=Europe;KeithMcdonald
+All_Users;CN=Keith Mcdonald,ou=Munich,ou=Europe;KeithMcdonald
+Employment;CN=Christine Long,ou=Munich,ou=Europe;ChristineLong
+HostingVPN;CN=Christine Long,ou=Munich,ou=Europe;ChristineLong
+RelationsLead;CN=Christine Long,ou=Munich,ou=Europe;ChristineLong
+All_Users;CN=Christine Long,ou=Munich,ou=Europe;ChristineLong
+Employment;CN=Cheryl Cruz,ou=Munich,ou=Europe;CherylCruz
+All_Users;CN=Cheryl Cruz,ou=Munich,ou=Europe;CherylCruz
+VendorCare;CN=Cheryl Cruz,ou=Munich,ou=Europe;CherylCruz
+customerDataCenter;CN=Samuel Marshall,ou=Munich,ou=Europe;SamuelMarshall
+Employment;CN=Samuel Marshall,ou=Munich,ou=Europe;SamuelMarshall
+InternalAudit;CN=Samuel Marshall,ou=Munich,ou=Europe;SamuelMarshall
+All_Users;CN=Samuel Marshall,ou=Munich,ou=Europe;SamuelMarshall
+campusAccess;CN=Mildred Ortiz,ou=Munich,ou=Europe;MildredOrtiz
+Employment;CN=Mildred Ortiz,ou=Munich,ou=Europe;MildredOrtiz
+globalExport;CN=Mildred Ortiz,ou=Munich,ou=Europe;MildredOrtiz
+All_Users;CN=Mildred Ortiz,ou=Munich,ou=Europe;MildredOrtiz
+Employment;CN=Willie Gomez,ou=Munich,ou=Europe;WillieGomez
+SecCompliance;CN=Willie Gomez,ou=Munich,ou=Europe;WillieGomez
+All_Users;CN=Willie Gomez,ou=Munich,ou=Europe;WillieGomez
+Employment;CN=Katherine Murray,ou=Munich,ou=Europe;KatherineMurray
+All_Users;CN=Katherine Murray,ou=Munich,ou=Europe;KatherineMurray
+VendorCare;CN=Katherine Murray,ou=Munich,ou=Europe;KatherineMurray
+Buyer;CN=Harold Patterson,ou=Munich,ou=Europe;HaroldPatterson
+Cost-SavingsAnalysis;CN=Harold Patterson,ou=Munich,ou=Europe;HaroldPatterson
+InventoryMgmt;CN=Harold Patterson,ou=Munich,ou=Europe;HaroldPatterson
+ProcureAnalysis;CN=Harold Patterson,ou=Munich,ou=Europe;HaroldPatterson
+All_Users;CN=Harold Patterson,ou=Munich,ou=Europe;HaroldPatterson
+Buyer;CN=Ralph Freeman,ou=Munich,ou=Europe;RalphFreeman
+All_Users;CN=Ralph Freeman,ou=Munich,ou=Europe;RalphFreeman
+Buyer;CN=Joan Wells,ou=Munich,ou=Europe;JoanWells
+campusAccess;CN=Joan Wells,ou=Munich,ou=Europe;JoanWells
+All_Users;CN=Joan Wells,ou=Munich,ou=Europe;JoanWells
+Buyer;CN=Lawrence Webb,ou=Munich,ou=Europe;LawrenceWebb
+ENG_Prod;CN=Lawrence Webb,ou=Munich,ou=Europe;LawrenceWebb
+ServerRoomToken;CN=Lawrence Webb,ou=Munich,ou=Europe;LawrenceWebb
+All_Users;CN=Lawrence Webb,ou=Munich,ou=Europe;LawrenceWebb
+Buyer;CN=Ashley Simpson,ou=Munich,ou=Europe;AshleySimpson
+DataArchive;CN=Ashley Simpson,ou=Munich,ou=Europe;AshleySimpson
+All_Users;CN=Ashley Simpson,ou=Munich,ou=Europe;AshleySimpson
+Buyer;CN=Nicholas Stevens,ou=Munich,ou=Europe;NicholasStevens
+InvntryAnalysis;CN=Nicholas Stevens,ou=Munich,ou=Europe;NicholasStevens
+All_Users;CN=Nicholas Stevens,ou=Munich,ou=Europe;NicholasStevens
+Buyer;CN=Marie Hughes,ou=Munich,ou=Europe;MarieHughes
+InventoryMgmt;CN=Marie Hughes,ou=Munich,ou=Europe;MarieHughes
+InvntryAnalysis;CN=Marie Hughes,ou=Munich,ou=Europe;MarieHughes
+All_Users;CN=Marie Hughes,ou=Munich,ou=Europe;MarieHughes
+Buyer;CN=Judith Tucker,ou=Munich,ou=Europe;JudithTucker
+campusAccess;CN=Judith Tucker,ou=Munich,ou=Europe;JudithTucker
+All_Users;CN=Judith Tucker,ou=Munich,ou=Europe;JudithTucker
+Buyer;CN=Roy Porter,ou=Munich,ou=Europe;RoyPorter
+InternalAudit;CN=Roy Porter,ou=Munich,ou=Europe;RoyPorter
+All_Users;CN=Roy Porter,ou=Munich,ou=Europe;RoyPorter
+Buyer;CN=Rose Hunter,ou=Munich,ou=Europe;RoseHunter
+All_Users;CN=Rose Hunter,ou=Munich,ou=Europe;RoseHunter
+VendorCare;CN=Rose Hunter,ou=Munich,ou=Europe;RoseHunter
+Buyer;CN=Benjamin Hicks,ou=Munich,ou=Europe;BenjaminHicks
+globalExport;CN=Benjamin Hicks,ou=Munich,ou=Europe;BenjaminHicks
+SecCompliance;CN=Benjamin Hicks,ou=Munich,ou=Europe;BenjaminHicks
+All_Users;CN=Benjamin Hicks,ou=Munich,ou=Europe;BenjaminHicks
+Buyer;CN=Janice Crawford,ou=Munich,ou=Europe;JaniceCrawford
+campusAccess;CN=Janice Crawford,ou=Munich,ou=Europe;JaniceCrawford
+All_Users;CN=Janice Crawford,ou=Munich,ou=Europe;JaniceCrawford
+InternalAudit;CN=Amanda Ross,ou=London,ou=Europe;AmandaRoss
+All_Users;CN=Amanda Ross,ou=London,ou=Europe;AmandaRoss
+PayrollAnalysis;CN=Douglas Flores,ou=London,ou=Europe;DouglasFlores
+All_Users;CN=Douglas Flores,ou=London,ou=Europe;DouglasFlores
+SupplyChain;CN=Bruce Henry,ou=London,ou=Europe;BruceHenry
+All_Users;CN=Bruce Henry,ou=London,ou=Europe;BruceHenry
+HostingVPN;CN=Kelly Boyd,ou=London,ou=Europe;KellyBoyd
+PayrollAnalysis;CN=Kelly Boyd,ou=London,ou=Europe;KellyBoyd
+All_Users;CN=Kelly Boyd,ou=London,ou=Europe;KellyBoyd
+ENG_Prod;CN=Brandon Mason,ou=London,ou=Europe;BrandonMason
+AccountingGeneral;CN=Brandon Mason,ou=London,ou=Europe;BrandonMason
+All_Users;CN=Brandon Mason,ou=London,ou=Europe;BrandonMason
+campusAccess;CN=Nicole Morales,ou=London,ou=Europe;NicoleMorales
+AccountingGeneral;CN=Nicole Morales,ou=London,ou=Europe;NicoleMorales
+All_Users;CN=Nicole Morales,ou=London,ou=Europe;NicoleMorales
+InvntryAnalysis;CN=Adam Kennedy,ou=London,ou=Europe;AdamKennedy
+All_Users;CN=Adam Kennedy,ou=London,ou=Europe;AdamKennedy
+InternalAudit;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+WindowsAdministration;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+PayrollControls;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+PayrollProjects;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+PayrollManager;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+PayrollAnalysis;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+All_Users;CN=Janet Washington,ou=London,ou=Europe;JanetWashington
+customerDataCenter;CN=Judy Warren,ou=London,ou=Europe;JudyWarren
+All_Users;CN=Judy Warren,ou=London,ou=Europe;JudyWarren
+DataArchive;CN=Harry Dixon,ou=London,ou=Europe;HarryDixon
+InternalAudit;CN=Harry Dixon,ou=London,ou=Europe;HarryDixon
+All_Users;CN=Harry Dixon,ou=London,ou=Europe;HarryDixon
+ServerRoomToken;CN=Christina Ramos,ou=London,ou=Europe;ChristinaRamos
+AccountingGeneral;CN=Christina Ramos,ou=London,ou=Europe;ChristinaRamos
+All_Users;CN=Christina Ramos,ou=London,ou=Europe;ChristinaRamos
+SecCompliance;CN=Fred Reyes,ou=London,ou=Europe;FredReyes
+AccountingGeneral;CN=Fred Reyes,ou=London,ou=Europe;FredReyes
+All_Users;CN=Fred Reyes,ou=London,ou=Europe;FredReyes
+globalExport;CN=Kathy Burns,ou=London,ou=Europe;KathyBurns
+All_Users;CN=Kathy Burns,ou=London,ou=Europe;KathyBurns
+VendorCare;CN=Kathy Burns,ou=London,ou=Europe;KathyBurns
+All_Users;CN=Henry Butler,ou=London,ou=Europe;HenryButler
+Treasury;CN=Henry Butler,ou=London,ou=Europe;HenryButler
+TR_Currency;CN=Henry Butler,ou=London,ou=Europe;HenryButler
+All_Users;CN=Wayne Gordon,ou=London,ou=Europe;WayneGordon
+Treasury;CN=Wayne Gordon,ou=London,ou=Europe;WayneGordon
+All_Users;CN=Theresa Shaw,ou=London,ou=Europe;TheresaShaw
+ENG_Prod;CN=Billy Holmes,ou=London,ou=Europe;BillyHolmes
+All_Users;CN=Billy Holmes,ou=London,ou=Europe;BillyHolmes
+All_Users;CN=Beverly Rice,ou=London,ou=Europe;BeverlyRice
+InvntryAnalysis;CN=Steve Robertson,ou=London,ou=Europe;SteveRobertson
+All_Users;CN=Steve Robertson,ou=London,ou=Europe;SteveRobertson
+DataArchive;CN=Catherine Simmons,ou=London,ou=Europe;CatherineSimmons
+TimesheetAdmin;CN=Catherine Simmons,ou=London,ou=Europe;CatherineSimmons
+All_Users;CN=Catherine Simmons,ou=London,ou=Europe;CatherineSimmons
+TR_Lead;CN=csimmons-adm,ou=San Jose,ou=Americas;CatherineSimmons
+All_Users;CN=Denise Hunt,ou=London,ou=Europe;DeniseHunt
+InternalAudit;CN=Louis Black,ou=London,ou=Europe;LouisBlack
+All_Users;CN=Louis Black,ou=London,ou=Europe;LouisBlack
+customerDataCenter;CN=Tammy Daniels,ou=London,ou=Europe;TammyDaniels
+All_Users;CN=Tammy Daniels,ou=London,ou=Europe;TammyDaniels
+HostingVPN;CN=Jeremy Palmer,ou=London,ou=Europe;JeremyPalmer
+All_Users;CN=Jeremy Palmer,ou=London,ou=Europe;JeremyPalmer
+DataArchive;CN=Irene Mills,ou=London,ou=Europe;IreneMills
+All_Users;CN=Irene Mills,ou=London,ou=Europe;IreneMills
+globalExport;CN=Aaron Nichols,ou=Singapore,ou=Asia-Pacific;AaronNichols
+SupplyChain;CN=Aaron Nichols,ou=Singapore,ou=Asia-Pacific;AaronNichols
+All_Users;CN=Aaron Nichols,ou=Singapore,ou=Asia-Pacific;AaronNichols
+campusAccess;CN=Jane Grant,ou=Singapore,ou=Asia-Pacific;JaneGrant
+All_Users;CN=Jane Grant,ou=Singapore,ou=Asia-Pacific;JaneGrant
+VendorCare;CN=Jane Grant,ou=Singapore,ou=Asia-Pacific;JaneGrant
+HelpDesk;CN=Howard Rose,ou=Singapore,ou=Asia-Pacific;HowardRose
+SysAdministration;CN=Howard Rose,ou=Singapore,ou=Asia-Pacific;HowardRose
+UnixAdministration;CN=Howard Rose,ou=Singapore,ou=Asia-Pacific;HowardRose
+All_Users;CN=Howard Rose,ou=Singapore,ou=Asia-Pacific;HowardRose
+WindowsAdministration;CN=Howard Rose,ou=Singapore,ou=Asia-Pacific;HowardRose
+Admins;CN=Martin Matthews,ou=Singapore,ou=Asia-Pacific;MartinMatthews
+customerDataCenter;CN=Martin Matthews,ou=Singapore,ou=Asia-Pacific;MartinMatthews
+HelpDesk;CN=Martin Matthews,ou=Singapore,ou=Asia-Pacific;MartinMatthews
+All_Users;CN=Martin Matthews,ou=Singapore,ou=Asia-Pacific;MartinMatthews
+WindowsAdministration;CN=Martin Matthews,ou=Singapore,ou=Asia-Pacific;MartinMatthews
+HelpDesk;CN=Anne Arnold,ou=Singapore,ou=Asia-Pacific;AnneArnold
+ServerRoomToken;CN=Anne Arnold,ou=Singapore,ou=Asia-Pacific;AnneArnold
+All_Users;CN=Anne Arnold,ou=Singapore,ou=Asia-Pacific;AnneArnold
+WindowsAdministration;CN=Anne Arnold,ou=Singapore,ou=Asia-Pacific;AnneArnold
+HelpDesk;CN=Ernest Wagner,ou=Singapore,ou=Asia-Pacific;ErnestWagner
+SecCompliance;CN=Ernest Wagner,ou=Singapore,ou=Asia-Pacific;ErnestWagner
+All_Users;CN=Ernest Wagner,ou=Singapore,ou=Asia-Pacific;ErnestWagner
+WindowsAdministration;CN=Ernest Wagner,ou=Singapore,ou=Asia-Pacific;ErnestWagner
+HelpDesk;CN=Jacqueline Willis,ou=Singapore,ou=Asia-Pacific;JacquelineWillis
+All_Users;CN=Jacqueline Willis,ou=Singapore,ou=Asia-Pacific;JacquelineWillis
+WindowsAdministration;CN=Jacqueline Willis,ou=Singapore,ou=Asia-Pacific;JacquelineWillis
+HelpDesk;CN=Phillip Ray,ou=Singapore,ou=Asia-Pacific;PhillipRay
+All_Users;CN=Phillip Ray,ou=Singapore,ou=Asia-Pacific;PhillipRay
+WindowsAdministration;CN=Phillip Ray,ou=Singapore,ou=Asia-Pacific;PhillipRay
+SysAdministration;CN=Rachel Stone,ou=Singapore,ou=Asia-Pacific;RachelStone
+UnixAdministration;CN=Rachel Stone,ou=Singapore,ou=Asia-Pacific;RachelStone
+All_Users;CN=Rachel Stone,ou=Singapore,ou=Asia-Pacific;RachelStone
+WindowsAdministration;CN=Rachel Stone,ou=Singapore,ou=Asia-Pacific;RachelStone
+UnixAdministration;CN=Wanda Watkins,ou=Singapore,ou=Asia-Pacific;WandaWatkins
+All_Users;CN=Wanda Watkins,ou=Singapore,ou=Asia-Pacific;WandaWatkins
+ENG_Prod;CN=Todd Olson,ou=Singapore,ou=Asia-Pacific;ToddOlson
+UnixAdministration;CN=Todd Olson,ou=Singapore,ou=Asia-Pacific;ToddOlson
+All_Users;CN=Todd Olson,ou=Singapore,ou=Asia-Pacific;ToddOlson
+UnixAdministration;CN=Bonnie Carroll,ou=Singapore,ou=Asia-Pacific;BonnieCarroll
+All_Users;CN=Bonnie Carroll,ou=Singapore,ou=Asia-Pacific;BonnieCarroll
+InvntryAnalysis;CN=Jesse Duncan,ou=Singapore,ou=Asia-Pacific;JesseDuncan
+UnixAdministration;CN=Jesse Duncan,ou=Singapore,ou=Asia-Pacific;JesseDuncan
+All_Users;CN=Jesse Duncan,ou=Singapore,ou=Asia-Pacific;JesseDuncan
+DataArchive;CN=Julia Snyder,ou=Singapore,ou=Asia-Pacific;JuliaSnyder
+UnixAdministration;CN=Julia Snyder,ou=Singapore,ou=Asia-Pacific;JuliaSnyder
+All_Users;CN=Julia Snyder,ou=Singapore,ou=Asia-Pacific;JuliaSnyder
+Development;CN=Eugene Hawkins,ou=Singapore,ou=Asia-Pacific;EugeneHawkins
+ENG_Internal;CN=Eugene Hawkins,ou=Singapore,ou=Asia-Pacific;EugeneHawkins
+ENG_Mgmt;CN=Eugene Hawkins,ou=Singapore,ou=Asia-Pacific;EugeneHawkins
+QualityAssurance;CN=Eugene Hawkins,ou=Singapore,ou=Asia-Pacific;EugeneHawkins
+All_Users;CN=Eugene Hawkins,ou=Singapore,ou=Asia-Pacific;EugeneHawkins
+Development;CN=Craig Hart,ou=Singapore,ou=Asia-Pacific;CraigHart
+ENG_Internal;CN=Craig Hart,ou=Singapore,ou=Asia-Pacific;CraigHart
+InternalAudit;CN=Craig Hart,ou=Singapore,ou=Asia-Pacific;CraigHart
+All_Users;CN=Craig Hart,ou=Singapore,ou=Asia-Pacific;CraigHart
+Development;CN=Ruby Cunningham,ou=Singapore,ou=Asia-Pacific;RubyCunningham
+ENG_Internal;CN=Ruby Cunningham,ou=Singapore,ou=Asia-Pacific;RubyCunningham
+All_Users;CN=Ruby Cunningham,ou=Singapore,ou=Asia-Pacific;RubyCunningham
+Development;CN=Alan Bradley,ou=Singapore,ou=Asia-Pacific;AlanBradley
+ENG_Internal;CN=Alan Bradley,ou=Singapore,ou=Asia-Pacific;AlanBradley
+SecCompliance;CN=Alan Bradley,ou=Singapore,ou=Asia-Pacific;AlanBradley
+All_Users;CN=Alan Bradley,ou=Singapore,ou=Asia-Pacific;AlanBradley
+Development;CN=Lois Lane,ou=Singapore,ou=Asia-Pacific;LoisLane
+ENG_Internal;CN=Lois Lane,ou=Singapore,ou=Asia-Pacific;LoisLane
+All_Users;CN=Lois Lane,ou=Singapore,ou=Asia-Pacific;LoisLane
+Development;CN=Shawn Andrews,ou=Singapore,ou=Asia-Pacific;ShawnAndrews
+ENG_Internal;CN=Shawn Andrews,ou=Singapore,ou=Asia-Pacific;ShawnAndrews
+All_Users;CN=Shawn Andrews,ou=Singapore,ou=Asia-Pacific;ShawnAndrews
+Development;CN=Marilyn Dunn,ou=Singapore,ou=Asia-Pacific;MarilynDunn
+ENG_Internal;CN=Marilyn Dunn,ou=Singapore,ou=Asia-Pacific;MarilynDunn
+ENG_Mgmt;CN=Marilyn Dunn,ou=Singapore,ou=Asia-Pacific;MarilynDunn
+QualityAssurance;CN=Marilyn Dunn,ou=Singapore,ou=Asia-Pacific;MarilynDunn
+All_Users;CN=Marilyn Dunn,ou=Singapore,ou=Asia-Pacific;MarilynDunn
+ENG_Internal;CN=Tina Ruiz,ou=Singapore,ou=Asia-Pacific;TinaRuiz
+QualityAssurance;CN=Tina Ruiz,ou=Singapore,ou=Asia-Pacific;TinaRuiz
+All_Users;CN=Tina Ruiz,ou=Singapore,ou=Asia-Pacific;TinaRuiz
+ENG_Internal;CN=Clarence Harper,ou=Singapore,ou=Asia-Pacific;ClarenceHarper
+HostingVPN;CN=Clarence Harper,ou=Singapore,ou=Asia-Pacific;ClarenceHarper
+QualityAssurance;CN=Clarence Harper,ou=Singapore,ou=Asia-Pacific;ClarenceHarper
+ServerRoomToken;CN=Clarence Harper,ou=Singapore,ou=Asia-Pacific;ClarenceHarper
+All_Users;CN=Clarence Harper,ou=Singapore,ou=Asia-Pacific;ClarenceHarper
+ENG_Internal;CN=Phyllis Fox,ou=Singapore,ou=Asia-Pacific;PhyllisFox
+globalExport;CN=Phyllis Fox,ou=Singapore,ou=Asia-Pacific;PhyllisFox
+QualityAssurance;CN=Phyllis Fox,ou=Singapore,ou=Asia-Pacific;PhyllisFox
+All_Users;CN=Phyllis Fox,ou=Singapore,ou=Asia-Pacific;PhyllisFox
+ENG_Internal;CN=Sean Riley,ou=Singapore,ou=Asia-Pacific;SeanRiley
+InvntryAnalysis;CN=Sean Riley,ou=Singapore,ou=Asia-Pacific;SeanRiley
+QualityAssurance;CN=Sean Riley,ou=Singapore,ou=Asia-Pacific;SeanRiley
+All_Users;CN=Sean Riley,ou=Singapore,ou=Asia-Pacific;SeanRiley
+customerDataCenter;CN=Norma Armstrong,ou=Singapore,ou=Asia-Pacific;NormaArmstrong
+ENG_Internal;CN=Norma Armstrong,ou=Singapore,ou=Asia-Pacific;NormaArmstrong
+QualityAssurance;CN=Norma Armstrong,ou=Singapore,ou=Asia-Pacific;NormaArmstrong
+All_Users;CN=Norma Armstrong,ou=Singapore,ou=Asia-Pacific;NormaArmstrong
+ENG_Prod;CN=Randy Knight,ou=Tokyo,ou=Asia-Pacific;RandyKnight
+ServerRoomToken;CN=Randy Knight,ou=Tokyo,ou=Asia-Pacific;RandyKnight
+All_Users;CN=Randy Knight,ou=Tokyo,ou=Asia-Pacific;RandyKnight
+BenefitCommittee;CN=Carlos Perkins,ou=Tokyo,ou=Asia-Pacific;CarlosPerkins
+Benefits;CN=Carlos Perkins,ou=Tokyo,ou=Asia-Pacific;CarlosPerkins
+CompCommittee;CN=Carlos Perkins,ou=Tokyo,ou=Asia-Pacific;CarlosPerkins
+Compensation;CN=Carlos Perkins,ou=Tokyo,ou=Asia-Pacific;CarlosPerkins
+All_Users;CN=Carlos Perkins,ou=Tokyo,ou=Asia-Pacific;CarlosPerkins
+BenefitCommittee;CN=Philip Carpenter,ou=Tokyo,ou=Asia-Pacific;PhilipCarpenter
+Benefits;CN=Philip Carpenter,ou=Tokyo,ou=Asia-Pacific;PhilipCarpenter
+InternalAudit;CN=Philip Carpenter,ou=Tokyo,ou=Asia-Pacific;PhilipCarpenter
+All_Users;CN=Philip Carpenter,ou=Tokyo,ou=Asia-Pacific;PhilipCarpenter
+Benefits;CN=Paula Weaver,ou=Tokyo,ou=Asia-Pacific;PaulaWeaver
+All_Users;CN=Paula Weaver,ou=Tokyo,ou=Asia-Pacific;PaulaWeaver
+VendorCare;CN=Paula Weaver,ou=Tokyo,ou=Asia-Pacific;PaulaWeaver
+Benefits;CN=Chris Greene,ou=Tokyo,ou=Asia-Pacific;ChrisGreene
+DataArchive;CN=Chris Greene,ou=Tokyo,ou=Asia-Pacific;ChrisGreene
+SecCompliance;CN=Chris Greene,ou=Tokyo,ou=Asia-Pacific;ChrisGreene
+All_Users;CN=Chris Greene,ou=Tokyo,ou=Asia-Pacific;ChrisGreene
+Benefits;CN=Diana Lawrence,ou=Tokyo,ou=Asia-Pacific;DianaLawrence
+campusAccess;CN=Diana Lawrence,ou=Tokyo,ou=Asia-Pacific;DianaLawrence
+All_Users;CN=Diana Lawrence,ou=Tokyo,ou=Asia-Pacific;DianaLawrence
+Benefits;CN=Johnny Elliott,ou=Tokyo,ou=Asia-Pacific;JohnnyElliott
+SupplyChain;CN=Johnny Elliott,ou=Tokyo,ou=Asia-Pacific;JohnnyElliott
+All_Users;CN=Johnny Elliott,ou=Tokyo,ou=Asia-Pacific;JohnnyElliott
+BenefitCommittee;CN=Andrea Hudson,ou=Tokyo,ou=Asia-Pacific;AndreaHudson
+Benefits;CN=Andrea Hudson,ou=Tokyo,ou=Asia-Pacific;AndreaHudson
+CompCommittee;CN=Andrea Hudson,ou=Tokyo,ou=Asia-Pacific;AndreaHudson
+Compensation;CN=Andrea Hudson,ou=Tokyo,ou=Asia-Pacific;AndreaHudson
+All_Users;CN=Andrea Hudson,ou=Tokyo,ou=Asia-Pacific;AndreaHudson
+BenefitCommittee;CN=Annie Chavez,ou=Tokyo,ou=Asia-Pacific;AnnieChavez
+Benefits;CN=Annie Chavez,ou=Tokyo,ou=Asia-Pacific;AnnieChavez
+All_Users;CN=Annie Chavez,ou=Tokyo,ou=Asia-Pacific;AnnieChavez
+Benefits;CN=Earl Sims,ou=Tokyo,ou=Asia-Pacific;EarlSims
+ENG_Prod;CN=Earl Sims,ou=Tokyo,ou=Asia-Pacific;EarlSims
+All_Users;CN=Earl Sims,ou=Tokyo,ou=Asia-Pacific;EarlSims
+Benefits;CN=Lillian Austin,ou=Tokyo,ou=Asia-Pacific;LillianAustin
+campusAccess;CN=Lillian Austin,ou=Tokyo,ou=Asia-Pacific;LillianAustin
+All_Users;CN=Lillian Austin,ou=Tokyo,ou=Asia-Pacific;LillianAustin
+Benefits;CN=Jimmy Peters,ou=Tokyo,ou=Asia-Pacific;JimmyPeters
+globalExport;CN=Jimmy Peters,ou=Tokyo,ou=Asia-Pacific;JimmyPeters
+InvntryAnalysis;CN=Jimmy Peters,ou=Tokyo,ou=Asia-Pacific;JimmyPeters
+All_Users;CN=Jimmy Peters,ou=Tokyo,ou=Asia-Pacific;JimmyPeters
+Benefits;CN=Emily Kelley,ou=Tokyo,ou=Asia-Pacific;EmilyKelley
+All_Users;CN=Emily Kelley,ou=Tokyo,ou=Asia-Pacific;EmilyKelley
+VendorCare;CN=Emily Kelley,ou=Tokyo,ou=Asia-Pacific;EmilyKelley
+InventoryMgmt;CN=Russell Spencer,ou=Tokyo,ou=Asia-Pacific;RussellSpencer
+InvntryAnalysis;CN=Russell Spencer,ou=Tokyo,ou=Asia-Pacific;RussellSpencer
+ReceivAnalysis;CN=Russell Spencer,ou=Tokyo,ou=Asia-Pacific;RussellSpencer
+All_Users;CN=Russell Spencer,ou=Tokyo,ou=Asia-Pacific;RussellSpencer
+InternalAudit;CN=Antonio Franklin,ou=Tokyo,ou=Asia-Pacific;AntonioFranklin
+InvntryAnalysis;CN=Antonio Franklin,ou=Tokyo,ou=Asia-Pacific;AntonioFranklin
+All_Users;CN=Antonio Franklin,ou=Tokyo,ou=Asia-Pacific;AntonioFranklin
+customerDataCenter;CN=Robin Lawson,ou=Tokyo,ou=Asia-Pacific;RobinLawson
+HostingVPN;CN=Robin Lawson,ou=Tokyo,ou=Asia-Pacific;RobinLawson
+InvntryAnalysis;CN=Robin Lawson,ou=Tokyo,ou=Asia-Pacific;RobinLawson
+ServerRoomToken;CN=Robin Lawson,ou=Tokyo,ou=Asia-Pacific;RobinLawson
+All_Users;CN=Robin Lawson,ou=Tokyo,ou=Asia-Pacific;RobinLawson
+InvntryAnalysis;CN=Danny Fields,ou=Tokyo,ou=Asia-Pacific;DannyFields
+SecCompliance;CN=Danny Fields,ou=Tokyo,ou=Asia-Pacific;DannyFields
+All_Users;CN=Danny Fields,ou=Tokyo,ou=Asia-Pacific;DannyFields
+InvntryAnalysis;CN=Peggy Gutierrez,ou=Tokyo,ou=Asia-Pacific;PeggyGutierrez
+All_Users;CN=Peggy Gutierrez,ou=Tokyo,ou=Asia-Pacific;PeggyGutierrez
+VendorCare;CN=Peggy Gutierrez,ou=Tokyo,ou=Asia-Pacific;PeggyGutierrez
+InvntryAnalysis;CN=Bryan Ryan,ou=Tokyo,ou=Asia-Pacific;BryanRyan
+All_Users;CN=Bryan Ryan,ou=Tokyo,ou=Asia-Pacific;BryanRyan
+InventoryMgmt;CN=Kathryn Gardner,ou=Tokyo,ou=Asia-Pacific;KathrynGardner
+InvntryAnalysis;CN=Kathryn Gardner,ou=Tokyo,ou=Asia-Pacific;KathrynGardner
+ReceivAnalysis;CN=Kathryn Gardner,ou=Tokyo,ou=Asia-Pacific;KathrynGardner
+All_Users;CN=Kathryn Gardner,ou=Tokyo,ou=Asia-Pacific;KathrynGardner
+DataArchive;CN=Crystal Schmidt,ou=Tokyo,ou=Asia-Pacific;CrystalSchmidt
+ReceivAnalysis;CN=Crystal Schmidt,ou=Tokyo,ou=Asia-Pacific;CrystalSchmidt
+All_Users;CN=Crystal Schmidt,ou=Tokyo,ou=Asia-Pacific;CrystalSchmidt
+ENG_Prod;CN=Tony Carr,ou=Tokyo,ou=Asia-Pacific;TonyCarr
+ReceivAnalysis;CN=Tony Carr,ou=Tokyo,ou=Asia-Pacific;TonyCarr
+All_Users;CN=Tony Carr,ou=Tokyo,ou=Asia-Pacific;TonyCarr
+ReceivAnalysis;CN=Gladys Vasquez,ou=Tokyo,ou=Asia-Pacific;GladysVasquez
+All_Users;CN=Gladys Vasquez,ou=Tokyo,ou=Asia-Pacific;GladysVasquez
+VendorCare;CN=Gladys Vasquez,ou=Tokyo,ou=Asia-Pacific;GladysVasquez
+InvntryAnalysis;CN=Luis Castillo,ou=Tokyo,ou=Asia-Pacific;LuisCastillo
+ReceivAnalysis;CN=Luis Castillo,ou=Tokyo,ou=Asia-Pacific;LuisCastillo
+All_Users;CN=Luis Castillo,ou=Tokyo,ou=Asia-Pacific;LuisCastillo
+campusAccess;CN=Rita Wheeler,ou=Tokyo,ou=Asia-Pacific;RitaWheeler
+globalExport;CN=Rita Wheeler,ou=Tokyo,ou=Asia-Pacific;RitaWheeler
+ReceivAnalysis;CN=Rita Wheeler,ou=Tokyo,ou=Asia-Pacific;RitaWheeler
+All_Users;CN=Rita Wheeler,ou=Tokyo,ou=Asia-Pacific;RitaWheeler
+campusAccess;CN=Lori Ferguson,ou=Taipei,ou=Asia-Pacific;LoriFerguson
+All_Users;CN=Lori Ferguson,ou=Taipei,ou=Asia-Pacific;LoriFerguson
+DataArchive;CN=Bobby Stephens,ou=Taipei,ou=Asia-Pacific;BobbyStephens
+All_Users;CN=Bobby Stephens,ou=Taipei,ou=Asia-Pacific;BobbyStephens
+InternalAudit;CN=Mike Chapman,ou=Taipei,ou=Asia-Pacific;MikeChapman
+All_Users;CN=Mike Chapman,ou=Taipei,ou=Asia-Pacific;MikeChapman
+All_Users;CN=Dawn Oliver,ou=Taipei,ou=Asia-Pacific;DawnOliver
+VendorCare;CN=Dawn Oliver,ou=Taipei,ou=Asia-Pacific;DawnOliver
+SecCompliance;CN=Stanley Montgomery,ou=Taipei,ou=Asia-Pacific;StanleyMontgomery
+All_Users;CN=Stanley Montgomery,ou=Taipei,ou=Asia-Pacific;StanleyMontgomery
+campusAccess;CN=Connie Richards,ou=Taipei,ou=Asia-Pacific;ConnieRichards
+All_Users;CN=Connie Richards,ou=Taipei,ou=Asia-Pacific;ConnieRichards
+SupplyChain;CN=Leonard Williamson,ou=Taipei,ou=Asia-Pacific;LeonardWilliamson
+All_Users;CN=Leonard Williamson,ou=Taipei,ou=Asia-Pacific;LeonardWilliamson
+All_Users;CN=Louise Payne,ou=Taipei,ou=Asia-Pacific;LouisePayne
+VendorCare;CN=Louise Payne,ou=Taipei,ou=Asia-Pacific;LouisePayne
+All_Users;CN=Florence Johnston,ou=Taipei,ou=Asia-Pacific;FlorenceJohnston
+AccountingGeneral;CN=Florence Johnston,ou=Taipei,ou=Asia-Pacific;FlorenceJohnston
+All_Users;CN=Nathan Banks,ou=Taipei,ou=Asia-Pacific;NathanBanks
+campusAccess;CN=Tracy Meyer,ou=Taipei,ou=Asia-Pacific;TracyMeyer
+All_Users;CN=Tracy Meyer,ou=Taipei,ou=Asia-Pacific;TracyMeyer
+DataArchive;CN=Dale Bishop,ou=Taipei,ou=Asia-Pacific;DaleBishop
+HostingVPN;CN=Dale Bishop,ou=Taipei,ou=Asia-Pacific;DaleBishop
+All_Users;CN=Dale Bishop,ou=Taipei,ou=Asia-Pacific;DaleBishop
+All_Users;CN=Edna Mccoy,ou=Taipei,ou=Asia-Pacific;EdnaMccoy
+VendorCare;CN=Edna Mccoy,ou=Taipei,ou=Asia-Pacific;EdnaMccoy
+InvntryAnalysis;CN=Victor Pierce,ou=Taipei,ou=Asia-Pacific;VictorPierce
+All_Users;CN=Victor Pierce,ou=Taipei,ou=Asia-Pacific;VictorPierce
+customerDataCenter;CN=Manuel Howell,ou=Taipei,ou=Asia-Pacific;ManuelHowell
+InternalAudit;CN=Manuel Howell,ou=Taipei,ou=Asia-Pacific;ManuelHowell
+All_Users;CN=Manuel Howell,ou=Taipei,ou=Asia-Pacific;ManuelHowell
+campusAccess;CN=Tiffany Alvarez,ou=Taipei,ou=Asia-Pacific;TiffanyAlvarez
+All_Users;CN=Tiffany Alvarez,ou=Taipei,ou=Asia-Pacific;TiffanyAlvarez
+SecCompliance;CN=Rodney Morrison,ou=Taipei,ou=Asia-Pacific;RodneyMorrison
+All_Users;CN=Rodney Morrison,ou=Taipei,ou=Asia-Pacific;RodneyMorrison
+All_Users;CN=Carmen Hansen,ou=Taipei,ou=Asia-Pacific;CarmenHansen
+VendorCare;CN=Carmen Hansen,ou=Taipei,ou=Asia-Pacific;CarmenHansen
+All_Users;CN=Curtis Fernandez,ou=Taipei,ou=Asia-Pacific;CurtisFernandez
+HostingVPN;CN=Sara Berry,ou=Taipei,ou=Asia-Pacific;SaraBerry
+All_Users;CN=Sara Berry,ou=Taipei,ou=Asia-Pacific;SaraBerry
+campusAccess;CN=Rosa Garza,ou=Taipei,ou=Asia-Pacific;RosaGarza
+All_Users;CN=Rosa Garza,ou=Taipei,ou=Asia-Pacific;RosaGarza
+ENG_Prod;CN=Norman Harvey,ou=Taipei,ou=Asia-Pacific;NormanHarvey
+All_Users;CN=Norman Harvey,ou=Taipei,ou=Asia-Pacific;NormanHarvey
+All_Users;CN=Cindy Little,ou=Taipei,ou=Asia-Pacific;CindyLittle
+VendorCare;CN=Cindy Little,ou=Taipei,ou=Asia-Pacific;CindyLittle
+InvntryAnalysis;CN=Allen Burton,ou=Taipei,ou=Asia-Pacific;AllenBurton
+All_Users;CN=Allen Burton,ou=Taipei,ou=Asia-Pacific;AllenBurton
+campusAccess;CN=Grace Stanley,ou=Taipei,ou=Asia-Pacific;GraceStanley
+All_Users;CN=Grace Stanley,ou=Taipei,ou=Asia-Pacific;GraceStanley
+InternalAudit;CN=Bobby Stephens,ou=Taipei,ou=Asia-Pacific;BobbyStephens
+SupplyChain;CN=Bobby Stephens,ou=Taipei,ou=Asia-Pacific;BobbyStephens
+VendorCare;CN=Bobby Stephens,ou=Taipei,ou=Asia-Pacific;BobbyStephens
+VendorCare;CN=Mike Chapman,ou=Taipei,ou=Asia-Pacific;MikeChapman
+DataArchive;CN=Mike Chapman,ou=Taipei,ou=Asia-Pacific;MikeChapman
+SupplyChain;CN=Mike Chapman,ou=Taipei,ou=Asia-Pacific;MikeChapman
+Compensation;CN=Mike Chapman,ou=Taipei,ou=Asia-Pacific;MikeChapman
+DataArchive;CN=Dawn Oliver,ou=Taipei,ou=Asia-Pacific;DawnOliver
+SupplyChain;CN=Dawn Oliver,ou=Taipei,ou=Asia-Pacific;DawnOliver
+Compensation;CN=Dawn Oliver,ou=Taipei,ou=Asia-Pacific;DawnOliver
+InternalAudit;CN=Dawn Oliver,ou=Taipei,ou=Asia-Pacific;DawnOliver
+InternalAudit;CN=Leonard Williamson,ou=Taipei,ou=Asia-Pacific;LeonardWilliamson
+VendorCare;CN=Leonard Williamson,ou=Taipei,ou=Asia-Pacific;LeonardWilliamson
+DataArchive;CN=Leonard Williamson,ou=Taipei,ou=Asia-Pacific;LeonardWilliamson
+Compensation;CN=Leonard Williamson,ou=Taipei,ou=Asia-Pacific;LeonardWilliamson
+InternalAudit;CN=Louise Payne,ou=Taipei,ou=Asia-Pacific;LouisePayne
+DataArchive;CN=Louise Payne,ou=Taipei,ou=Asia-Pacific;LouisePayne
+SupplyChain;CN=Louise Payne,ou=Taipei,ou=Asia-Pacific;LouisePayne
+Compensation;CN=Louise Payne,ou=Taipei,ou=Asia-Pacific;LouisePayne
+VendorCare;CN=Nathan Banks,ou=Taipei,ou=Asia-Pacific;NathanBanks
+InternalAudit;CN=Nathan Banks,ou=Taipei,ou=Asia-Pacific;NathanBanks
+DataArchive;CN=Nathan Banks,ou=Taipei,ou=Asia-Pacific;NathanBanks
+SupplyChain;CN=Nathan Banks,ou=Taipei,ou=Asia-Pacific;NathanBanks
+Compensation;CN=Nathan Banks,ou=Taipei,ou=Asia-Pacific;NathanBanks
+InternalAudit;CN=Edna Mccoy,ou=Taipei,ou=Asia-Pacific;EdnaMccoy
+DataArchive;CN=Edna Mccoy,ou=Taipei,ou=Asia-Pacific;EdnaMccoy
+SupplyChain;CN=Edna Mccoy,ou=Taipei,ou=Asia-Pacific;EdnaMccoy
+Compensation;CN=Edna Mccoy,ou=Taipei,ou=Asia-Pacific;EdnaMccoy

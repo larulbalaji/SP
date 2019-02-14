@@ -1,0 +1,696 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Exclusion Utility Library">
+  <Source>
+    <![CDATA[
+import sailpoint.object.EntitlementSnapshot;
+import sailpoint.object.QueryOptions;
+import sailpoint.tools.Util;
+
+import sailpoint.api.IdentityHistoryService;
+import sailpoint.api.ManagedAttributer;
+import sailpoint.api.SailPointContext;
+import sailpoint.object.Application;
+import sailpoint.object.Bundle;
+import sailpoint.object.EntitlementGroup;
+import sailpoint.object.Filter;
+import sailpoint.object.GroupDefinition;
+import sailpoint.object.Identity;
+import sailpoint.object.Certifiable;
+import sailpoint.object.Entitlements;
+import sailpoint.object.Certification;
+import sailpoint.object.Link;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.PolicyViolation;
+import sailpoint.object.CertificationItem;
+import sailpoint.object.CertificationDecision;
+import sailpoint.object.CertifiableDescriptor;
+import sailpoint.object.IdentityHistoryItem;
+import sailpoint.object.QueryOptions;
+import sailpoint.tools.GeneralException;
+import sailpoint.seri.util.ExclusionRuleUtility;
+
+import java.util.List;
+import java.util.Iterator;
+
+	public void excludePopulation(List populationNameList)
+			throws GeneralException {
+
+// Expect: sailpoint.object.Identity entity
+// Expect: java.util.List items
+// Expect: java.util.List itemsToExclude
+// Expect: java.util.Map state
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			for (int a = 0; a < populationNameList.size(); a++)
+				ExclusionRuleUtility.includeOnlyEntitlmentsDefinedInPopulation(
+						context, itemsToExclude,
+						(String) populationNameList.get(a), item, true, state);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludePopulation(String populationName)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.includeOnlyEntitlmentsDefinedInPopulation(
+					context, itemsToExclude, populationName, item, true, state);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includePopulation(String populationName)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility
+					.includeOnlyEntitlmentsDefinedInPopulation(context,
+							itemsToExclude, populationName, item, false, state);
+		}
+
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includePopulation(List populationNameList)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			for (int a = 0; a < populationNameList.size(); a++) {
+				ExclusionRuleUtility.includeOnlyEntitlmentsDefinedInPopulation(
+						context, itemsToExclude,
+						(String) populationNameList.get(a), item, false, state);
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includeItemsByManagedAttributeType(String managedAttributeName,
+			Object managedAttributeValue) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.matchByManagedAttributeExtendedAttribute(
+					context, itemsToExclude, item, managedAttributeName,
+					managedAttributeValue, false);
+
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includeItemsByManagedAttributeType(
+			Map managedAttributeAndValueMap) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			Set keys = managedAttributeAndValueMap.keySet();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String aKey = (String) keyIterator.next();
+				ExclusionRuleUtility.matchByManagedAttributeExtendedAttribute(
+						context, itemsToExclude, item, aKey,
+						managedAttributeAndValueMap.get(aKey), false);
+
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeItemsByManagedAttributeType(String managedAttributeName,
+			Object managedAttributeValue) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterAccountTypes(context, itemsToExclude,
+					item, managedAttributeName, managedAttributeValue, true);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeItemsByManagedAttributeType(
+			Map managedAttributeAndValueMap) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			Set keys = managedAttributeAndValueMap.keySet();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String aKey = (String) keyIterator.next();
+				ExclusionRuleUtility.matchByManagedAttributeExtendedAttribute(
+						context, itemsToExclude, item, aKey,
+						managedAttributeAndValueMap.get(aKey), true);
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includeAccountsByType(String accountAttributeName,
+			Object accountAttributeValue) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterAccountTypes(context, itemsToExclude,
+					item, accountAttributeName, accountAttributeValue, false);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includeAccountsByType(Map accountAttributeAndValueMap)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			Set keys = accountAttributeAndValueMap.keySet();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String aKey = (String) keyIterator.next();
+				ExclusionRuleUtility.filterAccountTypes(context,
+						itemsToExclude, item, aKey,
+						accountAttributeAndValueMap.get(aKey), false);
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeAccountsByType(String accountAttributeName,
+			Object accountAttributeValue) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterAccountTypes(context, itemsToExclude,
+					item, accountAttributeName, accountAttributeValue, true);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeAccountsByType(Map accountAttributeAndValueMap)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			Set keys = accountAttributeAndValueMap.keySet();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String aKey = (String) keyIterator.next();
+				ExclusionRuleUtility.filterAccountTypes(context,
+						itemsToExclude, item, aKey,
+						accountAttributeAndValueMap.get(aKey), true);
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includeApplicationByType(String applicationAttributeName,
+			Object applicationAttributeValue) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterApplicationTypes(context,
+					itemsToExclude, item, applicationAttributeName,
+					applicationAttributeValue, false);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void includeApplicationByType(Map applicationAttributeAndValueMap)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			Set keys = applicationAttributeAndValueMap.keySet();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String aKey = (String) keyIterator.next();
+				ExclusionRuleUtility.filterApplicationTypes(context,
+						itemsToExclude, item, aKey,
+						applicationAttributeAndValueMap.get(aKey), false);
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeApplicationByType(String applicationAttributeName,
+			Object applicationAttributeValue) throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterApplicationTypes(context,
+					itemsToExclude, item, applicationAttributeName,
+					applicationAttributeValue, true);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeApplicationByType(Map applicationAttributeAndValueMap)
+			throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			Set keys = applicationAttributeAndValueMap.keySet();
+			Iterator keyIterator = keys.iterator();
+			while (keyIterator.hasNext()) {
+				String aKey = (String) keyIterator.next();
+				ExclusionRuleUtility.filterApplicationTypes(context,
+						itemsToExclude, item, aKey,
+						applicationAttributeAndValueMap.get(aKey), true);
+			}
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeEntitlementsCertifiedAfterDayDuration(
+			int daysSinceLastCertified) throws GeneralException {
+
+// Expect: sailpoint.object.Certification certification
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.excludeEntitlementsCertifiedAfterDayDuration(
+					context, itemsToExclude, item, daysSinceLastCertified, id,
+					certification);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludePreviouslyCertifiedItems() throws GeneralException {
+		System.out.println("got Here");
+		Identity id = (Identity) entity;
+		System.out.println("got Here b");
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			System.out.println("got Here c");
+			Certifiable item = (Certifiable) it.next();
+			System.out.println("got Here d");
+			System.out.println("id:  " + id);
+			System.out.println("items to exclude: " + itemsToExclude);
+			System.out.println("item:  " + item);
+
+			ExclusionRuleUtility.excludePreviouslyCertifiedItems(context,
+					itemsToExclude, item, id, certification);
+
+			System.out.println("got Here e");
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void filter(boolean filterEntitlementsByPopulationDefinition,
+			String populationName, boolean excludeOnEntitlementMatch,
+			boolean filterOutPreviouslyCertifiedEntitlements)
+			throws GeneralException {
+		filter(context, items, itemsToExclude,
+				filterEntitlementsByPopulationDefinition, populationName,
+				excludeOnEntitlementMatch, false, null, null,
+				filterOutPreviouslyCertifiedEntitlements, false, 0, false,
+				null, null, false, false, null, null, false);
+	}
+
+	public void filter(SailPointContext context, List items,
+			List itemsToExclude,
+			boolean filterEntitlementsByPopulationDefinition,
+			String populationName, boolean excludeOnEntitlementMatch,
+			boolean filterOutPreviouslyCertifiedEntitlementsByDate,
+			int daysSinceLastCertified) throws GeneralException {
+		filter(context, items, itemsToExclude,
+				filterEntitlementsByPopulationDefinition, populationName,
+				excludeOnEntitlementMatch, false, null, null, false,
+				filterOutPreviouslyCertifiedEntitlementsByDate,
+				daysSinceLastCertified, false, null, null, false, false, null,
+				null, false);
+	}
+
+	public void filter(SailPointContext context, List items,
+			List itemsToExclude,
+			boolean filterEntitlementsByPopulationDefinition,
+			String populationName, boolean excludeOnEntitlementMatch,
+			boolean filterOutPreviouslyCertifiedEntitlementsByDate,
+			boolean filterOutAccountsByType, String accountAttributeName,
+			String accountAttributeValue, boolean excludeOnAccountTypeMatch)
+			throws GeneralException {
+		filter(context, items, itemsToExclude,
+				filterEntitlementsByPopulationDefinition, populationName,
+				excludeOnEntitlementMatch, false, null, null, false,
+				filterOutPreviouslyCertifiedEntitlementsByDate, 0,
+				filterOutAccountsByType, accountAttributeName,
+				accountAttributeValue, excludeOnAccountTypeMatch, false, null,
+				null, false);
+	}
+
+	public void filter(SailPointContext context, List items,
+			List itemsToExclude,
+			boolean filterEntitlementsByPopulationDefinition,
+			String populationName, boolean excludeOnEntitlementMatch,
+			boolean filterOutPreviouslyCertifiedEntitlementsByDate,
+			int daysSinceLastCertified, boolean filterOutAccountsByType,
+			String accountAttributeName, String accountAttributeValue,
+			boolean excludeOnAccountTypeMatch) throws GeneralException {
+		filter(context, items, itemsToExclude,
+				filterEntitlementsByPopulationDefinition, populationName,
+				excludeOnEntitlementMatch, false, null, null, false,
+				filterOutPreviouslyCertifiedEntitlementsByDate,
+				daysSinceLastCertified, filterOutAccountsByType,
+				accountAttributeName, accountAttributeValue,
+				excludeOnAccountTypeMatch, false, null, null, false);
+	}
+
+	public void filter(SailPointContext context, List items,
+			List itemsToExclude,
+			boolean filterEntitlementsByPopulationDefinition,
+			String populationName, boolean excludeOnEntitlementMatch,
+			boolean filterOutAttributeByManagedAttributeExtendedAttribute,
+			String manAttrAttributeName, String manAttrAttributeValue,
+			boolean filterOutPreviouslyCertifiedEntitlements,
+			boolean filterOutPreviouslyCertifiedEntitlementsByDate,
+			int daysSinceLastCertified, boolean filterOutAccountsByType,
+			String accountAttributeName, String accountAttributeValue,
+			boolean excludeOnAccountTypeMatch,
+			boolean filterOutApplicationsByType,
+			String aaplicationAttributeName, String applicationAttributeValue,
+			boolean excludeApplicationTypeMatch) throws GeneralException {
+
+		Identity id = (Identity) entity;
+		System.out
+				.println("Before exclusions are taken into consideration there are: "
+						+ items.size()
+						+ " decisions which need to be made for:  "
+						+ id.getDisplayableName());
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+
+			if (filterEntitlementsByPopulationDefinition) {
+				ExclusionRuleUtility.includeOnlyEntitlmentsDefinedInPopulation(
+						context, itemsToExclude, populationName, item,
+						excludeOnEntitlementMatch, state);
+			}
+
+			// first remove the item if its an attribute of an improper metadata
+			// type
+			if (filterOutAttributeByManagedAttributeExtendedAttribute) {
+				ExclusionRuleUtility.matchByManagedAttributeExtendedAttribute(
+						context, itemsToExclude, item, manAttrAttributeName,
+						manAttrAttributeValue, false);
+			}
+
+			// NOW exclude all items that have been previously certified if
+			// applicable
+			if (filterOutPreviouslyCertifiedEntitlements) {
+				ExclusionRuleUtility.excludePreviouslyCertifiedItems(context,
+						itemsToExclude, item, id, certification);
+			}
+
+			if (filterOutPreviouslyCertifiedEntitlementsByDate) {
+				ExclusionRuleUtility
+						.excludeEntitlementsCertifiedAfterDayDuration(context,
+								itemsToExclude, item, daysSinceLastCertified,
+								id, certification);
+			}
+
+			if (filterOutAccountsByType) {
+				ExclusionRuleUtility.filterAccountTypes(context,
+						itemsToExclude, item, accountAttributeName,
+						accountAttributeValue, excludeOnAccountTypeMatch);
+
+			}
+			if (filterOutApplicationsByType) {
+				ExclusionRuleUtility.filterApplicationTypes(context,
+						itemsToExclude, item, aaplicationAttributeName,
+						applicationAttributeValue, excludeApplicationTypeMatch);
+
+			}
+		}
+
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludePermissions() throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterPermissions(context, itemsToExclude,
+					item, true);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void excludeEntitlements() throws GeneralException {
+
+		Identity id = (Identity) entity;
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			ExclusionRuleUtility.filterPermissions(context, itemsToExclude,
+					item, false);
+		}
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void filter(String metadataObjectType, String populationName,
+			boolean excludeOnMatch, int daysSinceLastCertified)
+			throws GeneralException {
+
+		Map aFilter = new HashMap();
+		aFilter.put("key", metadataObjectType);
+		aFilter.put("population", populationName);
+		aFilter.put("excludeOnMatch", excludeOnMatch);
+
+		Map aDaysLastCertifiedFilter = new HashMap();
+		aDaysLastCertifiedFilter.put("key", "PREVIOUSLY_CERTIFIED_BY_DATE");
+		aDaysLastCertifiedFilter.put("daysSinceLastCertified",
+				daysSinceLastCertified);
+
+		List filterList = new ArrayList();
+		filterList.add(aFilter);
+		filterList.add(aDaysLastCertifiedFilter);
+
+		filter(filterList);
+
+	}
+
+	public void filter(String metadataObjectType, String attributeName,
+			Object attributeValue, boolean excludeOnMatch,
+			int daysSinceLastCertified) throws GeneralException {
+
+		Map aFilter = new HashMap();
+		aFilter.put("key", metadataObjectType);
+		aFilter.put("attributeName", attributeName);
+		aFilter.put("attributeValue", attributeValue);
+		aFilter.put("excludeOnMatch", excludeOnMatch);
+
+		Map aDaysLastCertifiedFilter = new HashMap();
+		aFilter.put("key", "PREVIOUSLY_CERTIFIED_BY_DATE");
+		aFilter.put("daysSinceLastCertified", daysSinceLastCertified);
+
+		List filterList = new ArrayList();
+		filterList.add(aFilter);
+		filterList.add(aDaysLastCertifiedFilter);
+
+		filter(filterList);
+
+	}
+
+	public void filter(String metadataObjectType, String attributeName,
+			Object attributeValue, boolean excludeOnMatch,
+			boolean excludeAllPreviouslyCertified) throws GeneralException {
+
+		Map aFilter = new HashMap();
+		aFilter.put("key", metadataObjectType);
+		aFilter.put("attributeName", attributeName);
+		aFilter.put("attributeValue", attributeValue);
+		aFilter.put("excludeOnMatch", excludeOnMatch);
+
+		Map aPreviouslyCertifiedFilter = new HashMap();
+		aFilter.put("key", "PREVIOUSLY_CERTIFIED");
+
+		List filterList = new ArrayList();
+		filterList.add(aFilter);
+		filterList.add(aPreviouslyCertifiedFilter);
+
+		filter(filterList);
+
+	}
+
+	public void filter(String filterObjectType, String attributeName,
+			Object attributeValue, boolean excludeOnMatch)
+			throws GeneralException {
+		Identity id = (Identity) entity;
+		Map aFilter = new HashMap();
+
+		aFilter.put("key", filterObjectType);
+		aFilter.put("attributeName", attributeName);
+		aFilter.put("attributeValue", attributeValue);
+		aFilter.put("excludeOnMatch", excludeOnMatch);
+
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+			filter(context, itemsToExclude, item, state, certification, aFilter);
+		}
+
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public void filter(List filterList) throws GeneralException {
+		Identity id = (Identity) entity;
+		for (Iterator it = items.iterator(); it.hasNext();) {
+			Certifiable item = (Certifiable) it.next();
+
+			for (int a = 0; a < filterList.size(); a++) {
+				Map aFilter = (Map) filterList.get(a);
+				if (filter(context, itemsToExclude, item, state, certification,
+						aFilter)) {
+					continue;
+				}
+			}
+		}
+
+		items.removeAll(itemsToExclude);
+
+	}
+
+	public boolean filter(SailPointContext context, List itemsToExclude,
+			Certifiable item, Map state, Certification certificiation,
+			Map aFilter) throws GeneralException {
+
+		Identity id = (Identity) entity;
+		System.out
+				.println("Before exclusions are taken into consideration there are: "
+						+ items.size()
+						+ " decisions which need to be made for:  "
+						+ id.getDisplayableName());
+
+		String key = (String) aFilter.get("key");
+
+		if (key.equalsIgnoreCase("POPULATION")) {
+			String populationName = (String) aFilter.get("population");
+			boolean excludeOnMatch = (Boolean) aFilter.get("excludeOnMatch");
+
+			return ExclusionRuleUtility
+					.includeOnlyEntitlmentsDefinedInPopulation(context,
+							itemsToExclude, populationName, item,
+							excludeOnMatch, state);
+		}
+
+		// first remove the item if its an attribute of an improper metadata
+		// type
+		else if (key.equalsIgnoreCase("MANAGED_ATTRIBUTE")) {
+			String attributeName = (String) aFilter.get("attributeName");
+			Object attributeValue = (String) aFilter.get("attributeValue");
+			boolean excludeOnMatch = (Boolean) aFilter.get("excludeOnMatch");
+
+			return ExclusionRuleUtility
+					.matchByManagedAttributeExtendedAttribute(context,
+							itemsToExclude, item, attributeName,
+							attributeValue, excludeOnMatch);
+		}
+
+		// NOW exclude all items that have been previously certified if
+		// applicable
+		else if (key.equalsIgnoreCase("PREVIOUSLY_CERTIFIED")) {
+
+			return ExclusionRuleUtility.excludePreviouslyCertifiedItems(
+					context, itemsToExclude, item, id, certification);
+
+		}
+
+		else if (key.equalsIgnoreCase("PREVIOUSLY_CERTIFIED_BY_DATE")) {
+			int daysSinceLastCertified = (Integer) aFilter
+					.get("daysSinceLastCertified");
+			return ExclusionRuleUtility
+					.excludeEntitlementsCertifiedAfterDayDuration(context,
+							itemsToExclude, item, daysSinceLastCertified, id,
+							certification);
+
+		}
+
+		else if (key.equalsIgnoreCase("ACCOUNT")) {
+			String attributeName = (String) aFilter.get("attributeName");
+			Object attributeValue = (String) aFilter.get("attributeValue");
+			boolean excludeOnMatch = (Boolean) aFilter.get("excludeOnMatch");
+
+			return ExclusionRuleUtility.filterAccountTypes(context,
+					itemsToExclude, item, attributeName, attributeValue,
+					excludeOnMatch);
+		} else if (key.equalsIgnoreCase("APPLICATION")) {
+
+			String attributeName = (String) aFilter.get("attributeName");
+			Object attributeValue = (String) aFilter.get("attributeValue");
+			boolean excludeOnMatch = (Boolean) aFilter.get("excludeOnMatch");
+			return ExclusionRuleUtility.filterApplicationTypes(context,
+					itemsToExclude, item, attributeName, attributeValue,
+					excludeOnMatch);
+
+		} else if (key.equalsIgnoreCase("EXCLUDE_PERMISSIONS")) {
+			return ExclusionRuleUtility.filterPermissions(context,
+					itemsToExclude, item, true);
+
+		} else if (key.equalsIgnoreCase("INCLUDE_ONLY_PERMISSIONS")) {
+			return ExclusionRuleUtility.filterPermissions(context,
+					itemsToExclude, item, false);
+		}
+		return false;
+	}
+	 
+        ]]>
+
+  </Source>
+
+</Rule>

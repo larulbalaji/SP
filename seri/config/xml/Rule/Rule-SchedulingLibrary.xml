@@ -1,0 +1,120 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint><Rule language="beanshell" name="Scheduling Library">
+  <Source><![CDATA[
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import sailpoint.api.RequestManager;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+import sailpoint.object.Workflow;
+
+void scheduleWorkflow(String identityName, String date, String workflowName) {
+  scheduleWorkflow(identityName, date, workflowName, null);
+}
+
+void scheduleWorkflow(String identityName, String date, String workflowName, Map wfArgs) {
+  scheduleWorkflow(identityName, date, "MM/dd/yyyy", workflowName, wfArgs);
+}
+
+void scheduleWorkflow(String identityName, String sDate, String leaveDateFormat, String workflowName, Map wfArgs) {
+  scheduleWorkflow(identityName, sDate, leaveDateFormat, workflowName, wfArgs, null);
+}
+
+void scheduleWorkflow(String identityName, String sDate, String leaveDateFormat, String workflowName, Map wfArgs, String wfCase) {
+
+  // Fire a workflow on a specific date
+
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.RuleLibrary.JoinerLibrary.scheduleWorkflowEvent_String");
+
+  // Specify what format the date is entered into the leaveDate attribute
+  // see http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html for details
+
+  SimpleDateFormat sdf=new SimpleDateFormat(leaveDateFormat);
+
+  serilog.debug("date="+sDate);
+  if (sDate==null) return;
+
+  Date theDate=null;
+  try {
+    theDate=sdf.parse(sDate);
+  } catch (ParseException pe) {
+    serilog.error("Can't reschedule workflow for "+identityName+" - can't parse date "+sDate+" with format "+leaveDateFormat);
+    return;
+  }
+  scheduleWorkflow(identityName, theDate, workflowName, wfArgs, wfCase);
+}
+  
+void scheduleWorkflow(String identityName, Date date, String workflowName) {
+  scheduleWorkflow(identityName, date, workflowName, null);
+}
+
+void scheduleWorkflow(String identityName, Date date, String workflowName, Map wfArgs) {
+  scheduleWorkflow(identityName, date, workflowName, wfArgs, null);
+}
+
+void scheduleWorkflow(String identityName, String theDate, String workflowName, Map wfArgs, String wfCase) {
+  scheduleWorkflow(identityName, theDate, "MM/dd/yyyy", workflowName, wfArgs, wfCase);
+}
+
+void scheduleWorkflow(String identityName, Date theDate, String workflowName, Map wfArgs, String wfCase) {
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.RuleLibrary.JoinerLibrary.scheduleWorkflowEvent_Date");
+
+  serilog.debug("Schedule "+workflowName+" ("+wfCase+")");
+
+  List requests=context.getObjects(Request.class);
+
+  int numResults=0;
+
+  for(Request req: requests) {
+
+    serilog.trace("Got Request");
+    String reqWorkflowName=req.getAttribute("workflow");
+    serilog.trace("workflowName="+reqWorkflowName);
+    String reqIdentityName=req.getAttribute("identityName");
+    serilog.trace("identityName="+reqIdentityName);
+
+    if( workflowName.equals(reqWorkflowName) && identityName.equals(reqIdentityName) ) {
+      String caseName=req.getAttribute("caseName");
+      serilog.debug("wfCase="+wfCase+" : caseName="+caseName);
+      if( wfCase==null || (caseName!=null && caseName.equals(wfCase)) ) {
+        serilog.debug("Found a match");
+          req.setNextLaunch(theDate);
+          context.saveObject(req);
+        numResults++;
+      }
+    }
+  }
+
+  serilog.debug("NumResults: "+numResults);
+  if(numResults>0) {
+    context.commitTransaction();
+  } else {
+    serilog.debug("No results found - scheduling a new instance of "+workflowName);
+    Workflow wf=context.getObjectByName(Workflow.class, workflowName);
+    if(wf==null) {
+      serilog.error("Cannot schedule: No such workflow '"+workflowName+"'");
+      return;
+    }
+    String caseName=( wfCase!=null ? wfCase : workflowName+" for "+identityName );
+    
+    Map args=new HashMap();
+    // workaround for Bug #27980
+    args.put("catchExceptions", true);
+    
+    serilog.debug("putting identityName="+identityName);
+    args.put("identityName", identityName);
+    if(wfArgs!=null) {
+      args.putAll(wfArgs);
+    }
+
+    Identity owner=context.getObjectByName(Identity.class, identityName); // May want to change this - spadmin, or manager, or something else
+    RequestManager.scheduleWorkflow(context, wf, caseName,
+      args, theDate, owner);
+  }
+}
+  ]]></Source>
+</Rule>
+</sailpoint>

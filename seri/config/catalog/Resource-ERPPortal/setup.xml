@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='CorrelationConfig-ERPCorrelation.xml'/>
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-ProvisioningPolicyField-FirstInitialPlusLastName.xml'/>
+  <ImportAction name='include' value='Application-ERPPortal.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AA-ERP.xml'/>
+</sailpoint>

@@ -1,0 +1,4 @@
+NAME,DISPLAY_NAME,DESCRIPTION,APPLICATION_NAME,START_DATE,EXPIRATION_DATE,STATUS,SUBORDINATE_ROLES,SUBORDINATE_RESPONSIBILITIES
+System Integration Analyst,System Integration Analyst,"System Integration Analyst has access to public information widely available for integarting to Oracle E-Business Suite. This level of information less detailed as compared to that available to a System Integration Developer.",Application Object Library,06-Nov-2001,,,,,
+Partner Administrator,Partner Administrator,"Represents external people that manage user accounts and access for people in their own as well as any partner organizations.",Application Object Library,04-Aug-2004,,,Customer Administrator,
+Customer Administrator,Customer Administrator,"Represents external people that manage user accounts / access for people in their own organization (defined as organization parties).",Application Object Library,04-Aug-2004,,,,User Management

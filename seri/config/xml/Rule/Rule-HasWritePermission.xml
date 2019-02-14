@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Rule name="hasWritePermission">
+    <Source><![CDATA[    
+import sailpoint.web.BaseBean;
+
+// Expect: sailpoint.object.Permission permission
+
+System.out.println("In write persmision");
+BaseBean bb = new BaseBean();
+Collection myRights =  bb.getLoggedInUserRights();
+if(myRights!= null && myRights.contains(permission)) {
+   return false;
+} else {
+  return true;
+}
+    ]]></Source>
+  </Rule>
+</sailpoint>
+

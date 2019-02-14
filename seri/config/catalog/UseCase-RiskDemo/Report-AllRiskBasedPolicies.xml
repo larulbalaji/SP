@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition   name="All Risk based Policy Violations" resultAction="Rename" subType="Policy Enforcement Reports" type="LiveReport">
+  <Attributes>
+    <Map>
+      <entry key="disableDetail" value="false"/>
+      <entry key="disableSummary" value="false"/>
+      <entry key="policies">
+        <value>
+          <List>
+            <String>Risk Demo Policy</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="reportColumnOrder" value="firstname, lastname, name, policy, violationOwner, rule, status, summary"/>
+      <entry key="status" value="null"/>
+    </Map>
+  </Attributes>
+  <Description>Displays information about all current policy violations in detailed format.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Policy Violation Report"/>
+  </Parent>
+</TaskDefinition>

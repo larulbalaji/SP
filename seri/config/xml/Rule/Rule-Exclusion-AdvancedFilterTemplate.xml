@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Rule  language="beanshell"  name="Advanced Exclusion Rule Template" type="CertificationExclusion">
+  <Description>This rule is to be used This will only work for entitlements and assumes that 'Include Roles' and "Include Policy Violations' features are not selected in the certification template.</Description>
+   <ReferencedRules>
+    <Reference class="sailpoint.object.Rule"  name="Exclusion Utility Library"/>
+  </ReferencedRules>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="entity" type="AbstractCertifiableEntity">
+        <Description>
+          The AbstractCertifiableEntity that is part of the certification.
+          Currently, this is either an Identity, ManagedAttribute, or Bundle.
+        </Description>
+      </Argument>
+      <Argument name="certification" type="Certification">
+        <Description>
+          The certification that this identity is part of.
+        </Description>
+      </Argument>
+      <Argument name="certContext" type="CertificationContext">
+        <Description>
+          The CertificationContext that is being used to generate the
+          certification.
+        </Description>
+      </Argument>
+      <Argument name="items" type="List">
+        <Description>
+          List of Certifiable items that are currently part of the
+          certification for this identity.  Any items that should be excluded
+          from the certification should be deleted from this list and added
+          to the itemsToExclude list.
+        </Description>
+      </Argument>
+      <Argument name="itemsToExclude" type="List">
+        <Description>
+          A List of Certifiable items that should not be included in the
+          certification.  This list will be empty when the rule is executed
+          and any items that should not be part of the certification should
+          be moved from the items list to the itemsToExclude list.
+        </Description>
+      </Argument>
+      <Argument name="state" type="Map">
+        <Description>
+          A Hashmap available to you to store stuff in. Scope of state is per the certification.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="explanation" type="String">
+        <Description>
+          An optional explanation describing why the items were excluded.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>    <![CDATA[
+
+  /***
+  //Allowed Method Signatures:
+  //filter prevously certified items
+  map.put("key","PREVIOUSLY_CERTIFIED");
+  
+  //filter prevously certified items by days since certified
+  map.put("key","PREVIOUSLY_CERTIFIED_BY_DATE");
+  map.put("daysSinceLastCertified",60);
+  
+  //filter by account Attribute. If you wish to include matched items in the cert, pass in false to "excludeOnMatch".If you wish to exclude them, pass in true.
+  map.put("key","ACCOUNT");
+  map.put("attributeName","service");
+  map.put("attributeValue",true);   This takes a object: String, or boolean, or int.
+  map.put("excludeOnMatch","true");
+  
+  //filter by application Attribute. If you wish to include matched items in the cert, pass in false to "excludeOnMatch".If you wish to exclude them, pass in true.
+  map.put("key","APPLICATION");
+  map.put("attributeName","FinanceApplication");
+  map.put("attributeValue",true);   This takes a object: String, or boolean, or int.
+  map.put("excludeOnMatch",false);
+  
+  //filter by managed attribute extended Attribute. If you wish to include matched items in the cert, pass in false to "excludeOnMatch".If you wish to exclude them, pass in true.
+  map.put("key","MANAGED_ATTRIBUTE");
+  map.put("attributeName","soxRelated");
+  map.put("attributeValue","yes");   This takes a object: String, or boolean, or int.
+  map.put("excludeOnMatch",false);
+  
+  List listOfFilters = new ArrayList();
+  Map aFilter1 = new HashMap();
+  aFilter1.put("key","PREVIOUSLY_CERTIFIED_BY_DATE");
+  aFilter1.put("daysSinceLastCertified",60);
+  listOfFilters.add(aFilter1);
+  
+  Map aFilter2 = new HashMap();
+  aFilter2.put("key","ACCOUNT");
+  aFilter2.put("attributeName","service");
+  aFilter2.put("attributeValue",true);   This takes a object: String, or boolean, or int.
+  aFilter2.put("excludeOnMatch","true");
+  listOfFilters.add(aFilter2);
+  
+   Map aFilter3 = new HashMap();
+   aFilter3.put("key","APPLICATION");
+   aFilter3.put("attributeName","FinanceApplication");
+   aFilter3.put("attributeValue",true);   This takes a object: String, or boolean, or int.
+   aFilter3.put("excludeOnMatch",false);
+   listOfFilters.add(aFilter3);
+
+  filter(listOfFilters);
+***/
+
+return null;
+  ]]>
+  </Source>
+</Rule>
+</sailpoint>

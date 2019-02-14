@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+  <ObjectConfig name="Identity">
+    <ObjectAttribute displayName="Phone Number" name="phone" namedColumn="true" type="string">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Set Phone Identity Attribute"/>
+      </RuleRef>
+      <AttributeSource name="GlobalRule:Set Phone Identity Attribute">
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Set Phone Identity Attribute"/>
+        </RuleRef>
+      </AttributeSource>
+    </ObjectAttribute>
+  </ObjectConfig>
+  </ImportAction>
+</sailpoint>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Alert Processor Task" resultAction="Delete" subType="task_item_type_activity_alerts" type="ActivityAlert">
+  <Attributes>
+    <Map>
+      <entry key="enablePartitioning" value="false"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+      <entry key="unprocessedAlerts" value="false"/>
+    </Map>
+  </Attributes>
+  <Description>Process Alerts previously aggregated from Alert Aggregation.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Alert Processor"/>
+  </Parent>
+</TaskDefinition>

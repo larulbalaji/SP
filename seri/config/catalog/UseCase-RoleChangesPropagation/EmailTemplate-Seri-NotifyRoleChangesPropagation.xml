@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate name="SERI - Notify Role Changes Propagation">
+  <Body>
+    <![CDATA[
+    <html>
+      <img src="http://localhost:8080/identityiq/images/CustHeader.gif" width="480" height="75" alt="IdentityIQ" />
+      <br><br>
+      Following recent changes in IT Security administration, your access rights were automatically updated to reflect
+      these changes. You can find the technical details below<br>
+      <br>
+      <b><u>Your Profile Details</u></b><br>
+      <UL>
+        <LI>Full Name: $identityName<br>
+        <LI>Employee ID: $userId<br>
+      </UL>
+      <br> 
+      #foreach ($pPlan in $project.getPlans())
+      #foreach ($acctReq in $pPlan.getAccountRequests())
+      #if ($acctReq.getApplication() != "IIQ")
+      <b><u>Application: $acctReq.getApplication().  Account ID: $acctReq.getNativeIdentity()</u></b>
+      
+      #foreach ($attrReq in $acctReq.getAttributeRequests())
+      <UL>
+        <LI>Operation: $attrReq.getOperation()<br>
+        <LI>Attribute: $attrReq.getName()<br>
+        <LI>Value(s): $attrReq.getValue()<br>
+      </UL>
+      #end
+      #end
+      #end
+      #end
+      <br>
+      Regards,<br>
+      The IdentityIQ Administration Team<br>
+
+      <center>
+         <img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/>
+      </center>
+    </html>
+    ]]>
+  </Body>
+  <Description>
+      This EmailTemplate is used to notify end users about propagation of role changes to their profile
+  </Description>
+  <Subject>Automatic Changes of Entitlements for $firstName $lastName - End User Notification </Subject>
+</EmailTemplate>

@@ -1,0 +1,180 @@
+IIQVersion=7.1
+build.properties.version=15
+########################
+#  IIQ Base (Required) #
+########################
+#
+# **Either** location of GA zip file identityiq-version.zip
+#
+GALocation=S:/SailPoint/IIQ7.1 GA
+#
+# **Or** location of identityiq.war 
+#
+#WARLocation=D:/workspace-juno/identityiq/trunk/image
+
+################################################
+#  IIQ Patch (only required if applying patch) #
+################################################
+#IIQPatchLevel=p4
+#PatchLocation=C:/sailpoint/patches
+
+runCustomScripts=false
+
+#dev properties
+#make sure any app server specific env variables,like CATALINA_HOME for tomcat, are set on your system
+IIQHome=D:/iiq-testing/7.0/tomcat/webapps/identityiq
+application.server.host=localhost
+application.server.port=8080
+
+#####################################################################################
+# This one is only needed when we're using the 'importDemoData' target              #
+# Typically when the demodata project has changed and we need to re-import the data #
+# Our rendition of demodata will be checked into the SERI project                   #
+#####################################################################################
+demodata.location=G:/Documents/SailPoint/demodata
+
+# These are required to start/stop tomcat from the ant script (ant tomcat.start and ant tomcat.stop)
+application.server.home=D:/iiq-testing/7.0/tomcat
+application.server.start=D:/iiq-testing/7.0/tomcat/bin/startup.bat
+application.server.stop=D:/iiq-testing/7.0/tomcat/bin/shutdown.bat
+db.url=jdbc:mysql://localhost/identityiq?useServerPrepStmts=true&tinyInt1isBit=true&useUnicode=true&characterEncoding=utf8
+db.userid=root
+db.password=password
+#type must be db2,mysql,oracle,sqlserver
+db.type=mysql
+#set this to true if you make test scripts that call targets with user warnings like drop db etc.
+override.safety.prompts=false
+#for export, the original install date string that we can use to determine new or changed objects
+installDate=4/25/12 14:48:58 PM CDT
+
+#tomcat properties. You only need to set these if you have a CATALINA_HOME env var set
+#NOTE: for tomcat 7+ the manager url is /manager/text for 6 and lower its just /manager
+#You will also need to setup a manager-script user in your tomcat user config, check out
+#http://tomcat.apache.org/tomcat-7.0-doc/manager-howto.html#Executing_Manager_Commands_With_Ant
+manager.url=http://localhost:8080/manager/text
+manager.username=tomcat
+manager.password=tomcat
+
+###############################################################
+# Custom branding                                             #
+# This parameter will replace login.gif and headerSPLogo.jpg  #
+# with login-xxx.gif and headerSPLogo-xxx.jpg from web/images #
+# For 7.x branding use following images in web/images         #
+# loginLogo-xxx.png, TopLogo1-xxx.png, watermark-xxx.png      #
+# mobilelogo-xxx.png                                          #
+# Desktop css: web/css/iiq-custom-xxx.css                     #
+# Mobile css:  web/ui/css/ui-custom-xxx.css                   #
+###############################################################
+#seri.branding=xxx
+
+# setting the snapshot date with "ant set-snapshot" allows exporting of only artifacts changed after that
+# date with "ant export-snapshot". XML files will be placed in snapshot.location
+snapshot.date=
+snapshot.location=D:/temp/snapshot
+
+####################
+# Since version 15 #
+####################
+# Adding attachments to the Access Requests 
+# see default.target.properties file for further configuration options.
+# see UseCase-LCMAttachments/readme.txt for further documentation
+#withLCMAttachments
+
+####################
+# Since version 14 #
+####################
+# For mysql formerly no database name had to be supplied, from now on all db types are treated equally
+# a database name has to be added to the url. 'identityiq' (all lower case) should be used in the db url
+# This will then be substituted for instance.name during the build if appropriate
+
+
+
+####################
+# Since version 13 #
+####################
+# JavaMelody is a tool to monitor Java or Java EE application servers
+# the default URL is <server>:<port>/identityiq/monitoring
+#withJavamelody=true
+
+####################
+# Since version 12 #
+####################
+# added log4j.info, log4j.error, log4j.warn, log4j.off, log4j.useLogFile, log4j.enableServerSideAppender
+
+###################################################################################################
+# log4j.<level> will automatically add entries for the specified comma-separated classes/packages #
+# into log4j at a <level> level.                                                                  #
+# Levels can be: debug, info, error, warn, off                                                    #
+# Note: stick to the class, don't prepend with log4j.logger, it will be prepended automatically.  #
+###################################################################################################
+
+# disabling the reflection warnings from tomcat8 / jdk 8 on a Mac
+#log4j.error=org.reflections.Reflections
+
+# To get rid of the Hearbeat warnings add
+#log4j.off=sailpoint.server.HeartbeatService
+
+# Example line: log4j.debug=sailpoint.seri.task.RoleImporter,sailpoint.seri.sodimporter
+# For SERI logging add:
+#log4j.debug=SERI.Rule,SERI.Workflow
+
+#log4j.info=
+#log4j.warn=
+
+# if set, log4j is patched to write to this file instead to catalina.out
+# Note that the path MUST exist on the application server system
+#log4j.useLogfile=C:/Prog/Tomcat 8.0/logs/Sailpoint.log
+
+# used to enable the ServerSideAppender for the eclipse plugin.
+# value is used as port
+#log4j.enableServerSideAppender=5555
+
+
+####################
+# Since Version 11 #
+####################
+# Enable SAML signon with IdentityNow by enabling this setting
+# NOTE: THIS WILL BE INCLUDED IF THIS SETTING IS SET TO *ANYTHING*, INCLUDING FALSE
+# So, if you don't want it, make sure this setting is commented out/removed
+#withIDNSAML=true
+
+####################
+# Since Version 10 #
+####################
+# Removed withIPF flag; Plugin framework is now in the product
+
+###################
+# Since version 8 #
+###################
+# Artifacts to add to your environment when it is built. Adds xxx/setup.xml to init-seri.xml
+# Allows you to automatically include your favourite extra use cases when building SERI
+# This is a comma-separated list of folders in the 'catalog' directory
+#myDemo=UseCase-RoleChangesPropagation
+
+###################
+# Since version 7 #
+###################
+# Twilio credentials for Joiner SMS process
+twilio.accountid= 
+twilio.authtoken=
+# fromphone is the phone number configured on your twilio account
+twilio.fromphone=
+# smsnumber is the number that will be put on all cubes for demo purposes
+demo.smsnumber=
+###################
+# Since version 6 #
+###################
+# This is the setting for your instance
+# defaults to identityiq as normal, but you can spin up differently named instances now
+# sets database name, username and password, and war file name.
+# For MYSQL database names must be no more than 16 chars, so with 'Plugin' appended we only have 10 chars left
+instance.name=
+# customer is no longer used
+# iiqpath is no longer used
+# db.sourceName is no longer used
+# db.name is no longer used
+####################
+# since 06/12/13   #
+####################
+# jdk.home has been removed since it was never used
+# didn't change the version number, since having it in build.properties does not cause any problems

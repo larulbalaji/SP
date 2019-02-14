@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="SAP SSO Application Default Role" name="SAP_SSOApplication_Default" type="launcher">
+  <Profiles>
+    <Profile name="launcher">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Azure Active Directory - IIQ Integration"/>
+      </ApplicationRef>
+      <Constraints>
+        <Filter operation="CONTAINS_ALL" property="groups">
+          <Value>
+            <List>
+              <String>6a02f75e-2b06-477b-bf2b-18ef239744c0</String>
+            </List>
+          </Value>
+        </Filter>
+      </Constraints>
+    </Profile>
+  </Profiles>
+</Bundle>

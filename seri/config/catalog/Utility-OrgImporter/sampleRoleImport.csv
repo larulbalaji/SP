@@ -1,0 +1,79 @@
+#Example Role import for ACME demonstration March 2012
+Delete Role,Lender-Lending Assistant,,,,
+
+
+# Add Organizational Roles 
+# Add Role,Role Type,Role Name,Role Description,Owner,Parent
+Add Role,organizational,ACME Business Roles,ACME Business Roles,spadmin,
+Add Role,organizational,ACME Human Resources,ACME Human Resources,spadmin,ACME Business Roles
+Add Role,organizational,ACME Information Technology,ACME Information Technology,spadmin,ACME Business Roles
+Add Role,organizational,ACME Health,ACME Health,spadmin,ACME Business Roles
+Add Role,organizational,ACME Specialty Property,ACME Specialty Property,spadmin,ACME Business Roles
+Add Role,organizational,SureDeposit,SureDeposit,spadmin,ACME Specialty Property
+Add Role,organizational,ACME Solutions, ACME Business Roles,spadmin,ACME Business Roles
+Add Role,organizational,ACME Employee Benefits, ACME Business Roles,spadmin,ACME Business Roles
+
+# Add Organizational Roles 
+# Add Role,Role Type,Role Name,Role Description,Owner,Parent
+Add Role,organizational,ACME IT Roles,ACME IT Roles,spadmin,
+
+# Add Business Roles 
+# Add Role,Role Type,Role Name,Role Description,Owner,Parent
+Add Role,business,Actuarial Assistant,Actuarial Assistant,spadmin,ACME Health
+Add Role,business,Supervisor Associate Actuary,Supervisor Associate Actuary,spadmin,ACME Health
+Add Role,business,Actuarial Associate,Actuarial Associate,spadmin,ACME Health
+Add Role,business,Enterprise Risk Analyst,Enterprise Risk Analyst,spadmin,ACME Health
+Add Role,business,VP Sr. Actuary,VP Sr. Actuary,spadmin,ACME Health
+Add Role,business,Actuarial Assistant,Actuarial Assistant,spadmin,ACME Health
+
+Add Role,business,Inside Claims Adjuster,Inside Claims Adjuster,spadmin,ACME Health
+#Add Role,business,P&C Associate Claim Adjuster,Inside Claims Adjuster,spadmin,ACME Health
+Add Role,business,Field Claims Adjuster,Field Claims Adjuster,spadmin,ACME Health
+Add Role,business,Claims Adjuster,Inside Claims Adjuster,spadmin,ACME Health
+
+# Add Match List for Business Roles.
+# Add MatchList,RoleName,MatchList Type,Var1,Var2,Var3
+#Add MatchList,Lender-Lending Assistant,IdentityMatchList,or,"jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle,jobTitle","BCM004,BCM012,BCM095,BCM096,BCM097,BCM098,BCM100,BCM101,BCM102,BCM103,BCM104,BCM105,BCM106,BCM107,BCM111,BCM112,BCM113,BCM115,BCM116,BCM117,BCM139,BCM140,BCM141,BCM142,BCM143,BCM145,CML102"
+Add MatchList,Actuarial Assistant,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Actuarial Assistant"
+Add MatchList,Supervisor Associate Actuary,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Supervisor Associate Actuary"
+Add MatchList,Actuarial Associate,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Actuarial Associate"
+Add MatchList,Enterprise Risk Analyst,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Enterprise Risk Analyst"
+Add MatchList,VP Sr. Actuary,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,VP Sr. Actuary"
+Add MatchList,Actuarial Assistant,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Actuarial Assistant"
+
+Add MatchList,Inside Claims Adjuster,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Inside Claims Adjuster"
+Add MatchList,Field Claims Adjuster,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Field Claims Adjuster"
+Add MatchList,Claims Adjuster,IdentityMatchList,and,"costcenter,jobTitle","ACME Health,Claims Adjuster"
+
+
+# Add IT Roles.  I have one level of inheritance.  I think we could use this more
+# Add Role,Role Type,Role Name,Role Description,Owner,Parent
+#Add Role,it,Lender-Lending Assistant Role Assignments,Metavante Lender-Lending Assistant Role Assignments,spadmin,Metavante Profiles
+Add Role,it,Claims Basic Access,Claims Basic Access,spadmin,ACME IT Roles
+Add Role,it,Milliman Reserve Pro Access,Milliman Reserve Pro Access,spadmin,ACME IT Roles
+
+
+# Add entitlement profiles to IT roles
+# Add Profile,Role Name,Profile Description,Profile Application,Profile Filter,
+#Add Profile,Lender-Lending Assistant Role Assignments,Lender-Lending Assistant Role Assignments,Active Directory,"groups.containsAll({""A113 SLINK SALES ONLY BANKER"", ""K102 LENDER"", ""KM001 INQUIRY ALL"", ""KM102 LENDER AND LENDING ASSISTANT""})"
+Add Profile,Milliman Reserve Pro Access,Milliman Reserve Pro Access,Active Directory,"groups.containsAll({""CN=ProReserve,OU=Groups,OU=Demo,DC=sailpointdemo,DC=com""})"
+Add Profile,Claims Basic Access,Claims Basic Access,Active Directory,"groups.containsAll({""CN=Claims,OU=Groups,OU=Demo,DC=sailpointdemo,DC=com""})"
+
+# Add required / permited relationships. 
+#
+Add Required,Actuarial Assistant,Milliman Reserve Pro Access
+Add Required,Supervisor Associate Actuary,Milliman Reserve Pro Access
+Add Required,Actuarial Associate,Milliman Reserve Pro Access
+Add Required,Enterprise Risk Analyst,Milliman Reserve Pro Access
+Add Required,VP Sr. Actuary,Milliman Reserve Pro Access
+Add Required,Actuarial Assistant,Milliman Reserve Pro Access
+
+Add Required,Inside Claims Adjuster,Claims Basic Access
+Add Required,Field Claims Adjuster,Claims Basic Access
+Add Required,Claims Adjuster,Claims Basic Access
+
+# 6.0 introduced LocalizedAttribute and RoleImporter adapted to support localized descs
+#
+# ADD DESCRIPTION, Role Name, Description, Locale
+Add Description,Enterprise Risk Analyst,The Enterprise Risk Analyst analyses risk,en_GB
+

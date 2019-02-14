@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name="Bundle">
+    <Attributes>
+      <Map>
+        <entry key="roleTypeDefinitions">
+          <value>
+            <List>
+              <RoleTypeDefinition displayName="Business - scope instance" icon="businessIcon" name="business_scope" noAssignmentSelector="true" noDetection="true" noIIQ="true" noManualAssignment="true" noProfiles="true" notPermittable="true" notRequired="true">
+                <Description>This type of role is intended to be used to store duplicate copies of standard business roles.</Description>
+              </RoleTypeDefinition>
+            </List>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <ObjectAttribute displayName="Requires scope" editMode="Permanent" name="scopeRequired" type="boolean">
+      <DefaultValue>
+        <Boolean/>
+      </DefaultValue>
+      <Description>This flag indicates that a scope/perimeter must be provided when the business role is requested</Description>
+    </ObjectAttribute>
+    <ObjectAttribute displayName="Accepts multiple scopes" editMode="Permanent" name="scopeMulti" type="boolean">
+      <DefaultValue>
+        <Boolean/>
+      </DefaultValue>
+    </ObjectAttribute>
+  </ObjectConfig>
+</ImportAction>
+</sailpoint>

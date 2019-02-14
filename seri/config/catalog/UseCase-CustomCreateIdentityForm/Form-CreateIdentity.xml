@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="IdentityInc - Create Identity" type="CreateIdentity">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Create a New Identity"/>
+      <entry key="labelAlign" value="top"/>
+      <entry key="includeHiddenFields" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>This form is used to manually create new identities in IdentityIQ (e.g., contractors, seasonal workers).</Description>
+
+  <Section columns="2" label="Basic User Information">
+    <Field displayName="First Name" name="firstname" required="true" type="string"/>
+    <Field displayName="Last Name" name="lastname" postBack="true" required="true" type="string"/>
+    <Field displayName="User Type" name="employeeType" type="string" postBack="true" required="true">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <String>Contractor</String>
+            <String>Employee</String> 
+            <String>Intern</String> 
+          </List> 
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="Location" name="location" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+      </AllowedValuesDefinition>  
+    </Field>
+    <Field displayName="Mobile Phone #" name="phone" type="string" helpKey="This will be used for SMS Password Reset">
+      <Attributes>
+        <Map>
+          <entry key="width" value="150"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Calculated User Name" dynamic="true" name="name" type="string" readOnly="true" dependencies="firstname,lastname">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Set Unique Username Field (I18n) in a Form" />
+      </RuleRef>
+    </Field>
+    <Field displayName="Calculated Email" name="email" type="string" dynamic="true" readOnly="true" dependencies="name">
+      <Script><Source>
+       <![CDATA[
+       if (null == name) {
+          return null;
+       } else {
+          return name + "@sailpointdemo.com";
+       }
+       ]]> 
+      </Source></Script> 
+    </Field>
+
+    <Field displayName="label_password" name="password" required="true" type="secret">       
+      <Attributes>
+        <Map>
+          <entry key="hidden" value="true"/>
+        </Map>
+ 	 </Attributes>
+      <Script>
+        <Source>return "xyzzy";</Source>
+      </Script>
+       <!--      
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Generate Password from Policy - SERI"/>
+      </RuleRef>
+      -->
+    </Field>
+    <Field displayName="Password Confirmation" name="passwordConfirm" required="true" type="secret">
+      <Attributes>
+        <Map>
+          <entry key="hidden" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>return "xyzzy";</Source>
+      </Script>
+    </Field>
+    <Field displayName="External Email" name="externalEmail" dynamic="true" type="string" helpKey="The external email address for partner accounts">
+       <Attributes>
+        <Map>
+          <entry key="hidden" value=
+            'script:
+                if(employeeType==null) {
+                  return true;
+                } else {
+                      if(employeeType.equals("Contractor")) {
+                        return false;
+                      } else {
+                          return true;
+                        }
+                  }
+            '
+          />
+         <!-- This does not work. Required cannot serve as a seperate entry key 
+         <entry key="required" value=
+            'script:
+                if(employeeType==null) {
+                  return false;
+                } else {
+                      if(employeeType.equals("Partner")) {
+                        return true;
+                      } else {
+                          return false;
+                        }
+                  }
+            '
+          />  -->
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[
+         if(employeeType==null) {
+            //field.setHidden(true);
+            field.setRequired(false);
+        } else {
+              if(employeeType.equals("Contractor")) {
+                 //field.setHidden(false);
+                 field.setRequired(true);
+              } else {
+                 //field.setHidden(true);
+                 field.setRequired(false);
+               }
+        }       
+        // [kmj] This looks like it is misusing the value initialization rule to pre-set whether a field is required or not
+        // Still, this should return a value
+        return null; 
+        ]]></Source>
+      </Script>
+    </Field>     
+  </Section>
+
+
+  <Section columns="1" label="Organizational Information">
+
+    <Field displayName="Manager" name="manager" required="true" type="sailpoint.object.Identity" filterString="managerStatus == true"/>
+    
+    <Field displayName="Department" name="department"  required="true" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+      </AllowedValuesDefinition>
+    </Field>
+    
+    <Field  displayName="Job Title"  name="jobTitle" required="true"  type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+        </RuleRef>
+       </AllowedValuesDefinition>
+    </Field>
+    <!--    To add a date field - note it will be there for show, it doesn't actually work as "date" is not a valid type... 
+    <Field displayName="Termination Date" helpKey="Date the contractor will leave" name="terminationDate" type="date" /> -->
+  </Section>
+</Form>

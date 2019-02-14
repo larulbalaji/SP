@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Employee Type Determiner" type="IdentityAttribute">
+  <Description>Examine account link to determine whether cube represents employee, contractor, etc.</Description>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="environment" type="Map">
+        <Description>
+           Arguments passed to the aggregation or refresh task.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+           The Identity object that represents the user
+           that is being aggregated.
+        </Description>
+      </Argument>
+      <Argument name="attributeDefinition">
+        <Description>
+           The AttributeDefinition object for this attribute.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="attributeValue">
+        <Description>
+          The value of the attribute that should be populated.
+          The rule should return this value.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+      <![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+import sailpoint.object.Application;
+
+String retval = "";
+
+// get app name for the passed in link
+//
+String empStatus = link.getAttribute("status");
+if (empStatus!=null) {
+  if (empStatus.endsWith("Employee")) {
+      retval = "Employee";
+  } else if (empStatus.endsWith("Contractor")) {
+      retval = "Contractor";
+  } 
+}
+return retval;
+      ]]>
+  </Source>
+</Rule>

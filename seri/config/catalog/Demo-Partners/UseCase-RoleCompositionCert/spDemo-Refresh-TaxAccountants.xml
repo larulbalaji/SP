@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition   name="Refresh for Tax Accountants" resultAction="Delete" type="Identity">
+  <Attributes>
+    <Map>
+      <entry key="checkHistory" value="true"/>
+      <entry key="correlateEntitlements" value="true"/>
+      <entry key="filterGroups" value="Tax Accountant Population"/>
+      <entry key="provision" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>Template for identity refresh scans.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Identity Refresh"/>
+  </Parent>
+</TaskDefinition>

@@ -1,0 +1,1105 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule name="SP Util Rule Library" language="beanshell">
+	
+	<Source>
+	<![CDATA[
+	import sailpoint.object.*;
+	import sailpoint.api.SailPointContext;
+	import java.util.*;
+	import java.text.*;
+    import sailpoint.provisioning.PlanUtil;
+   	import sailpoint.object.ProvisioningPlan;
+   	import sailpoint.object.ProvisioningPlan.Operation;
+	import sailpoint.object.ProvisioningPlan.AttributeRequest;
+	import sailpoint.object.ProvisioningPlan.AccountRequest;
+	import sailpoint.tools.Util;
+	import sailpoint.tools.Message;
+	import sailpoint.api.SailpointContext;
+  	import sailpoint.object.*;
+  	import java.util.*;
+  	import sailpoint.tools.Util;
+  	
+  	import sailpoint.api.Matchmaker;
+	import sailpoint.api.PasswordGenerator;
+	
+	import java.sql.PreparedStatement;
+	import java.sql.Connection;
+	import java.sql.DriverManager;
+	import java.sql.Statement;
+	import java.sql.ResultSet;
+    
+    import org.apache.commons.logging.Log;
+	import org.apache.commons.logging.LogFactory;
+
+	private static Log logger = LogFactory.getLog("rule.Util.RuleLibrary");
+	
+
+	public static ProvisioningPlan getDisablePlan (SailPointContext context, String identityName) {
+		logger.debug("************Enter getDisablePlan***********");
+		
+		ProvisioningPlan plan = new ProvisioningPlan();
+		Identity identity = context.getObjectByName(Identity.class, identityName);
+		
+		plan.setIdentity(identity);
+		
+		// Disable IIQ Acount.  Usually, nothing special needs to be completed as the
+		// termination aggregation process (identity mappings) modifies IIQ.  Left as placeholder
+		// 
+		AccountRequest iiqReq = new AccountRequest(AccountRequest.Operation.Modify, "IIQ", null, identityName);
+		iiqReq.add(new AttributeRequest("inactive", ProvisioningPlan.Operation.Set, "true"));		
+		plan.add(iiqReq);
+			
+		// Handle the case where the terminated account has no account links (needs pruning)
+		List links = identity.getLinks();
+		if (links == null || links.size() < 1){
+			return plan;
+		}
+		
+		// Loop over account resources
+		for (Link link : links){
+			Application app = link.getApplication();
+			String appName = app.getName();
+			String appType = app.getType();
+			
+			logger.debug("Working on terminating: " + appName + "  Type: " + appType);
+			
+			/*************************************************************************************
+			 * Set up provisoning plan per customer use cases
+			*************************************************************************************/
+			if (appType.compareTo("Active Directory - Direct") == 0) {
+				logger.debug("Build account modifications and disable request for: " + appName);
+				
+				AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+				acctReq.setNativeIdentity(link.getNativeIdentity());
+				String description = "Terminated on " + Calendar.getInstance().getTime();
+				acctReq.add(new AttributeRequest("description", ProvisioningPlan.Operation.Set, description));
+				acctReq.add(new AttributeRequest("AC_NewParent", "OU=DisabledUsers,OU=Demo,DC=seri,DC=sailpointdemo,DC=com"));
+				plan.add(acctReq);				
+				
+				AccountRequest disableAcctReq = new AccountRequest(AccountRequest.Operation.Disable, appName, null, identityName);
+				disableAcctReq.setNativeIdentity(link.getNativeIdentity());
+				plan.add(disableAcctReq);
+
+			} else {
+				if (app.isAuthoritative()) {
+                    logger.debug("Application is authoritative (i.e., SAP)...skipping disable");
+                } else if (appType.compareTo("Logical") == 0) {
+                	logger.debug("Application is logical...skipping disable");
+                } else {
+					logger.debug("Build disable request for: " + appName);
+					AccountRequest disableAcctReq = new AccountRequest(AccountRequest.Operation.Disable, appName, null, identityName);
+					disableAcctReq.setNativeIdentity(link.getNativeIdentity());
+					plan.add(disableAcctReq);
+				}
+			}
+			
+		}
+		
+		logger.debug("Returning from getDisablePlan with:  \n" + plan.toXml());
+		return plan;
+	}
+	
+
+	public static ProvisioningPlan getReenablePlan (SailPointContext context, String identityName) {
+		logger.debug("************Enter getReenablePlan***********");
+		
+		ProvisioningPlan plan = new ProvisioningPlan();
+		Identity identity = context.getObjectByName(Identity.class, identityName);
+		
+		plan.setIdentity(identity);
+		
+		// Enable IIQ Acount.  Usually, nothing special needs to be completed as the
+		// reenable  process (identity mappings) modifies IIQ.  Left as placeholder
+		// 
+		// AccountRequest iiqReq = new AccountRequest(AccountRequest.Operation.Modify, "IIQ", null, identityName);
+		// iiqReq.add(new AttributeRequest("inactive", ProvisioningPlan.Operation.Set, "true"));		
+		// plan.add(iiqReq);
+			
+		// Handle the case where the account has no account links (needs pruning)
+		List links = identity.getLinks();
+		if (links == null || links.size() < 1){
+			return plan;
+		}
+		
+		// Loop over account resources
+		for (Link link : links){
+			Application app = link.getApplication();
+			String appName = app.getName();
+			String appType = app.getType();
+			
+			logger.debug("Working on reenable plan: " + appName + "  Type: " + appType);
+			
+			/*************************************************************************************
+			 * Set up provisoning plan per customer use cases
+			*************************************************************************************/
+			if (appType.compareTo("Active Directory - Direct") == 0) {
+				logger.debug("Build account modifications and disable request for: " + appName);
+				
+				AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+				acctReq.setNativeIdentity(link.getNativeIdentity());
+				String description = "Reenabled on " + Calendar.getInstance().getTime();
+				acctReq.add(new AttributeRequest("description", ProvisioningPlan.Operation.Set, description));
+				plan.add(acctReq);				
+				
+				AccountRequest enableAcctReq = new AccountRequest(AccountRequest.Operation.Enable, appName, null, identityName);
+				enableAcctReq.setNativeIdentity(link.getNativeIdentity());
+				plan.add(enableAcctReq);
+
+
+			} else {
+				if (app.isAuthoritative()) {
+                    logger.debug("Application is authoritative (i.e., SAP)...skipping reenable");
+                } else if (appType.compareTo("Logical") == 0) {
+                	logger.debug("Application is logical...skipping reenable");
+                } else {
+					logger.debug("Build reenable request for: " + appName);
+					AccountRequest enableAcctReq = new AccountRequest(AccountRequest.Operation.Enable, appName, null, identityName);
+					enableAcctReq.setNativeIdentity(link.getNativeIdentity());
+					plan.add(enableAcctReq);
+				}
+			}
+			
+		}
+		
+		logger.debug("Returning from getReenablePlan with:  \n" + plan.toXml());
+		return plan;
+	}
+	
+	public static ProvisioningPlan getlastNameChangePlan (SailPointContext context, String identityName){
+		logger.debug("Enter getlastNameChangePlan");
+		
+		ProvisioningPlan plan = new ProvisioningPlan();
+		Identity identity = context.getObjectByName(Identity.class, identityName);
+		
+		plan.setIdentity(identity);
+		
+		// Set IIQ Cube Attributes
+		AccountRequest iiqReq = new AccountRequest(AccountRequest.Operation.Modify, "IIQ", null, identityName);
+
+			
+		List links = identity.getLinks();
+		if (links == null || links.size() < 1){
+			logger.debug("No Links, seting IIQ attributes ");
+			return plan;
+		}
+		
+		String firstname = identity.getFirstname();
+		String lastname =  identity.getLastname();
+		
+		logger.debug("Loop links: " + links);
+		for (Link link : links){
+			Application app = link.getApplication();
+			String appName = app.getName();
+			String appType = app.getType();
+			
+			logger.debug("Working on lastname change: " + appName + "  Type: " + appType);
+			
+			/*************************************************************************************
+			 * Set up provisoning plan per customer use cases
+			*************************************************************************************/
+			if (appType.compareTo("Active Directory - Direct") == 0) {
+				logger.debug("Build account modifications and disable request for: " + appName);
+				
+				AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+				acctReq.setNativeIdentity(link.getNativeIdentity());
+				String description = "LastName Change On " + Calendar.getInstance().getTime();
+				acctReq.add(new AttributeRequest("description", ProvisioningPlan.Operation.Set, description));
+				acctReq.add(new AttributeRequest("AC_NewName", ProvisioningPlan.Operation.Set, "CN=" + firstname + " " + lastname));
+				acctReq.add(new AttributeRequest("givenName", ProvisioningPlan.Operation.Set, firstname ));
+				acctReq.add(new AttributeRequest("sn", ProvisioningPlan.Operation.Set, lastname));
+				// acctReq.add(new AttributeRequest("cn", ProvisioningPlan.Operation.Set,  firstname + " " + lastname));
+
+				plan.add(acctReq);				
+
+			} else if (appType.compareTo("SunOne - Direct") == 0) {
+				logger.debug("Build account modifications and disable request for: " + appName);
+
+				AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+				acctReq.setNativeIdentity(link.getNativeIdentity());
+				acctReq.add(new AttributeRequest("description", ProvisioningPlan.Operation.Set, description));
+				acctReq.add(new AttributeRequest("givenName", ProvisioningPlan.Operation.Set, firstname ));
+				acctReq.add(new AttributeRequest("sn", ProvisioningPlan.Operation.Set, lastname));
+				
+				plan.add(acctReq);				
+				
+
+			} else {
+				if (app.isAuthoritative()) {
+                    logger.debug("Application is authoritative (i.e., SAP)...skipping disable");
+                } else if (appType.compareTo("Logical") == 0) {
+                	logger.debug("Application is logical...skipping disable");
+                } else {
+					logger.debug("Build lastname change request for non provisoned applications : " + appName);
+					;
+				}
+			}
+			
+		}
+		
+		logger.debug("Returning from getlastNameChangePlan with:  \n" + plan.toXml());
+		return plan;
+	}
+	
+	
+	public static AccountRequest getBirthrightRolesIIQAccountRequest(SailPointContext context, Identity identity) {
+		logger.debug("Enter getBirthrightRolesIIQAccountRequest: " + identity.getName());
+		
+		List roles = getBirthrightRolesToAssign(context, identity);
+		AccountRequest acctReq = null;
+		
+		if (roles != null) {
+			acctReq = new AccountRequest(AccountRequest.Operation.Modify, "IIQ", null, identity.getName());
+			acctReq.add(new AttributeRequest("assignedRoles", ProvisioningPlan.Operation.Add, roles));
+		}
+		
+		logger.debug("Exit getBirthrightRolesIIQAccountRequest: " + acctReq);
+		return acctReq;
+	}
+	
+	public static AccountRequest getBirthrightRolesIIQAccountRequest 
+              (SailPointContext context, Identity identity, String contractStartDate, String contractEndDate) {
+		logger.debug("Enter getBirthrightRolesIIQAccountRequest: " + identity.getName() +  
+			"  start: " + contractStartDate + "  end: " + contractEndDate );
+		//
+		// lets see about those pesky start and stop dates
+		Date sunriseDate = new Date();
+		if (contractStartDate != null) {
+		  try {
+    		SimpleDateFormat df = new SimpleDateFormat("MM/dd/y");
+    		df.setLenient(true);
+    		sunriseDate = df.parse(contractStartDate);
+    	  } catch (ParseException e) {
+    		logger.debug("Invalid date in format MM/DD/YYYY" + e);
+    		// for demo purposes the show must go on, so we set a start date 7 days from now 
+    		Calendar calendar = Calendar.getInstance();  
+    		calendar.add(Calendar.DAY_OF_MONTH, 7);
+    		sunriseDate = calendar.getTime();
+  		  }
+  		}
+  		Date sunsetDate = new Date();
+		if (contractEndDate != null) {
+		  try {
+    		SimpleDateFormat df = new SimpleDateFormat("MM/dd/y");
+    		df.setLenient(true);
+    		sunsetDate = df.parse(contractEndDate);
+    	  } catch (ParseException e) {
+    		logger.debug("Invalid date in format MM/DD/YYYY" + e);
+    		// for demo purposes the show must go on, so we set a end date 14 days from now 
+    		Calendar calendar = Calendar.getInstance();  
+    		calendar.add(Calendar.DAY_OF_MONTH, 7);
+    		sunsetDate = calendar.getTime();
+  		  }
+  		}
+  		  		
+		List roles = getBirthrightRolesToAssign(context, identity);
+		AccountRequest acctReq = null;
+		if (roles != null) {
+			acctReq = new AccountRequest(AccountRequest.Operation.Modify, "IIQ", null, identity.getName());
+			// acctReq.add(new AttributeRequest("assignedRoles", ProvisioningPlan.Operation.Add, roles));
+			ProvisioningPlan.AttributeRequest attrReq = new ProvisioningPlan.AttributeRequest();
+            attrReq.setName(ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES);
+            attrReq.setOperation(ProvisioningPlan.Operation.Add);
+            attrReq.setValue(roles);
+            if (contractStartDate != null) {
+            	logger.debug ("\t Adding a start date: "  + sunriseDate);
+                attrReq.setAddDate(sunriseDate);
+            }
+            logger.debug ("\t contractEndDate: "  + contractEndDate);
+            if (contractEndDate != null) {
+            	logger.debug ("\t Adding a end date: "  + sunsetDate);
+                attrReq.setRemoveDate(sunsetDate);
+            }
+            acctReq.add(attrReq);
+		}
+		logger.debug("Exit getBirthrightRolesIIQAccountRequest: " + acctReq);
+		return acctReq;
+	}
+
+	public static List getBirthrightRolesToAssign(SailPointContext context, Identity identity ) {
+		logger.debug("Enter getBirthrightRolesToAssign: " + identity.getName());
+		String identityName = identity.getName();
+		
+		
+		boolean useDefault = Boolean.parseBoolean("false");
+		
+		ArrayList assignedRoles = new ArrayList();
+		Matchmaker matchMaker = new Matchmaker(context);
+		
+		ArrayList currentRoles = new ArrayList();
+		
+		logger.debug("Get current role assignments");
+		ArrayList roleAssigns = identity.getRoleAssignments();
+		
+		if (roleAssigns != null){
+			logger.debug("# currently assigned = " + roleAssigns.size());
+			
+			for (RoleAssignment roleAssign : roleAssigns){
+				String rName = roleAssign.getName();
+				logger.debug("Have role assign: " + rName);
+				currentRoles.add(rName);
+				assignedRoles.add(rName);	// Add it to the list so we provison it.
+			}
+		}
+		
+		logger.debug("Get the organization role");
+		Bundle orgRole = context.getObjectByName(Bundle.class, "Demo");
+		
+		logger.debug("Get the children.  NOTE: API changed in 6.0.");
+		List children = orgRole.getHierarchy(context);
+		
+		if (children != null){
+			logger.debug("# of Children roles: " + children.size());
+			
+			for (Bundle bRole : children){
+				String roleName = bRole.getName();
+				
+				// logger.debug("Have assignable role: " + roleName);
+				
+				// logger.debug("If not already assigned check again.  You never know if the workflow
+				// added or changed some attributes so new roles are assignable.  
+				if (!currentRoles.contains(roleName)){
+					// logger.debug(roleName + " not assigned.  Proceed with match logic.");
+				
+					// logger.debug("Get the selector");
+					IdentitySelector idSelector = bRole.getSelector();
+					
+					if (idSelector != null){
+						// logger.debug("Check is match with id selector: " + idSelector.generateSummary());
+						boolean isMatch = matchMaker.isMatch(idSelector,identity);
+						
+						// logger.debug("Does " + identity.getName() + " match role " + roleName + "? " + isMatch);
+						
+						if (isMatch){
+							logger.debug("Role matches.  Assign: " + roleName);
+							assignedRoles.add(roleName);
+						}
+					} else {
+						logger.debug("No selector for role, " + roleName + ".  Skip.");
+					}
+				}
+			}
+		}
+		
+		if (assignedRoles == null || assignedRoles.size() < 1){
+			if (useDefault){
+				logger.debug("Add the default role: " + defaultRole);
+				
+				assignedRoles.add(defaultRole);
+			} else {
+				assignedRoles = null;
+			}
+			
+		}
+		
+		logger.debug("Exit getBirthrightRolesToAssign: " + assignedRoles);
+		return assignedRoles;
+	}
+
+	public static String getNewPassword(SailPointContext context, Identity identity, String appName){
+		logger.debug("Get password");
+		String password = "";
+		PasswordGenerator pg = new PasswordGenerator(context);
+		String numChars = "0123456789";
+		String specialChars = "~!@#$%^&*()_+`-={}|\\][:\"\';<>?,./";
+		String passChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+		String onlyChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0";
+		
+        try {
+            if (identity != null && appName != null) {
+                logger.debug(" generatePolicyPassword : id " + identity.getName() + " and app: " + appName);
+                Application app = (Application) context.getObjectByName(Application.class, appName);
+                password = pg.generatePassword(identity, app);
+            } else {
+                Identity idAdmin = (Identity) context.getObjectByName(Identity.class, "spadmin");
+                logger.debug(" generatePolicyPassword : Get the password driven " +
+                   "off of the sys config.");
+                password = pg.generatePassword(idAdmin);
+            }
+            
+            
+            char[] charArray = password.toCharArray();
+            password = "";
+            logger.trace("Loop over array");
+            for (int i = 0; i < charArray.length; i++) {
+                char checkChar = charArray[i];
+                if (specialChars.indexOf(checkChar) > -1 ) {
+                    logger.debug("generatePolicyPassword :Found special char :"  + checkChar);
+                    checkChar = getRandomChar(passChars);
+                }
+                password += checkChar;
+            }
+
+            // password = "4" + password;
+            logger.debug("FedEx Password Rule Library : generatePolicyPassword :Password after removing specials is:"
+                    + password);
+            String firstChar = password.substring(0, 1);
+            
+            if ((numChars.indexOf(firstChar) > -1) || (specialChars.indexOf(firstChar) > -1) ) {
+                char newChar = getRandomChar(onlyChars);
+                password = newChar + password.substring(1);
+                logger.debug("generatePolicyPassword :newChar :" + newChar);
+            } 
+            
+            
+            
+		} catch (Exception e){
+			logger.debug("Exception " + e.toString());
+		}
+		
+		return password;
+	
+	}
+	
+	
+	public static char getRandomChar(String charSequence) {
+        logger.debug("Enter: getRandomChar ");
+        char[] charArray = charSequence.toCharArray();
+        boolean ooBounds = true;
+        int lv = 0;
+        while (ooBounds) {
+            double num = Math.random();
+            double l = num * charArray.length - 1;
+            lv = (int) Math.round(l);
+            logger.debug("getRandomChar :Num = " + num + ", l = " + l + ", lv = " + lv + ", len = " 
+                    + charArray.length);
+            if (lv < charArray.length && lv > -1) {
+                ooBounds = false;
+            }
+        }
+        char newChar = charArray[lv];
+        logger.debug("Exit: getRandomChar : newChar :" + newChar);
+        return newChar;
+    }  	
+    
+
+	public static ProvisioningPlan getCleanupOldAccountPlan (SailPointContext context, String identityName){
+		logger.debug("Enter getCleanupOldAccountPlan");
+		
+		ProvisioningPlan plan = new ProvisioningPlan();
+		Identity identity = context.getObjectByName(Identity.class, identityName);
+		
+		plan.setIdentity(identity);	
+		
+		List links = identity.getLinks();
+		
+		if (links == null || links.size() < 1){
+			logger.debug("No Links ");
+			return plan;
+		}
+		
+		
+		logger.debug("Loop links: " + links);
+		for (Link link : links){
+			Application app = link.getApplication();
+			String appName = app.getName();
+			String appType = app.getType();
+			
+			logger.debug("Working on terminating: " + appName + "  Type: " + appType);
+			
+			/*************************************************************************************
+			 * Set up provisoning plan per customer use cases
+			*************************************************************************************/
+			if (appType.compareTo("Active Directory - Direct") == 0) {
+				logger.debug("Build account modifications and disable request for: " + appName);
+								
+				AccountRequest deleteAcctReq = new AccountRequest(AccountRequest.Operation.Delete, appName, null, identityName);
+				deleteAcctReq.setNativeIdentity(link.getNativeIdentity());
+				plan.add(deleteAcctReq);
+
+			} else {
+				if (app.isAuthoritative()) {
+                    logger.debug("Application is authoritative (i.e., SAP)...skipping delete");
+                } else if (appType.compareTo("Logical") == 0) {
+                	logger.debug("Application is logical...skipping delete");
+                } else {
+					logger.debug("Build delete request for: " + appName);
+					AccountRequest deleteAcctReq = new AccountRequest(AccountRequest.Operation.Delete, appName, null, identityName);
+					deleteAcctReq.setNativeIdentity(link.getNativeIdentity());
+					plan.add(deleteAcctReq);
+				}
+			}
+			
+		}
+		
+		logger.debug("Returning with plan: \n" + plan.toXml());
+		return plan;
+	}
+	
+	
+    public void auditDisableCleanup (SailPointContext context, ProvisioningPlan plan, String identityName) {
+    	String source;
+    	String requesterDisplayName = null;
+    	
+    	Map args = plan.getArguments();
+    	if (null != args) {
+    		source = (String) args.get("source");
+    		String requester = (String) args.get("requester");
+
+    		if ( null != requester && !requester.equals("RequestHandler") ) {
+    			try {
+    				Identity cube = context.getObjectByName(Identity.class, requester);
+    				requesterDisplayName = cube.getDisplayName();
+    			} catch (Exception ge) {
+    				println("Exception getting requester's cube : " + ge.toString());
+    			}
+    		} else {
+    			requesterDisplayName = "Request Handler";
+    		}
+    	} else {
+    		// Role model reconciliation; set source to LCM 
+    		source = "LCM";
+    	}
+
+        // Put the ticket # on the cube as an identity event
+        //  
+        logger.debug ("auditDisableCleanup: "  + source + ":: " + identityName + ":: " + requesterDisplayName);
+        Auditor.logAs(source + (requesterDisplayName != null ? ":" + requesterDisplayName : "") , 
+        		AuditEvent.ActionIdentityTriggerEvent, 
+        		identityName, 
+                "Deprovisoninging Account Cleanup Completed" ,
+                "", 
+                "Launched workflow - Lifecycle Event - Delete Old Accounts", 
+                "60 consecutive days of being in a disabled state is over" );
+
+    	return;    	
+    	
+    }
+
+
+  public static HashMap getPlanAddAndRemove (IdentityChangeEvent event, SailPointContext context, String identityName) {
+  
+    /*
+     * We return a hashmap with the following three values
+     * planAdd - PP for the roles to add based on the new transfer matching criteria
+     * planRemove - PP of the items to delete  
+    */
+    logger.debug("Entering getPlanAddAndRemove ...");
+    
+    Identity identity = context.getObjectByName(Identity.class, identityName);
+    
+    // Sunset the role assignments both LCM request and auto assigned via rules
+    ProvisioningPlan planRemove = new ProvisioningPlan();
+    planRemove.setIdentity(identity);
+    ProvisioningPlan planAdd = new ProvisioningPlan();
+    ProvisioningPlan planChgSrc = new ProvisioningPlan();
+
+    List rolesToSunset = new ArrayList();
+    ArrayList oldRoleAssigns = event.getOldObject().getRoleAssignments();
+    if (oldRoleAssigns != null) {
+      for (RoleAssignment roleAssign : oldRoleAssigns){
+        rolesToSunset.add (roleAssign.getName());
+        logger.debug("\t OLD" + event.getOldObject().getName() + " has this role assigned: " + roleAssign.getName()  + "  from the source: " + roleAssign.getSource());
+      }
+    }
+    List rolesToAdd = new ArrayList();
+    ArrayList newRoleAssigns = event.getNewObject().getRoleAssignments();
+    if (newRoleAssigns != null) {
+      for (RoleAssignment roleAssign : newRoleAssigns) {
+        // only add rules that are auto assigned I.E., remove previously requested roles
+        if (roleAssign.getSource().equalsIgnoreCase("Rule")) {
+          rolesToAdd.add (roleAssign.getName());
+        }
+        logger.debug("\t NEW" + event.getNewObject().getName() + " has this role assigned: " + roleAssign.getName() + "  from the source: " + roleAssign.getSource());
+      }
+    }
+
+    // Do not remove roles that you are also being added.  
+    rolesToSunset.removeAll(rolesToAdd);  
+    logger.debug ("rolesToSunset: " + rolesToSunset);
+    logger.debug ("rolesToAdd: "    + rolesToAdd);
+
+    ProvisioningPlan.AccountRequest acctReq = new ProvisioningPlan.AccountRequest();
+    acctReq.setApplication(ProvisioningPlan.APP_IIQ);
+    acctReq.setNativeIdentity(identityName);
+    acctReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+      
+    if ( rolesToSunset != null || rolesToSunset.size() < 1 ) {
+      for (int i = 0; i < rolesToSunset.size(); i++) {  
+        ProvisioningPlan.AttributeRequest attrReq = new ProvisioningPlan.AttributeRequest();
+        attrReq.setName(ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES);
+        attrReq.setOperation(ProvisioningPlan.Operation.Remove);
+        attrReq.setValue(rolesToSunset.get(i));
+        acctReq.add(attrReq);
+      }
+      planRemove.add(acctReq);
+    }
+    
+        
+    /********************************************************************************
+     *  Sunset the detected roles not associated with a business role assignment
+    ********************************************************************************/
+    ProvisioningPlan.AccountRequest acctReq = new ProvisioningPlan.AccountRequest();
+    acctReq.setApplication(ProvisioningPlan.APP_IIQ);
+    acctReq.setNativeIdentity(identityName);
+    acctReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+        
+    List nameFilter = new ArrayList();
+    nameFilter.add(Filter.eq("name", "detectedRoles"));
+    nameFilter.add(Filter.eq("allowed", false));
+    nameFilter.add(Filter.eq("identity", identity));
+
+    QueryOptions ops = new QueryOptions();
+    ops.addFilter(Filter.and(nameFilter));
+
+    // Returns a list.  The list is an array of one item, which is the IdentityEntitlement.class value attribute
+    // The value parameter is the name of the detected role
+    Iterator iter = context.search(IdentityEntitlement.class, ops, "value");  
+    while(iter.hasNext()){
+      ProvisioningPlan.AttributeRequest attrReq = new ProvisioningPlan.AttributeRequest();
+      attrReq.setName(ProvisioningPlan.ATT_IIQ_DETECTED_ROLES);
+      attrReq.setOperation(ProvisioningPlan.Operation.Remove);
+      String detectedRoleName = iter.next()[0];
+      logger.debug ("We have detected the following role, not associated with a business role to remove: " + detectedRoleName);
+      attrReq.setValue(detectedRoleName);
+      acctReq.add(attrReq);
+    }
+    // A detected role because of account attribute are not deleted unless  
+    // add this agrument to the plan.  
+    PlanUtil.addDeassignEntitlementsArgument(acctReq);
+    planRemove.add(acctReq);
+             
+    
+    /********************************************************************************
+     *  Sunset those pesky extra entitlements the user has added over time that are not 
+     *  associated with a detected role 
+    ********************************************************************************/
+    List entitlementExceptions = identity.getExceptions();  // Entitlements assigned outside role model
+    logger.debug ("entitlementExceptions: " + entitlementExceptions); 
+    for( EntitlementGroup ent : entitlementExceptions) {
+      // for now, we will skip permissions and only concentrate on entitlements
+      // i.e., the call to ent.getAttributes() is null for permissions
+      if (ent.getAttributes() == null) {
+        logger.debug ("found null attributes: " + ent.toXml());
+        continue;
+      }
+      logger.debug ("\tFound extra entitlements to sunset for: " + ent.getApplicationName() + " application. " );
+      AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, ent.getApplicationName(), null, identityName);
+      acctReq.setNativeIdentity(ent.getNativeIdentity());
+      
+      List attNames = ent.getAttributeNames();  // List of entitlement attributes per app
+      Map attMap = ent.getAttributes().getMap();  // Map of the entitlement attribute name / value pairs
+      for(String attrib : attNames) {
+        Object entValues = attMap.get(attrib); //grab the values
+        if( entValues instanceof String) {
+          // logger.debug("\t " + attrib + " attribute String is :: " + attMap.get(attrib));
+          ProvisioningPlan.AttributeRequest attrRequest = new AttributeRequest(attrib, ProvisioningPlan.Operation.Remove, attMap.get(attrib));
+          /********************************************************************************
+           *  When you request an entitlement in LCM and it is approved we make it part of the desired state.  
+           *  The IIQ cube has a attributeAssignments map.  Attribute assignments are like roles, they are 
+           *  a declaration of desired state.  
+           *  Since we are doing a transfer, we want to change the desired state so removal happens :)
+          ********************************************************************************/
+          attrRequest.put("assignment", "true");  
+          acctReq.add(attrRequest);
+          planRemove.add(acctReq);
+        } else if ( entValues instanceof ArrayList) { 
+          for(String entValue : entValues) { 
+            // logger.debug ("\t " + attrib + " attribute List is :: " + entValue);
+            ProvisioningPlan.AttributeRequest attrRequest = new AttributeRequest(attrib, ProvisioningPlan.Operation.Remove, entValue);
+            acctReq.add(attrRequest);
+          }
+          planRemove.add(acctReq);
+        } else {
+          logger.debug ("Warning:  transfer Request - should never be here.  ");
+        }
+      }   
+    }
+    
+         
+    /********************************************************************************
+     *  Now in another Plan, add in the new roles  and set IIQ HREvent attribute
+    ********************************************************************************/
+    
+    ProvisioningPlan.AccountRequest acctReq = new ProvisioningPlan.AccountRequest();
+    acctReq.setApplication(ProvisioningPlan.APP_IIQ);
+    acctReq.setNativeIdentity(identityName);
+    acctReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+    if ( rolesToAdd != null || rolesToAdd.size() < 1 ) { 
+      for (int i = 0; i < rolesToAdd.size(); i++) {
+        // logger.debug(rolesToAdd.get(i));   
+        ProvisioningPlan.AttributeRequest attrReq = new ProvisioningPlan.AttributeRequest();
+        attrReq.setName(ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES);
+        attrReq.setOperation(ProvisioningPlan.Operation.Add);
+        attrReq.setValue(rolesToAdd.get(i));
+        acctReq.add(attrReq);
+      }
+    }
+    planAdd.add(acctReq);
+
+    
+    List links = identity.getLinks();
+    for (Link link : links){
+      Application app = link.getApplication();
+      String appName = app.getName();
+      String appType = app.getType();
+      
+      /*************************************************************************************
+       * Set up provisoning plan per customer use cases
+      *************************************************************************************/
+      if (appType.compareTo("Active Directory - Direct") == 0) {
+        // logger.debug("Build account modifications for: " + appName);
+        AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+        acctReq.setNativeIdentity(link.getNativeIdentity());
+        String description = "Transfered on " + Calendar.getInstance().getTime();
+        acctReq.add(new AttributeRequest("description", ProvisioningPlan.Operation.Set, description));  
+        planAdd.add(acctReq);       
+      } else if (appType.compareTo("SunOne - Direct") == 0) {
+        // logger.debug("Build account modifications for: " + appName);
+        AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+        acctReq.setNativeIdentity(link.getNativeIdentity());
+        String description = "Transfered on " + Calendar.getInstance().getTime();
+        acctReq.add(new AttributeRequest("description", ProvisioningPlan.Operation.Set, description));
+        planAdd.add(acctReq);       
+      }
+    }
+    
+  
+
+    /********************************************************************************
+     * The man has a plan and it is governed by transfer rules.  Return the addition and 
+     * removal plans in a hashMap  
+    ********************************************************************************/
+    HashMap transferPlans = new HashMap();
+    transferPlans.put ("removals",planRemove);
+    transferPlans.put ("additions",planAdd);
+    
+    return transferPlans;
+  }
+  
+
+
+	public static HashMap getDiffBirthrightRoles (SailPointContext context, Identity identity ) {
+		logger.debug("Enter getDiffBirthrightRolesToAssign for user: " + identity.getName());
+		String identityName = identity.getName();
+		
+		ArrayList assignedRoles = new ArrayList();
+		Matchmaker matchMaker = new Matchmaker(context);
+		
+		// Retrieve the current Roles
+		ArrayList roleAssigns = identity.getRoleAssignments();
+		logger.debug("Currently assigned = " + roleAssigns);
+		ArrayList currentRoles = new ArrayList();
+		if (roleAssigns != null){
+			// logger.debug("# currently assigned = " + roleAssigns.size());
+			for (RoleAssignment roleAssign : roleAssigns){
+				String rName = roleAssign.getName();
+				logger.debug("\t " + identity.getName() + " has this role assigned: " + rName + "  from the source: " + roleAssign.getSource());
+				currentRoles.add(rName);
+			}
+		}
+		
+		// Retrive the new assignments based on the assignment rules.  
+		Bundle orgRole = context.getObjectByName(Bundle.class, "Demo");
+		
+		ArrayList newAssignments = new ArrayList();
+		
+		List children = orgRole.getHierarchy(context);
+		if (children != null){
+			// logger.debug("\t # of Children roles: " + children.size());
+			
+			for (Bundle bRole : children){
+				String roleName = bRole.getName();
+				// logger.debug("Checking role: " + roleName);
+					
+				IdentitySelector idSelector = bRole.getSelector();
+					
+				if (idSelector != null){
+					// logger.debug("\t Check is match with id selector: " + idSelector.generateSummary());
+					boolean isMatch = matchMaker.isMatch(idSelector,identity);
+						
+					// logger.debug("\t Does " + identity.getName() + " match role " + roleName + "? " + isMatch);
+						
+					if (isMatch){
+						// logger.debug("\t Role matches.  Assign: " + roleName);
+						newAssignments.add(roleName);
+					}
+				}
+			}
+		}
+		
+		if (newAssignments == null || newAssignments.size() < 1){
+			newAssignments = null;
+		}
+		
+
+		logger.debug("Calculate Differences between: " + newAssignments + "  and " + currentRoles);
+		
+		ArrayList removeList = new ArrayList(currentRoles);
+		removeList.removeAll(newAssignments);
+	
+		
+		logger.debug ("BirthRight Role Remove List is: " + removeList);
+		logger.debug ("BirthRight Role Add List is: " + newAssignments);
+		HashMap returnMap = new HashMap();
+		returnMap.put("sunset",removeList);
+		returnMap.put("add",newAssignments);
+
+		return returnMap;
+		
+	}
+
+	public static ProvisioningPlan getAdminActionPlan (SailPointContext context, String identityName, List rolesToAdd){
+		logger.debug("Enter getAdminActionPlan");
+		
+		ProvisioningPlan plan = new ProvisioningPlan();
+		Identity identity = context.getObjectByName(Identity.class, identityName);
+		
+		plan.setIdentity(identity);
+        ProvisioningPlan.AccountRequest acctReq = new ProvisioningPlan.AccountRequest();
+        acctReq.setApplication(ProvisioningPlan.APP_IIQ);
+        acctReq.setNativeIdentity(identityName);
+        acctReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+        plan.add(acctReq);
+
+        // Add in all the birthright roles
+        for (int i= 0; i < rolesToAdd.size(); i++) {
+             ProvisioningPlan.AttributeRequest attrReq = new ProvisioningPlan.AttributeRequest();
+             attrReq.setName(ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES);
+             attrReq.setOperation(ProvisioningPlan.Operation.Add);
+             attrReq.setValue(rolesToAdd.get(i));
+             acctReq.add(attrReq);
+        }
+		
+
+		return plan;
+
+	}
+
+    public void auditTransferCleanup (SailPointContext context, ProvisioningPlan plan, String identityName) {
+    	String source;
+    	String requesterDisplayName = null;
+    	
+    	Map args = plan.getArguments();
+    	if (null != args) {
+    		source = (String) args.get("source");
+    		String requester = (String) args.get("requester");
+
+    		if ( null != requester && !requester.equals("RequestHandler") ) {
+    			try {
+    				Identity cube = context.getObjectByName(Identity.class, requester);
+    				requesterDisplayName = cube.getDisplayName();
+    			} catch (Exception ge) {
+    				println("Exception getting requester's cube : " + ge.toString());
+    			}
+    		} else {
+    			requesterDisplayName = "Request Handler";
+    		}
+    	} else {
+    		// Role model reconciliation; set source to LCM 
+    		source = "LCM";
+    	}
+
+        // Put the ticket # on the cube as an identity event
+        //        
+        Auditor.logAs(source + (requesterDisplayName != null ? ":" + requesterDisplayName : "") , 
+        		AuditEvent.ActionIdentityTriggerEvent, 
+        		identityName, 
+                "Transfer Entitlement Cleanup Completed" ,
+                "", 
+                "Launched workflow Transfer Entitlement Cleanup", 
+                "Transfer Entitlement Overlap Period is Over" );
+
+    	return;    	
+    	
+    }
+
+
+	
+    
+    /***************************************************************************************
+	 * Convenience Function to retrieve a unique 4 digit employee number used for sponsored
+	 * contractor accounts.  
+	***************************************************************************************/
+	public static String getSponsoredContractorNumber (SailPointContext context){
+		logger.debug("Enter getSponsoredContractorNumber");
+
+		Configuration employeeNumberConfig = null;
+		employeeNumberConfig = context.getObject(Configuration.class, "Bechtel Employee Number Configuration Data");
+
+		Integer number = employeeNumberConfig.getInteger("number");
+		number++;
+		employeeNumberConfig.put("number",number.toString());
+		context.saveObject(employeeNumberConfig);
+		context.commitTransaction();
+		String employeeNumber = "S" + number.toString() + "X";
+		return employeeNumber;
+	}
+		
+
+
+
+
+
+/***************************************************************************************
+ * Convenience Function to set an attribute value in a SQL Prepared statement
+ * Takes care of possible nulls, hence why it is good to use.  Used in JDBC provisoning rules
+***************************************************************************************/
+private void setAttribute(PreparedStatement stmt, int position, String attrName, AccountRequest account) {
+    logger.debug("\tInside rule library's setAttribute METHOD: " + attrName + "  " + position);
+    try {
+        if(account != null &&  account.getAttributeRequest(attrName) != null && account.getAttributeRequest(attrName).getValue() != null)  {
+        	stmt.setString(position, (String)account.getAttributeRequest(attrName).getValue());
+    	} else {
+            stmt.setString(position, null);
+        }
+    } catch(SQLException e) {
+        logger.debug("Exception" + e.getMessage());
+    }
+}
+
+public Integer getNextSequence (String seqenceName) {
+	/****************************************************************************************
+	* I realize I should get all this from a resource object or a configuration object
+	* but, hey I am a lazy 
+	****************************************************************************************/ 
+	// Load the database Driver
+	Class.forName("com.mysql.jdbc.Driver");
+	
+	// Connect to the database
+	String url = "jdbc:mysql://localhost:3306/trakk";
+	
+	// Pass username / password (should get password encrypted from an application resource object
+	Connection conn = DriverManager.getConnection(url,"root","sailpoint");
+	Statement stmt = conn.createStatement();
+	
+	String SQLQuery = "SELECT nextval(\"" + seqenceName + "\") as next_sequence;";
+	
+	//Query the database and walk the resultset
+	ResultSet rs;
+	rs = stmt.executeQuery(SQLQuery);
+	
+	while ( rs.next() ) {
+    	int next_sequence = rs.getInt("next_sequence");               
+		return next_sequence;
+	}
+}    
+
+
+public List getCompanyNames () {
+	/****************************************************************************************
+	* I realize I should get all this from a resource object or a configuration object
+	* but, hey I am a lazy 
+	****************************************************************************************/ 
+	// Load the database Driver
+	Class.forName("com.mysql.jdbc.Driver");
+	
+	// Connect to the database
+	String url = "jdbc:mysql://localhost:3306/customDBApp";
+	
+	// Pass username / password (should get password encrypted from an application resource object
+	Connection conn = DriverManager.getConnection(url,"customDBApp","customDBApp");
+	Statement stmt = conn.createStatement();
+	
+	String SQLQuery = "SELECT * from companyName";
+	List companyNames = new ArrayList();
+	//Query the database and walk the resultset
+	ResultSet rs;
+	rs = stmt.executeQuery(SQLQuery);
+	
+	while ( rs.next() ) {
+    	String nextName = rs.getString("companyName");               
+		companyNames.add(nextName); 
+	}
+	return companyNames;
+}
+	
+
+/***********************************************************************************************
+  Convenience - Audit Auto Approval of an ApprovalItem
+************************************************************************************************/
+public static void cstAuditAutoApprovedApprovalSetRule(SailPointContext context, ApprovalItem it, String owner, String identityName) {
+        
+  AuditEvent event = new AuditEvent();
+  event.setAction(AuditEvent.ActionApproveLineItem);
+  event.setSource(owner);
+  event.setTarget(identityName);
+
+  event.setApplication(it.getApplication());
+  event.setAccountName(it.getNativeIdentity());
+  event.setInstance(it.getInstance());
+  event.setAttributeName(it.getName());
+  event.setAttributeValue(it.getCsv());
+  
+  Date start = it.getStartDate();
+  if ( start != null )
+    event.setAttribute("startDate", start);
+  Date end = it.getEndDate();
+  if ( end != null ) 
+    event.setAttribute("endDate", end);
+
+  event.setAttribute("currentStep", "High Risk Approval");
+
+  // group them by a generatedId
+  //event.setTrackingId(wfcontext.getWorkflow().getProcessLogId());
+  String interfaceName = Source.LCM.toString();
+
+  // djs: for now set this in both places to avoid needing
+  // to upgrade.  Once we have ui support for "interface"
+  // we can remove the map version
+  event.setAttribute("interface", interfaceName);
+  event.setInterface(interfaceName);
+
+  event.setAttribute("operation", it.getOperation());
+  event.setAttribute("requester", owner);
+
+  List comments = it.getComments();
+  if ( Util.size(comments) <= 0 ) {
+    comments = new ArrayList();
+    comments.add(new Comment("High Risk Approval auto approved", "system"));
+  }
+  event.setAttribute("completionComments", comments);
+
+  String requesterComments = it.getRequesterComments();
+  if ( Util.getString(requesterComments) != null )
+    event.setAttribute("requesterComments", requesterComments);
+
+  //String taskResultId = wfcontext.getString(Workflow.VAR_TASK_RESULT);
+  //if ( taskResultId != null ) {
+  //  event.setAttribute(Workflow.VAR_TASK_RESULT, taskResultId);
+  //}
+
+  if ( Auditor.isEnabled(event.getAction()) ) {
+    Auditor.log(event);
+    context.commitTransaction();
+  }
+}
+
+public List getOracleProfiles (String appName) {
+ 
+	/************************************************************************************
+	 * Retrieve DB Connection Parameters
+	************************************************************************************/
+
+	Application app = context.getObject(Application.class, appName);
+	
+	// Load the database Driver
+	Class.forName((String) app.getAttributeValue("driverClass"));
+	
+	// Connect to the database
+	String url = (String) app.getAttributeValue("url");
+	String user = (String) app.getAttributeValue("user");
+	String encryptedSecurityCredentials = (String) app.getAttributeValue("password");
+	String securityCredentials = context.decrypt(encryptedSecurityCredentials);
+	
+	// Pass username / password (should get password encrypted from an application resource object
+	Connection conn = DriverManager.getConnection(url,user,securityCredentials);
+	
+	Statement stmt = conn.createStatement();
+	
+	String SQLQuery = "SELECT profile from dba_profiles;";
+	
+	//Query the database and walk the resultset
+	ResultSet rs;
+	rs = stmt.executeQuery(SQLQuery);
+	List profiles = new ArrayList();
+	while ( rs.next() ) {
+    	String profile = rs.getString("profile");               
+		profiles.add(profile); 
+	}
+	return profiles;
+}    
+
+	]]>
+	</Source>
+</Rule>

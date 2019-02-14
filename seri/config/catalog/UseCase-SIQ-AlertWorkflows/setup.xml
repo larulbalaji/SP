@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="SecurityIQ-Alert.xml"/>
+  <ImportAction name="include" value="SecurityIQ-DisableUser.xml"/>
+  <ImportAction name="include" value="SecurityIQ-SingleUserCert.xml"/>
+  <ImportAction name="include" value="Auditconfig-Auditconfig.xml"/>
+</sailpoint>

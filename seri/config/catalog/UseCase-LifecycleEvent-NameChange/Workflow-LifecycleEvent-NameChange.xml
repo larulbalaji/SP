@@ -1,0 +1,273 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" libraries="Identity,IdentityRequest"
+  name="Workflow - Lifecycle Event - Name Change" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="doRefresh" initializer="String:true">
+    <Description>Executes the Identity Refresh Step</Description>
+  </Variable>
+  <Variable input="true" name="event" transient="true"
+    type="sailpoint.object.IdentityChangeEvent">
+    <Description>
+      The IdentityChangeEvent. It can be used to build
+      the
+      provisioning plan, but does not need to be
+      persisted with the case,
+      so marked as transient.
+    </Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable
+    initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)"
+    input="true" name="identityDisplayName">
+    <Description>
+      The displayName of the identity being updated.
+      Query for
+      this using a projection query and fall back to the name.
+    </Description>
+  </Variable>
+  <Variable name="renamePlan">
+    <Description>The provisioning plan, which is built by a service
+      method.
+    </Description>
+  </Variable>
+  <Variable initializer="string:false" name="optimisticProvisioning">
+    <Description>
+      Set to true to enable optimistic provisioning. This
+      will cause
+      changes to the entitlements compiled from role
+      assignments to be
+      applied immediately to the identity cube rather than waiting
+      for the next
+      refresh/reaggregation after the provisioning system
+      completes the
+      request.
+    </Description>
+  </Variable>
+  <Variable initializer="string:true" name="foregroundProvisioning">
+    <Description>
+      Normally provisioning is done in a step that uses the
+      "background"
+      option to force the workflow to be suspend and be
+      resumed in a
+      background task thread. This prevents the browser
+      session from
+      hanging since provision can sometimes take a long
+      time. For demos
+      and testing it can be better to do this in the
+      foreground so that
+      provisioning will have been performed when
+      control is returned to the
+      user. This prevents having to run the
+      Perform Maintenance task to
+      see the resutls of the request.
+    </Description>
+  </Variable>
+  <Variable initializer="string:spadmin" input="true"
+    name="fallbackApprover">
+    <Description>
+      A String that specifies the name of the Identity that
+      will
+      be assigned any approvals where the owner of the approver
+      can't be resolved. Example if the scheme is "owner" and the
+      application doesn't specify and owner.
+    </Description>
+  </Variable>
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>
+      String version of sailpoint.object.Source to indicate
+      where the request originated. Defaults to LCM.
+    </Description>
+  </Variable>
+  <Variable initializer="string:false" input="true" name="trace">
+    <Description>
+      Used for debugging this workflow and when set to true
+      trace
+      will be sent to stdout.
+    </Description>
+  </Variable>
+  <Variable name="project">
+    <Description>
+      ProvisioningProject which is just a compiled version of
+      the ProvisioningPlan.
+    </Description>
+  </Variable>
+  <Variable name="identityRequestId" output="true">
+    <Description>
+      The sequence id of the Identity request object which is stored in
+      the name field of the identity request.
+    </Description>
+  </Variable>
+  <Variable initializer="Active Directory" name="applicationName" />
+
+  <Description>Name (Last) Change Workflow. This Lifecycle Event
+    Workflow will update the identity cube name with the new last name.
+    Next the Active Directory sAMAccountName and distinguishedName are
+    updated with the new last name.
+    If you need to update other attributes, this can be done via an Identity
+    Attribute target source. Make sure to enable the Identity Refresh by
+    setting doRefresh to true
+  </Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library" />
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="10" posY="20">
+    <Description>Initialize a plan</Description>
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.NameChange.Start");
+serilog.debug("Starting Name Change Workflow for: " + identityName + "::" + identityDisplayName);
+serilog.debug("Old Last Name was " + event.getOldObject().getLastname());
+serilog.debug("New Last Name is " + event.getObject().getLastname());
+      ]]></Source>
+    </Script>
+    <Transition to="Stop" when="(event.getObject().getLastname() == null)"/>
+    <Transition to="Create NameChange Plan" />
+  </Step>
+
+
+
+  <Step name="Create NameChange Plan">
+    <Description>Create a namechange plan specifically for Active
+      Directory</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.Application;
+import sailpoint.object.Identity;
+import sailpoint.object.Configuration;
+import sailpoint.object.Link;
+import java.util.List;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.NameChange.CreatePlan");
+serilog.debug("Create Plan");
+
+Identity newIdentity = (Identity) event.getObject();
+serilog.debug("Got newIdentity " + newIdentity);
+
+String firstname = newIdentity.getFirstname();
+String lastname = newIdentity.getLastname();
+String newCNName = firstname + " " + lastname;
+
+Identity identity = context.getObjectByName(Identity.class, identityName);   
+serilog.debug("Found identity = " + identity);
+
+List links = identity.getLinks();
+ProvisioningPlan renamePlan = new ProvisioningPlan();
+renamePlan.setIdentity(identity);
+
+//Only looking at AD Accounts
+for (Link link : links) {
+    if (link.getApplicationName().equals(applicationName)) {
+        renamePlan.setIdentity(identity);
+
+        String nativeIdentity = link.getNativeIdentity();
+        serilog.debug("Old nativeIdentity = " + nativeIdentity);
+        serilog.debug("Old NativeIdentity = " + nativeIdentity);
+
+        //Copy and Edit to add other values or change setValue)
+        //AttributeRequest samAtrReq = new AttributeRequest();
+        //samAtrReq.setName("sAMAccountName");
+        //samAtrReq.setOperation(ProvisioningPlan.Operation.Set);
+        //samAtrReq.setValue(newName);
+
+
+        //This is the AC_NewName Plan
+        AccountRequest ar = new AccountRequest();
+        String newNativeIdentity = "CN=" + newCNName + nativeIdentity.substring(nativeIdentity.indexOf(","));
+        //System.out.println(newNativeIdentity);
+        serilog.debug("New NativeIdentity = " + newNativeIdentity);
+        ar.setNativeIdentity(nativeIdentity);
+        ar.setApplication(applicationName);
+        ar.setOperation(ProvisioningPlan.AccountRequest.Operation.Modify);
+        AttributeRequest attrReq = new AttributeRequest();
+        attrReq.setName("AC_NewName");
+        attrReq.setOperation(ProvisioningPlan.Operation.Set);
+        String id = link.getId();
+        attrReq.setValue("CN=" + newCNName);
+
+        ar.add(attrReq);
+        //ar.add(samAtrReq);
+        renamePlan.addRequest(ar);
+    }
+}
+serilog.debug(renamePlan.toXml());
+//System.out.println(renamePlan.toXml());
+workflow.put("renamePlan",renamePlan);
+
+      ]]></Source>
+    </Script>
+    <Transition to="Call Provisioning" />
+  </Step>
+
+
+  <Step icon="Task" name="Call Provisioning" posX="500" posY="8">
+    <Arg name="identityName" value="ref:identityName" />
+    <Arg name="renamePlan" value="ref:renamePlan" />
+    <Description>
+      Invoke the Provisioner to carry out our AD rename and pass refresh options so Provisioner 
+      will do the refresh for us to cause attribute synchronization.
+    </Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Attributes;
+import sailpoint.api.Provisioner;
+import sailpoint.api.Identitizer;
+
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.NameChange.Provision");
+
+//serilog.debug("Provisioning");
+Provisioner provisioner = new Provisioner(context);
+provisioner.setNoLocking(true);
+provisioner.setDoRefresh(true);
+Attributes refreshOptions = new Attributes();  
+refreshOptions.put(Identitizer.ARG_CORRELATE_ENTITLEMENTS,true);
+refreshOptions.put(Identitizer.ARG_SYNCHRONIZE_ATTRIBUTES,true);
+provisioner.setRefreshOptions(refreshOptions);
+provisioner.execute(renamePlan);
+serilog.debug("Finished Provisioning NameChange");
+            ]]></Source>
+    </Script>
+    <Transition to="Change Cube Name"/>
+  </Step>
+  <Step name="Change Cube Name">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.NameChange.ChangeCubeName");
+
+
+Identity newIdentity = context.getObjectByName(Identity.class,identityName);
+serilog.debug("Got newIdentity " + newIdentity);
+
+String firstname = newIdentity.getFirstname();
+String lastname = newIdentity.getLastname();
+
+String cubeName = firstname + "." + lastname;
+
+serilog.debug("New CubeName will be " + cubeName);
+
+//Sets the cube name to the new name
+newIdentity.setName(cubeName);
+newIdentity.setLock(null);
+newIdentity.setAttribute("triggerSnapshots",null);
+context.saveObject(newIdentity);
+context.commitTransaction();
+     
+     ]]></Source>
+    </Script>
+    <Transition to="Stop" />
+  </Step>
+
+  <Step icon="Stop" name="Stop" posX="526" posY="170" />
+
+</Workflow>

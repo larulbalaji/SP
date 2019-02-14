@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  libraries="Identity,IdentityRequest"  name="Disable Leaver" type="SERI">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <!-- RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="LCM Workflow Library"/>
+  </RuleLibraries-->
+  <Step icon="Start" name="Start" posX="10" posY="20" resultVariable="plan">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+Identity i=context.getObjectByName(Identity.class, identityName);
+i.setInactive(true);
+context.saveObject(i);
+context.commitTransaction();
+
+      ]]></Source>
+    </Script>  
+    <Transition to="Stop"/>
+  </Step>
+  
+  <Step icon="Stop" name="Stop" posX="526" posY="170"/>
+  
+</Workflow>

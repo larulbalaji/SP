@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="FTO date change rule" type="Listener">
+  <Description>When the FTO start or finish date changes, change the future event to disable/enable accounts, or schedule one
+The key variables passed in are:
+attributeName
+oldValue
+newValue
+  </Description>
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="Scheduling Library"/>
+  </ReferencedRules>
+  <Source>
+    <![CDATA[
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+import sailpoint.object.Workflow;
+// Fire this when the leave date changes
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.FTODateChange");
+
+serilog.debug("newValue="+newValue);
+if(newValue==null) {
+  return;
+  // Maybe should remove the pending event?
+}
+
+// Specify what format the date is entered into the leaveDate attribute
+// see http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html for details
+
+String leaveDateFormat="MM/dd/yyyy"; // e.g 01/07/2015 = 1 July 2015
+// Orange HRM format is 12/27/2013 0:0:0 AM GMT
+
+SimpleDateFormat sdf=new SimpleDateFormat(leaveDateFormat);
+
+
+// The workflow to schedule - this is the same as the one fired when inactive->true
+String workflowName="FTO Start - Disable All Accounts";
+if ("ftoend".equals(attributeName)) {
+  workflowName="FTO End - Enable All Accounts";
+}
+
+String identityName=identity.getName();
+
+List requests=context.getObjects(Request.class);
+
+int numResults=0;
+
+for(Request req: requests) {
+
+  serilog.trace("Got Request");
+  String reqWorkflowName=req.getAttribute("workflow");
+  serilog.trace("workflowName="+reqWorkflowName);
+  String reqIdentityName=req.getAttribute("identityName");
+  serilog.trace("identityName="+reqIdentityName);
+
+  if( workflowName.equals(reqWorkflowName) && identityName.equals(reqIdentityName) ) {
+    serilog.debug("Found a match");
+    try {
+      serilog.debug("new value="+newValue);
+      Date when=sdf.parse((String)newValue);
+      req.setNextLaunch(when);
+      context.saveObject(req);
+    } catch (ParseException pe) {
+      serilog.error("Can't reschedule workflow for "+identity.getDisplayName()+" - can't parse date "+newValue+" with format "+leaveDateFormat);
+    }
+    numResults++;
+  }
+}
+
+serilog.debug("NumResults: "+numResults);
+if(numResults>0) {
+  context.commitTransaction();
+} else if(numResults==0) {
+  serilog.debug("No results found - scheduling a new workflow");
+  scheduleWorkflow(identityName, newValue, workflowName);
+}
+    ]]>
+  </Source>
+</Rule>

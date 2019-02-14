@@ -1,0 +1,465 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" libraries="Role" name="Role Modeler - Impact Analysis - Changes Propagation" type="RoleModeler" workItemRenderer="workflow.xhtml">
+  <Variable editable="true" name="doArchive" type="boolean">
+    <Description>Set to true to enable archiving role versions.</Description>
+    <Prompt>Enable Role Versioning</Prompt>
+  </Variable>
+  <Variable editable="true" initializer="true" name="doOverlapAnalysis" type="boolean">
+    <Description>Set to true to enable role overlap analysis.</Description>
+    <Prompt>Enable Overlap Enalysis</Prompt>
+  </Variable>
+  <Variable editable="true" initializer="1" name="overlapThreshold" type="int">
+    <Description>Minimum overlap percentage in any facet a role must have to be included in the result.</Description>
+    <Prompt>Minimum Overlap Percentage</Prompt>
+  </Variable>
+  <Variable input="true" name="approvalObject">
+    <Description>New version of role to approve</Description>
+  </Variable>
+  <Variable name="approvalType">
+    <Description>Set to &amp;quot;delete&amp;quot; when deleting roles. Set to &amp;quot;rollback&amp;quot; when restoring a role archive.  Otherwise null.</Description>
+  </Variable>
+  <Variable input="true" name="approvalSource">
+    <Description>Where in the UI we are requesting the approval.
+       Values: modeler, directed, undirected, certification.</Description>
+  </Variable>
+  <Variable input="true" name="impactAnalysisOwner">
+    <Description>Name of user to receive impact analysis result</Description>
+  </Variable>
+  <Variable initializer="call:getDisplayableRoleName" name="roleName">
+    <Description>Role name referenced by the email templates</Description>
+  </Variable>
+  <Variable editable="true" initializer="false" name="noRolePropagation" type="boolean">
+    <Description>Set to true to disable role change propagation.</Description>
+  </Variable>
+  <Variable name="roleChangesEvents"/>
+  <Variable name="propagationForm"/>
+  <Variable editable="true" name="impactDecision">
+    <Description>This variable stores the decision of the approval step and defines </Description>
+  </Variable>
+  <Step icon="Start" name="start">
+    <Transition to="Impact Analysis"/>
+  </Step>
+  <Step action="launchImpactAnalysis" condition="script:!(impactAnalysisOwner == unbound || impactAnalysisOwner == null)" icon="Analysis" name="Impact Analysis" posX="141" posY="17">
+    <Arg name="noApplicationTemplates" value="true"/>
+    <Arg name="doOverlapAnalysis" value="ref:doOverlapAnalysis"/>
+    <Arg name="overlapThreshold" value="ref:overlapThreshold"/>
+    <Transition to="Review Analysis"/>
+  </Step>
+  <Step condition="script:!(impactAnalysisOwner == unbound || impactAnalysisOwner == null)" icon="Email" name="Review Analysis" posX="258" posY="17">
+    <Approval owner="ref:impactAnalysisOwner">
+      <Arg name="workItemDescription" value="Review impact analysis of $(call:getObjectClass): $(call:getDisplayableRoleName)"/>
+      <WorkItemConfig escalationStyle="none">
+        <NotificationEmailTemplateRef>
+          <Reference class="sailpoint.object.EmailTemplate" name="Role Modeler - Impact Analysis Review"/>
+        </NotificationEmailTemplateRef>
+      </WorkItemConfig>
+    </Approval>
+    <Transition to="Check for Role Entitlement Changes"/>
+  </Step>
+  <Step action="commit" condition="script:(impactAnalysisOwner == unbound || impactAnalysisOwner == null) || approved" name="Commit" posX="547" posY="19">
+    <Arg name="archive" value="ref:doArchive"/>
+    <Transition to="stop"/>
+  </Step>
+  <Step icon="Stop" name="stop" posX="710" posY="18"/>
+  <Step icon="Default" name="Check for Role Entitlement Changes" posX="350" posY="129" resultVariable="roleChangeEvents">
+    <Arg name="roleChangeEvents" value="ref:roleChangeEvents"/>
+    <Arg name="roleName" value="ref:roleName"/>
+    <Arg name="newRole" value="ref:approvalObject"/>
+    <Description>This step checks if entitlements were removed or added to the current, either directly or by inheritance or through required roles</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.api.RoleChangeAnalyzer;
+import sailpoint.object.Bundle;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.RoleModeler.CheckChanges");
+
+// get the new Bundle object from the current workflow
+if (newRole == null) {
+    serilog.warn("approvalObject is null");
+    return null;
+}
+serilog.debug("Approval object: " + newRole.toXml());
+
+Bundle old = context.getObjectByName(Bundle.class, roleName);
+if (old != null) {
+    serilog.debug("Old role (before analysis): " + old.toXml());
+}
+// save the role in the workflow context for later use
+workflow.put("oldRole", old);
+
+serilog.debug("Detecting Entitlements Changes for Bundle: " + newRole.getName());
+
+// Use the Role change API to compute role changes
+// this returns a list of RoleChangeEvent objects
+RoleChangeAnalyzer analyzer = new RoleChangeAnalyzer(context);
+List events = analyzer.calculateRoleChanges(newRole);
+if (events != null) {
+    serilog.debug("Returned " + events.size() + " events");
+} else {
+    serilog.debug("No event returned from role change analysis");
+}
+
+// I don't know why, but
+// the old role is altered with the new version after calling the analyzer...
+// restore the object
+context.decache();
+old = context.getObjectByName(Bundle.class, roleName);
+serilog.debug("Old role from DB (after analysis): " + old.toXml());
+//context.saveObject(old);
+
+return events;
+        ]]></Source>
+    </Script>
+    <Transition to="Build Propagation Approval Form" when="return (roleChangeEvents != null &amp;&amp; (roleChangeEvents.size() &gt; 0))"/>
+    <Transition to="Commit"/>
+  </Step>
+  <Step icon="Default" name="Build Propagation Approval Form" posX="442" posY="250" resultVariable="propagationForm">
+    <Arg name="old" value="ref:oldRole"/>
+    <Arg name="roleChangeEvents" value="ref:roleChangeEvents"/>
+    <Arg name="roleName" value="ref:roleName"/>
+    <Arg name="newRole" value="ref:approvalObject"/>
+    <Description>This step builds the dynamic form that displays information related to the current role being modified</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.api.RoleLifecycler;
+import sailpoint.object.BundleDifference;
+import sailpoint.object.Bundle;
+import sailpoint.object.Difference;
+import sailpoint.object.ProfileDifference;
+import sailpoint.tools.Util;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Form.Button;
+import sailpoint.object.BaseAttributeDefinition;
+import java.util.ArrayList;
+import sailpoint.object.Profile;
+import sailpoint.object.Filter.LeafFilter;
+import sailpoint.object.Identity;
+import sailpoint.object.RoleChangeEvent;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.RoleModeler.BuildApprovalForm");
+
+// Fetch the data to build the form
+// 1. Role differences
+// 2. List of users to whom this role is DIRECTLY assigned
+// 3. Users assigned INDIRECTLY
+serilog.debug("Getting Differences for Bundle: " + roleName);
+serilog.debug("Approval object: " + newRole.toXml());
+
+// Get the old role from the context
+if (old == null) {
+    serilog.error("Unable to find current Bundle version");
+} else {
+  old = context.getObjectByName(Bundle.class, roleName);
+  serilog.debug("Old role: " + old.toXml());
+
+  //
+  // Get role differences
+  //
+  RoleLifecycler cycler = new RoleLifecycler(context);
+  BundleDifference diffs = cycler.diff(old, newRole);
+  serilog.debug("Differences:" + diffs.toXml());
+  
+  Difference diffReq = diffs.getRequirementsDifference();
+  List lDiffAttrs = diffs.getAttributeDifferences();
+  List lDiffProfiles = diffs.getProfileDifferences();
+  
+  //
+  // Get names of the inheriting roles and roles that require this modified role
+  //
+  List props = Util.csvToList("id,name");
+  
+  List lRoleRequires = new ArrayList();
+  QueryOptions opsRequires = new QueryOptions();
+  opsRequires.add(Filter.containsAll("requirements", Util.asList(newRole)));
+  Iterator iRequires = context.search(Bundle.class, opsRequires, props);
+  while (iRequires.hasNext()) {
+    Object[] obj = iRequires.next();
+    serilog.debug("Role ID: " + obj[0] + " requires " + roleName);
+    lRoleRequires.add(obj[0]);
+  }
+  
+  List lRoleInherits = new ArrayList();
+  QueryOptions opsInherits = new QueryOptions();
+  opsInherits.add(Filter.containsAll("inheritance", Util.asList(newRole)));
+  Iterator iInherits = context.search(Bundle.class, opsInherits, props);
+  while (iInherits.hasNext()) {
+    Object[] obj = iInherits.next();
+    serilog.debug("Role ID: " + obj[0] + " inherits " + roleName);
+    lRoleInherits.add(obj[0]);
+  }
+  
+  //
+  // Build the form
+  //
+  Form frm = new Form();
+  frm.put("pageTitle", "Role Changes Impact Validation - " + roleName);
+  frm.setName("Role Changes Impact Validation");
+  
+  // Default next and cancel buttons
+  List buttons = new ArrayList();
+  Button approveButton = new Button("Approve", "next");
+  approveButton.setParameter("impactDecision");
+  approveButton.setValue("approved");
+  Button rejectButton = new Button("Reject", "next");
+  rejectButton.setParameter("impactDecision");
+  rejectButton.setValue("rejected");
+  buttons.add(rejectButton);
+  buttons.add(approveButton);
+  frm.setButtons(buttons);
+  
+  // Section 1: Requested changes
+  // That includes attributes, profiles, requirements changes
+  Section sect1=new Section();
+  sect1.setColumns(2);
+  sect1.setLabel("Requested Changes for role: " + roleName);
+  
+  if (!Util.isEmpty(lDiffAttrs)) {
+    Field changedAttrs = new Field();
+    changedAttrs.setColumnSpan(2);
+    changedAttrs.setName("changedAttrs");
+    changedAttrs.setDisplayName("Changed attributes");
+    changedAttrs.setType(BaseAttributeDefinition.TYPE_STRING);
+    changedAttrs.setReadOnly(true);
+    changedAttrs.setDisplayOnly(true);
+    changedAttrs.setMulti(true);
+    List fieldValues = new ArrayList();
+    for (Difference d : lDiffAttrs) {
+        fieldValues.add("Attribute : " + d.getAttribute() + ", " + d.getOldValue() + " ---> " + d.getNewValue());
+    }
+    serilog.debug(fieldValues);
+    changedAttrs.setValue(fieldValues);
+    sect1.add(changedAttrs);
+  }
+  
+  if (diffReq != null) {
+    Field changedReqs = new Field();
+    changedReqs.setColumnSpan(2);
+    changedReqs.setName("changedReqs");
+    changedReqs.setType(BaseAttributeDefinition.TYPE_STRING);
+    changedReqs.setReadOnly(true);
+    changedReqs.setDisplayName("Changed Requirements");
+    String fieldValue = diffReq.getOldValue() + " --> " + diffReq.getNewValue();
+    serilog.debug(fieldValue);
+    changedReqs.setValue(fieldValue);
+    sect1.add(changedReqs);
+  }
+  
+  // the profile difference doesn't give the entire profile value
+  // use the old and new roles 
+  if (!Util.isEmpty(lDiffProfiles)) {
+  
+    // old profiles
+    Field oldProfiles = new Field();
+    oldProfiles.setName("oldProfiles");
+    oldProfiles.setDisplayName("Original entitlements");
+    oldProfiles.setType(BaseAttributeDefinition.TYPE_STRING);
+    oldProfiles.setReadOnly(true);
+    oldProfiles.setDisplayOnly(true);
+    oldProfiles.setMulti(true);
+    List fieldOldValues = new ArrayList();
+    List currentProfiles = old.getProfiles();
+    
+    for (Profile prf : currentProfiles) {
+        List lFilter = prf.getConstraints();
+        int filterSize = lFilter.size();
+        for (int iCount=0 ; iCount < filterSize ; iCount++) {
+            if(lFilter.get(iCount) instanceof LeafFilter) {
+                LeafFilter filter = (LeafFilter)lFilter.get(iCount);
+                Object value = filter.getValue();
+                if (value instanceof ArrayList) {
+                    ArrayList listEntitlements = new ArrayList();
+                    listEntitlements = (ArrayList) value;
+                    for (String entitlement : listEntitlements){
+                        serilog.debug("OLD - Entitlements from the bundle: "+entitlement);
+                        fieldOldValues.add(prf.getApplication().getName() + " - " + entitlement);
+                    }
+                }
+             }
+        }
+    }
+    serilog.debug(fieldOldValues);
+    oldProfiles.setValue(fieldOldValues);
+    sect1.add(oldProfiles);
+    
+    // new profiles
+    Field newProfiles = new Field();
+    newProfiles.setName("newProfiles");
+    newProfiles.setDisplayName("New entitlements");
+    newProfiles.setType(BaseAttributeDefinition.TYPE_STRING);
+    newProfiles.setReadOnly(true);
+    newProfiles.setDisplayType(Field.DISPLAY_TYPE_LABEL);
+    newProfiles.setMulti(true);
+    List fieldNewValues = new ArrayList();
+    List futureProfiles = newRole.getProfiles();
+    
+    for (Profile prf : futureProfiles) {
+        List lFilter = prf.getConstraints();
+        int filterSize = lFilter.size();
+        for (int iCount=0 ; iCount < filterSize ; iCount++) {
+            if(lFilter.get(iCount) instanceof LeafFilter) {
+                LeafFilter filter = (LeafFilter)lFilter.get(iCount);
+                Object value = filter.getValue();
+                if (value instanceof ArrayList) {
+                    ArrayList listEntitlements = new ArrayList();
+                    listEntitlements = (ArrayList) value;
+                    for (String entitlement : listEntitlements){
+                        serilog.debug("NEW - Entitlements from the bundle: "+entitlement);
+                        fieldNewValues.add(prf.getApplication().getName() + " - " + entitlement);
+                    }
+                }
+             }
+        }
+    }
+    serilog.debug(fieldNewValues);
+    newProfiles.setValue(fieldNewValues);
+    sect1.add(newProfiles);
+    
+  } // end if profiles changes
+  
+  frm.add(sect1);
+  
+  // Section 2: Impacted Roles and users
+  // 2.1: role assigned directly to users
+  Section sect21=new Section();
+  sect21.setColumns(1);
+  sect21.setLabel("Directly impacted users (existing assignment)");
+  // Count how many users have this role assigned
+  QueryOptions directAssignOps = new QueryOptions();
+  directAssignOps.add(Filter.containsAll(Identity.ATT_ASSIGNED_ROLES, Util.asList(old)));
+  int directUsers = context.countObjects(Identity.class, directAssignOps);
+  Field directUsersText = new Field();
+  directUsersText.setName("directUsers");
+  directUsersText.setDisplayName("Numbers of directly impacted users");
+  directUsersText.setType(BaseAttributeDefinition.TYPE_STRING);
+  directUsersText.setReadOnly(true);
+  directUsersText.setDisplayType(Field.DISPLAY_TYPE_TEXTAREA);
+  directUsersText.setValue("There are " + directUsers + " user(s) directly impacted by these changes.");
+  sect21.add(directUsersText);
+  frm.add(sect21);
+  
+  // 2.2: role indirectly asssigned to users
+  Section sect22=new Section();
+  sect22.setColumns(2);
+  sect22.setLabel("Indirect impacts on users");
+  
+  // Go through the list of impacted roles (from the RoleChangeEvents)
+  int nbRoles = 0;
+  for (RoleChangeEvent rce : roleChangeEvents) {
+    String bundleId = rce.getBundleId();
+    serilog.debug("RCE - BundleId: " + bundleId);
+    serilog.debug("Current bundleId (old): " + old.getId());
+    serilog.debug("Current bundleId (new): " + newRole.getId());
+    
+    // Skip current role
+    if (bundleId.equals(old.getId())) {
+        serilog.debug("Skipping current updated role");
+        continue;
+    }
+    Bundle impactedRole = context.getObjectById(Bundle.class, bundleId);
+    if (impactedRole == null) {
+        serilog.error("Unable to find role with ID : " + bundleId);
+        continue;
+    }
+    // Create a new Field to display the number of impacted users
+    Field fieldRole = new Field();
+    fieldRole.setName("role"+nbRoles);
+    fieldRole.setType(BaseAttributeDefinition.TYPE_STRING);
+    fieldRole.setDisplayName(impactedRole.getDisplayableName() + " (" + impactedRole.getType() + ")");
+    fieldRole.setReadOnly(true);
+    // Count users assigned to this impacted role
+    QueryOptions roleAssignOps = new QueryOptions();
+    roleAssignOps.add(Filter.containsAll(Identity.ATT_ASSIGNED_ROLES, Util.asList(impactedRole)));
+    int roleCount = context.countObjects(Identity.class, roleAssignOps);
+    fieldRole.setValue(roleCount);
+
+    sect22.add(fieldRole);  
+    nbRoles++; 
+  }
+  
+  frm.add(sect22);
+  
+  return frm;
+}
+        ]]></Source>
+    </Script>
+    <Transition to="Approve Propagation"/>
+  </Step>
+  <Step icon="Approval" name="Approve Propagation" posX="589" posY="253">
+    <Approval name="Approve Propagation" owner="string:spadmin" return="impactDecision" send="impactDecision">
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Role Changes Impact Validation - $(roleName)"/>
+      <Arg name="workItemForm" value="ref:propagationForm"/>
+      <OwnerScript>
+        <Source><![CDATA[import sailpoint.object.Identity;
+
+// Return the role owner, spadmin if the current owner does not exist
+// get the owner from the approval object
+Identity owner = approvalObject.getOwner();
+if (owner == null) {
+    return "spadmin";
+} else {
+    return owner.getName();
+}]]></Source>
+      </OwnerScript>
+    </Approval>
+    <Transition to="Audit Success" when="return (impactDecision != null &amp;&amp; impactDecision.equals(&quot;approved&quot;));"/>
+    <Transition to="Audit Failure"/>
+  </Step>
+  <Step icon="Audit" name="Audit Failure" posX="786" posY="222">
+    <Arg name="target" value="Role: $(roleName)"/>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.AuditEvent;
+import sailpoint.object.Identity;
+
+Identity owner = approvalObject.getOwner();
+String ownerName = "spadmin";
+if (owner != null) {
+    ownerName = owner.getName();
+}
+
+AuditEvent audit = new AuditEvent();
+audit.setSource(ownerName);
+audit.setTarget(target);
+audit.setString1("failure");
+audit.setAction("roleImpactsApproval");
+context.saveObject(audit);
+context.commitTransaction();
+
+    
+    ]]></Source>
+    </Script>
+    <Transition to="stop"/>
+  </Step>
+  <Step icon="Audit" name="Audit Success" posX="576" posY="143">
+    <Arg name="target" value="Role: $(roleName)"/>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.AuditEvent;
+import sailpoint.object.Identity;
+
+Identity owner = approvalObject.getOwner();
+String ownerName = "spadmin";
+if (owner != null) {
+    ownerName = owner.getName();
+}
+
+AuditEvent audit = new AuditEvent();
+audit.setSource(ownerName);
+audit.setTarget(target);
+audit.setString1("success");
+audit.setAction("roleImpactsApproval");
+context.saveObject(audit);
+context.commitTransaction();
+
+    
+    ]]></Source>
+    </Script>
+    <Transition to="Commit"/>
+  </Step>
+</Workflow>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ServiceDefinition executor="sailpoint.server.EndForwardingService" hosts="global" interval="60" name="EndForwarding">
+    <Description>Reverts workitems back to original owner when forwarding ends</Description>
+    <Attributes>
+      <Map>
+        <entry key="pluginName" value="endForwardingService"/>
+      </Map>
+    </Attributes>
+  </ServiceDefinition>
+</sailpoint>

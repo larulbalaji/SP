@@ -1,0 +1,148 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application authoritative="true" connector="sailpoint.connector.JDBCConnector" featuresString="DISCOVER_SCHEMA, PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING" icon="databaseIcon" name="Human Resources" profileClass="" type="JDBC">
+  <Attributes>
+    <Map>
+      <entry key="SQL" value="select emp.employee_id as empid, emp.emp_firstname as firstname, emp.emp_lastname as lastname, emp.emp_work_email as email,&#xD;&#xA; job.job_title as title, loc.country_code as country, loc.city, mgr.employee_id as mgrId, stat.name as status,&#xD;&#xA; concat(emp.emp_firstname, &apos;.&apos;, emp.emp_lastname) as userid,&#xD;&#xA; dept.name as department,&#xD;&#xA; CASE WHEN emp.termination_id IS NOT NULL or stat.name like 'Inactive%' THEN True ELSE False END as term,&#xD;&#xA; ftostart, ftoend&#xD;&#xA; &#xD;&#xA; from hs_hr_employee as emp&#xD;&#xA;&#xD;&#xA; left outer join (select ohrm_leave.emp_number, min(ohrm_leave.date)&#xD;&#xA;  as ftostart, max(ohrm_leave.date) as ftoend&#xD;&#xA;  from ohrm_leave group by ohrm_leave.emp_number) as fto&#xD;&#xA; on fto.emp_number=emp.emp_number&#xD;&#xA; left outer join ohrm_job_title as job&#xD;&#xA; on emp.job_title_code=job.id &#xD;&#xA; left outer join hs_hr_emp_reportto as empmgr&#xD;&#xA; on emp.emp_number=empmgr.erep_sub_emp_number&#xD;&#xA; left outer join hs_hr_employee as mgr&#xD;&#xA; on empmgr.erep_sup_emp_number=mgr.emp_number&#xD;&#xA; left outer join hs_hr_emp_locations as emploc&#xD;&#xA; on emp.emp_number=emploc.emp_number&#xD;&#xA; left outer join ohrm_location as loc&#xD;&#xA; on emploc.location_id=loc.id&#xD;&#xA; left outer join ohrm_employment_status as stat&#xD;&#xA; on emp.emp_status=stat.id&#xD;&#xA; left outer join ohrm_subunit as dept&#xD;&#xA; on emp.work_station=dept.id&#xD;&#xA; left outer join ohrm_emp_termination as term&#xD;&#xA; on emp.emp_number=term.emp_number&#xD;&#xA;"/>
+      <entry key="accountDeprovisionScenario" value="Do Nothing"/>
+      <entry key="aggregationMode">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="compositeDefinition"/>
+      <entry key="deltaTable" value="user_delta"/>
+      <entry key="driverClass" value="com.mysql.jdbc.Driver"/>
+      <entry key="getDeltaSQL" value="select emp.employee_id as empid, emp.emp_firstname as firstname, emp.emp_lastname as lastname, emp.emp_work_email as email,&#xD;&#xA; job.job_title as title, loc.country_code as country, loc.city, mgr.employee_id as mgrId, stat.name as status,&#xD;&#xA; concat(emp.emp_firstname, &apos;.&apos;, emp.emp_lastname) as userid,&#xD;&#xA; dept.name as department,&#xD;&#xA; CASE WHEN emp.termination_id IS NOT NULL or stat.name like 'Inactive%' THEN True ELSE False END as term,&#xD;&#xA; ftostart, ftoend&#xD;&#xA; &#xD;&#xA; from hs_hr_employee as emp&#xD;&#xA;&#xD;&#xA; left outer join (select ohrm_leave.emp_number, min(ohrm_leave.date)&#xD;&#xA;  as ftostart, max(ohrm_leave.date) as ftoend&#xD;&#xA;  from ohrm_leave group by ohrm_leave.emp_number) as fto&#xD;&#xA; on fto.emp_number=emp.emp_number&#xD;&#xA; left outer join ohrm_job_title as job&#xD;&#xA; on emp.job_title_code=job.id &#xD;&#xA; left outer join hs_hr_emp_reportto as empmgr&#xD;&#xA; on emp.emp_number=empmgr.erep_sub_emp_number&#xD;&#xA; left outer join hs_hr_employee as mgr&#xD;&#xA; on empmgr.erep_sup_emp_number=mgr.emp_number&#xD;&#xA; left outer join hs_hr_emp_locations as emploc&#xD;&#xA; on emp.emp_number=emploc.emp_number&#xD;&#xA; left outer join ohrm_location as loc&#xD;&#xA; on emploc.location_id=loc.id&#xD;&#xA; left outer join ohrm_employment_status as stat&#xD;&#xA; on emp.emp_status=stat.id&#xD;&#xA; left outer join ohrm_subunit as dept&#xD;&#xA; on emp.work_station=dept.id&#xD;&#xA; left outer join ohrm_emp_termination as term&#xD;&#xA; on emp.emp_number=term.emp_number&#xD;&#xA;where emp.employee_id=&apos;$(identity)&apos;"/>
+      <entry key="getObjectSQL" value="select emp.employee_id as empid, emp.emp_firstname as firstname, emp.emp_lastname as lastname, emp.emp_work_email as email,&#xD;&#xA; job.job_title as title, loc.country_code as country, loc.city, mgr.employee_id as mgrId, stat.name as status,&#xD;&#xA; concat(emp.emp_firstname, &apos;.&apos;, emp.emp_lastname) as userid,&#xD;&#xA; dept.name as department,&#xD;&#xA;  CASE WHEN emp.termination_id IS NOT NULL or stat.name like 'Inactive%' THEN True ELSE False END as term,&#xD;&#xA; ftostart, ftoend&#xD;&#xA; &#xD;&#xA; from hs_hr_employee as emp&#xD;&#xA;&#xD;&#xA; left outer join (select ohrm_leave.emp_number, min(ohrm_leave.date)&#xD;&#xA;  as ftostart, max(ohrm_leave.date) as ftoend&#xD;&#xA;  from ohrm_leave group by ohrm_leave.emp_number) as fto&#xD;&#xA; on fto.emp_number=emp.emp_number&#xD;&#xA; left outer join ohrm_job_title as job&#xD;&#xA; on emp.job_title_code=job.id &#xD;&#xA; left outer join hs_hr_emp_reportto as empmgr&#xD;&#xA; on emp.emp_number=empmgr.erep_sub_emp_number&#xD;&#xA; left outer join hs_hr_employee as mgr&#xD;&#xA; on empmgr.erep_sup_emp_number=mgr.emp_number&#xD;&#xA; left outer join hs_hr_emp_locations as emploc&#xD;&#xA; on emp.emp_number=emploc.emp_number&#xD;&#xA; left outer join ohrm_location as loc&#xD;&#xA; on emploc.location_id=loc.id&#xD;&#xA; left outer join ohrm_employment_status as stat&#xD;&#xA; on emp.emp_status=stat.id&#xD;&#xA; left outer join ohrm_subunit as dept&#xD;&#xA; on emp.work_station=dept.id&#xD;&#xA; left outer join ohrm_emp_termination as term&#xD;&#xA; on emp.emp_number=term.emp_number&#xD;&#xA;&#xD;&#xA;where emp.emp_firstname=substring_index(&quot;$(identity)&quot;, &apos;.&apos;, 1)&#xD;&#xA;  and emp.emp_lastname=substring_index(&quot;$(identity)&quot;, &apos;.&apos;, -1)"/>
+      <entry key="group.aggregationMode">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.deltaTable"/>
+      <entry key="group.getDeltaSQL"/>
+      <entry key="group.isAdvance">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.isPermissionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.mergeRows">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.useExecuteQuery">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="groupHierarchyAttribute" value="Child Roles"/>
+      <entry key="isAdvance">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="isPermissionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="managerCorrelationFilter">
+        <value>
+          <Filter operation="EQ" property="employeeId" value="mgrId"/>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="partitionMode">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="partitionStatements"/>
+      <entry key="password" value="1:0wjmINZ8uIishsPf84aaIQ=="/>
+      <entry key="provisionRule" value="globalRule"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="The HR authoritative source&lt;br>&#xD;&#xA;&#xD;&#xA;"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="JDBC Template"/>
+      <entry key="url" value="jdbc:mysql://seri.sailpointdemo.com/orangehrm?useOldAliasMetadataBehavior=true"/>
+      <entry key="useExecuteQuery">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="user" value="orangehrm"/>
+    </Map>
+  </Attributes>
+ <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="Correlation - EmployeeID"/>
+  </CorrelationRule>
+  <CreationRule>
+    <Reference class="sailpoint.object.Rule" name="Set Unique Username (I18n) with email on Identity Creation"/>
+  </CreationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="" groupAttribute="" identityAttribute="empid" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="city" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="country" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="department" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="email" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="empid" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="firstname" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="lastname" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="mgrId" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="status" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="term" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="title" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="userid" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+</Application>

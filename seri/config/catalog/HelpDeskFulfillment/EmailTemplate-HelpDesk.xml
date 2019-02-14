@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+<EmailTemplate name="Notify Help Desk">
+  <Description>
+      *******************************************************************************
+      *   This is the advanced Email Template for the Help Desk Notification flow.
+      *
+      *   To tie this into the Help Desk Executor flow, add the name of the 
+      *   Email Template to the Configuration Object, "POC Configuration Data" in
+      *   the attribute called "helpDesk-EmailTemplate".
+      *******************************************************************************
+  </Description>
+  <Body>
+    <![CDATA[
+    <html>
+      <img src="http://localhost:8080/identityiq/images/DemoHeader.png" width="512" height="69" alt="IdentityIQ" />
+      <br><br>
+      Attention:
+      <br><br>
+      Enterprise user, <b>$firstName $lastName</b>, requires the provisioning of updated Entitlements.<br>
+      <br>
+      Please open a <u>Help Desk Ticket</u> to reflect the following provisioning changes for $firstName:<br>
+      <br>
+      <b><u>User Profile Details</u></b><br>
+      <UL>
+        <LI>Full Name: $firstName $lastName<br>
+        <LI>Employee ID: $userId<br>
+        <LI>Application: $application<br>
+        <LI>Operation:   $operation<br>
+      </UL>
+      <br> 
+      <b><u>Account Details</u></b><br>
+      #foreach ($acctReq in $ProvisioningPlan.getAccountRequests())
+      <UL>
+        <LI>Application: $acctReq.getApplication()<br>
+        <LI>Account ID: $acctReq.getNativeIdentity()<br>
+      </UL>
+      <br>
+      <b><u>Entitlement Change Details</u></b><br>
+      #foreach ($attrReq in $acctReq.getAttributeRequests())
+      <UL>
+        <LI>Operation: $attrReq.getOperation()<br>
+        <LI>Attribute: $attrReq.getName()<br>
+        <LI>Value(s): $attrReq.getValue()<br>
+      </UL>
+      #end
+      <br>
+      To compliment the simulation of Help Desk integration, a Request ID was generated to track <br>
+      this remediation request.  This tracking number is available in the IdentityIQ Remediations report.<br>
+      <br>
+      The Request ID for this remediation is <font color="#0088A3"><b>$requestId</b></font>.<br>
+      <br>
+      <br>
+      Regards,<br>
+      The IdentityIQ Administration Team<br>
+      #end
+      <center>
+         <img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/>
+      </center>
+    </html>
+    ]]>
+  </Body>
+  <Subject>Help Desk access request for $firstName $lastName</Subject>
+</EmailTemplate>
+ 
+<EmailTemplate name="Notify Help Desk - Basic">
+  <Description>
+      *******************************************************************************
+      *   This is a basic Email Template for the Help Desk Notification flow.
+      *
+      *   To tie this into the Help Desk Executor flow, add the name of the 
+      *   Email Template to the Configuration Object, "POC Configuration Data" in
+      *   the attribute called "helpDesk-EmailTemplate".
+      *******************************************************************************
+     Email Template for notifying the Help Desk.
+  </Description>
+  <Subject>Access Request for the Help Desk</Subject>
+  <Body>
+     A new Access Request has been approved and assigned to the Help Desk.
+     Please create a Help Desk ticket based upon the following details:
+  </Body>
+</EmailTemplate>
+
+<EmailTemplate name="POC Access Request - For Approval">
+  <Description>
+      *******************************************************************************
+      *   This is the Email Template which is invoked in the ARM Request Workflow,
+      *   when an ARM Access Request is submitted for APPROVAL.                    
+      *
+      *   It is **NOT** 'linked' or specified in the System Configuration; the only 
+      *   reference to it is in the ARM Request Workflow configuration object.
+      *******************************************************************************
+    </Description>
+  <Body>
+    <![CDATA[
+    <html>
+      <img src="http://localhost:8080/identityiq/images/DemoHeader.png" width="512" height="69" alt="IdentityIQ" />
+      <br><br>
+      $requestor is requesting the following access changes for account $identity:<br>
+      <UL>
+         <LI>Roles to Add: <b>$addNames</b><br>
+      <br>
+         <LI>Roles to Remove: <b>$removeNames</b><br>
+      </UL>
+      <br>
+      Please log into the <a href="http://localhost:8080/identityiq/login.jsf">IdentityIQ console</a> to review this approval request.<br>
+      <br>
+      Regards,<br>
+      The IdentityIQ Administration Team<br>
+     <center>         
+        <img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/>
+      </center>
+ 
+    </html>
+    ]]>
+    </Body>
+  <Subject>Role changes to User: $identity needs approval </Subject>
+</EmailTemplate>
+
+<EmailTemplate name="POC Access Request - Was Approved">
+  <Description>
+      ********************************************************************************
+      *   This Email Template is invoked in the ARM Request Workflow, after an 
+      *   ARM Access Request has been APPROVED.  It is sent to the requestor.
+      *
+      *   It is **NOT** 'linked' or specified in the System Configuration; the only 
+      *   reference to it is in the ARM Request Workflow configuration object.
+      ********************************************************************************
+    </Description>
+  <Body>
+    <![CDATA[
+    <html>
+      <img src="http://localhost:8080/identityiq/images/DemoHeader.png" width="512" height="69" alt="IdentityIQ" />
+      <br><br>
+      This is an automated response to your recent request for additional access.  The following<br>
+      summarizes the outcome from the approval processing:<br>
+      <br>
+      The following changes were <b>approved</b>:<br>
+      <UL>
+         <LI>Add: $approvedAddNames<br>
+         <LI>Remove: $approvedRemoveNames<br>
+      </UL>
+      <br>
+      The following changes were <b>rejected</b>:<br>
+      <UL>
+         <LI>Add: $rejectedAddNames<br>
+         <LI>Remove: $rejectedRemoveNames<br>
+      </UL>
+      <br>
+      Regards,<br>
+      The IdentityIQ Administration Team<br>
+    </html>
+    ]]>
+    </Body>
+  <Subject>Role change request completed for User: $identity</Subject>
+</EmailTemplate>
+
+</sailpoint>

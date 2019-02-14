@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="MARetrievalPO" type="Workflow">
+  <Signature>
+    <Inputs>
+      <Argument name='owernName'/>
+      <Argument name='appName'/>
+    </Inputs>
+  </Signature>
+
+  <Source><![CDATA[
+
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.QueryOptions;
+
+List filterList = new ArrayList();
+filterList.add(Filter.eq("application.name", appName));
+filterList.add(Filter.eq("owner.name", ownerName));
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.and(filterList));
+
+Iterator groups = null;
+Map ownerMap = new HashMap();
+                        
+try {
+  groups = context.search(ManagedAttribute.class, qo);
+  while (groups.hasNext()) {
+    ManagedAttribute ma = groups.next();
+    Identity owner = ma.getOwner();
+    if (owner != null) {
+      ownerMap.put(ma.getDisplayableName(),ma.getOwner().getName());
+    } else {
+    	// Currently not going to worry about items without owners
+    	// ownerMap.put(ma.getDisplayableName(),"spadmin");
+    }
+  }                          
+} catch (Exception ex){
+  ex.printStackTrace();
+}
+
+return ownerMap;
+      
+  ]]></Source>
+</Rule>

@@ -1,0 +1,7 @@
+GroupName,GroupScope,GroupLocation
+RegionDirector_EMEA,Global,"OU=Groups,OU=Demo"
+RegionDirector_APAC,Global,"OU=Groups,OU=Demo"
+RegionDirector_AMS,Global,"OU=Groups,OU=Demo"
+SalesEngineer_EMEA,Global,"OU=Groups,OU=Demo"
+SalesEngineer_APAC,Global,"OU=Groups,OU=Demo"
+SalesEngineer_AMS,Global,"OU=Groups,OU=Demo"

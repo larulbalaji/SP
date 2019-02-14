@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE GroupDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<GroupDefinition   indexed="true" name="Native Change for Catherine" private="true">
+  <Description></Description>
+  <GroupFilter>
+    <CompositeFilter operation="AND">
+      <Filter ignoreCase="true" matchMode="START" operation="LIKE" property="lastname" value="simmo"/>
+    </CompositeFilter>
+  </GroupFilter>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+</GroupDefinition>

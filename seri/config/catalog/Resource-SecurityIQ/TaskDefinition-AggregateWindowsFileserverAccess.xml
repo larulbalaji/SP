@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Aggregate Windows FileServer Access" resultAction="Delete" subType="task_item_type_target_aggregation" type="TargetAggregation">
+  <Attributes>
+    <Map>
+      <entry key="TaskDefinition.runLengthAverage" value="19"/>
+      <entry key="TaskDefinition.runLengthTotal" value="19"/>
+      <entry key="TaskDefinition.runs" value="1"/>
+      <entry key="TaskSchedule.host"/>
+      <entry key="promoteInherited" value="false"/>
+      <entry key="targetApplication" value="SecurityIQ"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+    </Map>
+  </Attributes>
+  <Description>Pull in access to unstructured data discovered using SecurityIQ</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Target Aggregation"/>
+  </Parent>
+</TaskDefinition>

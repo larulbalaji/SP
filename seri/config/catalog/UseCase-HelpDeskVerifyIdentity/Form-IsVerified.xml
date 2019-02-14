@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Form name="Is Verified">
+    <Attributes>
+      <Map>
+        <entry key="pageTitle" value="$(identityName) is Verified" />
+      </Map>
+    </Attributes>
+
+    <Description>This form is displayed when the users identity is
+      verified.</Description>
+    <Section name="post" type="datatable">
+      <Field name="goto"
+        displayName="The User was verified.   Select 'Change Password' to continue"
+        displayType="textarea" type="text" dynamic="true">
+        <Script>
+          <Source><![CDATA[
+
+import sailpoint.object.*;
+
+// Expect: java.lang.String identityName
+
+String url="/identityiq/lcm/managePasswords.jsf?identityName=" + identityName;
+String button="";
+Identity identity = context.getObjectByName(Identity.class,identityName);
+button = "<a href='" + url + "'><div><input type='button' name='submittosomthin' value='Change Password' class='secondaryBtn' /></div></a>";
+return button;
+
+                ]]></Source>
+        </Script>
+      </Field>
+
+
+    </Section>
+  </Form>
+</sailpoint>

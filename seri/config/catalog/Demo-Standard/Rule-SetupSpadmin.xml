@@ -1,0 +1,63 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Setup SPADMIN" >
+  <Source>
+  <![CDATA[
+  	import sailpoint.object.AuthenticationAnswer;
+  	import sailpoint.object.AuthenticationQuestion;
+  	import sailpoint.object.Identity;
+
+	String identity="spadmin";
+
+	Identity targetIdentity=context.getObjectByName(Identity.class, identity);
+	List answers=new ArrayList();
+	List questions=context.getObjects(AuthenticationQuestion.class);
+
+	for(AuthenticationQuestion q: questions) {
+		String theQuestion=q.getQuestion();
+		AuthenticationAnswer ans=new AuthenticationAnswer();
+
+		if("auth_question_mothers_maiden_name".equals(theQuestion)) {
+			ans.setQuestion(q);
+			ans.setAnswer("maiden");
+			answers.add(ans);
+		}
+
+		if("auth_question_favorite_color".equals(theQuestion)) {
+			ans.setQuestion(q);
+			ans.setAnswer("color");
+			answers.add(ans);
+		}
+
+		if("auth_question_first_street".equals(theQuestion)) {
+			ans.setQuestion(q);
+			ans.setAnswer("street");
+			answers.add(ans);
+		}
+	}
+	targetIdentity.assignAuthenticationAnswers(answers);
+
+    // Add spadmin to the 'AD Admins' and 'PRISM Application Owners' workgroup (if they exist)
+    List workgroups=targetIdentity.getWorkgroups();
+    if (workgroups==null) workgroups = new ArrayList();
+
+    Identity adAdmins = context.getObjectByName(Identity.class, "AD Admins");
+    if(adAdmins!=null) {
+      workgroups.add(adAdmins);
+      targetIdentity.setWorkgroups(workgroups);
+    }
+  
+    Identity prismAppOwners = context.getObjectByName(Identity.class, "PRISM Application Owners");
+    if (prismAppOwners != null) {
+       workgroups.add(prismAppOwners);
+       targetIdentity.setWorkgroups(workgroups);
+    }
+  
+    // Give spadmin an email address so we don't see nasty "a to address was not specified" exceptions
+    targetIdentity.setEmail("spadmin@sailpointdemo.com");
+     
+    context.saveObject(targetIdentity);
+    context.commitTransaction();
+  ]]>
+  </Source>
+</Rule>

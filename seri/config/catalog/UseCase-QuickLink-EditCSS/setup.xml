@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='include' value='Workflow-ManageCss.xml' />
+  <ImportAction name='include' value='Rule-GenerateCssForm.xml' />
+  <ImportAction name='include' value='QuickLink-EditCss.xml' />
+  <ImportAction name='include' value='Form-CreateCSSFileName.xml' />
+  <ImportAction name='include' value='Form-ConfigureCss.xml' />
+  <ImportAction name='include' value='Custom-CSS-Examples.xml' />
+</sailpoint>
+

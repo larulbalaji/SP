@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin name="tiny-mfa-plugin" displayName="Tiny MFA Plugin" version="1.4" disabled="false" certificationLevel="None" minSystemVersion="7.1" maxSystemVersion="7.2">
+  <Attributes>
+    <Map>     
+      <entry key="minUpgradableVersion" value="1.0"/>     
+      <entry key="settings">
+        <value>
+          <List>
+            <Setting name="issuerDomain" dataType="string" defaultValue="sailpoint.labs" helpText="define the domainname that gets appended to the account. This is for convinience of the user and does not have any effects on token calculation" label="issuer domain"/>
+            <Setting name="maxAttempts" dataType="int" defaultValue="15" helpText="how much attempts are allowed for a given timesegment until we don't validate anymore" label="maximum validation attempts"/>
+          </List>
+        </value>
+      </entry>
+      <entry key="fullPage">
+        <value>
+          <FullPage title="Tiny Multifactor-Authentication Plugin" />
+        </value>
+      </entry>     
+      <entry key="snippets">
+        <value>
+          <List>
+            <Snippet regexPattern=".*" rightRequired="TinyMfaPluginIcon">
+              <Scripts>
+                <String>ui/js/buttonInject.js</String>
+              </Scripts>
+            </Snippet>
+          </List>
+        </value>
+      </entry>      
+      <entry key="restResources">
+        <value>
+          <List>
+            <String>de.whisperedshouts.identityiq.rest.TinyMfaService</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>

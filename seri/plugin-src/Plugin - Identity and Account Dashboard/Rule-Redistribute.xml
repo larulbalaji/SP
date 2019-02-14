@@ -1,0 +1,223 @@
+<?xml version='1.0' encoding='UTF-8'?>  
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">  
+<Rule language="beanshell" name="redistribute">  
+  <Source>  
+    <![CDATA[ 
+ 
+import org.apache.log4j.Logger; 
+import org.apache.log4j.Level; 
+import sailpoint.object.*;
+import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
+import java.util.HashMap;
+import org.hibernate.collection.PersistentList;
+ 
+Logger log = Logger.getLogger("sailpoint.services.bshdemo"); 
+// TODO: Remove this forced log level set before checking in this Rule. 
+log.setLevel(Level.DEBUG); 
+ 
+
+// get number of applications
+QueryOptions qo = new QueryOptions(); 
+int numberOfApps=context.countObjects(Application.class,qo);  
+log.debug("total number of apps: "+numberOfApps);
+
+//get app names
+ArrayList colsToRead = new ArrayList();
+colsToRead.add("name");
+colsToRead.add("id");  
+Iterator it = context.search(Application.class, qo, colsToRead);  
+ArrayList appNames=new ArrayList();
+ArrayList appIds=new ArrayList();
+
+while ( (null !=it) && (it.hasNext()) ) {
+	Object [] thisRecord= it.next();
+	appNames.add(thisRecord[0]);
+	appIds.add(thisRecord[1]);
+	log.debug(thisRecord[0]+" "+thisRecord[1]);	
+}
+
+
+HashMap dataRow = new HashMap();
+
+ArrayList datum=new ArrayList();
+
+
+
+Iterator<SailPointObject> it = context.search(Identity.class, qo, colsToRead);  
+
+
+
+
+colsToRead=new ArrayList();
+colsToRead.add("created");
+
+Iterator<Identity> it = context.search(Identity.class, qo);  
+  
+
+Identity obj;
+Link obj2;
+
+currentDate = new Date();
+
+log.debug("before");
+// go through identities
+while ( (null !=it) && (it.hasNext()) ) {
+	log.debug("getid");
+   obj = it.next();
+  log.debug("do math");
+  year = (int) Math.floor((Math.random()*2)+1);
+  year = 114+year; // want to start in 2015
+//  year =116;
+  if (year==116)  // if this year , make it before today
+  {
+   month =  (int) Math.floor((Math.random() * (currentDate.getMonth()+1)));
+   if (month==currentDate.getMonth())
+       day = (int) Math.floor((Math.random() * currentDate.getDate()));
+      else
+               day = (int) Math.floor((Math.random() * 28) + 1);
+   }
+   else
+   {
+      month =  (int) Math.floor((Math.random() * 12));	   
+      day = (int) Math.floor((Math.random() * 28));
+   }
+
+   hour = (int) Math.floor((Math.random() * 24)); 
+   log.debug("month: "+month+"  day: "+day);
+   date = new Date(year,month,day);
+   date.setHours(hour);
+   log.debug("before Persistentlist");
+//   PersistentList listLinks=obj.links;
+   log.debug("id: "+obj.getId());
+     QueryOptions qo = new QueryOptions();
+   qo.addFilter(Filter.eq("identity.id", obj.getId()));
+Iterator<Link> it2 = context.search(Link.class, qo);
+
+//go through links for this identity
+  while ( (null !=it2) && (it2.hasNext()) ) {
+	  log.debug("found a link!    "+obj.getId());
+	  obj2 = it2.next();
+	  newHour = date.getHours()+1;
+	  if (newHour>23) {
+		  newHour=23;
+	  }
+	  date.setHours(newHour);
+	  
+	  obj2.setCreated(date);
+	  context.saveObject(obj2);
+	    context.commitTransaction();
+
+//go through entitlements
+
+  QueryOptions qo2 = new QueryOptions();
+   qo2.addFilter(Filter.eq("identity.id", obj.getId()));
+   qo2.addFilter(Filter.eq("application.id",obj2.getApplication().getId()));
+  Iterator<IdentityEntitlement> it3 = context.search(IdentityEntitlement.class, qo);
+ while ( (null !=it3) && (it3.hasNext()) ) {
+	  log.debug("found an entitlement!    ");
+	  obj3 = it3.next();
+	  newHour = date.getHours()+2;
+	  if (newHour>23) {
+		  newHour=23;
+	  }
+	  date.setHours(newHour);
+
+	  obj3.setCreated(date);
+	  context.saveObject(obj3);
+	    context.commitTransaction();
+	  }
+
+
+   }
+   log.debug(date);
+   obj.setCreated(date);
+   context.saveObject(obj);  
+   context.commitTransaction();  
+
+	
+}
+
+
+
+
+
+/*
+
+log.debug("{
+	"values": [");
+
+
+while ( (null !=it) && (it.hasNext()) ) {
+	log.debug("{")
+	dataRow = new HashMap();
+	Object [] thisRecord= it.next();
+	dataRow.put("date",thisRecord[0].getTime());
+	dataRow.put("Identity",true);
+	log.debug("\"date\":"+thisRecord[0].getTime()+",");
+	log.debut("\"identity\": \"1\",");
+	for (int i=0;i<numberOfApps;i++)
+	{
+		dataRow.put(appNames.get(i),false);
+		log.debug("\""+appNames.get(i)+"\":\"0\",");
+	}
+   // log.debug(dataRow);	
+    datum.add(dataRow);
+}
+
+
+
+
+for (int i=0;i<numberOfApps;i++) {
+  QueryOptions qo = new QueryOptions();  
+  qo.addFilter(Filter.eq("application.id", appIds.get(i)));
+  int numberOfAccounts=context.countObjects(Link.class,qo);  
+  log.debug("app:  "+appNames.get(i)+"  total number of ids: "+numberOfAccounts);  
+
+  //go get the ids
+  colsToRead= new ArrayList();
+  colsToRead.add("created");  
+  Iterator it=context.search(Link.class, qo, colsToRead);  
+  
+  while ( (null !=it) && (it.hasNext()) ) {
+	dataRow = new HashMap();
+	Object [] thisRecord= it.next();
+	dataRow.put("date",thisRecord[0].getTime());
+	dataRow.put("Identity",false);
+	for (int j=0;j<numberOfApps;j++)
+	{
+		if (i==j)
+		dataRow.put(appNames.get(j),true);
+		 else
+		dataRow.put(appNames.get(j),false);
+	}
+    datum.add(dataRow);
+    //log.debug(dataRow);
+    
+}
+  
+  	
+}
+
+
+
+log.debug("*************");
+
+log.debug(datum.get(0));
+log.debug(datum.get(1));
+log.debut(datum.get(2));
+
+log.debug("");
+
+
+	
+
+
+log.debug(stuff);
+*/
+sailpoint.tools.Util.flushIterator(it);  
+ 
+return;  
+    ]]>  
+  </Source>  
+</Rule>  

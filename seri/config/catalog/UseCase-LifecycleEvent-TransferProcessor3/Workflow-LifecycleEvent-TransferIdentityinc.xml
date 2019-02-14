@@ -1,0 +1,639 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow created="1493992011750" explicitTransitions="true" id="8a8080815bd8dc70015bd8dcf7e600fa" libraries="Identity,IdentityRequest" modified="1494007680005" name="LifeCycle Event - Transfer IdentityInc" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event" transient="true">
+    <Description>The IdentityChangeEvent.  It can be used to build
+      the provisioning plan, but does not need to be
+      persisted with the case, so marked as transient.</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName">
+    <Description>The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.</Description>
+  </Variable>
+  <Variable name="plan">
+    <Description>The transfer removal plan, which is built by a service method.</Description>
+  </Variable>
+  <Variable name="planAdd">
+    <Description>The transfer addition plan, which is built by a service method.</Description>
+  </Variable>
+  <Variable name="planRemove">
+    <Description>The transfer removal plan, which is built by a service method.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="optimisticProvisioning">
+    <Description>Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.</Description>
+  </Variable>
+  <Variable initializer="string:true" name="foregroundProvisioning">
+    <Description>Normally provisioning is done in a step that uses the &amp;quot;background&amp;quot;
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to 
+      see the resutls of the request.</Description>
+  </Variable>
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>String version of sailpoint.object.Source to indicate
+      where the request originated.  Defaults to LCM.</Description>
+  </Variable>
+  <Variable initializer="string:false" input="true" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Variable name="project">
+    <Description>ProvisioningProject which is just a compiled version of the ProvisioningPlan.</Description>
+  </Variable>
+  <Variable name="identityRequestId" output="true">
+    <Description>The sequence id of the Identity request object which is stored in 
+       the name field of the identity request.</Description>
+  </Variable>
+  <Variable name="cart" output="true">
+    <Description>This variable includes all ApprovalItems that are part of 
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions 
+       and comments from the Approvals copy of the ApprovalItem.</Description>
+  </Variable>
+  <Variable initializer="string:28" input="true" name="daysAfterTransfer">
+    <Description>Number of days after the transfer occurs that IdentityIQ is to sunset previously 
+          assigned roles and entitlements.  
+          A value of 0 will sunset the roles on the day of transfer</Description>
+  </Variable>
+  <Variable initializer="string:user,oldManager,newManager" input="true" name="notificationScheme">
+    <Description>Who should be notified that a transfer has occurred, separate the actors&amp;#39; names with commas. If the oldManager and the newManager are one and the same, only one variable name is required.
+oldManager - The transfer&amp;#39;s prior manager 
+newManager - The transfer&amp;#39;s new manager 
+user - The transferred associate</Description>
+  </Variable>
+  <Variable name="theForm"/>
+  <Variable name="retMap"/>
+  <Variable initializer="script: event.getIdentityFullName()" name="identityFullname"/>
+  <Variable initializer="true" name="SIQEnabled"/>
+  <Variable name="SIQResources"/>
+  <Variable name="sponsor">
+    <Description>The person who should decide on the retaining of SIQ Resources. Also person to get ownership if resources are reassigned</Description>
+  </Variable>
+  <Variable name="oldManagerName">
+    <Description>Display name of old manager</Description>
+  </Variable>
+  <Variable name="newManagerName">
+    <Description>Display name of new manager</Description>
+  </Variable>
+  <Description>Do the transfer dance.</Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule" name="SP Util Rule Library"/>
+    <Reference class="sailpoint.object.Rule" name="RuleLibrary-SecurityIQConfiguration"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="22" posY="14">
+    <Description>Set the old and new manager</Description>
+    <Script>
+      <Source>
+import sailpoint.object.Identity;      
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LceTransferInc.Start");     
+serilog.debug("Starting Transfer Workflow");
+Identity oldManager = (null != event.getOldObject()) ? event.getOldObject().getManager() : null;
+Identity newManager = (null != event.getObject()) ? event.getObject().getManager() : null;
+String oldManagerName = (null != oldManager) ? oldManager.getDisplayableName() : null;
+String newManagerName = (null != newManager) ? newManager.getDisplayableName() : null;
+workflow.put("sponsor", oldManager.getName());
+workflow.put("oldManagerName", oldManagerName);
+workflow.put("newManagerName", newManagerName);
+
+      </Source>
+    </Script>
+    <Transition to="Calculate Ownerships" when="ref:SIQEnabled"/>
+    <Transition to="Build Transfer Provisioning Plan"/>
+  </Step>
+  <Step name="Build Transfer Provisioning Plan" posX="165" posY="12" resultVariable="transferPlans">
+    <Description>Create a plan based on configured settings</Description>
+    <Script>
+      <Source>
+import sailpoint.object.*;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.Operation;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import java.util.*;
+
+
+// Grab the cube
+Identity cube = context.getObjectByName(Identity.class, identityName);
+
+/****************************************************************************
+ * Avoid locking with aggregation task
+****************************************************************************/
+if(cube.getLock() != null) {  
+    cube.setLock(null);
+    context.saveObject(cube);
+    context.commitTransaction();
+}
+
+//It's just here to avoid org.hibernate.LazyInitializationException by loading the Identity first
+if(identity != null) {
+    cube.toXml();
+}
+
+
+/****************************************************************************
+ * Determine birthright roles to assign based on role assignment rules
+****************************************************************************/
+HashMap transferPlans = getPlanAddAndRemove (event, context, identityName);
+
+/****************************************************************************
+ * Put some variables in the workflow case for email notifications.  
+****************************************************************************/
+WorkflowCase c = wfcontext.getWorkflowCase();
+c.put("identityDisplayName", event.getIdentityFullName());
+c.put("userId", cube.getName());
+c.put("firstName", cube.getFirstname());
+c.put("lastName", cube.getLastname());
+c.put("planAdd", transferPlans.get("additions"));
+c.put("planRemove", transferPlans.get("removals"));
+
+// System.out.println ("\n\nTransfer Addition Plan is: \n" + transferPlans.get("additions").toXml());
+// System.out.println ("\n\nTransfer Removal Plan is: \n" + transferPlans.get("removals").toXml());
+
+return transferPlans;
+
+    </Source>
+    </Script>
+    <Transition to="Transfer Notification" when="script: planRemove != null &amp;&amp; !planRemove.isEmpty()"/>
+    <Transition to="Decide SIQ ownership" when="script:return ( &quot;true&quot;.equals(SIQEnabled) &amp;&amp; (SIQResources.size()>0) )"/>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Task" name="Transfer Notification" posX="255" posY="181">
+    <Arg name="newManagerEmailTemplate" value="string:Transfer Notification - New Manager"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="notificationScheme" value="ref:notificationScheme"/>
+    <Arg name="userEmailTemplate" value="string:Transfer Notification - User"/>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="policyViolations" value="ref:policyViolations"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="priority" value="ref:workItemPriority"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="trace" value="false"/>
+    <Arg name="planAdd" value="ref:planAdd"/>
+    <Arg name="oldManagerEmailTemplate" value="string:Transfer Notification - Old Manager"/>
+    <Arg name="dateAfterTransfer">
+      <Script>
+        <Source>
+import java.text.*;
+import java.util.*;
+
+if (daysAfterTransfer != null) {
+  DateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM dd, yyyy");
+  Date date = new Date();
+  Calendar cal = Calendar.getInstance();
+  cal.setTime(date);  
+  cal.add(Calendar.DATE, + Integer.parseInt(daysAfterTransfer));
+  Date newDate = cal.getTime();
+  formatedDate = dateFormat.format(newDate);
+  return formatedDate;
+}
+        </Source>
+      </Script>
+    </Arg>
+    <Arg name="securityOfficerName" value="ref:securityOfficerName"/>
+    <Arg name="securityOfficerEmailTemplate" value="ref:securityOfficerEmailTemplate"/>
+    <Arg name="event" value="ref:event"/>
+    <Arg name="plan" value="ref:planRemove"/>
+    <Arg name="flow" value="ref:flow"/>
+    <Arg name="launcher" value="ref:launcher"/>
+    <Description>Call the standard subprocess that will notifiy the various
+      actors based on notification scheme.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" id="8a8080815bd8dc70015bd8dcf5b400f7" name="SERI Transfer Request Notify"/>
+    </WorkflowRef>
+    <Transition to="Generate Old Manager Certification"/>
+  </Step>
+  <Step name="Calculate Ownerships" posX="68" posY="262" resultVariable="SIQResources">
+    <Script>
+      <Source>
+import java.sql.*;
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.CalculateOwnerships");
+
+/* Go look at SIQ for resources the mover owns */
+/* We know that only MSSQL server would be user here; makes it simpler */
+HashMap siqrepo = getSIQConnectionInformation();
+serilog.debug("Obtaining connection..");
+try {
+  Connection conn = DriverManager.getConnection(siqrepo.get("url"),siqrepo.get("user"),context.decrypt(siqrepo.get("password")));
+  serilog.debug("..done");
+  
+  Statement stmt = conn.createStatement();
+  ResultSet rs;
+  
+  Identity iden=context.getObjectByName(Identity.class, identityName);
+  
+  //Use email because its on the identity
+  //We should really promote the sAMAccountName to another identity attribute
+  //In SERI the cube name will be the sAMAccountName but that is not always the case.
+  String email = iden.getEmail();
+  serilog.debug("Email = " + email);
+  if (email != null) {
+     String query = getSIQOwnershipQuery(email);
+     
+     serilog.debug("Executing query.. "+query);
+     rs = stmt.executeQuery(query);
+     serilog.debug(".. done");
+     Map map=new HashMap();
+     Integer i=new Integer(0);
+     while ( rs.next() ) {
+        serilog.debug("got a result");
+        String path = rs.getString("path");
+        String type = rs.getString("type");
+        String user = rs.getString("username");
+        String resID = rs.getString("res_id");
+        serilog.debug("result: "+path+" "+type+" "+user);
+        Map res=new HashMap();
+        res.put("path", path);
+        res.put("id", resID);
+        map.put(i, res);    
+        i=i+1;
+     }
+     serilog.debug("No more results");
+     conn.close();
+     return map;
+   } else {
+      //User didn't have an email.  Return null;
+      serilog.debug("User had no email, No matching SIQ ownership");
+      return null;
+   }
+} catch (Exception e) {
+   serilog.error("Something went wrong contacting SIQ database: "+e);
+   return null;
+}
+
+
+          
+      </Source>
+    </Script>
+    <Transition to="Generate Form"/>
+  </Step>
+  <Step name="Generate Form" posX="168" posY="258" resultVariable="theForm">
+    <Script>
+      <Source>
+import sailpoint.object.DynamicValue;
+import sailpoint.object.Form;
+import sailpoint.object.Field;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Script;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.GenerateForm");
+
+
+Form frm=new Form();
+frm.put("pageTitle", "Transfer Process");
+frm.put("title", "Reassign Resources");
+
+//Default next and cancel buttons
+List buttons=new ArrayList();
+buttons.add(new Button("Next", "next"));
+buttons.add(new Button("Cancel", "cancel"));
+frm.setButtons(buttons);
+
+Section sect=new Section();
+sect.setType("text");
+
+Field f = new Field();
+f.setValue("\n\t\t  Per corporate policy, your input is required regarding the transfer of the following employee.  Please choose whether their current resources should be retained or reassigned. By choosing Retain, the individual's will maintain ownership. Choosing reassign will assign you as the owner.");
+
+sect.add(f);
+frm.add(sect);
+
+sect=new Section();
+sect.setType("datatable");
+
+f=new Field();
+f.setDisplayName("Person");
+f.setName("identityFullname");
+sect.add(f);
+
+frm.add(sect);
+
+if ("true".equals(SIQEnabled) &amp;&amp; (null!=SIQResources)) {
+  sect=new Section();
+  sect.setLabel("Owned Resources");
+  
+  sect.setSubtitle("Should the user keep ownership after the move?");
+  
+  for (Integer resourceName: SIQResources.keySet()) {
+    Map item=SIQResources.get(resourceName);
+    f=new Field();
+    f.setDisplayName(item.get("path"));
+    f.setName("decision:"+item.get("id"));
+    DynamicValue dv=new DynamicValue();
+    List retrev=new ArrayList();
+    retrev.add("Yes");
+    retrev.add("No");
+    dv.setValue(retrev);
+    f.setAllowedValuesDefinition(dv);
+    sect.add(f);
+  
+  }
+}
+
+
+frm.add(sect);
+
+serilog.debug("Form=\n"+frm.toXml());
+
+return frm;
+
+      </Source>
+    </Script>
+    <Transition to="Build Transfer Provisioning Plan"/>
+  </Step>
+  <Step name="Generate Old Manager Certification" posX="266" posY="352">
+    <Description>Generate a certification for the new manager</Description>
+    <Script>
+      <Source>
+import java.util.List;
+import java.util.ArrayList;
+import sailpoint.object.*;
+import sailpoint.object.Identity;
+import sailpoint.api.CertificationScheduler;
+import sailpoint.web.certification.CertificationScheduleDTO;
+import sailpoint.object.CertificationDefinition;
+import sailpoint.object.TaskSchedule;
+import sailpoint.object.Certification;
+import sailpoint.task.CertificationExecutor.CertifierSelectionType;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LceTransferInc.GenerateOldCert");
+    
+Identity requestor = context.getObject(Identity.class, launcher);   
+Identity identity = context.getObject(Identity.class,identityName);
+    
+serilog.debug("Building certification for " + identityName);
+
+// Certifier is the sponsor...
+//
+Identity certifier = event.getOldObject().getManager();
+serilog.debug("Certification will be done by " + certifier.getName());
+    
+CertificationScheduler scheduler = new CertificationScheduler(context);
+
+CertificationSchedule schedule = scheduler.initializeScheduleBean(requestor, Certification.Type.Identity);
+schedule.setRunNow(true);
+
+CertificationDefinition definition = schedule.getDefinition();
+definition.setCertifierSelectionType(CertificationDefinition.CertifierSelectionType.Manual);
+definition.setProcessRevokesImmediately(true);
+
+definition.setNameTemplate("Previous Manager Transfer Review " + identity.getDisplayName() );
+definition.setShortNameTemplate("Previous Manager Transfer Review: " + identity.getDisplayName());
+definition.setName("Previous Manager Transfer Review : " + identity.getDisplayName() + " [" + new Date().toString() + "]");
+
+List identities = new ArrayList();
+identities.add(identity.getName());
+definition.setIdentitiesToCertify(identities);
+definition.setCertifierName(certifier.getName());
+
+definition.setCertificationOwner(certifier);
+definition.setCertificationNameTemplate("Previous Manager Transfer  Review : " + identity.getDisplayName());
+
+TaskSchedule taskSchedule = scheduler.saveSchedule(schedule, false);</Source>
+    </Script>
+    <Transition to="Schedule Delete Old Assignments"/>
+  </Step>
+  <Step action="call:scheduleWorkflowEvent" icon="Task" name="Schedule Delete Old Assignments" posX="428" posY="344">
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="workflow" value="string:Transfer Entitlement Cleanup"/>
+    <Arg name="catchExceptions" value="string:true"/>
+    <Arg name="scheduleDate">
+      <Script>
+        <Source>
+import java.text.*;
+import java.util.*;
+
+Calendar calendar = Calendar.getInstance();  
+calendar.add(Calendar.MINUTE, 2); 
+// calendar.add(Calendar.DATE, Integer.parseInt(daysAfterTransfer));   
+return calendar.getTime();
+
+    </Source>
+      </Script>
+    </Arg>
+    <Arg name="eventName" value="string:Old Transfer Assignments expires on ref:daysAfterTransfer"/>
+    <Arg name="plan" value="ref:planRemove"/>
+    <Transition to="Modify Role Assignment Source and Removal TimeFrame"/>
+  </Step>
+  <Step icon="Task" name="Modify Role Assignment Source and Removal TimeFrame" posX="605" posY="322">
+    <Arg name="identityEmailTemplate"/>
+    <Arg name="enableRetryRequest"/>
+    <Arg name="securityOfficerElectronicSignature"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="endOnManualWorkItems"/>
+    <Arg name="userEmailTemplate"/>
+    <Arg name="policiesToCheck"/>
+    <Arg name="project"/>
+    <Arg name="workItemComments"/>
+    <Arg name="identityRequestId"/>
+    <Arg name="approvalSplitPoint"/>
+    <Arg name="source" value="Task"/>
+    <Arg name="identityDisplayName"/>
+    <Arg name="foregroundProvisioning"/>
+    <Arg name="ownerElectronicSignature"/>
+    <Arg name="batchRequestItemId"/>
+    <Arg name="splitPlans"/>
+    <Arg name="doRefresh" value="string:false"/>
+    <Arg name="plan">
+      <Script>
+        <Source>
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan;
+
+Calendar cal = Calendar.getInstance();
+cal.add(Calendar.DATE, Integer.parseInt("28"));   // MODIFY to be passed in
+Date deactivitationDate = cal.getTime();
+
+ProvisioningPlan planRoleAssignmentOnly = new ProvisioningPlan();
+planRoleAssignmentOnly.setSource ("Task");
+List accountRequests = planRemove.getAccountRequests();
+for ( AccountRequest accountRequest : accountRequests ) {
+  // Normally we would set this for every removal (entitlement and role)
+  // In 7.1 Beta, if an entitlement has a removalDate, the 'request' object 
+  // stays around while the 'request' object for  IIQ roles are cleaned up.
+  // This just demo's better given, the entitlement and roles are deleted in the schedule event. 
+  if (accountRequest.getApplication() == ProvisioningPlan.APP_IIQ) {
+    List attributeRequests = accountRequest.getAttributeRequests();
+    if ( Util.size(attributeRequests) > 0 ) {
+      for ( AttributeRequest attributeRequset : attributeRequests ) {   
+        attributeRequset.setRemoveDate(deactivitationDate);
+      }
+    }
+    planRoleAssignmentOnly.add(accountRequest);
+  } 
+}
+// System.out.println ("returning planRemove: " + planRoleAssignmentOnly.toXml());
+return planRoleAssignmentOnly;
+        </Source>
+      </Script>
+    </Arg>
+    <Arg name="flow"/>
+    <Arg name="identityElectronicSignature"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="approvalSet"/>
+    <Arg name="violationReviewDecision"/>
+    <Arg name="filterRejects"/>
+    <Arg name="splitProjects"/>
+    <Arg name="requesterEmailTemplate"/>
+    <Arg name="approvalEmailTemplate"/>
+    <Arg name="ticketManagementApplication"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="approvingIdentities"/>
+    <Arg name="managerEmailTemplate" value="string:LCM Manager Termination Notify"/>
+    <Arg name="ticketId"/>
+    <Arg name="approvalScheme" value="string:none"/>
+    <Arg name="allowRequestsWithViolations"/>
+    <Arg name="workItemPriority"/>
+    <Arg name="managerElectronicSignature"/>
+    <Arg name="requireViolationReviewComments"/>
+    <Arg name="splitApprovalSet"/>
+    <Arg name="approvalMode" value="string:parallel"/>
+    <Arg name="trace" value="string:false"/>
+    <Arg name="endOnProvisioningForms"/>
+    <Arg name="splitWorkItemComments"/>
+    <Arg name="notificationScheme" value="string:none"/>
+    <Arg name="policyViolations"/>
+    <Arg name="policyScheme" value="string:none"/>
+    <Arg name="setPreviousApprovalDecisions"/>
+    <Arg name="optimisticProvisioning"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <Description>Call the standard subprocess to initialize the request, this includes
+        auditing, building the approvalset, compiling the plan into 
+        project and checking policy violations.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" id="8a8080815bd8db97015bd8dc121402f0" name="LCM Provisioning"/>
+    </WorkflowRef>
+    <Transition to="Add in New Roles"/>
+  </Step>
+  <Step icon="Task" name="Add in New Roles" posX="804" posY="300">
+    <Arg name="identityEmailTemplate"/>
+    <Arg name="enableRetryRequest"/>
+    <Arg name="securityOfficerElectronicSignature"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="endOnManualWorkItems"/>
+    <Arg name="userEmailTemplate"/>
+    <Arg name="policiesToCheck"/>
+    <Arg name="project"/>
+    <Arg name="workItemComments"/>
+    <Arg name="identityRequestId"/>
+    <Arg name="approvalSplitPoint"/>
+    <Arg name="source" value="Rule"/>
+    <Arg name="identityDisplayName"/>
+    <Arg name="foregroundProvisioning"/>
+    <Arg name="ownerElectronicSignature"/>
+    <Arg name="batchRequestItemId"/>
+    <Arg name="splitPlans"/>
+    <Arg name="doRefresh" value="string:false"/>
+    <Arg name="plan" value="ref:planAdd"/>
+    <Arg name="flow"/>
+    <Arg name="identityElectronicSignature"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="approvalSet"/>
+    <Arg name="violationReviewDecision"/>
+    <Arg name="filterRejects"/>
+    <Arg name="splitProjects"/>
+    <Arg name="requesterEmailTemplate"/>
+    <Arg name="approvalEmailTemplate"/>
+    <Arg name="ticketManagementApplication"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="approvingIdentities"/>
+    <Arg name="managerEmailTemplate" value="string:LCM Manager Termination Notify"/>
+    <Arg name="ticketId"/>
+    <Arg name="approvalScheme" value="string:none"/>
+    <Arg name="allowRequestsWithViolations"/>
+    <Arg name="workItemPriority"/>
+    <Arg name="managerElectronicSignature"/>
+    <Arg name="requireViolationReviewComments"/>
+    <Arg name="splitApprovalSet"/>
+    <Arg name="approvalMode" value="string:parallel"/>
+    <Arg name="trace" value="string:false"/>
+    <Arg name="endOnProvisioningForms"/>
+    <Arg name="splitWorkItemComments"/>
+    <Arg name="notificationScheme" value="string:none"/>
+    <Arg name="policyViolations"/>
+    <Arg name="policyScheme" value="string:none"/>
+    <Arg name="setPreviousApprovalDecisions"/>
+    <Arg name="optimisticProvisioning"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <Description>Call the standard subprocess to initialize the request, this includes
+        auditing, building the approvalset, compiling the plan into 
+        project and checking policy violations.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" id="8a8080815bd8db97015bd8dc121402f0" name="LCM Provisioning"/>
+    </WorkflowRef>
+    <Transition to="Decide SIQ ownership" when="script:return ( &quot;true&quot;.equals(SIQEnabled) &amp;&amp; (SIQResources.size()>0) )"/>
+    <Transition to="end"/>
+  </Step>
+  <Step name="Decide SIQ ownership" posX="512" posY="200">
+    <Approval description="Transfer : $(identityFullname) : Move resource ownership" owner="ref:sponsor" return="retMap" send="identityFullname, oldManagerName, newManagerName, decision, currentApps, currentRiskScore, currentRoles">
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Transfer : $(identityFullname) : Retain / Revoke"/>
+      <Arg name="workItemForm" value="ref:theForm"/>
+      <Arg name="workItemFormBasePath" value="retMap"/>
+    </Approval>
+    <Transition to="Move owned resources"/>
+  </Step>
+  <Step name="Move owned resources" posX="620" posY="74">
+    <Description>Move SIQ resources to new owner</Description>
+    <Script>
+      <Source>
+import java.sql.*;     
+import sailpoint.object.Identity;          
+          
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor3.MoveOwnedResources");
+
+// check through retMap
+// if any answer is 'no', change owner to sponsor
+Identity idSponsor=context.getObjectByName(Identity.class, sponsor);
+String email=idSponsor.getEmail();
+
+
+String updateSQL = getSIQMoverQuery(email);
+HashMap siqrepo = getSIQConnectionInformation();
+// Update statement to change owned resource
+serilog.debug(updateSQL);
+serilog.debug("Getting connection");
+Connection conn = DriverManager.getConnection(siqrepo.get("url"),siqrepo.get("user"),context.decrypt(siqrepo.get("password")));
+serilog.debug("..done");
+
+Statement stmt = conn.prepareStatement(updateSQL);
+
+for (String key: retMap.keySet()) {
+  // we encoded the ID of the resource into the name of the field (decision:XXXX)
+  if (key.startsWith("decision:")) {
+    String value=retMap.get(key);
+    serilog.debug(key+"="+value);
+    if ("No".equals(value)) {
+      String num=key.substring(9);
+      serilog.debug("Got ID:"+num);
+      int iNum=Integer.parseInt(num);
+      stmt.setInt(1, iNum);
+      serilog.debug("updating "+iNum);
+      stmt.executeUpdate();
+      serilog.debug("..done");
+    }
+  }
+}
+      </Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Stop" name="end" posX="675" posY="8"/>
+</Workflow>

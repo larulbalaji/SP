@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Import Demo Policies" resultAction="Delete" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="activeSODcsvString" value="X"/>
+      <entry key="dataColIndex" value="2"/>
+      <entry key="dataRowIndex" value="2"/>
+      <entry key="dataSize" value="66"/>
+      <entry key="fileType" value="XLS"/>
+      <entry key="filename" value="WEB-INF/config/seri/data/DemoRoles/Access Violations.xlsx"/>
+      <entry key="nameColIndex" value="1"/>
+      <entry key="nameRowIndex" value="1"/>
+      <entry key="roleType" value="IT"/>
+      <entry key="sheetName" value="Access Violations"/>
+    </Map>
+  </Attributes>
+  <Description>Import IT-level SoD policy rules from an Excel spreadsheet</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Import Matrix SOD Definitions"/>
+  </Parent>
+</TaskDefinition>

@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.JDBCConnector"
+  featuresString="DISCOVER_SCHEMA, PROVISIONING, ENABLE, UNLOCK" name="PRISM"
+  profileClass="" type="JDBC">
+  <Attributes>
+    <Map>
+      <entry key="SQL" value="select * from users" />
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately" />
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1351744997825</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1351744996247</Date>
+        </value>
+      </entry>
+      <entry key="aggregationMode">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="buildMapRule" value="BuildMap - PRISM" />
+      <entry key="compositeDefinition" />
+      <entry key="daysToWaitForDeletion" />
+      <entry key="deltaTable" />
+      <entry key="driverClass" value="com.mysql.jdbc.Driver" />
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="getDeltaSQL" />
+      <entry key="getObjectSQL" value="select * from users where login = '$(identity)'" />
+      <entry key="group.SQL" value="select * from groups" />
+      <entry key="group.aggregationMode">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="group.deltaTable" />
+      <entry key="group.driverClass" value="com.mysql.jdbc.Driver" />
+      <entry key="group.getDeltaSQL" />
+      <entry key="group.getObjectSQL" value="select * from groups where name = '$(identity)'" />
+      <entry key="group.isPermissionEnabled">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="group.mergeRows">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="group.password" value="1:7qu+XvQvQHsmirRAPzhCBw==" />
+      <entry key="group.url" value="jdbc:mysql://seri.sailpointdemo.com/prism" />
+      <entry key="group.useExecuteQuery">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="group.user" value="root" />
+      <entry key="isPermissionEnabled">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="jdbcProvisionRule" value="Provision - PRISM" />
+      <entry key="mergeRows">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements" />
+      <entry key="nativeChangeDetectionAttributes" />
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations" />
+      <entry key="partitionMode">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="partitionStatements" />
+      <entry key="password" value="1:7qu+XvQvQHsmirRAPzhCBw==" />
+      <entry key="provisionRule" value="globalRule" />
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"
+              value="This application represents the PRISM (Purchasing, Resourcing, Information Systems Management) Application." />
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="JDBC Template" />
+      <entry key="url" value="jdbc:mysql://seri.sailpointdemo.com/prism" />
+      <entry key="useExecuteQuery">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="user" value="root" />
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="Correlation - PRISM" />
+  </CorrelationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="PRISM Application Owners" />
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="login" identityAttribute="login"
+      instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="login"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="description"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="first"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="last"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true"
+        managed="true" multi="true" name="groups"
+        remediationModificationType="None" schemaObjectType="group"
+        type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="status"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="locked"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="lastLogin"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="name" identityAttribute="name"
+      instanceAttribute="" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="name"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="description"
+        remediationModificationType="None" type="string">
+        <Description />
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <Templates>
+    <Template name="PRISM" schemaObjectType="account" usage="Create">
+      <Field displayName="First Name" name="first" required="true"
+        type="string">
+        <Script>
+          <Source>return identity.firstname;</Source>
+        </Script>
+      </Field>
+      <Field displayName="Last Name" name="last" required="true"
+        type="string">
+        <Script>
+          <Source>return identity.lastname;</Source>
+        </Script>
+      </Field>
+      <Field displayName="Login ID" name="login" required="true"
+        type="string">
+        <Script>
+          <Source>return identity.name;</Source>
+        </Script>
+      </Field>
+      <Field displayName="Status" name="status" type="string"
+        value="A" />
+      <Field displayName="Account Locked" name="locked" required="true"
+        type="string" value="N" />
+    </Template>
+    <Template name="PRISM" schemaObjectType="account" usage="Update">
+      <Field displayName="Login" name="login" required="true"
+        type="string">
+        <Script>
+          <Source>return identity.name;</Source>
+        </Script>
+      </Field>
+      <Field displayName="First Name" name="first" required="true"
+        type="string">
+        <Script>
+          <Source>return identity.firstname;</Source>
+        </Script>
+      </Field>
+      <Field displayName="Last Name" name="last" required="true"
+        type="string">
+        <Script>
+          <Source>return identity.lastname;</Source>
+        </Script>
+      </Field>
+      <Field displayName="Status" name="status" type="string"
+        value="A" />
+      <Field displayName="Account Locked" name="locked" required="true"
+        type="string" value="N" />
+    </Template>
+  </Templates>
+</Application>

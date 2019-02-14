@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Financially Sensitive Non-Employees" type="Policy">
+  <Signature returnType="PolicyViolation">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+          The Identity being inspected.
+        </Description>
+      </Argument>
+      <Argument name="policy">
+        <Description>
+          The Policy being evaluated.
+        </Description>
+      </Argument>
+      <Argument name="constraint">
+        <Description>
+          The Constraint being evaluated.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="violation">
+        <Description>
+          The PolicyViolation object.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+  
+import sailpoint.api.SailPointContext;
+import sailpoint.object.Attributes;
+
+import sailpoint.object.Custom;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Policy;
+import sailpoint.object.PolicyViolation;
+import sailpoint.object.Link;
+import sailpoint.object.Application;
+import sailpoint.object.EntitlementGroup;
+import sailpoint.object.Entitlement;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.api.ManagedAttributer;
+
+import sailpoint.tools.GeneralException;
+import sailpoint.tools.Message;
+import sailpoint.tools.Util;
+
+import java.text.SimpleDateFormat;
+import java.text.DateFormat;
+import java.util.*;
+
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Policy.SensitiveAccess");
+PolicyViolation v = null;
+
+Locale locale = new Locale("en", "US");     
+
+String employeeType = (String)identity.getAttribute("employeeType");
+if ( "Contractor".equalsIgnoreCase(employeeType) ) {
+	serilog.debug("found contractor");
+	List links = identity.getLinks();
+	if (links == null) {
+		return v;
+	}
+
+
+	List appList = new ArrayList();
+	for (Link link : links) {
+		Application app = context.getObjectByName(Application.class, link.getApplicationName());
+		appList.add(app);
+		serilog.debug("adding app:" + app.getName());
+		List linkEntList = link.getEntitlements(locale,"");
+		serilog.debug("linkEntList:" + linkEntList);
+		for (Entitlement ent: Util.safeIterable(linkEntList)) {
+			serilog.debug("ent name:" + ent.getAttributeName());
+			serilog.debug("ent value:" + ent.getAttributeValue());
+			ManagedAttribute ent = ManagedAttributer.get(context, app, false, ent.getAttributeName(),ent.getAttributeValue());
+			if (ent != null) {
+				String dataClassifications = (String) ent.getAttribute("dataClassifications");
+				if (dataClassifications != null) {
+					v = new PolicyViolation();
+					v.setActive(true);
+					v.setIdentity(identity);
+					v.setPolicy(policy);
+					v.setConstraint(constraint);
+					v.setDescription("Contractor access to Financially Sensitive Data");
+					v.setStatus(sailpoint.object.PolicyViolation.Status.Open);
+					serilog.debug("Policy Violation Returned:" + v.toXml());
+					return v;
+				}
+			}
+		}
+	}
+
+
+}
+
+return v;
+
+  ]]></Source>
+</Rule>

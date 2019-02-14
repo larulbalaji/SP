@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="ObjectConfig-MergeApplication.xml"/>
+  <ImportAction name="include" value="ObjectConfig-MergeBundle.xml"/>
+  <ImportAction name="include" value="ObjectConfig-MergeManagedAttribute.xml"/>
+  <ImportAction name="include" value="Workflow-Approvals-LCMApprovals.xml"/>
+  <ImportAction name="include" value="Workflow-Approvals-LCMProvisioning.xml"/>
+  <ImportAction name="include" value="TaskDefinition-Approvals-ProvisioningTasks.xml"/>
+  <ImportAction name="include" value="Configuration-mergeSystemConfiguration.xml"/>
+</sailpoint>

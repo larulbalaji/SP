@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="Rule-setOldJobTitleAttribute.xml"/>
+    <ImportAction name="include" value="Rule-setTransferManagerAttribute.xml"/>
+    <ImportAction name="include" value="ObjectConfig-Identity.xml"/>
+    <ImportAction name="include" value="/seri/xml/Rule/RuleLibrary-Demo-Workflow.xml"/>
+    <ImportAction name="include" value="EmailTemplate-UserTransfer.xml"/>
+    <ImportAction name="include" value="Workflow-LifecycleEvent-TransferProcessor.xml"/>
+    <ImportAction name="include" value="IdentityTrigger-Mover.xml"/>
+    <ImportAction name="include" value="TaskDefinition-RefreshTransferUsers1.xml"/>
+    <ImportAction name="include" value="TaskDefinition-RefreshTransferUsers2.xml"/>
+    <ImportAction name="include" value="TaskDefinition-Sequential4Mover.xml"/>
+    <ImportAction name="include" value="TaskDefinition-ExtendDemoRoleAssignments.xml"/>
+    <ImportAction name="include" value="Configuration-SystemConfiguration-TransferManagerLcmConfig.xml"/>
+</sailpoint>	

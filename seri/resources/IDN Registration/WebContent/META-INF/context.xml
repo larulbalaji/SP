@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Context>
+   <Resource name="jdbc/configDB" auth="Container"
+       type="javax.sql.DataSource" 
+       username="idnReg" password="idnReg"
+       driverClassName="com.mysql.jdbc.Driver"
+       url="jdbc:mysql://localhost/idnConfig" 
+   /> 
+</Context> 

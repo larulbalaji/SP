@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Set Authentication Question" type="RegisterIdentity">
+	<Attributes>
+		<Map>
+			<entry key="pageTitle" value="Authentication Questions" />
+			<entry key="subtitle" value="Enter your authentication questions" />
+		</Map>
+	</Attributes>
+	<Button action="next" label="Submit" />
+	<Button action="cancel" label="nav_cancel" />
+	<Description>This form is used to for self-service registration.</Description>
+
+
+	<Section label="Authentication Questions" columns="2">
+		<Field displayName="Question 1" name="q1" required="true"
+			postBack="false" type="string" columnSpan="2">
+			<AllowedValuesDefinition>
+				<Script>
+					<Source><![CDATA[
+import sailpoint.obj.messages.MessageKeys;
+import sailpoint.tools.Message;
+import sailpoint.object.Identity;
+import sailpoint.object.*;
+import sailpoint.connector.*;
+import sailpoint.api.*;
+import sailpoint.tools.xml.*; 
+
+Map args = new HashMap();
+//args.put("userName", userName);
+Rule rule = context.getObjectByName(Rule.class, "Get Authentication Questions");
+if (rule == null) {
+	return null;
+}
+
+List questions = context.runRule(rule, args);
+
+return questions;
+            ]]></Source>
+				</Script>
+				<!-- <Reference class="sailpoint.object.Rule" name="Get Authentication 
+					Questions"/> -->
+			</AllowedValuesDefinition>
+		</Field>
+		<Field displayName="Answer 1" name="a1" required="true"
+			postBack="false" type="string" columnSpan="2" />
+		<Field displayName="Question 2" name="q2" required="true"
+			postBack="false" type="string" columnSpan="2">
+			<AllowedValuesDefinition>
+				<Script>
+					<Source><![CDATA[
+import sailpoint.obj.messages.MessageKeys;
+import sailpoint.tools.Message;
+import sailpoint.object.Identity;
+import sailpoint.object.*;
+import sailpoint.connector.*;
+import sailpoint.api.*;
+import sailpoint.tools.xml.*; 
+
+Map args = new HashMap();
+//args.put("userName", userName);
+Rule rule = context.getObjectByName(Rule.class, "Get Authentication Questions");
+if (rule == null) {
+	return null;
+}
+
+List questions = context.runRule(rule, args);
+
+return questions;
+            ]]></Source>
+				</Script>
+				<!-- <Reference class="sailpoint.object.Rule" name="Get Authentication 
+					Questions"/> -->
+			</AllowedValuesDefinition>
+		</Field>
+		<Field displayName="Answer 2" name="a2" required="true"
+			postBack="false" type="string" columnSpan="2" />
+	</Section>
+
+</Form>
+

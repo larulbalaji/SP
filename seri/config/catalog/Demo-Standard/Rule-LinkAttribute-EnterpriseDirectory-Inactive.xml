@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Link Attribute - Enterprise Directory Inactive" type="LinkAttribute">
+  <Source><![CDATA[
+    
+// Disabled accounts are indicated by the ds-pwp-account-disabled flag set to true
+// attribute.
+String options = link.getAttributes().getString("ds-pwp-account-disabled");
+
+return("true".equalsIgnoreCase(options));
+
+       
+]]> </Source>
+</Rule>

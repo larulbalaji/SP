@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="ObjectConfig-Managedattribute.xml"/>
+  <ImportAction name="include" value="Policy-Non-employeeAccessToFinanciallySensitiveData.xml"/>   
+  <ImportAction name="include" value="Rule-FinanciallySensitiveNon-employees.xml"/>
+</sailpoint>

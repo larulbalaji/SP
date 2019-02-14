@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+	<Map>
+	  <entry key='quickLinkCategories'>
+	    <value>
+	      <List>
+		<QuickLinkCategory name="ITServices" messageKey="IT Services" icon="quickLinkCategoryCustom" />
+	      </List>
+	    </value>
+	  </entry>
+	</Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+  <Identity name="BU Service Management Team" workgroup="true">
+    <Capabilities>
+      <Reference class="sailpoint.object.Capability" name="WorkItemAdministrator"/>
+    </Capabilities>
+    <Description>Responsible for managing services provided to the BU via corporate IT</Description>
+  </Identity>
+
+  <DynamicScope name="BU Service Management">
+    <Selector>
+      <IdentitySelector>
+	<MatchExpression and="true">
+	  <MatchTerm name='workgroups' value='BU Service Management Team'/>
+	</MatchExpression>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+
+  <QuickLink name="Create Group" action="workflow" enabled="true" messageKey="Request Group" category="ITServices">
+    <Attributes>
+      <Map>
+	<entry key="workflowName" value="AD Group Management - Create" />
+	<entry key="workflowSuccess" value="" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="BU Service Management" />
+    </DynamicScopes>
+  </QuickLink>
+
+  <QuickLink name="Edit Group" action="workflow" enabled="true" messageKey="Manage My Groups" category="ITServices">
+    <Attributes>
+      <Map>
+	<entry key="workflowName" value="AD Group Management - Edit" />
+	<entry key="workflowSuccess" value="" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="BU Service Management" />
+    </DynamicScopes>
+  </QuickLink>
+
+<!--
+  <QuickLink name="AD Account Admin" action="workflow" enabled="true" messageKey="Account Administration" category="Custom">
+    <Attributes>
+      <Map>
+	<entry key="workflowName" value="AD Account Administration" />
+	<entry key="workflowSuccess" value="" />
+      </Map>
+    </Attributes>
+  </QuickLink>
+-->
+
+</sailpoint>

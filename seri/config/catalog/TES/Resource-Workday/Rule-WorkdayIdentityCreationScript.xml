@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Workday Identity Creation Script" type="IdentityCreation">
+  <Description/>
+  <Signature returnType="void">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="environment" type="Map">
+        <Description>
+          Arguments passed to the aggregation task.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          Application being aggregated.
+        </Description>
+      </Argument>
+      <Argument name="account" type="ResourceObject">
+        <Description>
+          The resource account for the identity being created.
+        </Description>
+      </Argument>
+      <Argument name="identity" type="Identity">
+        <Description>
+          The identity that is being created.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.connector.Connector;
+import sailpoint.connector.ConnectorFactory;
+import sailpoint.object.Application;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Capability;
+import sailpoint.object.ResourceObject;
+
+      
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.IdentityCreation.Workday");
+
+
+//Set the environment for this specific application / customer
+// Replace this with the settings for your environment
+
+String mailDomain = "@sailpointdemo.com";
+String appSchemaFirstName ="FIRST_NAME";
+String appSchemaLastName ="LAST_NAME";
+
+// set default IIQ password for demo purposes
+identity.setPassword("xyzzy");
+
+
+String firstname = account.getStringAttribute(appSchemaFirstName);
+serilog.debug("Firstname: " + firstname);
+String lastname = account.getStringAttribute(appSchemaLastName);
+serilog.debug("Lastname: " + lastname);
+
+// Handle lastnames with multiple parts, i.e. Van den Heuvel
+lastname = lastname.replace(" ",".");
+
+// Make sure the first letter is converted to lowercase for Fullname constructs and UniqueID contructs in multi-part last names.
+// i.e. Van.den.Heuvel to van.den.Heuvel
+if (lastname.contains(".")) {
+  String firstLetter = lastname.substring(0,1).toLowerCase();
+  String restLetters = lastname.substring(1);
+    lastname = firstLetter + restLetters;
+  }  
+  serilog.debug("Lastname: " + lastname);
+  
+  if(firstname==null) {
+    serilog.debug("no first name: skipping rule");
+    return;
+  } else {
+    serilog.debug("firstname="+firstname);
+  }
+
+  if(lastname==null) {
+    serilog.debug("no last name: skipping rule");
+    return;
+  } else {
+    serilog.debug("lastname="+lastname);
+  }
+  
+  
+  // Naming convention for the Identity is: 
+  // firstname.lastname + add number if not unique
+  // See other options below for number of characters from first and last name
+  
+  boolean unique=false;
+  boolean allLast=false;
+  boolean usesuffix=false;
+  int suffix=1;
+  
+  // Interstring runs the name past the I18n rule
+  
+  String firstChars=firstname;
+
+  String lastChars=lastname;
+
+  
+  String candidate=null;
+  
+  while(!unique) {
+    candidate=firstChars + "." + lastChars;
+    if(!usesuffix) {
+      usesuffix=true;
+    } else {
+      candidate+=(suffix++); // inc here, so will be bigger next iteration if required
+    }
+    
+    serilog.debug("candidate Username: "+candidate);
+
+    QueryOptions options = new QueryOptions();
+    options.addFilter(Filter.eq("name",candidate));
+    Iterator iter =  context.search(Identity.class, options);
+  
+    // Do we have already have a cube with the same Cube name?
+    //
+    if (iter.hasNext()) {
+      serilog.debug("Found a match. Trying again..");  
+    } else {
+      serilog.debug("Candidate is unique. Returning..");
+      unique=true; 
+    }
+  }
+  
+  
+  String mailCandidate=candidate + mailDomain;
+  identity.setAttribute("email", mailCandidate);
+  identity.setName(candidate);
+  
+ ]]></Source>
+</Rule>

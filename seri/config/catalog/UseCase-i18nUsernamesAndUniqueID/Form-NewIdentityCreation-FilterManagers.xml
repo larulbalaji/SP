@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="New Identity Registration Form" type="CreateIdentity">
+	<Attributes>
+		<Map>
+			<entry key="pageTitle" value="Create a new Identity" />
+		</Map>
+	</Attributes>
+	<Description>This form is used to create new Identities for example for contractors.</Description>
+	<Section>
+		<Field displayName="First Name" name="firstname" required="true" type="string" />
+		<Field displayName="Last Name" name="lastname" postBack="true" required="true" type="string" />
+		<Field displayName="user_name" dynamic="true" displayOnly="true" name="name" required="true" type="string" helpKey="The User Name will be generated">
+			<Attributes>
+				<Map>
+					<entry key="readOnly" value="true" />
+				</Map>
+			</Attributes>
+			<RuleRef>
+				<Reference class="sailpoint.object.Rule" name="Set Unique Username Field (I18n) in a Form" />
+			</RuleRef>
+		</Field>
+		<Field displayName="User Type" name="employeeType" type="string">
+			<AllowedValuesDefinition>
+				<Value>
+					<List>
+						<String>Contractor</String>
+						<String>Employee</String>
+						<String>Intern</String>
+					</List>
+				</Value>
+			</AllowedValuesDefinition>
+		</Field>
+		<Field displayName="label_password" name="password" required="true" type="secret">    
+    <!--     
+      <Attributes>
+        <Map>
+          <entry key="hidden" value="true"/>
+        </Map>
+ 	 </Attributes>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Generate Password from Policy - SERI"/>
+      </RuleRef>
+    -->
+		</Field>
+		<Field displayName="Password Confirmation" name="passwordConfirm" required="true" type="secret">
+    <!-- 
+      <Attributes>
+        <Map>
+          <entry key="hidden" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source>return password;</Source>
+      </Script>
+    -->
+		</Field>
+		<Field displayName="Phone Number" name="phone" type="string" />
+		<Field displayName="Department" name="department" type="string">
+			<AllowedValuesDefinition>
+				<RuleRef>
+					<Reference class="sailpoint.object.Rule" name="Query Identity Attribute Allowed Values for Fields" />
+				</RuleRef>
+			</AllowedValuesDefinition>
+		</Field>
+		<Field displayName="Job Title" name="jobTitle" type="string">
+			<AllowedValuesDefinition>
+				<RuleRef>
+					<Reference class="sailpoint.object.Rule" name="Query Identity Attribute Allowed Values for Fields" />
+				</RuleRef>
+			</AllowedValuesDefinition>
+		</Field>
+		<Field displayName="Manager" name="manager" required="true" type="sailpoint.object.Identity">
+			<Attributes>
+				<Map>
+					<entry key="hidden" value="script:field.setFilterString(&quot;managerStatus == true&quot;);" />
+				</Map>
+			</Attributes>
+		</Field>
+		<Field displayName="Location" name="location" required="true" type="string">
+			<AllowedValuesDefinition>
+				<RuleRef>
+					<Reference class="sailpoint.object.Rule" name="Query Identity Attribute Allowed Values for Fields" />
+				</RuleRef>
+			</AllowedValuesDefinition>
+<!-- 			<AllowedValuesDefinition>
+				<Value>
+					<List>
+						<String>Austin</String>
+						<String>Brussels</String>
+						<String>London</String>
+						<String>Munich</String>
+						<String>San Jose</String>
+						<String>Singapore</String>
+						<String>Taipei</String>
+						<String>Tokyo</String>
+					</List>
+				</Value>
+			</AllowedValuesDefinition>
+-->
+		</Field>
+		<Field displayName="E-mail" dynamic="true" name="email" type="string" helpKey="The email address will be generated">
+			<Script>
+				<Source><![CDATA[
+					String myEmail=name;
+					myEmail = myEmail +"@sailpointdemo.com";
+					return myEmail;
+				]]></Source>
+			</Script>
+		</Field>
+		<Field displayName="Termination Date" helpKey="Date the contractor will leave" name="terminationDate" type="date" />
+	</Section>
+</Form>

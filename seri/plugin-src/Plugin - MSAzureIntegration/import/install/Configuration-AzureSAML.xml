@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Configuration PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Configuration name="SAML">
+  <Attributes>
+    <Map>
+      <entry key="IdentityNow">
+        <value>
+          <SAMLConfig assertionConsumerService="https://iiq-server.sailpointdemo.com:8443/identityiq/home.jsf" bindingMethod="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" entityId="https://iiq-server.sailpointdemo.com" idpServiceUrl="https://login.microsoftonline.com/d573b782-1017-4a54-b57b-9684529d4f20/saml2" issuer="https://sts.windows.net/d573b782-1017-4a54-b57b-9684529d4f20/" nameIdFormat="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">
+            <IdpPublicKey>-----BEGIN CERTIFICATE-----
+MIIC8DCCAdigAwIBAgIQEkLoSxa3jJRKjj+4BwFtbDANBgkqhkiG9w0BAQsFADA0MTIwMAYDVQQD
+EylNaWNyb3NvZnQgQXp1cmUgRmVkZXJhdGVkIFNTTyBDZXJ0aWZpY2F0ZTAeFw0xNzAyMDIyMDUz
+MjVaFw0xOTA5MTkxMTAwMDBaMDQxMjAwBgNVBAMTKU1pY3Jvc29mdCBBenVyZSBGZWRlcmF0ZWQg
+U1NPIENlcnRpZmljYXRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzMeO9dngCGts
+Jf5TC0XrPWccHKPg48R5sRD75ih1jRg8Ch3+IN4NgMDw/uzCXUD97mj8fa/YmPkP3bdfxRqhgyJt
+T36fEmbkS6u4iL1cAdwdie6zHDbCVa/crTLwE+P3an3Bu6alklu3df0zWbSJ0f2PxlEyuoiuOmss
+wbjPhbmvd4GSPW1NabD02Y3CsyYsRoHEnPl6HtVDCdSX53nsC550H9zlCudecGLHZobhZQpn5Yr7
+b6mQLoJg2UefmLsUU7PW1k7whV/xcfCDLp/p37d9zwaCN+SuST6wtkSNaaVSt71ZLUeZDlr4YFDw
+lTYFAKCXU92LOyVs0nmgd+ggXQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBAQAHQrgfGE6/D5omrLuU
+bBsiAjrmz01on7vjm+kf1ziFc1MU1Yma7BdIIcBM6OkV2ZsaQvwpvSX5D47ehk7bZwf6CDs5JWQK
+j10WhjQRBCh/JYcUq/DIDfRP9yIZS+EoADfzR1r+3uWEN7DvNBJqVyRt3uNrbsIO9fUjbfrdTrEz
+ZUqIxWd+BvBQAzvcD6qAvjWPuKE2B9jiMIBnFJEiqqtQYlnSHUB61EBIMYP+dfzNl4TwJt0pHY5N
+Mgcw/30VYBpXJzwQKNXddy0zMYgUmvbD80Omz+Kfk4grdYBVlt4SkPwRRmVwvPPMEGEq6HhIOEVk
+S3SX5jOOHA0K49SFHj+8
+-----END CERTIFICATE-----</IdpPublicKey>
+            <RuleRef>
+              <Reference class="sailpoint.object.Rule" name="MicrosoftSAML"/>
+            </RuleRef>
+          </SAMLConfig>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Configuration>

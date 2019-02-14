@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <ImportAction name="merge">
+  <ObjectConfig name="Application">
+  <ObjectAttribute categoryName="Account Reactivation Settings" displayName="Enable Account on Reactivation" editMode="Permanent" name="enableOnReactivation" type="boolean">
+    <DefaultValue>
+      <Boolean>true</Boolean>
+    </DefaultValue>
+    <Description>When user is reactivated, if this account is disabled, when true this setting will automatically enable the account.</Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Reactivation Settings" displayName="Update Link Rule" editMode="Permanent" name="accountReactivationLinkRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Reactivation Settings" displayName="Update Plan Rule" editMode="Permanent" name="accountReactivationPlanRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+     <ObjectAttribute categoryName="Account Reactivation Settings" displayName="Update Post Provisioning Rule" editMode="Permanent" name="accountReactivationPostProvRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+  
+  </ObjectConfig>
+  </ImportAction>
+</sailpoint>

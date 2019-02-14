@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:8080/" />
+<title>CheckAmandasCert</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">CheckAmandasCert</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/identityiq/login.jsf</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=loginForm:accountId</td>
+	<td>amanda.ross</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=loginForm:password</td>
+	<td>xyzzy</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=loginButtonDisplay</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForXpathCount</td>
+	<td>xpath=//div[@id=&quot;workItemsInboxGridState-body&quot;]/div/table/tbody/tr[@class=&quot;x-grid-row &quot;]/td[2]/div</td>
+	<td>1</td>
+</tr>
+<tr>
+	<td>verifyText</td>
+	<td>xpath=//div[@id=&quot;workItemsInboxGridState-body&quot;]/div/table/tbody/tr[@class=&quot;x-grid-row &quot;]/td[2]/div</td>
+	<td>Manager Access Review for Amanda Ross</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//div[@id='gridview-1033']/table/tbody/tr[2]/td[2]/div</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=okCloseBtnStartUpHelp-btnEl</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForText</td>
+	<td>id=tbtext-1036</td>
+	<td>Displaying 1 - 6 of 6</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=Logout</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=headerForm:logoutButton</td>
+	<td></td>
+</tr>
+
+</tbody></table>
+</body>
+</html>

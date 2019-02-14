@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="GroupDefinition-MonitoredUsers.xml"/>
+  <ImportAction name="include" value="/seri/xml/Rule/RuleLibrary-Demo-Workflow.xml"/>   
+  <ImportAction name="include" value="Configuration-DigitalSignature.xml"/>
+  <ImportAction name="include" value="Workflow-RiskPolicyHandler.xml"/>
+  <ImportAction name="include" value="Policy-RiskDemoPolicy.xml"/>
+  <ImportAction name="include" value="TaskDefinition-RefreshMonitoredUsersRiskScores.xml"/>
+  <ImportAction name="include" value="Report-AllRiskBasedPolicies.xml"/>
+  <ImportAction name="include" value="GroupDefinition-HighRiskUsers.xml"/>
+  <ImportAction name="include" value="Report-HighRiskUsers.xml"/>
+  <ImportAction name="include" value="ScoreConfig.xml"/>
+  <ImportAction name="include" value="TaskDefinition-ReaggregateMonitoredUsers.xml"/>
+  <ImportAction name="include" value="TaskDefinition-RefreshMonitoredUsers.xml"/>
+</sailpoint>

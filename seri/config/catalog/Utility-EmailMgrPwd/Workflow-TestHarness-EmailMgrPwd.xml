@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" libraries="Identity" name="EmailMgrPwdTest">
+  <Variable input="true" name="project"/>
+  <Variable initializer="string:Send Manager Password" name="passwordNotifyTemplate"/>
+
+
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule" name="EmailManagerAccountPasswords"/>
+  </RuleLibraries>
+
+
+  <Step action="script:emailManagerAccountPasswords(project, passwordNotifyTemplate)" icon="Task" name="EMail Manager Passwords"/>
+</Workflow>

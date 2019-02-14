@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.SecurityIQConnector" name="SecurityIQ" profileClass="" type="SecurityIQ">
+  <Attributes>
+    <Map>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="afterProvisioningRule"/>
+      <entry key="host" value="seri.sailpointdemo.com" />
+
+      <entry key="alert.deltaListEndpoint">
+        <value>
+          <Map>
+            <entry key="baseURL"/>
+            <entry key="body">
+              <value>
+                <Map>
+                  <entry key="query" value="{&quot;bool&quot;: { &quot;must&quot;: [ {&quot;exists&quot;: {&quot;field&quot;: &quot;alert rule names&quot; }},{&quot;range&quot; : { &quot;creation_timestamp&quot; : {&quot;gt&quot; : &quot;$(deltaAggregation)&quot;}}}],&quot;must_not&quot;: [{&quot;term&quot; : { &quot;alert rule names&quot;:&quot;&quot; }}] } }"/>
+                  <entry key="sort" value="[{&quot;creation_timestamp&quot; : {&quot;order&quot; : &quot;asc&quot;}}]"/>
+                </Map>
+              </value>
+            </entry>
+            <entry key="contextURL" value="_search"/>
+            <entry key="header"/>
+            <entry key="httpMethodType" value="POST"/>
+            <entry key="scrollKeepAlive" value="5m"/>
+            <entry key="size" value="50"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="alert.getEndpoint">
+        <value>
+          <Map>
+            <entry key="baseURL"/>
+            <entry key="body">
+              <value>
+                <Map>
+                  <entry key="query" value="{&quot;ids&quot; : { &quot;type&quot; : &quot;event&quot;, &quot;values&quot; : [&quot;$(identity)&quot;] }}"/>
+                </Map>
+              </value>
+            </entry>
+            <entry key="contextURL" value="_search"/>
+            <entry key="header"/>
+            <entry key="httpMethodType" value="POST"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="alert.listEndpoint">
+        <value>
+          <Map>
+            <entry key="baseURL"/>
+            <entry key="body">
+              <value>
+                <Map>
+                  <entry key="query" value="{&quot;bool&quot;: { &quot;must&quot;: [ {&quot;exists&quot;: {&quot;field&quot;: &quot;alert rule names&quot; }}],&quot;must_not&quot;: [{&quot;term&quot; : { &quot;alert rule names&quot;:&quot;&quot; }}] } }"/>
+                  <entry key="sort" value="[{&quot;creation_timestamp&quot; : {&quot;order&quot; : &quot;asc&quot;}}]"/>
+                </Map>
+              </value>
+            </entry>
+            <entry key="contextURL" value="_search"/>
+            <entry key="header"/>
+            <entry key="httpMethodType" value="POST"/>
+            <entry key="scrollKeepAlive" value="5m"/>
+            <entry key="size" value="50"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="baseURL" value="http://ad-resource.seri.sailpointdemo.com:9200"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SecurityIQ template"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema aggregationType="TargetAssociation" displayAttribute="" featuresString="NO_AGGREGATION" identityAttribute="" instanceAttribute="" nativeObjectType="" objectType="associations">
+      <AttributeDefinition name="is_inherited" type="boolean">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="is_allow"  type="boolean">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="is_effective"  type="int">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="description" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="permission_type_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="row_type" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_uid" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_full_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="role_uid" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="role_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="role_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="role_entity_type_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="role_domain" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="" identityAttribute="_id" instanceAttribute="" nativeObjectType="event" objectType="alert">
+      <AttributeDefinition name="_index" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="_type" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'user full name'" name="userFullName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'alert rule names'" multi="true" name="alertRuleNames" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'action type'" name="actionType" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.path" name="path" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'application type'" name="applicationType" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.timestamp" name="timestamp" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'bam name'" name="bamName" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'wpc data'" name="wpc data" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.creation_timestamp" name="creation_timestamp" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition internalName="_source.'object name'" name="object name" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="br_name" identityAttribute="br_id" instanceAttribute="" nativeObjectType="" objectType="unstructured">
+      <AttributeDefinition name="br_id" type="long">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="full_path"  type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="br_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="size" type="long">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="bam_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <Attributes>
+        <Map>
+          <entry key="aggregateInherited">
+             <value>
+              <Boolean>true</Boolean>
+            </value>
+          </entry>
+          <entry key="associationAttribute" value="associations"/>
+          <entry key="driverClass" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+          <entry key="password" value="1:PRYxEtkZL2NkjofXmBp2/A=="/>
+          <entry key="referencedApplications">
+            <value>
+              <List>
+                <String>Active Directory</String>
+              </List>
+            </value>
+          </entry>
+          <entry key="schemaName" value="whiteops"/>
+          <entry key="targetHosts">
+            <value>
+              <List>
+                <TargetHostConfig hostId="2" hostName="Windows File Server"/>
+              </List>
+            </value>
+          </entry>
+          <entry key="url" value="jdbc:sqlserver://seri.sailpointdemo.com:1433;databaseName=SecurityIQDB_SERI"/>
+          <entry key="user" value="SecurityIQ_User"/>
+        </Map>
+      </Attributes>
+      <CorrelationRule>
+        <Reference class="sailpoint.object.Rule" name="Windows FileServer Access Correlation"/>
+      </CorrelationRule>
+      <CreationRule>
+        <Reference class="sailpoint.object.Rule" name="Windows FileServer Target Creation"/>
+      </CreationRule>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard>
+    <Attributes>
+      <Map>
+        <entry key="dormantAccount" value="0"/>
+        <entry key="inactiveAccount" value="0"/>
+        <entry key="privilegedAccount" value="0"/>
+        <entry key="riskyAccount" value="0"/>
+        <entry key="serviceAccount" value="0"/>
+        <entry key="totalEntitlements" value="0"/>
+        <entry key="totalLinks" value="0"/>
+        <entry key="violatorAccount" value="0"/>
+      </Map>
+    </Attributes>
+  </ApplicationScorecard>
+</Application>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Entitlement Usage Report Form">
+  <Section columns="1" label="Select Entitlements" name="customProperties">
+    <Field displayName="Entitlements" multi="true" name="entitlements" type="ManagedAttribute" />
+  </Section>
+</Form>

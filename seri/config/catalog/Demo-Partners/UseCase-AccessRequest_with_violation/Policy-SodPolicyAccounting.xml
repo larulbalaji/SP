@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Policy PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Policy certificationActions="Remediated,Mitigated,Delegated" configPage="sodpolicy.xhtml"  executor="sailpoint.policy.SODPolicyExecutor"   name="SOD Policy - Accounting Department" state="Active" type="SOD" typeKey="policy_type_sod" violationOwnerType="Manager" >
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <SODConstraints>
+    <SODConstraint    name="Accounts Paybale versus Receivable conflict" violationOwnerType="None" weight="200">
+      <Description>Accounts Payable and Receivable should not be combined</Description>
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle"  name="Accounts Receivable Accountant"/>
+      </LeftBundles>
+      <RemediationAdvice>Please remove the conflicting role, or allow for a limited amount of time when required.</RemediationAdvice>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle"  name="Accounts Payable Access"/>
+        <Reference class="sailpoint.object.Bundle"  name="Accounts Payable Accountant"/>
+        <Reference class="sailpoint.object.Bundle"  name="Accounts Payable Approver"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>

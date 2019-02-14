@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition formPath="/monitor/tasks/sequentialTask.xhtml" name="3-Joiner-Demo" resultAction="Delete" type="Generic" hidden="true">
+  <Attributes>
+    <Map>
+      <entry key="taskList" value="Aggregate HR Authoritative, Refresh Monitored Users and Process Events, Aggregate AD Accounts, Refresh Monitored Users - Quick "/>
+    </Map>
+  </Attributes>
+  <Description>Template for creating a task that runs multiple other tasks.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Jerry.Bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Sequential Task Launcher"/>
+  </Parent>
+</TaskDefinition>

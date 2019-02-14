@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.JDBCConnector" featuresString="DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, DIRECT_PERMISSIONS, ENABLE, UNLOCK" icon="databaseIcon" name="AssetsDB" profileClass="" type="JDBC">
+  <Attributes>
+    <Map>
+      <entry key="SQL" value="SELECT u.user_id,u.user_firstname,u.user_lastname,u.user_org_id,u.user_department,u.user_email,u.user_manager_id,u.user_disabled,u.user_phone,r.asset_id,a.asset_brand,a.asset_name,a.asset_type,a.asset_model,a.asset_prod_date,a.asset_serialno,a.asset_description,a.asset_color FROM ACCOUNTS AS u LEFT JOIN accounts_assets AS r on u.user_id = r.user_id left join assets AS a on r.asset_id = a.asset_id ORDER by u.user_id;"/>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="aggregationMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="asset.SQL" value="select * from assets;"/>
+      <entry key="asset.aggregationMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="asset.deltaTable"/>
+      <entry key="asset.driverClass"/>
+      <entry key="asset.getDeltaSQL"/>
+      <entry key="asset.getDirectPermObjectSQL"/>
+      <entry key="asset.getObjectSQL" value="select * from assets where asset_id = '$(identity);"/>
+      <entry key="asset.isPermissionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="asset.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="asset.password"/>
+      <entry key="asset.url"/>
+      <entry key="asset.useExecuteQuery">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="asset.user"/>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="deltaTable"/>
+      <entry key="driverClass" value="com.mysql.jdbc.Driver"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="getDeltaSQL"/>
+      <entry key="getObjectSQL" value="SELECT u.user_id,u.user_firstname,u.user_lastname,u.user_org_id,u.user_department,u.user_email,u.user_manager_id,u.user_disabled,u.user_phone,r.asset_id,a.asset_brand,a.asset_name,a.asset_type,a.asset_model,a.asset_prod_date,a.asset_serialno,a.asset_description,a.asset_color FROM ACCOUNTS AS u LEFT JOIN accounts_assets AS r on u.user_id = r.user_id left join assets AS a on r.asset_id = a.asset_id ORDER by u.user_id where u.user_id = $(identity);"/>
+      <entry key="indexColumns">
+        <value>
+          <List>
+            <String>user_id</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="isPermissionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="jdbcProvisionRule" value="ProvisionAssetsDB"/>
+      <entry key="mergeColumns">
+        <value>
+          <List>
+            <String>asset_id</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="partitionMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="partitionStatements"/>
+      <entry key="password" value="1:iCAlakm5CVUe7+Q6hVJIBA=="/>
+      <entry key="provisionRule" value="globalRule"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="de_DE" value="Die Hardware Datenbank - verwaltet Nicht IT Vermögenswerte wie Handys, Tablets oder Laptops."/>
+            <entry key="en_US" value="The Assets Database - manage Non IT Assets like mobile phones, tablets or laptops."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="JDBC Template"/>
+      <entry key="testConnSQL" value="select * from accounts where 'user_id' = '1';"/>
+      <entry key="url" value="jdbc:mysql://seri.sailpointdemo.com/assetsdb"/>
+      <entry key="useExecuteQuery">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="user" value="identityiq"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle"/>
+        </Map>
+      </Attributes>
+      <Section name="Account Data">
+        <Field displayName="UserID" name="user_id" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getName();]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Firstname" name="user_firstname" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getFirstname();]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Lastname" name="user_lastname" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getLastname();]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Email" name="user_email" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getEmail();]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="OrgId" name="user_org_id" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getStringAttribute("costCenter");]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Department" name="user_department" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getStringAttribute("department");]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="ManagerId" name="user_manager_id" type="string">
+          <Script>
+            <Source><![CDATA[if( null != identity.getManager() ) {
+  return identity.getManager().getName();
+} else { 
+return ""; 
+} ]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="Disabled" name="user_disabled" type="string">
+          <Script>
+            <Source><![CDATA[return identity.isInactive() ? "1" : "0";]]></Source>
+          </Script>
+        </Field>
+      </Section>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="" identityAttribute="user_id" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="user_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_firstname" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_lastname" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_org_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_department" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_email" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_manager_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_disabled" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="user_phone" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="asset_id" schemaObjectType="asset" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema aggregationType="group" displayAttribute="asset_name" identityAttribute="asset_id" instanceAttribute="" nativeObjectType="asset" objectType="asset" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="asset_id" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_brand" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_name" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_type" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_model" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_prod_date" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_serialno" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_description" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="asset_color" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

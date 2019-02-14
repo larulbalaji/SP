@@ -1,0 +1,24 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<ns2:getUsersResponse
+			xmlns:ns2="http://soapserver.userstore.kjames.sailpoint.com/">
+			<return>
+				<attributes />
+				<firstname>Kevin</firstname>
+				<lastname>JamesIT</lastname>
+				<username>kjames</username>
+			</return>
+			<return>
+				<attributes>
+					<entry>
+						<key>costcenter</key>
+						<value>xx</value>
+					</entry>
+				</attributes>
+				<firstname>Brian</firstname>
+				<lastname>Blessed</lastname>
+				<username>bblessed</username>
+			</return>
+		</ns2:getUsersResponse>
+	</soap:Body>
+</soap:Envelope>

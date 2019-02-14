@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+
+  <ImportAction name='include' value='Application-NovellEdirectory.xml'/>
+  <ImportAction name='include' value='CorrelationConfig-NovellEdirectory.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateNovellEdirectoryAccounts.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateNovellEdirectoryGroups.xml'/>
+
+</sailpoint>

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<SPRight  displayName="edit_homeAddress" name="EditHomeAddress">
+  <Description>edit_homeAddress</Description>
+</SPRight>
+<SPRight  displayName="view_homeAddress" name="ViewHomeAddress">
+  <Description>view_homeAddress</Description>
+</SPRight>
+
+</sailpoint>
+

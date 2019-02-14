@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Account Reactivation - Plan - Move AD Account" type="Workflow">
+  <Description>Adds an AC_NewParent attribute to the Provisioning Plan - this moves an AD Account (for Reactivation)
+It assumes that the original container was persisted on the cube as attribute "originalADContainer".</Description>
+  <Source><![CDATA[
+import sailpoint.object.Application;
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+
+// Expect: sailpoint.object.ProvisioningPlan plan
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String identityName
+// Expect: java.lang.String nativeIdentity
+
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Reprovisioning.MoveADAccount");
+
+serilog.debug("Setting the new plan:    "+ plan);
+
+Identity id=context.getObjectByName(Identity.class, identityName);
+
+Application app=context.getObjectByName(Application.class, applicationName);
+
+String newParent=id.getAttribute("originalADContainer");
+
+Link link=id.getLink(app);
+if (link!=null) { // impossible but you never know..
+  List links=id.getLinks();
+  links.remove(link);
+  if(link!=null) {
+    String cn=nativeIdentity.substring(0,nativeIdentity.indexOf(","));
+    String newId=cn+","+newParent;
+    link.setNativeIdentity(newId);
+    link.setAttribute("distinguishedName", newId);
+    context.saveObject(link);
+  }
+  links.add(link);
+  id.setLinks(links);
+}
+
+context.saveObject(id);
+context.commitTransaction();
+
+AccountRequest acctReq = new AccountRequest();	            		
+acctReq.setApplication(applicationName);
+acctReq.setNativeIdentity(nativeIdentity);
+acctReq.setOperation(AccountRequest.Operation.Modify);
+
+AttributeRequest attrReq = new AttributeRequest();
+attrReq.setName("AC_NewParent");
+attrReq.setOperation(ProvisioningPlan.Operation.Set);
+attrReq.setValue(newParent);
+acctReq.add(attrReq);
+
+//AttributeRequest attrReq = new AttributeRequest();
+//attrReq.setName("AC_NewName");
+//attrReq.setOperation(ProvisioningPlan.Operation.Set);
+//attrReq.setValue("dana");
+//acctReq.add(attrReq);
+
+plan.add(acctReq);
+
+serilog.debug("Set the plan:    "+ plan.toXml());
+
+workflow.put("plan",plan);  
+  ]]></Source>
+</Rule>
+

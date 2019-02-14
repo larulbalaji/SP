@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <SPRight name="ManageLauncherRoles" displayName="Manage Launcher Roles">
+  <Description>Allow a user to manage SSO Launcher Roles</Description>
+</SPRight>
+  <SPRight name="ManageLauncherBusinessRoles" displayName="Manage Launcher Business Roles">
+    <Description>Allow a user to manage SSO Launcher Business Roles</Description>
+  </SPRight>
+
+  <Capability name="ManageLauncherRolesAdmin" displayName="Manage Launcher Roles Admin">
+    <Description>The manage launcher roles admin</Description>
+    <RightRefs>
+      <Reference class="sailpoint.object.SPRight" name="ManageLauncherRoles"/>
+    </RightRefs>
+  </Capability>
+  <Capability name="ManageLauncherBusinessRolesAdmin" displayName="Manage Launcher Business Roles Admin">
+    <Description>The manage launcher business roles admin</Description>
+    <RightRefs>
+      <Reference class="sailpoint.object.SPRight" name="ManageLauncherBusinessRoles"/>
+    </RightRefs>
+  </Capability>
+
+</sailpoint>
+

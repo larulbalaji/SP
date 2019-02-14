@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <ImportAction name="merge">
+    <ObjectConfig name="Application">
+     <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Account Deprovisioning Policy" editMode="Permanent" name="accountDeprovisionScenario" required="true">
+    <AllowedValues>
+      <String>Disable Account Immediately</String>
+      <String>Remove Entitlements and Disable Account Immediately</String>
+      <String>Disable Account Immediately, Wait, then Delete</String>
+      <String>Delete Account Immediately</String>
+      <String>Do Nothing</String>
+    </AllowedValues>
+    <Description>Method by which accounts on this application are Deprovisioned.
+Delete Account Immediately = Delete the account Immediately
+Disable Account Immediately = Disable the account Immediately
+Disable Account Immediately, Wait. Then Delete = Disable the account for X days, then delete the account on that date.</Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Days To Wait Until Account Deletion" editMode="Permanent" name="daysToWaitForDeletion" type="int"/>
+  <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Update Link Rule" editMode="Permanent" name="accountDeprovisioningLinkRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Update Plan Rule" editMode="Permanent" name="accountDeprovisioningPlanRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+    <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Update Post Provisioning Rule" editMode="Permanent" name="accountDeprovisioningPostProvRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+  
+ 
+ <!-- <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Move Deprovisioned Accounts" editMode="Permanent" name="moveAccountOnDeprovisioning" type="boolean">
+    <DefaultValue>
+      <Boolean></Boolean>
+    </DefaultValue>
+    <Description>Specify's if the account should be move to a different OU or other container upon disable, while waiting to be deleted.</Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Deprovisioned Accounts Container" editMode="Permanent" name="deprovisionedAccountsContainer">
+    <Description>The full DN or qulalified path to where this account should be moved upon initiation of deprovisioning.</Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Deprovisioning Settings" displayName="Deprovisioned Accounts Prefix/Suffix" editMode="Permanent" name="deprovisionedAccountsPreSuffix">
+    <Description>The suffix  or prefix you wish to prepend to deprovisioned Accounts</Description>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Account Deprovisioning Settings" defaultValue="Do No Rename Account" displayName="Rename Deprovisioned Accounts" editMode="Permanent" name="renameDeprovisionedAccounts">
+    <AllowedValues>
+      <String>Do No Rename Account</String>
+      <String>Prefix Value</String>
+      <String>Append Value</String>
+    </AllowedValues>
+  </ObjectAttribute>-->
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

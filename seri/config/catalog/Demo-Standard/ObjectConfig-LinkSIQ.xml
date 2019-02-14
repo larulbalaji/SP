@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name='Link'>
+ <ObjectAttribute displayName="SecurityIQ Account Name" editMode="ReadOnly"  extendedNumber="6" name="siqAccountName" type="string">
+    <AttributeSource name="AppRule: SIQ AccountName Active Directory">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Active Directory"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="SIQ AccountName"/>
+      </RuleRef>
+    </AttributeSource>
+  </ObjectAttribute>
+  <ObjectAttribute displayName="SecurityIQ Principal Name" editMode="ReadOnly" extendedNumber="7" name="siqPrincipalName" type="string">
+    <AttributeSource name="userPrincipalName">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application"  name="Active Directory"/>
+      </ApplicationRef>
+    </AttributeSource>
+  </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

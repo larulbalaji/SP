@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="CreateIdentity" type=""> 
+  <Variable name="result" output="true"/>
+  <Variable input="true" name="resource"/>
+  <Variable input="true" name="operation"/>
+  <Variable name="payload" output="true"/>
+  <Step icon="Start" name="Start" posX="67" posY="354">
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.CreateIdentity");
+serilog.debug("operation="+operation);
+serilog.debug("++ Beanshell namespace:");
+for (int i = 0 ; i < this.variables.length ; i++) {
+    String name = this.variables[i];
+    Object value = eval(name);
+    if (value == void)
+        serilog.debug("++ " +name + " = void");
+    else if (value == null)
+        serilog.debug("++ " +name + " = null");
+    else
+        serilog.debug("++ " +name + ": " + value.getClass().getSimpleName() + " = " + value);
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Initialize Identity Model"/>
+  </Step>
+  
+  <Step action="call:getIdentityModel" name="Initialize Identity Model" posX="176" posY="10" resultVariable="identityModel">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Description>Initialize the data for the identity that we are creating.</Description>
+    <Transition to="Populate Identity Attributes" />
+  </Step>
+  
+   <Step name="Populate Identity Attributes" posX="67" posY="354" >
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ObjectConfig;
+import sailpoint.object.ObjectAttribute;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.CreateIdentity");
+serilog.debug("Starting Populate Identity Attributes");
+
+ObjectConfig idConfig = context.getObjectByName(ObjectConfig.class, "identity");
+List objAttrs = (ArrayList) idConfig.getObjectAttributes();
+
+for (int i = 0 ; i < this.variables.length ; i++) {
+    String name = this.variables[i];
+    Object value = eval(name);
+
+    serilog.debug("param name:" + name);
+    serilog.debug("param value:" + value);
+
+    for (ObjectAttribute objAttr : objAttrs ) {
+        if (objAttr.getName().equalsIgnoreCase(name) ) {
+            serilog.debug("setting name in identityModel:" + name);
+            identityModel.put(name, value);
+        }
+    }
+}
+
+serilog.debug("identityModel:" + identityModel);
+workflow.put("identityModel", identityModel);
+      ]]></Source>
+    </Script>
+    <Transition to="Build Provisioning Plan"/>
+  </Step> 
+  <Step action="call:buildPlanFromIdentityModel" name="Build Provisioning Plan" posX="301" posY="10" resultVariable="plan">
+    <Arg name="identityModel" value="ref:identityModel"/>
+    <Description>Convert the registration request into a provisioning plan.</Description>
+    <Transition to="Submit New User Request"/>
+  </Step>
+
+  <Step icon="Task" name="Submit New User Request" posX="450" posY="12">
+    <Arg name="identityName"/>
+    <Arg name="identityDisplayName"/>
+    <Arg name="plan"/>
+    <Arg name="flow" value="string:CreateIdentity"/>
+    <Arg name="optimisticProvisioning"/>
+    <Arg name="foregroundProvisioning"/>
+    <Arg name="doRefresh"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="notificationScheme"/>
+    <Arg name="approvalMode"/>
+    <Arg name="approvalScheme" value="string:none"/>
+    <Arg name="fallbackApprover" value= "string:spadmin"/>
+    <Arg name="approverElectronicSignature"/>
+    <Arg name="approvalEmailTemplate"/>
+    <Arg name="userEmailTemplate"/>
+    <Arg name="managerEmailTemplate"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <Arg name="policyScheme"/>
+    <Arg name="policiesToCheck"/>
+    <Arg name="priority"/>
+    <Arg name="ticketManagementApplication"/>
+    <Arg name="source"/>
+    <Arg name="trace" value="string:false"/>
+    <Description>Call the LCM Create and Update workflow with the plan that was created.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow"  name="LCM Create and Update"/>
+    </WorkflowRef>
+    <Transition to="Stop"/>
+  </Step>
+
+
+  <Step icon="Stop" name="Stop">
+      <Script>
+      <Source><![CDATA[
+workflow.put("result", "success");
+      ]]></Source>
+    </Script>
+  </Step>
+  
+</Workflow>

@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="MicrosoftSAML" type="SAMLCorrelation">
+  <Description/>
+  <Signature returnType="SailPointObject">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="assertionAttributes">
+        <Description>
+          A map where the key is a string and value is a string. The map will always contain
+          a key NameId with the value being the name Id sent by the Identity Provider.  All other
+          SAML assertion attributes will be included in the map.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="identity Or Link">
+        <Description>
+          The Identity or Link that has been authenticated via SAML SSO.
+          Returning the Link is the preferred way as it provides the
+          exact account back to the server side which can be helpful
+          when collecting authentication for electronic signatures.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>// Imports
+            import sailpoint.object.Identity;
+ 
+            // Making a BIG assumption here that the nameid-format is unspecified/persitent
+ 
+            // Get the nameId from the assertionAttributes
+            String nameId = (String)assertionAttributes.get("nameId");
+ 
+            String[] nameIdParts=nameId.split("@");
+ 
+           
+ 
+            Identity ident;
+ 
+ 
+ 
+            if(nameId != null) {
+                // Lookup the identity based on nameId
+                ident = context.getObject(Identity.class, nameIdParts[0]);
+            }
+ 
+            return ident;</Source>
+</Rule>

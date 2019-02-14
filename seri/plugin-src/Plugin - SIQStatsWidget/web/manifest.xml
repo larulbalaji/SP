@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin displayName="SIQStatsWidget" minSystemVersion="7.1" name="siqstats" rightRequired="SIQStatsRight" version="1.3">
+  <Attributes>
+    <Map>
+      <entry key="minUpgradableVersion" value="0.1"/>
+      <entry key="settings">
+        <value>
+          <List>
+            <Setting dataType="string" defaultValue="\\ad-resource\Data" helpText="" label="connection String" name="resource"/>
+            <Setting dataType="string" defaultValue="Administrator" helpText="" label="SIQ DB User" name="dbuser"/>
+            <Setting dataType="string" defaultValue="Sailp0!nt" helpText="" label="SIQ DB Password" name="dbpassword"/>
+            <Setting dataType="string" defaultValue="seri.sailpointdemo.com:1433" helpText="" label="SIQ DB Host:Port" name="dbhost"/>
+            <Setting dataType="string" defaultValue="SecurityIQDB_SERI" helpText="" label="SIQ DB Name" name="dbname"/>
+            <Setting dataType="string" defaultValue="SERI" helpText="" label="SIQ DB Domain" name="dbdomain"/>
+          </List>
+        </value>
+      </entry>
+        <entry key="snippets">
+        <value>
+          <List>
+            <Snippet regexPattern=".*\/home\.?(jsf|xhtml)" rightRequired="SIQStatsPluginRight">
+              <Scripts>
+                 <String>ui/js/AbstractListCtrl.js</String>
+                <String>ui/js/SIQKPI.js</String>
+                <String>ui/js/SIQKPIService.js</String>
+                <String>ui/js/SIQKPIWidgetDirective.js</String>
+                <String>ui/js/SIQKPIDirectiveCtrl.js</String>
+              </Scripts>
+                 <StyleSheets>
+                <String>ui/css/seri-widget.css</String>
+              </StyleSheets>
+            </Snippet>
+          </List>
+        </value>
+      </entry>
+      <entry key="restResources">
+        <value>
+          <List>
+            <String>sailpoint.plugin.siqstats.rest.SIQStatsResource</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>

@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  name="Trigger HR Processing" type="SERI">
+  <Step icon="Start" name="Start" posX="10" posY="20" resultVariable="plan">
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.AggregateHR.Start");
+serilog.debug("--");
+      ]]></Source>
+    </Script>
+    <Transition to="Run HR Aggregation"/>
+  </Step>
+
+  <Step name="Run HR Aggregation" posX="460" posY="20" resultVariable="plan">
+    <!-- Just do a delta aggregation on Human Resources -->
+    <Script>
+      <Source><![CDATA[
+import sailpoint.api.TaskManager;
+import sailpoint.object.Attributes;
+import sailpoint.object.Identity;
+import sailpoint.tools.GeneralException;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.AggregateHR.RunHRAggregation");
+
+// Execute an Aggregation task.
+// These are the appropriate options to:
+// - Set the application name
+// - Enable Delta Aggregation
+// - Disable task completion emails
+
+try {
+  Attributes newArgs = new Attributes();
+//  newArgs.put("correlateEntitlements", "true");
+  newArgs.put("applications", "Human Resources");
+  newArgs.put("deltaAggregation", "true");
+  newArgs.put("taskCompletionEmailNotify", "Disabled");
+
+  TaskManager taskMan = new TaskManager(context);
+  taskMan.runSync("Account Aggregation", newArgs);
+
+  serilog.debug("done!");
+} catch (Exception e) {
+  throw new GeneralException(e);
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Fire Events"/>
+  </Step>
+
+  <Step name="Fire Events" posX="460" posY="20" resultVariable="plan">
+    <!-- Just do an Identity refresh with 'Process Events' checked -->
+    <Script>
+      <Source><![CDATA[
+import sailpoint.api.TaskManager;
+import sailpoint.object.Attributes;
+import sailpoint.object.Identity;
+import sailpoint.tools.GeneralException;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.AggregateHR.FireEvents");
+
+serilog.debug("Firing Events");
+// Execute an IdentityRefresh task.
+// These are the appropriate options to:
+// - Process Events
+
+try {
+  Attributes newArgs = new Attributes();
+  newArgs.put("processTriggers", "true");
+  newArgs.put("taskCompletionEmailNotify", "Disabled");
+  newArgs.put("refreshManagerStatus", "true");
+  newArgs.put("promoteAttributes", "true");
+  TaskManager taskMan = new TaskManager(context);
+  taskMan.runSync("Identity Refresh", newArgs);
+
+  serilog.debug("done!");
+} catch (Exception e) {
+  throw new GeneralException(e);
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+  
+  <Step icon="Stop" name="Stop" posX="526" posY="170"/>
+  
+</Workflow>

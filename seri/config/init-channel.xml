@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="seri/catalog/Demo-Partners/UseCase-AccessRequest_with_violation/setup.xml"/>
+  <ImportAction name="include" value="seri/catalog/UseCase-LifecycleEvent-JoinerWithCertification/setup.xml"/> 
+	<ImportAction name="include" value="seri/catalog/Demo-Partners/UseCase-RoleCompositionCert/setup.xml"/> 
+	<ImportAction name="include" value="seri/catalog/Demo-Partners/UseCase-NativeChange/setup.xml"/>
+	<ImportAction name="include" value="seri/catalog/Demo-Partners/UseCase-GeneralPartnerDemo/setup.xml"/>
+  <ImportAction name="include" value="seri/catalog/UseCase-LifeCycleEvent-TransferProcessor4/setup.xml"/>
+
+</sailpoint>

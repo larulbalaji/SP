@@ -1,0 +1,399 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Probable Owner Manager Dynamic Form"
+  type="SERI" libraries="Identity,LCM">
+  <Variable initializer="string:true" name="transient">
+    <Description>Set to false to cause workflow-related objects, such as
+      approval
+      work items, to be saved in the database even if they are only
+      viewed by the person registering.</Description>
+  </Variable>
+  <Variable input="true" name="batchRequestItemId">
+    <Description>Used by the batch interface to record back individual
+      request item status. The specific item id for the individual
+      request in the batch file.</Description>
+  </Variable>
+  <Variable editable="true" name="optimisticProvisioning"
+    initializer="string:false">
+    <Description>Set to true to enable optimistic provisioning. This
+      will cause
+      changes to the entitlements compiled from role assignments to be
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.</Description>
+  </Variable>
+  <Variable editable="true" initializer="string:false"
+    name="foregroundProvisioning">
+    <Description>Normally provisioning is done in a step that uses the
+      "backgroud"
+      option to force the workfow to be suspend and be resumed in a
+      background task thread. This prevents the browser session from
+      hanging since provision can sometimes take a long time. For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to
+      the
+      user. This prevents having to run the Perform Maintanance task to
+      see the resutls of the request.</Description>
+  </Variable>
+
+  <Variable initializer="string:Normal" input="true"
+    name="workItemPriority">
+    <Description>The String version of a WorkItem.Priority. This
+      variable is
+      used to set the priority on all of the workitems generated
+      as part of this workflow and also set on the IdentityRequest
+      object.</Description>
+  </Variable>
+
+  <Variable input="true" name="ticketManagementApplication">
+    <Description>Name of the application that can handle ticket
+      requests.
+      When non-null the Manage Ticket Steps will be visited to open
+      tickets during the workflow lifecycle.</Description>
+  </Variable>
+
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>String version of sailpoint.object.Source to indicate
+      where the request originated. Defaults to LCM.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace">
+    <Description>Used for debugging this workflow and when set to true
+      trace will be sent to stdout.</Description>
+  </Variable>
+
+  <Variable name="identityDisplayName">
+    <Description>The displayName of the identity being updated.</Description>
+  </Variable>
+
+  <Variable name="plan">
+    <Description>The ProvisioningPlan that gets generated from the form
+      input.</Description>
+  </Variable>
+  <Variable name="flow" initializer="string:Probable Manager Owner">
+    <Description>The ProvisioningPlan that gets generated from the form
+      input.</Description>
+  </Variable>
+  <Variable name="ticketId">
+    <Description>The id of the ticket that is genereated by the
+      ticketingManagementApplication.
+      This is typically generated on the "open" call, and then used in subsequent
+      calls. It is also stored on the IdentityRequest object under the externalTicketId variable.</Description>
+  </Variable>
+
+  <Variable name="identityName" input="true">
+    <Description>The name of the identity we using.</Description>
+  </Variable>
+  
+  <!-- Normans Variables.  Need to clean up Jeff Bounds -->
+  <Variable name="ownerMap" type="java.util.Map"/>
+  <Variable name="workItemDecisionBasePath"/>
+  <Variable name="changeOwnerMap" initializer="null"/> 
+  <Variable name="newManager"/>  
+  <Variable name="newManagedByDN"/> 
+  <Variable name="removeKey"/>
+  <Variable name="formName" />
+  
+
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="Approval Library" />
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library" />
+  </RuleLibraries>
+
+  <Step icon="Start" name="Start" posX="34" posY="26">
+    <Transition to="Get User ID" />
+  </Step>
+  
+  <Step icon="Default" name="Get User ID" posX="33" posY="140">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+// Expect: java.lang.String quickLinkIdentityId
+
+//Quicklinks User Select passes in the Identity ID rather than the identityName
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableManagerWorkflow");
+serilog.debug("Manager User Id = " + quickLinkIdentityId);
+Identity aUser = context.getObjectById(Identity.class, quickLinkIdentityId);
+serilog.debug("Manager User Id resolves to " + aUser.getName());
+workflow.put("identityName", aUser.getName());
+
+    ]]></Source>
+    </Script>
+    <Transition to="Retrive Probable Owner Map" />
+  </Step>
+
+  <Step action="rule:RetrieveManagerPOMap" icon="Default" name="Retrive Probable Owner Map" posX="151" posY="140" resultVariable="ownerMap">
+    <Arg name='ownerName' value='ref:identityName'/> 
+    <Transition to="Subordinate Form II"/>
+  </Step>
+  
+  <Step icon="Default" name="Subordinate Form II"  posX="275" posY="140" resultVariable="attrForm">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Attributes;
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Script;
+import sailpoint.object.Rule;
+import sailpoint.object.DynamicValue;
+import java.util.Collection;
+import java.util.HashSet;
+import sailpoint.tools.MapUtil;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableManagerWorkflow");
+
+Form frm=new Form();
+frm.put("pageTitle", "Manager Certification - Are These Still My Subordinates");
+frm.setName("Probable Owner");
+workflow.put("formName",frm.getName());
+
+// Having issues with duplicate form names
+Form oldForm = context.getObjectByName(Form.class,frm.getName());
+if (oldForm != null) {
+  context.removeObject(oldForm);
+  context.commitTransaction();
+}
+
+//Default next and cancel buttons
+List buttons=new ArrayList();
+buttons.add(new Button("Next", "next"));
+buttons.add(new Button("Cancel", "cancel"));
+frm.setButtons(buttons);
+
+Section sect=new Section();
+sect.setColumns(2);
+
+List allowedValues = new ArrayList();
+allowedValues.add("Yes");
+allowedValues.add("No");
+
+// Build out the form
+serilog.debug("POP :: ownerMap = " + ownerMap);
+
+for (Map.Entry entry : ownerMap.entrySet()) {
+  for (String subordinate : entry.getValue()) {
+     Field managerField = new Field();
+     managerField.setType("radio");
+     // Apparently IIQ field names can not contain a period
+     managerField.setName(subordinate.replace(".","NoPeriodsAllowed"));
+     managerField.setDisplayName("Do you still manage " + subordinate);
+     managerField.setDefaultValue("Yes");
+     managerField.setRequired(true);
+     managerField.setAllowedValues(allowedValues);
+   
+     Field decisionField = new Field();
+     decisionField.setType("identity");
+     decisionField.setFilterString("managerStatus == true");
+     decisionField.setName(subordinate.replace(".","NoPeriodsAllowed") + "-newOwner");
+     decisionField.setDisplayName("If not manager, please specify a replacement");
+     decisionField.setAttribute("valueProperty","name");
+     // decisionField.setDefaultValue("I-AM-Owner");
+     String validationRuleName = "PO Form Validation";
+     Rule rule = wfcontext.getSailPointContext().getObject(Rule.class, validationRuleName);
+     decisionField.setValidationRule(rule);
+
+     sect.add(managerField);
+     sect.add(decisionField);
+  }
+}
+
+
+//Add the section to the form
+frm.add(sect);
+
+// Save the dynamic form object inside IIQ repository.
+context.saveObject(frm);
+context.commitTransaction();
+
+return frm;
+          ]]></Source>
+    </Script>
+    <Transition to="Approve Ownership" />
+  </Step>
+
+  <Step icon="Approval" name="Approve Ownership" posX="396" posY="139">
+    <Approval name="Edit Attributes" owner="script:return identityName;"
+      return="workItemDecisionBasePath" send="launcher,decisions">
+      <Arg name="workItemType" value="string:Form" />
+      <Arg name="workItemDescription" value="string:Manager Ownership Recertification Process" />
+      <Arg name="workItemForm" value="ref:formName" />
+      <Arg name="workItemFormBasePath" value="string:workItemDecisionBasePath"/>
+
+      <AfterScript>
+        <Source><![CDATA[
+import sailpoint.object.Form.FieldIterator;
+import sailpoint.object.Form;
+import sailpoint.object.Field; 
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableManagerWorkflow");
+serilog.debug("Decisions AfterScript :: workItemDecisionBasePath = \n" + workItemDecisionBasePath);
+
+// Change the map to be easily used in a loop
+Map changeOwnerMap = new HashMap();
+for (Map.Entry entry : workItemDecisionBasePath.entrySet()) {
+  if (!entry.getKey().contains("-newOwner")) {
+    // IIQ form field names do not allow periods, but IIQ account names allow periods.  
+    // Unsubstitute 
+    String javaAllowsPeriods = entry.getKey().replace("NoPeriodsAllowed",".");
+    if (entry.getValue().equals("No")) {
+      changeOwnerMap.put(javaAllowsPeriods,workItemDecisionBasePath.get(entry.getKey() + "-newOwner"));
+    }
+  }
+}
+
+workflow.put("changeOwnerMap",changeOwnerMap);
+        ]]></Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="Loop And Provison Changes" />
+  </Step>
+
+  <Step name="Loop And Provison Changes" posX="395" posY="9" resultVariable="plan">
+    <Description>For each user create - create a plan based on the roles selected</Description>
+    <Script>
+      <Source>
+
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+
+String identityName = null;
+String newManager = null;
+String newManagedByDN = null;
+
+
+// Process each entry in the map one at a time.  Loop until map is empty
+for (Map.Entry entry : changeOwnerMap.entrySet()) {
+    
+  identityName = entry.getKey();
+  newManager = entry.getValue();
+    
+  Identity managerIdentity = context.getObjectByName(Identity.class, newManager);
+  if (managerIdentity != null) {
+  List accountsManager = managerIdentity.getLinksByAppIdOrName(null,"Active Directory");
+    if(!accountsManager.isEmpty()) {
+      Link accountManager = (Link) accountsManager.get(0);
+      newManagedByDN = (String) accountManager.getAttribute("distinguishedName");
+    }
+  }
+
+  workflow.put("identityName",identityName);
+  workflow.put("newManager",newManager);
+  workflow.put("newManagedByDN",newManagedByDN);
+  workflow.put("removeKey",entry.getKey());
+
+  break;
+
+}
+      </Source>
+    </Script>
+    <Transition to="end">
+      <Script>
+        <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableManagerWorkflow");
+if (changeOwnerMap.size() == 0) {
+  serilog.debug ("Done iterating over changes"); 
+  return true;
+} else {
+  changeOwnerMap.remove(removeKey);
+  workflow.put("changeOwnerMap",changeOwnerMap);
+  return false;
+}
+        ]]></Source>
+      </Script>
+    </Transition>
+
+    <Transition to="Build Group Changes"/>
+  </Step>
+    
+  <Step name="Build Group Changes" icon='Task' posX="735" posY="135" resultVariable="plan">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.Operation;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.ObjectRequest;
+import sailpoint.object.ProvisioningPlan.ObjectOperation;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableManagerWorkflow");
+
+Identity managerIdentity = context.getObjectByName(Identity.class , newManager);
+Identity identity = context.getObjectByName(Identity.class , identityName);
+
+// Construct Managed Attribute ObjectRequet
+ProvisioningPlan plan = new ProvisioningPlan();
+
+// Change IIQ Link
+AccountRequest iiqReq = new AccountRequest(AccountRequest.Operation.Modify, "IIQ", null, identityName);
+iiqReq.add(new AttributeRequest("manager", ProvisioningPlan.Operation.Set, newManager));
+plan.add(iiqReq);
+
+List links = identity.getLinks();
+if (links == null || links.size() < 1){
+  serilog.debug("No Links, seting IIQ attributes " + plan.toXml());
+  return plan;
+}
+    
+// Build Other Appropriate Account Changes
+for (Link link : links){
+  Application app = link.getApplication();
+  String appName = app.getName();
+  String appType = app.getType();
+  /*************************************************************************************
+   * Set up provisoning plan per customer use cases
+   *************************************************************************************/
+  if (appType.compareTo("Active Directory - Direct") == 0) {
+    AccountRequest acctReq = new AccountRequest(AccountRequest.Operation.Modify, appName, null, identityName);
+    acctReq.setNativeIdentity(link.getNativeIdentity());
+    acctReq.add(new AttributeRequest("manager", newManagedByDN));
+    plan.add(acctReq);        
+  }
+}
+
+serilog.debug ("plan to execute is: " + plan.toXml());
+return plan;
+
+      ]]></Source>
+    </Script>
+    <Transition to="Provision Manager Changes"/>
+  </Step>
+  
+  <!-- Since this is happening in a loop, we need to schedule the LCM Provisioning call -->
+  <Step action="call:scheduleWorkflowEvent" icon="Task" name="Provision Manager Changes" posX="614" posY="134">
+    <Arg name="workflow" value="LCM Provisioning"/>
+    <Arg name='flow' value='ref:flow'/>    
+    <Arg name="owner" value='ref:launcher'/>
+    <Arg name="eventName" value="string:Manager ReCert Update Process"/>
+    <Arg name="scheduleDate">
+      <Script>
+        <Source>
+Calendar calendar = Calendar.getInstance();       
+return calendar.getTime();
+        </Source>
+      </Script>
+    </Arg>
+    <Arg name="launcher" value="ref:launcher"/>
+    <Arg name="caseName" value="Manager ReCert Update Process"/>
+    <Arg name="requestName" value="string:Manager ReCert Update Process"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="notificationScheme" value="string:none"/>
+    <Arg name="approvalMode" value="string:parallel"/>
+    <Arg name="approvalScheme" value="string:none"/>
+    <Arg name="doRefresh" value="string:false"/>
+    <Arg name="policyScheme" value="string:none"/>
+    <Arg name="trace" value="string:false"/>
+    <Arg name="source" value="LCM"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+
+    <Transition to="Loop And Provison Changes"/>
+  </Step>
+ 
+  
+  <Step icon="Stop" name="end" posX="713" posY="6"/>
+</Workflow>

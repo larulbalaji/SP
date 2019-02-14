@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='SystemConfiguration-Tools.xml'/>
+  <ImportAction name='include' value='SPRight-ConnectorRegistry.xml'/>
+  <ImportAction name='include' value='Capability-ConnectorRegistry.xml'/>
+  <ImportAction name='include' value='DynamicScope-ConnectorRegistry.xml'/>
+  <ImportAction name='include' value='Workflow-ConnectorRegistry.xml'/>
+  <ImportAction name='include' value='QuickLink-ConnectorRegistry.xml'/>
+  <ImportAction name='include' value='QuickLinkOptions-ConnectorRegistry.xml'/>
+</sailpoint>

@@ -1,0 +1,281 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="ExportBundlesOrig">
+  <Source><![CDATA[
+    
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.SearchControls;
+import javax.naming.ldap.InitialLdapContext;
+import javax.naming.ldap.LdapContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import sailpoint.api.CertificationContext;
+import sailpoint.api.IdentityHistoryService;
+import sailpoint.api.ObjectUtil;
+import sailpoint.api.Localizer;
+import sailpoint.api.SailPointContext;
+import sailpoint.api.SailPointFactory;
+import sailpoint.connector.Connector;
+import sailpoint.connector.ConnectorException;
+import sailpoint.connector.JDBCConnector;
+import sailpoint.object.AbstractCertifiableEntity;
+import sailpoint.object.Application;
+import sailpoint.object.Bundle;
+import sailpoint.object.Capability;
+import sailpoint.object.CertifiableDescriptor;
+import sailpoint.object.Certification;
+import sailpoint.object.CertificationEntity;
+import sailpoint.object.CertificationItem;
+import sailpoint.object.CompoundFilter;
+import sailpoint.object.CustomGlobal;
+import sailpoint.object.Filter;
+import sailpoint.object.Filter.MatchMode;
+import sailpoint.object.Identity;
+import sailpoint.object.IdentityHistoryItem;
+import sailpoint.object.IdentitySelector;
+import sailpoint.object.IdentitySelector.MatchExpression;
+import sailpoint.object.IdentitySelector.MatchTerm;
+import sailpoint.object.Link;
+import sailpoint.object.Permission;
+import sailpoint.object.Profile;
+import sailpoint.object.ProvisioningConfig;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningResult;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.ResourceObject;
+import sailpoint.object.SailPointObject;
+import sailpoint.object.Schema;
+import sailpoint.object.WorkItem;
+import sailpoint.tools.GeneralException;
+import sailpoint.tools.Util;
+import sailpoint.tools.xml.XMLObjectFactory;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+private String
+getBundleLocalizedDescription(Bundle bundle)
+{
+     String desc = null;
+
+     // English ist über alles!
+     //
+     Locale locale = new Locale("en", "US");
+
+     Localizer localizer = new Localizer(context, bundle.getId());
+     desc = localizer.getLocalizedValue(Localizer.ATTR_DESCRIPTION, locale);
+
+     return desc;
+}
+
+
+private String
+exportIIQBundles(Filter [] filters) 
+{
+        String result = "";
+        List bundles = null;
+
+        if (null == filters) { 
+            // no filtering...
+            bundles = context.getObjects(Bundle.class);
+            System.out.println("got bundles; size = " + bundles.size());
+        } else {
+            QueryOptions qo = new QueryOptions();
+            qo.add(filters);
+            bundles = context.getObjects(Bundle.class, qo);
+            System.out.println("got bundles; size = " + bundles.size());
+        }
+ 
+        if (context != null) {
+            File exportFile = new File("BundleExport.csv");
+            try {
+                FileWriter fw = new FileWriter(exportFile, false);
+                for (Bundle bundle : bundles) {
+                    String type = bundle.getType();
+                    String name = bundle.getName();
+                    String description = getBundleLocalizedDescription(bundle);
+                    if (null == description) description = "";
+                    String owner = (bundle.getOwner() != null) ? bundle.getOwner().getName() : "";
+                    List parents = new ArrayList();
+                    //Parent
+                    Iterator results = context.search("sql:select child from spt_bundle_children where bundle='" + bundle.getId() + "'", null, null);
+                    while (results.hasNext()) {
+                        String resultParentId = (String)results.next();
+                        Bundle parent = context.getObjectById(Bundle.class, resultParentId);
+                        parents.add(parent.getName());
+                        //context.decache(parent);
+                    }
+                    boolean roleAdded = false;
+                    //Inheritance
+                    if(parents.size() == 0) {
+                        fw.write("Add Role,\"" + type + "\",\"" + name + "\",\"" + description + "\",\"" + owner + "\",\"\"\n");
+                        roleAdded = true;
+                    } else if(parents.size() == 1) {
+                        fw.write("Add Role,\"" + type + "\",\"" + name + "\",\"" + description + "\",\"" + owner + "\",\"" + parents.get(0) + "\"\n");
+                        roleAdded = true;
+                    } else {
+                        for(String parent : parents) {
+                            if(!roleAdded) {
+                                fw.write("Add Role,\"" + type + "\",\"" + name + "\",\"" + description + "\",\"" + owner + "\",\"" + parent + "\"\n");
+                                roleAdded = true;
+                            } else {
+                                fw.write("Add Inheritance,\"" + name + "\",\"" + parent + "\"\n");
+                            }
+                        }
+                    }
+                    
+                    //Permitted
+                    List permits = bundle.getPermits();
+                    if(permits != null) {
+                        for(Bundle permit : permits) {
+                            fw.write("Add Permitted,\"" + name + "\",\"" + permit.getName() + "\"\n");
+                        }
+                    }
+                    
+                    //Required
+                    List requireds = bundle.getRequirements();
+                    if(requireds != null) {
+                        for(Bundle required : requireds) {
+                            fw.write("Add Required,\"" + name + "\",\"" + required.getName() + "\"\n");
+                        }
+                    }
+                    
+                    //MatchList
+                    IdentitySelector selector = bundle.getSelector();
+                    if(selector != null) {
+                        MatchExpression expression = selector.getMatchExpression();
+                        CompoundFilter filter = selector.getFilter();
+                        if(expression != null) {
+                            List matchTerms = expression.getTerms();
+                            String matchName = "";
+                            String matchValue = "";
+                            String matchTermStr = "";
+                            String together = "or";
+                            String appName = "";
+                            for(MatchTerm matchTerm : matchTerms) {
+                                appName = (matchTerm.getApplication() != null) ? matchTerm.getApplication().getName() : "";
+                                if(matchName.length() > 0) {
+                                    matchName = matchName + "," + matchTerm.getName();
+                                } else
+                                    matchName = matchTerm.getName();
+                                
+                                if(matchValue.length() > 0) {
+                                    matchValue = matchValue + "\"\",\"\"" + matchTerm.getValue();
+                                } else 
+                                    matchValue = matchTerm.getValue();
+                                    
+                                matchTermStr = matchTerm.render();
+                                together = "or";
+                                if(matchTerm.isAnd()) {
+                                    together = "and";
+                                }
+                            }
+                            fw.write("Add MatchList,\"" + name + "\",IDENTITYMATCHLIST," + together + ",\"" + matchName + "\",\"\"\"" + matchValue + "\"\"\"" + ",\"" + appName + "\"\n");
+                        }
+                        
+                        //Filters
+                        if(filter != null) {
+                            String filterText = filter.render();
+                            fw.write("Add MatchList,\"" + name + "\",FILTER,\"" + filterText + "\"\n");
+                        }
+                    }
+                    
+                    //Profiles
+                    List profiles = bundle.getProfiles();
+                    for(Profile profile : profiles) {
+                        String roleName = (profile.getBundle() != null) ? profile.getBundle().getName() : "";
+                        String profileDescription = (profile.getDescription() != null) ? profile.getDescription() : "";
+                    	String appName = (profile.getApplication() != null) ? profile.getApplication().getName() : "";
+                        List lFilters = profile.getConstraints();
+                        List permissions = profile.getPermissions();
+                        String filter = "";
+                        //we can only use the first filter, importer does not handle more than 1
+                        if(lFilters != null && lFilters.size() > 0) {
+                            Filter toMessWith = lFilters.get(0);
+                            filter = toMessWith.getExpression();
+                            //double quote the filter literals
+                            filter = filter.replace("\"", "\"\"");
+                            fw.write("Add Profile,\"" + name + "\",\"" + profileDescription + "\",\"" + appName + "\",\"" + filter + "\"\n");
+                        }
+                        
+                        
+                        if(permissions != null && permissions.size() != 0) {
+                            JSONArray permArray = new JSONArray();
+                            for(Permission permission : permissions) {
+                                String target = permission.getTarget();
+                                String rights = permission.getRights();
+                                JSONObject permObject = new JSONObject();
+                                permObject.put("rights", rights);
+                                permObject.put("target", target);
+                                permArray.put(permObject);
+                            }
+                            if(permArray.length() > 0) {
+                                String permString = permArray.toString();
+                                permString = permString.replace("\"","\"\"");
+                                fw.write("Add Profile,\"" + name + "\",\"" + profileDescription + "\",\"" + appName + "\",\"\",\"" + permString.toString() +"\"\n");
+                            }
+                        }
+                    }
+                    context.decache(bundle);
+                }
+                fw.flush();
+                fw.close();
+            } catch (IOException ioe) {
+                result = ioe.toString();
+                
+            } catch (Throwable th) {
+                StringWriter sw = new StringWriter();
+                PrintWriter pw = new PrintWriter(sw);
+                th.printStackTrace(pw);
+                if (sw != null) {
+                    result += "\n" + sw.toString();
+                }
+            }
+        }
+        
+        return result;
+     }
+
+     // Pass filter for getting only biz roles and it roles that reference Active_Directory app
+
+     List filters = new ArrayList();
+     Filter [] searchFilter = new Filter[1];
+
+     Application app = context.getObjectByName(Application.class, "Active_Directory");
+     filters.add(Filter.eq("type", "business"));
+     filters.add(Filter.eq("type", "organizational"));
+     filters.add(Filter.eq("profiles.application", app));
+
+     searchFilter[0] = Filter.or(filters);     
+
+     return exportIIQBundles(searchFilter);
+   
+  ]]></Source>
+</Rule>

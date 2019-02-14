@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="lastLoginToDate" type="LinkAttribute">
+  <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.tools.Util;
+
+String acctValue = link.getAttribute("acct_lastLogin");
+return Util.stringToDate(acctValue);
+]]>  </Source>
+</Rule>

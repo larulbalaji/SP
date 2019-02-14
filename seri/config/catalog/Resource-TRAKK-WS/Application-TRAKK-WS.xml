@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.webservices.WebServicesConnector" featuresString="PROVISIONING, ENABLE, PASSWORD, ACCOUNT_ONLY_REQUEST, ADDITIONAL_ACCOUNT_REQUEST" name="TRAKK-WS" profileClass="" type="Web Services">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="TRAKK WS Correlation"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="accountDeprovisionScenario" value="Delete Account Immediately"/>
+      <entry key="afterProvisioningRule"/>
+      <entry key="authenticationMethod" value="BasicLogin"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="connectionParameters">
+        <value>
+          <List>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/test"/>
+              <entry key="header"/>
+              <entry key="httpMethodType" value="GET"/>
+              <entry key="operationType" value="Test Connection"/>
+              <entry key="resMappingObj"/>
+              <entry key="rootPath"/>
+              <entry key="sequenceNumberForEndpoint" value="1"/>
+              <entry key="uniqueNameForEndPoint" value="test"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/aggregate"/>
+              <entry key="header">
+                <value>
+                  <Map>
+                    <entry key="Content-Type" value="application/json"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="httpMethodType" value="GET"/>
+              <entry key="operationType" value="Account Aggregation"/>
+              <entry key="resMappingObj">
+                <value>
+                  <Map>
+                    <entry key="capabilities" value="capabilities"/>
+                    <entry key="email" value="email"/>
+                    <entry key="firstname" value="firstname"/>
+                    <entry key="lastname" value="lastname"/>
+                    <entry key="userId" value="userId"/>
+                    <entry key="username" value="username"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>200</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath" value="$.trakkwsAccounts"/>
+              <entry key="sequenceNumberForEndpoint" value="2"/>
+              <entry key="uniqueNameForEndPoint" value="aggregate"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/aggregate/$getObject.nativeIdentity$"/>
+              <entry key="header"/>
+              <entry key="httpMethodType" value="GET"/>
+              <entry key="operationType" value="Get Object"/>
+              <entry key="resMappingObj">
+                <value>
+                  <Map>
+                    <entry key="capabilities" value="capabilities"/>
+                    <entry key="firstname" value="firstname"/>
+                    <entry key="lastname" value="lastname"/>
+                    <entry key="userId" value="userId"/>
+                    <entry key="username" value="username"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>2**</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath"/>
+              <entry key="sequenceNumberForEndpoint" value="3"/>
+              <entry key="uniqueNameForEndPoint" value="getAccount"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody" value="{&#10;&quot;userId&quot;:&quot;$plan.nativeIdentity$&quot;,&#10;&quot;username&quot;:&quot;$plan.username$&quot;,&#10;&quot;firstname&quot;:&quot;$plan.firstname$&quot;,&#10;&quot;lastname&quot;:&quot;$plan.lastname$&quot;,&#10;&quot;email&quot;:&quot;$plan.email$&quot;&#10;&quot;capabilities:&quot;:$plan.capabilities$&quot;&#10;}"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/createService"/>
+              <entry key="header">
+                <value>
+                  <Map>
+                    <entry key="Content-Type" value="application/json"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="httpMethodType" value="POST"/>
+              <entry key="operationType" value="Create Account"/>
+              <entry key="resMappingObj">
+                <value>
+                  <Map>
+                    <entry key="capabilities" value="capabilities"/>
+                    <entry key="email" value="email"/>
+                    <entry key="firstname" value="firstname"/>
+                    <entry key="lastname" value="lastname"/>
+                    <entry key="userId" value="userId"/>
+                    <entry key="username" value="username"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>2**</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath"/>
+              <entry key="sequenceNumberForEndpoint" value="4"/>
+              <entry key="uniqueNameForEndPoint" value="create"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/aggregateGroups"/>
+              <entry key="header"/>
+              <entry key="httpMethodType" value="GET"/>
+              <entry key="operationType" value="Group Aggregation"/>
+              <entry key="resMappingObj">
+                <value>
+                  <Map>
+                    <entry key="capability" value="capability"/>
+                    <entry key="description" value="description"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>200</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath" value="$.trakkwsGroups"/>
+              <entry key="sequenceNumberForEndpoint" value="5"/>
+              <entry key="uniqueNameForEndPoint" value="aggregateGroups"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody" value="{&#10;&quot;userId&quot;:&quot;$plan.nativeIdentity$&quot;,&#10;&quot;capabilities&quot;:&quot;$plan.capabilities$&quot;&#10;}"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/addEntitlementService"/>
+              <entry key="header">
+                <value>
+                  <Map>
+                    <entry key="Content-Type" value="application/json"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="httpMethodType" value="POST"/>
+              <entry key="operationType" value="Add Entitlement"/>
+              <entry key="resMappingObj"/>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>2**</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath"/>
+              <entry key="sequenceNumberForEndpoint" value="6"/>
+              <entry key="uniqueNameForEndPoint" value="addEntitlements"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody" value="{&#10;&quot;userId&quot;:&quot;$plan.nativeIdentity$&quot;,&#10;&quot;capabilities&quot;:&quot;$plan.capabilities$&quot;&#10;}"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/removeEntitlementService"/>
+              <entry key="header">
+                <value>
+                  <Map>
+                    <entry key="Content-Type" value="application/json"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="httpMethodType" value="POST"/>
+              <entry key="operationType" value="Remove Entitlement"/>
+              <entry key="resMappingObj"/>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>2**</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath"/>
+              <entry key="sequenceNumberForEndpoint" value="7"/>
+              <entry key="uniqueNameForEndPoint" value="removeEntitlements"/>
+            </Map>
+            <Map>
+              <entry key="afterRule"/>
+              <entry key="beforeRule"/>
+              <entry key="body">
+                <value>
+                  <Map>
+                    <entry key="bodyFormData"/>
+                    <entry key="bodyFormat" value="raw"/>
+                    <entry key="jsonBody"/>
+                  </Map>
+                </value>
+              </entry>
+              <entry key="contextUrl" value="/trakkws/rest/remove/$getObject.nativeIdentity$"/>
+              <entry key="header"/>
+              <entry key="httpMethodType" value="POST"/>
+              <entry key="operationType" value="Delete Account"/>
+              <entry key="resMappingObj"/>
+              <entry key="responseCode">
+                <value>
+                  <List>
+                    <String>2**</String>
+                  </List>
+                </value>
+              </entry>
+              <entry key="rootPath"/>
+              <entry key="sequenceNumberForEndpoint" value="8"/>
+              <entry key="uniqueNameForEndPoint" value="remove"/>
+            </Map>
+          </List>
+        </value>
+      </entry>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="enableStatus" value="status"/>
+      <entry key="genericWebServiceBaseUrl" value="http://ad-resource.seri.sailpointdemo.com:9080/"/>
+      <entry key="host" value="seri.sailpointdemo.com"/>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="password" value="1:DddXyiX96Ny2nKHNIUGxrg=="/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="Web Services"/>
+      <entry key="timeoutInSeconds" value="13"/>
+      <entry key="username" value="TRAKKWSAdmin"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="Create" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="Create"/>
+        </Map>
+      </Attributes>
+      <Section name="Section 1">
+        <Field name="userId" required="true" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getAttribute("employeeId");]]></Source>
+          </Script>
+        </Field>
+        <Field name="username" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getName();]]></Source>
+          </Script>
+        </Field>
+        <Field name="firstname" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getFirstname();]]></Source>
+          </Script>
+        </Field>
+        <Field name="lastname" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getLastname();]]></Source>
+          </Script>
+        </Field>
+        <Field name="email" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getEmail();]]></Source>
+          </Script>
+        </Field>
+        <Field multi="true" name="capabilities" type="string" value="input"/>
+      </Section>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="username" groupAttribute="" identityAttribute="userId" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="userId" type="string"/>
+      <AttributeDefinition name="username" type="string"/>
+      <AttributeDefinition name="firstname" type="string"/>
+      <AttributeDefinition name="lastname" type="string"/>
+      <AttributeDefinition name="email" type="string"/>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="capabilities" type="string"/>
+    </Schema>
+    <Schema displayAttribute="capability" identityAttribute="capability" instanceAttribute="" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="capability" type="string"/>
+      <AttributeDefinition name="description" type="string"/>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Windows FileServer Access Correlation" type="TargetCorrelation">
+  <Description/>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          The Application which owns the Target.
+        </Description>
+      </Argument>
+      <Argument name="nativeId">
+        <Description>
+          The native id associated with an AccessMapping.
+        </Description>
+      </Argument>
+      <Argument name="target">
+        <Description>
+          The Target being correlated.
+        </Description>
+      </Argument>
+      <Argument name="targetSource">
+        <Description>
+          The source of the configuration for the collector.
+        </Description>
+      </Argument>
+      <Argument name="isGroup">
+        <Description>
+          Indicates whether or not this is a GroupMapping.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>
+          A Map containing either a ManagedAttribute object ('group') or the name ('groupAttributeName') and value ('groupAttributeValue') of a ManagedAttribute. Link may also be returned since targets may also be correlated to a link object.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[import sailpoint.api.Correlator;    
+import sailpoint.unstructured.SecurityIQTargetCollector;    
+import sailpoint.object.Link;  
+        
+private String ATTR_OBJECT_SID = "objectSid";    
+  
+Map returnMap = new HashMap();     
+Link retLink = new Link();  
+  
+// resourceMap is an argument to this rule which contains the permissions data.  
+// if its row_type = "R", the permission relates to a group (R stands for "role");  
+// otherwise the permission belongs to a user account  
+  
+ if ( "R".equals(resourceMap.get("row_type")) ) {    
+     //AD Group    
+     returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,ATTR_OBJECT_SID);    
+     returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, resourceMap.get(SecurityIQTargetCollector.defaultIterateColumns.role_uid.name()));    
+          
+ } else {        
+     returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE, ATTR_OBJECT_SID);    
+     returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE,  resourceMap.get(SecurityIQTargetCollector.defaultIterateColumns.user_uid.name()));    
+ }  
+return returnMap;  ]]></Source>
+</Rule>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition id="SERI_HR_TRIGGER_PROCESSING"  name="HR Trigger Processing" resultAction="Delete" subType="task_item_type_system" type="System" hidden='true'>
+  <Attributes>
+    <Map>
+      <entry key="processWorkflowEvents" value="true"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate" value="Task Status"/>
+      <entry key="workflowThreads" value="3"/>
+    </Map>
+  </Attributes>
+  <Description>[SERI Base Demo] Dedicated Perform Maintenance task for processing in-bound OrangeHRM onboarding events.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="System Maintenance"/>
+  </Parent>
+</TaskDefinition>

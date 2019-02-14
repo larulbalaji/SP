@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow   libraries="IdentityRequest" name="SERI Transfer Request Notify" type="Subprocess">
+  <Variable input="true" name="identityName" required="true">
+    <Description>
+      The name of the identity object being modified.
+    </Description>
+  </Variable>
+  <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName">
+    <Description>
+      The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.
+    </Description>
+  </Variable>
+  <Variable initializer="user,oldManager" input="true" name="notificationScheme">
+    <Description>
+     A string that specifies who should be notified when the request has been complete.
+     The value can be null or a csv of one or more of the following options. 
+
+     none or null
+       disable notifications
+
+     user 
+       Identity that is being update will be notified.
+
+     oldManager
+       The old manager of the Identity that is being updated will be notified.
+
+     newManager
+       The new manager of the Identity that is being updated will be notified.
+
+     securityOfficer
+       The identity named in the securityOfficerNameVariable will be notified.
+    </Description>
+  </Variable>
+  <Variable input="true" name="securityOfficerName">
+    <Description>
+      The name of the security officer identity.
+    </Description>
+  </Variable>
+  <Variable input="true" name="policyViolations">
+    <Description> 
+       List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see 
+       pending violations.
+    </Description>
+  </Variable>
+  <Variable input="true" name="flow">
+    <Description>
+      The name of the LCM flow that launched this workflow.
+
+      This is one of these values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest
+      IdentityCreateRequest
+      IdentityEditRequest
+      ForgotPassword
+      ExpiredPassword
+      PasswordRequest
+
+    </Description>
+  </Variable>
+  <Variable input="true" name="trace">
+    <Description>
+      Used for debugging this subprocess and when set to true trace
+      statements will be sent to stdout.
+    </Description>
+  </Variable>
+  <Variable input="true" name="approvalSet">
+    <Description>
+       This attributes is set during the "Build Approval Set" step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of 
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions 
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+  <Variable input="true" name="plan">
+    <Description>The provisioning plan for the transfer removal requests.</Description>
+  </Variable>
+  <Variable input="true" name="planAdd">
+    <Description>The provisioning plan for the transfer additions.</Description>
+  </Variable>
+  <Variable initializer="User Transfer Notification" input="true" name="userEmailTemplate">
+    <Description>
+       Name of the email template to use when notifying the user.
+    </Description>
+  </Variable>
+  <Variable initializer="Old Manager Transfer Notification" input="true" name="oldManagerEmailTemplate">
+    <Description>
+       Name of the email template to use when notifying the manager.
+    </Description>
+  </Variable>
+  <Variable initializer="New Manager Transfer Notification" input="true" name="newManagerEmailTemplate">
+    <Description>
+       Name of the email template to use when notifying the manager.
+    </Description>
+  </Variable> 
+  <Variable initializer="New Manager Transfer Notification" input="true" name="securityOfficerEmailTemplate">
+    <Description>
+       Name of the email template to use when notifying the security officer.
+    </Description>
+  </Variable>
+  <Variable input="true" name="priority">
+    <Description>
+      String version of WorkItem.level that was used
+      to set the priority on the access request and
+      any workitems.
+    </Description>
+  </Variable>
+  <Step icon="Start" name="Start">
+    <Transition to="Notify User"/>
+  </Step>
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;user&quot;)" icon="Email" name="Notify User">
+    <Arg name="template" value="ref:userEmailTemplate"/>
+    <Arg name="to" value="script:getUserEmail(identityName, plan)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Arg name="oldManager">
+      <Script>
+        <Source><![CDATA[
+Identity oldManager = event.getOldObject().getManager();
+if (oldManager != null) {
+	return oldManager.getDisplayName();
+}
+return null;
+         ]]></Source>
+	  </Script>
+    </Arg>
+    <Transition to="Notify Old Manager"/>
+  </Step>
+
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;oldManager&quot;)" icon="Email" name="Notify Old Manager">
+    <Arg name="template" value="ref:oldManagerEmailTemplate"/>
+    <Arg name="to">
+      <Script>
+        <Source><![CDATA[ 
+Identity oldManager = event.getOldObject().getManager();
+if (oldManager != null) {
+	if (oldManager.getEmail() != null) {
+		return oldManager.getEmail();
+	}
+}
+return null;
+        ]]></Source>
+	  </Script>
+    </Arg>
+    <Arg name="oldManager">
+      <Script>
+        <Source><![CDATA[
+Identity oldManager = event.getOldObject().getManager();
+if (oldManager != null) {
+	return oldManager.getDisplayName();
+}
+return null;
+        ]]></Source>
+	  </Script>
+    </Arg>
+    <Arg name="newManager" value="script:getManagersEmail(identityName)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Arg name="ProvisioningPlan" value="ref:plan"/>
+    <Transition to="Notify New Manager"/>
+  </Step>
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;newManager&quot;)" icon="Email" name="Notify New Manager">
+    <Arg name="template" value="ref:newManagerEmailTemplate"/>
+    <Arg name="to" value="script:getManagersEmail(identityName, plan)"/>
+    <Arg name="oldManager">
+      <Script>
+        <Source><![CDATA[
+Identity oldManager = event.getOldObject().getManager();
+if (oldManager != null) {
+    return oldManager.getDisplayName();
+}
+return null;
+        ]]></Source>
+	  </Script>
+    </Arg>
+    <Arg name="newManager" value="script:getManagersEmail(identityName)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Arg name="ProvisioningPlan" value="ref:planAdd"/>
+    <Transition to="Notify Security Officer"/>
+  </Step>  
+  <Step action="call:sendEmail" condition="script:Util.csvToList(notificationScheme).contains(&quot;securityOfficer&quot;)" icon="Email" name="Notify Security Officer">
+    <Arg name="template" value="ref:securityOfficerEmailTemplate"/>
+    <Arg name="to" value="script:getEmail(securityOfficerName)"/>
+    <Arg name="approvalSet" value="call:prepareApprovalSetForNotification"/>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Stop" name="end"/>
+</Workflow>

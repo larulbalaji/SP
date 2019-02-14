@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  libraries="Identity,IdentityRequest"  name="PreDisable Joiner" type="SERI">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <!-- RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="LCM Workflow Library"/>
+  </RuleLibraries-->
+  <Step icon="Start" name="Start" posX="10" posY="20">
+    <Transition to="Refresh to set Manager"/>
+  </Step>
+  <Step name="Set inactive">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.seri.util.WorkflowUtils;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.PreDisableJoiner");
+serilog.debug("Disabling joiner: "+identityName);
+
+
+
+Identity id=context.getObjectByName(Identity.class, identityName);
+if(id!=null) {
+  serilog.debug("found cube: setting flag.");
+  WorkflowUtils.setIIQAttribute(context, identityName, "inactive", "true", false);
+} else {
+  serilog.debug("unable to find cube "+identityName);
+}
+
+      ]]></Source>
+    </Script>  
+    <Transition to="Stop"/>
+  </Step>
+   <Step action="call:refreshIdentity" icon="Task" name="Refresh to set Manager" posX="1028" posY="7">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="promoteAttributes" value="true"/>
+    <Transition to="Set inactive"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="526" posY="170"/>
+  
+</Workflow>

@@ -1,0 +1,3 @@
+Amanda.Ross,Janet.Washington,Exception,Oasis,"create on 'Employee Data'",DecisionComment,"Janet needs to be able to add employee data."
+Amanda.Ross,Henry.Butler,Bundle,Active Directory,"Treasury Analyst",Comment,"Henry is expanding into general accounting but still performs Treasury Analyst duties."
+Amanda.Ross,Catherine.Simmons,Exception,Active Directory,"groups=CN=DataArchive,OU=Groups,OU=Demo,DC=sailpointdemo,DC=com",Comment,"Cathy is scheduled to do data archive until end of March 2011."

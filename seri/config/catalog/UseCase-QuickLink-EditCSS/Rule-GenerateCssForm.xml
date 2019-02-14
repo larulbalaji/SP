@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Generate Css Form" type="Workflow">
+  <Description>This rule sends a notification email when a report is
+    completed.</Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the
+          SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be
+          used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="wfcontext">
+        <Description>
+          The current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="handler">
+        <Description>
+          The workflow handler associated with the current
+          WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="workflow">
+        <Description>
+          The current Workflow definition.
+        </Description>
+      </Argument>
+      <Argument name="step">
+        <Description>
+          The current Step.
+        </Description>
+      </Argument>
+      <Argument name="approval">
+        <Description>
+          The current Approval.
+        </Description>
+      </Argument>
+      <Argument name="item">
+        <Description>
+          The WorkItem being processed.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="Object">
+        <Description>
+          The result of the workflow rule; dependent on the
+          rule itself.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.object.Attributes;
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Application;
+import sailpoint.object.Rule;
+import sailpoint.object.Schema;
+import sailpoint.object.Script;
+import sailpoint.object.DynamicValue;
+import java.util.Collection;
+import java.util.HashSet;
+import sailpoint.tools.MapUtil;
+
+serilog = org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Rule-GenerateCssForm");
+
+Form frm=new Form();
+frm.setPageTitle("IIQ CSS Branding.");
+frm.setName("Form - Configure CSS");
+frm.setSubtitle("Please use the following fields to configure your custom CSS. When complete, to test your configurations click 'Test CSS'. To save your configurations, click 'Save Configurations'. To exit or cancel, click 'Cancel'");
+workflow.put("formName",frm.getName());
+
+//Not sure if we need to do this,but was having issues with forms
+try
+{
+    Form oldForm = context.getObjectByName(Form.class,frm.getName());
+    if (oldForm != null) 
+    {
+        context.removeObject(oldForm);
+        context.commitTransaction();
+    }
+}
+catch(Exception e)
+{
+    serilog.debug("Couldnt delete old form. Who cares. Moving on");
+}
+
+
+//Default next and cancel buttons
+List buttons=new ArrayList();
+
+
+Button testButton = new Button("Test CSS","next");
+testButton.setParameter("test");
+testButton.setValue("true");
+buttons.add(testButton);
+
+buttons.add(new Button("Cancel", "cancel"));
+
+
+Button saveButton = new Button("Save Configurations","next");
+saveButton.setParameter("save");
+saveButton.setValue("true");
+buttons.add(saveButton);
+
+Button saveEButton = new Button("Save Configurations and Exit","next");
+saveEButton.setParameter("saveAndExit");
+saveEButton.setValue("true");
+buttons.add(saveEButton);
+
+frm.setButtons(buttons);
+
+Field advancedField = new Field();
+advancedField.setType("String");
+advancedField.setName("mode");
+advancedField.setDisplayName("Editing Mode");
+advancedField.setPostBack(true);
+List values = new ArrayList();
+values.add("Basic");
+/* values.add("Advanced");*/
+advancedField.setAllowedValues(values);
+advancedField.setValue("Advanced");
+
+Section viewSect=new Section();
+
+
+viewSect.setLabel("View");
+viewSect.add(advancedField);
+
+frm.add(viewSect);
+
+
+
+Section basicSect=new Section();
+basicSect.setLabel("Basic Style Settings");   
+
+
+
+
+Section basicBackgroundSect=new Section();
+basicBackgroundSect.setName("basicBackground");
+basicBackgroundSect.setLabel("Background Style Settings");
+
+Section basicloginSect=new Section();
+basicloginSect.setName("basicLogin");
+basicloginSect.setLabel("Login Style Settings");
+
+Section basicSectionHeaderSect=new Section();
+basicSectionHeaderSect.setName("basicHeader");
+basicSectionHeaderSect.setLabel("Page Title Style Settings");
+
+Section basicloggedInSect=new Section();
+basicloggedInSect.setName("loggedInAs");
+basicloggedInSect.setLabel("'Logged In As' Header Style Settings");
+
+Section basictextSect=new Section();
+basictextSect.setName("basictext");
+basictextSect.setLabel("Text/Heading Settings");
+
+Section basicdashboardSect=new Section();
+basicdashboardSect.setName("basicDashboard");
+basicdashboardSect.setLabel("Dashboard Style Settings");
+
+Section basicmenuSect=new Section();
+basicmenuSect.setName("basicMenu");
+basicmenuSect.setLabel("Main Menu Style Settings");
+
+Section basicsubmenuSect=new Section();
+basicsubmenuSect.setName("basicMenu");
+basicsubmenuSect.setLabel("Sub Menu Style Settings");
+
+Section basictabSect=new Section();
+basictabSect.setName("basicTabs");
+basictabSect.setLabel("Tab Style Settings");
+
+Section basicTitleColumnSect=new Section();
+basicTitleColumnSect.setName("basicTitleColumn");
+basicTitleColumnSect.setLabel("Title Column Style Settings");
+
+Section basicPageInfoSect=new Section();
+basicPageInfoSect.setName("basicPageInfo");
+basicPageInfoSect.setLabel("Page Info Style Settings");
+
+Section basicBreadcrumbsSect=new Section();
+basicBreadcrumbsSect.setName("basicBreadcrumbs");
+basicBreadcrumbsSect.setLabel("Breadcrumbs Style Settings");        
+
+
+//set the login field sections
+Iterator bit = ((Map)cssMap.get("basic")).entrySet().iterator();
+while (bit.hasNext()) 
+{
+    Map.Entry pairs = (Map.Entry)bit.next();
+    //get the type
+    String styleName = (String)pairs.getKey();   
+    Map attributes = (Map)pairs.getValue();
+    String  section =  (String) attributes.get("section");
+    String  help =  (String) attributes.get("help");  
+    String  name =  (String) attributes.get("name");
+    String  displayName =  (String) attributes.get("displayName");
+    String  css =  (String) attributes.get("css");
+
+
+
+
+    //add it to the proper section    
+    Field editField = new Field();
+    editField.setType("String");
+    editField.setName("basic."+(String)pairs.getKey()+".css");
+    editField.setDisplayName(displayName);
+
+    editField.setDynamic(true);
+    // editField.setValue(css);
+    editField.setHelpKey(help);
+
+    DynamicValue advancedDef = new DynamicValue();
+    advancedDef.setRule(context.getObjectByName(Rule.class,"isAdvancedView"));
+    editField.setHiddenDefinition(advancedDef);
+
+
+
+    if(section==null)
+    {
+
+    }
+
+
+
+    if(section.equalsIgnoreCase("basicTitleColumnSect"))
+    {
+        basicTitleColumnSect.add(editField);
+    }
+
+
+    if(section.equalsIgnoreCase("basicPageInfoSect"))
+    {
+        basicPageInfoSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicBackgroundSect"))
+    {
+        basicBackgroundSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicloginSect"))
+    {
+        basicloginSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicSectionHeaderSect"))
+    {
+        basicSectionHeaderSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicloggedInSect"))
+    {
+        basicloggedInSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basictextSect"))
+    {
+        basictextSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicdashboardSect"))
+    {
+        basicdashboardSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicmenuSect"))
+    {
+        basicmenuSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basicsubmenuSect"))
+    {
+        basicsubmenuSect.add(editField);
+    }
+    if(section.equalsIgnoreCase("basictabSect"))
+    {
+        basictabSect.add(editField);
+    }
+
+    if(section.equalsIgnoreCase("basicBreadcrumbsSect"))
+    {
+        basicBreadcrumbsSect.add(editField);
+    }
+
+}
+
+
+
+
+if(basicBackgroundSect.hasFields())    
+{
+    frm.add(basicBackgroundSect);
+}
+
+if(basicloginSect.hasFields())    
+{
+    frm.add(basicloginSect);
+}
+if(basicSectionHeaderSect.hasFields())
+{
+    frm.add(basicSectionHeaderSect);
+}
+if(basicloggedInSect.hasFields())
+{
+    frm.add(basicloggedInSect);
+}
+if(basictextSect.hasFields())
+{
+    frm.add(basictextSect);
+}
+
+if(basicPageInfoSect.hasFields())
+{
+    frm.add(basicPageInfoSect);
+}
+
+if(basicTitleColumnSect.hasFields())
+{
+    frm.add(basicTitleColumnSect);
+}
+
+
+if(basicdashboardSect.hasFields())
+{
+    frm.add(basicdashboardSect);
+}
+if(basicmenuSect.hasFields())
+{
+    frm.add(basicmenuSect);
+}
+if(basicsubmenuSect.hasFields())
+{
+    frm.add(basicsubmenuSect);
+}   
+
+if(basictabSect.hasFields())
+{
+    frm.add(basictabSect);
+}   
+
+
+if(basicBreadcrumbsSect.hasFields())
+{
+    frm.add(basicBreadcrumbsSect);
+}   
+
+try
+{
+    //Save the form object.
+    context.saveObject(frm);
+    context.commitTransaction();
+}
+catch(Exception e)
+{
+    serilog.debug("Could not SAVE the transcaton. This is a problem:   "+ e); 
+}
+
+  ]]></Source>
+</Rule>

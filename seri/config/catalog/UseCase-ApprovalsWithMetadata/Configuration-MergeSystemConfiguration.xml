@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+        <Map>
+          <entry key="workflowLCMAccessRequest" value="Approvals-LCMProvisioning" />
+          <entry key="workflowLCMAccountsRequest" value="Approvals-LCMProvisioning" />
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>

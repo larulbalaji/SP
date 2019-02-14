@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Form-CreateVendor.xml'/>
+  <ImportAction name='include' value='ObjectConfig-CreateVendor-Identity.xml'/>
+  <ImportAction name='include' value='QuickLink-CreateVendor.xml'/>
+  <ImportAction name='include' value='DynamicScope-VendorAdmins.xml'/>
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-Query-IdentityAttributeValues.xml'/>
+</sailpoint>

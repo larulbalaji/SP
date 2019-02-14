@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-Servicenow.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateServicenowAccounts.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateServicenowRoles.xml'/>
+</sailpoint>

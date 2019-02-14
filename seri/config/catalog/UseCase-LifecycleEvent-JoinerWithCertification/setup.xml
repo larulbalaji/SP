@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+    
+    <ImportAction name="include" value="TaskDefinition-RefreshMonitoredUsersQuick.xml"/>
+    <ImportAction name="include" value="TaskDefinition-RefreshMonitoredUsersProcessEvents.xml"/> 
+    <ImportAction name="include" value="TaskDefinition-Sequential3Joiner.xml"/>
+    <ImportAction name="include" value="Workflow-NewUserCert.xml"/>
+    <ImportAction name="include" value="IdentityTrigger-JoinerCertifyIdentity.xml"/>   
+    <ImportAction name="include" value="TaskDefinition-IdentityAccessReviewLiveReport.xml"/>        
+    <ImportAction name="include" value="TaskDefinition-NewHireAccessReviewReport.xml"/>
+
+</sailpoint>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition  formPath="/monitor/tasks/accountAggregationTask.xhtml"   name="Aggregate AD Accounts" resultAction="Delete" type="AccountAggregation">
+  <Attributes>
+    <Map>
+      <entry key="applications" value="Active Directory"/>
+    </Map>
+  </Attributes>
+  <Description>Load and correlate AD accounts directly from AD domain server</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Account Aggregation"/>
+  </Parent>
+</TaskDefinition>

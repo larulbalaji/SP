@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="AfterAction - CreateLyncAccount" type="ConnectorAfterCreate">
+  <Attributes>
+    <Map>
+      <entry key="ObjectOrientedScript" value="true"/>
+      <entry key="extension" value=".ps1"/>
+      <entry key="program" value="powershell.exe"/>
+      <entry key="timeout" value="100"/>
+    </Map>
+  </Attributes>
+  <Source>
+  <![CDATA[ 
+          Add-type -path "C:\prog\IQService\Utils.dll" 
+      try
+        {
+# Read the environment variables
+$sReader = New-Object System.IO.StringReader([System.String]$env:Request);
+# Form the xml reader object
+$xmlReader = [System.xml.XmlTextReader]([SailPoint.Utils.xml.XmlUtil]::getReader($sReader));
+# Create SailPoint Request object
+$requestObject = New-Object SailPoint.Utils.objects.AccountRequest($xmlReader);
+
+ 
+              foreach ($attribute in $requestObject.AttributeRequests)
+              {
+                 if($attribute.Name -eq "sAMAccountName")
+                 {
+    Enable-CsUser -Identity $attribute.Value -RegistrarPool "lync2013.poc.local" -SipAddressType SamAccountName -SipDomain poc.local
+                  }
+               }
+  
+              
+        }
+        catch
+        {
+                $_.Exception.Message | out-file  -append $args[0]
+        }
+
+        return;
+    ]]>
+    </Source> 
+</Rule>

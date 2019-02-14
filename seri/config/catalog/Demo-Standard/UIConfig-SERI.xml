@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <UIConfig name="UIConfig">
+      <Attributes>
+	      <Map>
+	        <entry key="accountIconConfig">
+	          <value>
+	            <List>
+		            <AccountIconConfig attribute="privileged" source="/images/icons/privilege_16.png" title="This is a privileged account" value="true"/>
+		            <AccountIconConfig attribute="service" source="/images/icons/person_16.png" title="This is a service account" value="true"/>
+		            <AccountIconConfig attribute="inactive" source="/images/icons/certif_approved_16.png" title="Account Enabled" value="false"/>
+		            <AccountIconConfig attribute="inactive" source="/images/icons/certif_rejected_16.png" title="Account Disabled" value="true"/>
+	            </List>
+	          </value>
+	        </entry>
+	        <entry key="lcmSearchIdentityAttributes" value="region,manager,location,department,jobTitle"/>
+
+          <!--  add the inactive attribute with graphical rendering to the identityTableColumns
+                ar 03/05/2015 
+            -->
+          <entry key='identityTableColumns'>
+             <value>
+               <List>
+                 <!-- For some unknown reason we have to add the id field here, otherwise it is removed and
+                      a cklick on the identity results in a NPE
+                      ar 03/05/2015 
+                   -->
+                 <ColumnConfig dataIndex="id" fieldOnly="true" property="id" sortProperty="id" stateId="id"/> 
+                 <ColumnConfig dataIndex="inactive" 
+                                hideable="true" 
+                                property="inactive" 
+                            sortProperty="inactive" 
+                                sortable="true" 
+                                 stateId="inactive" 
+                                renderer="SailPoint.Define.Grid.Identity.renderStatus"/>
+               </List>
+             </value>
+          </entry>
+        </Map>
+      </Attributes>      
+    </UIConfig>
+  </ImportAction>
+</sailpoint>

@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" libraries="Identity" name="FTO Start - Disable All Accounts" type="IdentityLifecycle">
+  <Variable input="true" name="plan" type="sailpoint.object.ProvisioningPlan">
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Step icon="Start" name="start" posX="36" posY="39">
+    <Transition to="Build Disabling Plan"/>
+  </Step>
+  <Step name="Build Disabling Plan" posX="157" posY="39" resultVariable="plan">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.Identity;
+import sailpoint.object.Link; 
+
+ProvisioningPlan plan=null;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.DisableAccounts.BuildDisablingPlan");
+
+Identity identity=context.getObjectByName(Identity.class, identityName);
+
+List links = identity.getLinks();
+for (Link link: links) {
+  // we will not disable Authoritative accounts - since they are authoritative
+  serilog.debug("Got link for "+identityName+" on "+link.getApplicationName());
+  if (!link.getApplication().isAuthoritative()) {
+    serilog.debug("Disabling..");
+    if(plan==null) {
+      plan=new ProvisioningPlan();
+      plan.setIdentity(identity);
+    }
+
+    ProvisioningPlan.AccountRequest ar=new ProvisioningPlan.AccountRequest();
+    ar.setNativeIdentity(link.getNativeIdentity());
+    ar.setApplication(link.getApplicationName());
+    ar.setOperation(ProvisioningPlan.AccountRequest.Operation.Disable);
+    plan.addRequest(ar);
+  } else {
+    serilog.debug("skipping..");
+  }
+}
+
+return plan;
+
+  ]]></Source>
+    </Script>
+    <Transition to="Provision Plan"/>
+  </Step>
+  <Step name="Provision Plan" posX="667" posY="134" resultVariable="plan">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.api.Provisioner;      
+      
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.DisableAccounts.ProvisionPlan");
+serilog.debug("provision..");
+
+Provisioner p = new Provisioner(context);
+if(plan!=null) {
+  p.setDoRefresh(true);
+  p.execute(plan);
+} else {
+  serilog.debug("no plan to fire for "+identityName);
+}
+return plan;
+      ]]></Source>
+    </Script>
+    <Transition to="Refresh Identity"/>
+  </Step>
+  <Step action="call:refreshIdentity" icon="Task" name="Refresh Identity" posX="621" posY="352">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="correlateEntitlements" value="string:true"/>
+    <Arg name="provision" value="string:true"/>
+    <Arg name="synchronizeAttributes" value="string:true"/>
+    <Arg name="refreshLinks" value="script:return true;"/>
+    <Description>Update the identity with anything we might have provisioned to applications</Description>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="760" posY="367"/>
+
+</Workflow>
+

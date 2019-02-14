@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Account Deprovisioning - AD Link set description" type="Workflow">
+  <Description>Updates the AD Account Model </Description>
+  <Source><![CDATA[
+import java.text.DateFormat;
+
+// Expect: java.util.Map link
+
+// This rule gets passed a Map object called link
+// It can then modify the link as required
+// the link must be returned
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Deprovisioning.LinkRule");
+
+DateFormat df=DateFormat.getDateInstance(DateFormat.MEDIUM);
+
+link.put("description", "disabled on " + df.format(new Date()));
+
+return link;
+
+
+  ]]></Source>
+</Rule>
+

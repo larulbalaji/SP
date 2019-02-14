@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, SYNC_PROVISIONING, ENABLE, SEARCH, NO_PERMISSIONS_PROVISIONING, DIRECT_PERMISSIONS, PASSWORD, ACCOUNT_ONLY_REQUEST" icon="internetIcon" name="Amazon AWS" profileClass="" type="AWS IAM">
+  <Attributes>
+    <Map>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1478896257771</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1478896257677</Date>
+        </value>
+      </entry>
+      <entry key="compositeDefinition"/>
+      <entry key="connectorClass" value="openconnector.connector.aws.AWSConnector"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="encrypted" value="kid,secret"/>
+      <entry key="kid" value="put your key id here"/>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="secret" value="put your secret key here"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="AWS IAM"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="account" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="IIQTemplateOwnerDefinition">
+            <value>
+              <DynamicValue value=""/>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+      <Field displayName="con_prov_policy_AWSIAM_user_name" filterString="" helpKey="help_con_form_AWSIAM_user_name" name="UserName" required="true" type="string">
+        <Script>
+          <Source><![CDATA[return identity.getName();]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="con_prov_policy_AWSIAM_Password" filterString="" helpKey="help_con_form_AWSIAM_Password" name="password" required="true" type="secret" value="P@ssw0rd"/>
+    </Form>
+    <Form name="create Group" objectType="group" type="Create">
+      <Field displayName="con_prov_policy_AWSIAM_Group_Name" helpKey="help_con_form_AWSIAM_Group_name" name="GroupName" required="true" type="string"/>
+    </Form>
+    <Form name="Update Group" objectType="group" type="Update">
+      <Field displayName="con_prov_policy_AWSIAM_Path" helpKey="help_con_form_AWSIAM_Path" name="Path" reviewRequired="true" type="string"/>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="UserName" identityAttribute="UserName" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="UserName" remediationModificationType="None" required="true" type="string">
+        <Description>User Name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="UserId" remediationModificationType="None" required="true" type="string">
+        <Description>User ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Path" remediationModificationType="None" required="true" type="string">
+        <Description>Path of the group</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Arn" remediationModificationType="None" required="true" type="string">
+        <Description>Amazon Resource Name of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CreateDate" remediationModificationType="None" required="true" type="string">
+        <Description>User Creation date</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Has Password" remediationModificationType="None" required="true" type="string">
+        <Description>Password Status</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="Groups" remediationModificationType="None" schemaObjectType="group" type="string">
+        <Description>Groups of the user</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="GroupName" featuresString="PROVISIONING, NO_PERMISSIONS_PROVISIONING" identityAttribute="GroupName" instanceAttribute="" nativeObjectType="group" objectType="group" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="GroupName" remediationModificationType="None" required="true" type="string">
+        <Description>Group Name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GroupId" remediationModificationType="None" required="true" type="string">
+        <Description>Group ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Path" remediationModificationType="None" required="true" type="string">
+        <Description>Group Path</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="Arn" remediationModificationType="None" required="true" type="string">
+        <Description>Amazon Resource Name of the Group</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CreateDate" remediationModificationType="None" required="true" type="string">
+        <Description>Group Creation date</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="GroupPermissions" remediationModificationType="None" required="true" type="string">
+        <Description>Group Permissions</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard>
+    <Attributes>
+      <Map>
+        <entry key="dormantAccount" value="0"/>
+        <entry key="inactiveAccount" value="0"/>
+        <entry key="privilegedAccount" value="0"/>
+        <entry key="riskyAccount" value="0"/>
+        <entry key="serviceAccount" value="0"/>
+        <entry key="totalEntitlements" value="0"/>
+        <entry key="totalLinks" value="0"/>
+        <entry key="violatorAccount" value="0"/>
+      </Map>
+    </Attributes>
+  </ApplicationScorecard>
+</Application>

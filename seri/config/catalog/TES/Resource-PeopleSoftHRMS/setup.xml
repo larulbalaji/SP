@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-PeoplesoftHrms.xml'/>
+  <ImportAction name='include' value='Rule-PeoplesoftCreation.xml'/>
+  <ImportAction name='include' value='Rule-PSoftModifyProvisioning.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregatePeoplesoftHrmsAccounts.xml'/>  
+</sailpoint>

@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <Rule language="beanshell" name="AD Fileshare Access Rights Correlation" type="TargetCorrelation">
+    <Source>
+<![CDATA[
+import sailpoint.api.Correlator;
+import sailpoint.tools.xml.XMLObjectFactory;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.TargetCorrelation.ADFileshare");
+
+String ATTR_OBJECT_SID = "objectSid";
+Map returnMap = new HashMap();
+if ( isGroup ) {
+    returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE, ATTR_OBJECT_SID);
+    returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, nativeId);
+} else {
+    returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE, ATTR_OBJECT_SID);
+    returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, nativeId);
+}
+//serilog.debug("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+return returnMap;
+]]>
+    </Source>
+  </Rule>
+
+</sailpoint>

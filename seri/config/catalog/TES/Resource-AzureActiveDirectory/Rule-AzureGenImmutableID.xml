@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Azure AD Rule Library">
+  <Source><![CDATA[
+
+import java.util.Base64;
+import java.lang.Character;
+
+    /** 
+    * Take an Active Directory objectGUID and return the calculated immutableID
+    */
+    public String getImmutableId(String guid) {
+      byte[] arrangedBytes = new byte[16];
+      if (guid != null) {
+        String hexdigits = guid.replace("-", "").replace("{","").replace("}","").toUpperCase();
+        if (hexdigits.length() == 32) {
+          byte[] bytes = new byte[16];
+          for (int i=0; i < 16; i++) { bytes[i] = (byte)Integer.parseInt(hexdigits.substring((i*2),((i+1)*2)),16); }
+        }
+      }
+	    return Base64.getEncoder().encodeToString(arrangedBytes);
+    }
+  ]]></Source>
+</Rule>

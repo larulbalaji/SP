@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Assign Demo Roles To Scopes" resultAction="Delete" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="roleFile" value="WEB-INF/config/seri/data/DemoRoles/StandardDemo-PlaceBundleInScopesImport.csv"/>
+    </Map>
+  </Attributes>
+  <Description>Assign Scopes to Standard Role Model for demo purposes</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Role Importer"/>
+  </Parent>
+</TaskDefinition>

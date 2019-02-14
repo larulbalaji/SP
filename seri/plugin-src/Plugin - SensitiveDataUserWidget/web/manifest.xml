@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin displayName="SensitiveDataWidget" minSystemVersion="7.1" name="sensitivedata" rightRequired="SensitiveDataUsersRight" version="1.0">
+  <Attributes>
+    <Map>
+      <entry key="minUpgradableVersion" value="0.1"/>
+      <entry key="settings">
+        <value>
+          <List>
+            <Setting dataType="int" defaultValue="150" helpText="Limit the number of users returned" label="Return Limit" name="limit"/>
+            <Setting dataType="string" defaultValue="ALL" helpText="Enter a value for a Data Classification, ALL will return all users with any classification" label="Data Classification" name="dctag"/>
+          </List>
+        </value>
+      </entry>
+        <entry key="snippets">
+        <value>
+          <List>
+            <Snippet regexPattern=".*\/home\.?(jsf|xhtml)" rightRequired="SensitiveDataUsersPluginRight">
+              <Scripts>
+                <String>ui/js/AbstractListCtrl.js</String>
+                <String>ui/js/SensitiveDataUser.js</String>
+                <String>ui/js/SensitiveDataUserService.js</String>
+                <String>ui/js/SensitiveDataUserWidgetDirective.js</String>
+                <String>ui/js/SensitiveDataUserWidgetDirectiveCtrl.js</String>
+              </Scripts>
+              <StyleSheets>
+                <String>ui/css/seri-widget.css</String>
+              </StyleSheets>
+            </Snippet>
+          </List>
+        </value>
+      </entry>
+      <entry key="restResources">
+        <value>
+          <List>
+            <String>sailpoint.plugin.sensitivedata.rest.SensitiveDataResource</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>

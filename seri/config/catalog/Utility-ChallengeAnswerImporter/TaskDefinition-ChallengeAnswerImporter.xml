@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.seri.task.ChallengeQuestionAnswerImporterExecutor" name="Challenge Answer Importer" type="Generic" template="true">
+  <Description>
+    IdentityIQ Challenge Answer Importer -- Import answers to challenge questions from a file
+  </Description>
+  <Attributes>
+    <Map>
+      <entry key="filename" value="WEB-INF/config/seri/catalog/Utility-ChallengeAnswerImporter/sampleImport.csv"/>
+    </Map>
+  </Attributes>
+  <Signature>
+    <Inputs>
+      <Argument name="filename" required="true" type="string">
+        <Prompt>CSV file containing challenge answers.</Prompt>
+      </Argument>
+      <Argument name="locale" type="string">
+        <Prompt>Langage to check default questions in (default: en)</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="numlines" type="String">
+        <Prompt>Lines Processed:</Prompt>
+      </Argument>
+      <Argument name="answersCreated" type="String">
+        <Prompt>Challenge Answers Created:</Prompt>
+      </Argument>
+      <Argument name="identitiesNotFound" type="String">
+        <Prompt>Identities Not Found:</Prompt>
+      </Argument>
+      <Argument name="questionsNotFound" type="String">
+        <Prompt>Questions Not Found:</Prompt>
+      </Argument>
+      <Argument name="errorLines" type="String">
+        <Prompt>Invalid Lines:</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>

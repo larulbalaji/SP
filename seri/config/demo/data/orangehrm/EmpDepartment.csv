@@ -1,0 +1,158 @@
+employeeId,department
+1a,Executive Management
+1a2a,Regional Operations
+1a2aX,Regional Operations
+1a2b,Regional Operations
+1a2c,Regional Operations
+1a2a3a,Information Technology
+1a2a3b,Information Technology
+1a2a3c,Engineering
+1a2a3d,Engineering
+1a2b3a,Human Resources
+1a2b3b,Human Resources
+1a2b3c,Inventory
+1a2b3d,Inventory
+1a2c3a,Accounting
+1a2c3b,Accounting
+1a2c3c,Finance
+1a2c3d,Finance
+1a2a3a4a,Information Technology
+1a2a3a4b,Information Technology
+1a2a3a4e,Information Technology
+1a2a3b4a,Information Technology
+1a2a3b4b,Information Technology
+1a2a3b4e,Information Technology
+1a2a3c4a,Engineering
+1a2a3c4b,Engineering
+1a2a3c4e,Engineering
+1a2a3d4a,Engineering
+1a2a3d4b,Engineering
+1a2a3d4e,Engineering
+1a2b3a4a,Human Resources
+1a2b3a4b,Human Resources
+1a2b3a4e,Human Resources
+1a2b3b4a,Human Resources
+1a2b3b4b,Human Resources
+1a2b3b4e,Human Resources
+1a2b3c4a,Inventory
+1a2b3c4b,Inventory
+1a2b3c4e,Inventory
+1a2b3d4a,Inventory
+1a2b3d4b,Inventory
+1a2b3d4e,Inventory
+1a2c3a4a,Accounting
+1a2c3a4b,Accounting
+1a2c3a4e,Accounting
+1a2c3b4a,Accounting
+1a2c3b4b,Accounting
+1a2c3b4e,Accounting
+1a2c3c4a,Finance
+1a2c3c4b,Finance
+1a2c3c4e,Finance
+1a2c3d4a,Finance
+1a2c3d4b,Finance
+1a2c3d4e,Finance
+1b,Executive Management
+1b2a,Regional Operations
+1b2b,Regional Operations
+1b2c,Regional Operations
+1b2a3a,Information Technology
+1b2a3b,Information Technology
+1b2a3c,Engineering
+1b2a3d,Engineering
+1b2b3a,Human Resources
+1b2b3b,Human Resources
+1b2b3c,Inventory
+1b2b3d,Inventory
+1b2c3a,Accounting
+1b2c3b,Accounting
+1b2c3c,Finance
+1b2c3d,Finance
+1b2a3a4a,Information Technology
+1b2a3a4b,Information Technology
+1b2a3a4e,Information Technology
+1b2a3b4a,Information Technology
+1b2a3b4b,Information Technology
+1b2a3b4e,Information Technology
+1b2a3c4a,Engineering
+1b2a3c4b,Engineering
+1b2a3c4e,Engineering
+1b2a3d4a,Engineering
+1b2a3d4b,Engineering
+1b2a3d4e,Engineering
+1b2b3a4a,Human Resources
+1b2b3a4b,Human Resources
+1b2b3a4e,Human Resources
+1b2b3b4a,Human Resources
+1b2b3b4b,Human Resources
+1b2b3b4e,Human Resources
+1b2b3c4a,Inventory
+1b2b3c4b,Inventory
+1b2b3c4e,Inventory
+1b2b3d4a,Inventory
+1b2b3d4b,Inventory
+1b2b3d4e,Inventory
+1b2c3a4a,Accounting
+1b2c3a4b,Accounting
+1b2c3a4e,Accounting
+1b2c3b4a,Accounting
+1b2c3b4b,Accounting
+1b2c3b4e,Accounting
+1b2c3c4a,Finance
+1b2c3c4b,Finance
+1b2c3c4e,Finance
+1b2c3d4a,Finance
+1b2c3d4b,Finance
+1b2c3d4e,Finance
+1c,Executive Management
+1c2a,Regional Operations
+1c2b,Regional Operations
+1c2c,Regional Operations
+1c2a3a,Information Technology
+1c2a3b,Information Technology
+1c2a3c,Engineering
+1c2a3d,Engineering
+1c2b3a,Human Resources
+1c2b3b,Human Resources
+1c2b3c,Inventory
+1c2b3d,Inventory
+1c2c3a,Accounting
+1c2c3b,Accounting
+1c2c3c,Finance
+1c2c3d,Finance
+1c2a3a4a,Information Technology
+1c2a3a4b,Information Technology
+1c2a3a4e,Information Technology
+1c2a3b4a,Information Technology
+1c2a3b4b,Information Technology
+1c2a3b4e,Information Technology
+1c2a3c4a,Engineering
+1c2a3c4b,Engineering
+1c2a3c4e,Engineering
+1c2a3d4a,Engineering
+1c2a3d4b,Engineering
+1c2a3d4e,Engineering
+1c2b3a4a,Human Resources
+1c2b3a4b,Human Resources
+1c2b3a4e,Human Resources
+1c2b3b4a,Human Resources
+1c2b3b4b,Human Resources
+1c2b3b4e,Human Resources
+1c2b3c4a,Inventory
+1c2b3c4b,Inventory
+1c2b3c4e,Inventory
+1c2b3d4a,Inventory
+1c2b3d4b,Inventory
+1c2b3d4e,Inventory
+1c2c3a4a,Accounting
+1c2c3a4b,Accounting
+1c2c3a4e,Accounting
+1c2c3b4a,Accounting
+1c2c3b4b,Accounting
+1c2c3b4e,Accounting
+1c2c3c4a,Finance
+1c2c3c4b,Finance
+1c2c3c4e,Finance
+1c2c3d4a,Finance
+1c2c3d4b,Finance
+1c2c3d4e,Finance

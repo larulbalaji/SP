@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-PRISM.xml' />
+  <ImportAction name='include' value='Rule-BuildMap-PRISM.xml' />
+  <ImportAction name='include' value='Rule-Correlation-PRISM.xml' />
+  <ImportAction name='include' value='Rule-Provision-PRISM.xml' />
+  <ImportAction name='include' value='Workgroup-PRISMApplicationOwners.xml' />
+  <ImportAction name='include' value='TaskDefinition-Aggregate-PRISM.xml' />
+  <ImportAction name='include' value='TaskDefinition-Aggregate-PRISM-Groups.xml' />
+</sailpoint>

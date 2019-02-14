@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="IdentityTrigger-LastNameChange.xml" />
+  <ImportAction name="include" value="Workflow-LifecycleEvent-NameChange.xml" />
+  <ImportAction name="include" value="Rule-TargetMapping-sAMAccountName.xml" />
+  <ImportAction name="include" value="Rule-TargetMapping-userPrincipalName.xml" />
+  <ImportAction name="include" value="ObjectConfig-Identity.xml" />
+</sailpoint>	

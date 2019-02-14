@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, MANAGER_LOOKUP, ENABLE, SEARCH, PASSWORD, DIRECT_PERMISSIONS, CURRENT_PASSWORD, ACCOUNT_ONLY_REQUEST" icon="enterpriseIcon" name="IBM iSeries" profileClass="" type="IBM i">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="IBM iSeries"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="AttributeFunction">
+        <value>
+          <Map>
+            <entry key="ACGCDE" value="getAccountingCode"/>
+            <entry key="ASTLVL" value="getAssistanceLevel"/>
+            <entry key="ATNPGM" value="getAttentionKeyHandlingProgram"/>
+            <entry key="AUDLVL" value="getUserActionAuditLevel"/>
+            <entry key="CCSID" value="getCCSID"/>
+            <entry key="CHRIDCTL" value="getCHRIDControl"/>
+            <entry key="CNTRYID" value="getCountryID"/>
+            <entry key="CURLIB" value="getCurrentLibraryName"/>
+            <entry key="DLVRY" value="getMessageQueueDeliveryMethod"/>
+            <entry key="DSPSGNINF" value="getDisplaySignOnInformation"/>
+            <entry key="GID" value="getGroupID"/>
+            <entry key="GRPAUT" value="getGroupAuthority"/>
+            <entry key="GRPAUTTYP" value="getGroupAuthorityType"/>
+            <entry key="GRPPRF" value="getGroupProfileName"/>
+            <entry key="HOMEDIR" value="getHomeDirectory"/>
+            <entry key="INLMNU" value="getInitialMenu"/>
+            <entry key="INLPGM" value="getInitialProgram"/>
+            <entry key="INVSIGNON" value="getSignedOnAttemptsNotValid"/>
+            <entry key="JOBD" value="getJobDescription"/>
+            <entry key="KBDBUF" value="getKeyboardBuffering"/>
+            <entry key="LANGID" value="getLanguageID"/>
+            <entry key="LCLPWDMGT" value="isLocalPasswordManagement"/>
+            <entry key="LMTCPB" value="getLimitCapabilities"/>
+            <entry key="LMTDEVSSN" value="getLimitDeviceSessions"/>
+            <entry key="LOCALE" value="getLocalePathName"/>
+            <entry key="MAXSTG" value="getMaximumStorageAllowed"/>
+            <entry key="MSGQ" value="getMessageQueue"/>
+            <entry key="OBJAUD" value="getObjectAuditingValue"/>
+            <entry key="OUTQ" value="getOutputQueue"/>
+            <entry key="OWNER" value="getOwner"/>
+            <entry key="PREVSIGNON" value="getPreviousSignedOnDate"/>
+            <entry key="PRTDEV" value="getPrintDevice"/>
+            <entry key="PTYLMT" value="getHighestSchedulingPriority"/>
+            <entry key="PWDEXP" value="isPasswordSetExpire"/>
+            <entry key="PWDEXPDATE" value="getPasswordExpireDate"/>
+            <entry key="PWDEXPITV" value="getPasswordExpirationInterval"/>
+            <entry key="PWDLASTCHG" value="getPasswordLastChangedDate"/>
+            <entry key="SETJOBATTR" value="getLocaleJobAttributes"/>
+            <entry key="SEV" value="getMessageQueueSeverity"/>
+            <entry key="SPCAUT" value="getSpecialAuthority"/>
+            <entry key="SPCENV" value="getSpecialEnvironment"/>
+            <entry key="SRTSEQ" value="getSortSequenceTable"/>
+            <entry key="STATUS" value="getStatus"/>
+            <entry key="SUPGRPPRF" value="getSupplementalGroups"/>
+            <entry key="TEXT" value="getDescription"/>
+            <entry key="UID" value="getUserID"/>
+            <entry key="USRCLS" value="getUserClassName"/>
+            <entry key="USREXPACT" value="getUserExpirationAction"/>
+            <entry key="USREXPDATE" value="getUserExpirationDate"/>
+            <entry key="USREXPITV" value="getUserExpirationInterval"/>
+            <entry key="USROPT" value="getUserOptions"/>
+            <entry key="USRPRF" value="getUserProfileName"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1487261343626</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1487261288357</Date>
+        </value>
+      </entry>
+      <entry key="change.password" value="CHGUSRPRF"/>
+      <entry key="compositeDefinition"/>
+      <entry key="connectorClass" value="openconnector.connector.IBMiConnector"/>
+      <entry key="create" value="CRTUSRPRF"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="delete" value="DLTUSRPRF"/>
+      <entry key="directPermissionObjectType">
+        <value>
+          <List>
+            <String>*LIB</String>
+            <String>*MSGQ</String>
+            <String>*FILE</String>
+            <String>*PGM</String>
+            <String>*CMD</String>
+            <String>*MENU</String>
+            <String>*AUTL</String>
+            <String>*JOBQ</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="disable" value="CHGUSRPRF"/>
+      <entry key="enable" value="CHGUSRPRF"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="groupInfo" value="*NONE"/>
+      <entry key="host" value="172.30.188.40"/>
+      <entry key="modify" value="CHGUSRPRF"/>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="objectLibrary" value="*ALL"/>
+      <entry key="objectName" value="*ALL"/>
+      <entry key="partitionStatements"/>
+      <entry key="password" value="1:czSJEqe1MlgIDBQlgKhODg=="/>
+      <entry key="proxyServer"/>
+      <entry key="retryableErrors">
+        <value>
+          <List>
+            <String>Connect Failed</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="revoke.permission" value="RVKOBJAUT"/>
+      <entry key="setDelay" value="1"/>
+      <entry key="specialAttr" value="AUDLVL,OBJAUD"/>
+      <entry key="specialCommands">
+        <value>
+          <Map>
+            <entry key="CHGUSRAUD">
+              <value>
+                <List>
+                  <String>AUDLVL</String>
+                  <String>OBJAUD</String>
+                </List>
+              </value>
+            </entry>
+          </Map>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="IBM i Template"/>
+      <entry key="unlock" value="CHGUSRPRF"/>
+      <entry key="useSSL">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="user" value="SP_SALES"/>
+      <entry key="userInfo" value="ALL"/>
+      <entry key="userProfile" value="ALL"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="account" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="account"/>
+        </Map>
+      </Attributes>
+      <Section>
+        <Field displayName="con_prov_policy_ibmi_user_profile" helpKey="help_con_prov_policy_ibmi_user_profile" name="USRPRF" required="true" type="string">
+          <RuleRef>
+            <Reference class="sailpoint.object.Rule" name="Provisioning Policy - IBM iSeries User Profile"/>
+          </RuleRef>
+        </Field>
+        <Field displayName="con_prov_policy_ibmi_group_profile" filterString="" helpKey="help_con_prov_policy_ibmi_group_profile" name="GRPPRF" required="true" type="string" value="SP_SALES"/>
+        <Field displayName="con_prov_policy_ibmi_user_id" filterString="" helpKey="help_con_prov_policy_ibmi_user_id" name="UID" type="string"/>
+        <Field displayName="con_prov_policy_ibmi_user_class" filterString="" helpKey="help_con_prov_policy_ibmi_user_class" name="USRCLS" type="string"/>
+        <Field displayName="con_prov_policy_ibmi_password" filterString="" helpKey="help_con_prov_policy_ibmi_password" name="password" type="secret" value="1qaz!QAZ"/>
+        <Field displayName="con_prov_policy_ibmi_set_password" filterString="" helpKey="help_con_prov_policy_ibmi_set_password" name="PWDEXP" type="string"/>
+        <Field name="TEXT" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getAttribute("employeeId");]]></Source>
+          </Script>
+        </Field>
+      </Section>
+    </Form>
+    <Form name="create group" objectType="group" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="create group"/>
+        </Map>
+      </Attributes>
+      <Section>
+        <Field displayName="con_prov_policy_ibmi_user_profile" helpKey="help_con_prov_policy_ibmi_user_profile" name="USRPRF" required="true" type="string"/>
+        <Field displayName="con_prov_policy_ibmi_group_id" helpKey="help_con_prov_policy_ibmi_group_id" name="GID" required="true" type="string"/>
+        <Field displayName="con_prov_policy_ibmi_set_password" helpKey="help_con_prov_policy_ibmi_set_password" name="PWDEXP" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_ibmi_user_class" helpKey="help_con_prov_policy_ibmi_user_class" name="USRCLS" reviewRequired="true" type="string"/>
+      </Section>
+    </Form>
+    <Form name="update group" objectType="group" type="Update">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="update group"/>
+        </Map>
+      </Attributes>
+      <Section>
+        <Field displayName="con_prov_policy_ibmi_group_id" helpKey="help_con_prov_policy_ibmi_group_id" name="GID" reviewRequired="true" type="string"/>
+        <Field displayName="con_prov_policy_ibmi_user_class" helpKey="help_con_prov_policy_ibmi_user_class" name="USRCLS" reviewRequired="true" type="string"/>
+      </Section>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="USRPRF" identityAttribute="USRPRF" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="USRPRF" remediationModificationType="None" required="true" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDEXP" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="STATUS" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USRCLS" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ASTLVL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CURLIB" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="INLPGM" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="INLMNU" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LMTCPB" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="TEXT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SPCAUT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SPCENV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="DSPSGNINF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDEXPITV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LCLPWDMGT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LMTDEVSSN" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="KBDBUF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="MAXSTG" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PTYLMT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="JOBD" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPPRF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="OWNER" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPAUT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPAUTTYP" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="SUPGRPPRF" remediationModificationType="None" schemaObjectType="group" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACGCDE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="MSGQ" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="DLVRY" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SEV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PRTDEV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="OUTQ" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ATNPGM" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SRTSEQ" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LANGID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CNTRYID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CCSID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CHRIDCTL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SETJOBATTR" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LOCALE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USROPT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="UID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="HOMEDIR" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="AUDLVL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="OBJAUD" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="AUTL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDLASTCHG" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PREVSIGNON" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDEXPDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="INVSIGNON" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USREXPACT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USREXPDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USREXPITV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LSTUSEDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CHGDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CTRBYUSER" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="USRPRF" featuresString="PROVISIONING" identityAttribute="USRPRF" instanceAttribute="" nativeObjectType="group" objectType="group" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="USRPRF" remediationModificationType="None" required="true" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDEXP" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="STATUS" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USRCLS" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ASTLVL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CURLIB" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="INLPGM" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="INLMNU" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LMTCPB" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="TEXT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SPCAUT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SPCENV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="DSPSGNINF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDEXPITV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LCLPWDMGT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LMTDEVSSN" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="KBDBUF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="MAXSTG" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PTYLMT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="JOBD" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPPRF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="OWNER" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPAUT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPAUTTYP" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SUPGRPPRF" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACGCDE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="MSGQ" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="DLVRY" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SEV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PRTDEV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="OUTQ" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ATNPGM" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SRTSEQ" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LANGID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CNTRYID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CCSID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CHRIDCTL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SETJOBATTR" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LOCALE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USROPT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="GID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="HOMEDIR" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="AUDLVL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="OBJAUD" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" multi="true" name="AUTL" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDLASTCHG" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PREVSIGNON" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDEXPDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="INVSIGNON" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USREXPACT" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USREXPDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="USREXPITV" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LSTUSEDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CHGDATE" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="CTRBYUSER" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

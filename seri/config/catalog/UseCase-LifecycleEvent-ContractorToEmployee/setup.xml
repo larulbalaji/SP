@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="Workflow-LifeCycleEvents-ContractorToEmployee.xml"/>
+  <ImportAction name="include" value="ObjectConfig-mergeIdentity.xml"/>
+  <ImportAction name="include" value="IdentityTrigger-Contratortoemployee.xml"/>
+  <ImportAction name="include" value="UIConfig.xml" />
+  <ImportAction name="include" value="Workgroup-Securityit.xml"/>
+  <ImportAction name="include" value="EmailTemplate-Contractortoemployeeemail.xml"/>
+  <ImportAction name="include" value="EmailTemplate-Contractoremployee.xml"/>
+</sailpoint>

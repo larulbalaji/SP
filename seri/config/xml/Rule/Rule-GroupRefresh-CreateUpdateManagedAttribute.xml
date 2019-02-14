@@ -1,0 +1,206 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- 
+
+   SE Demo - AccountGroup Refresh Rule
+
+   Rule that runs for every group object returned during account group aggregation.  This hook allows us
+   to source ManagedAttribute objects based on the information coming in for each group object.  Since
+   these group objects often have the notion of an owner and a business friendly description, we can 
+   automatically set these corresponding fields on the ManagedAttribute that we're creating/updating.
+   
+   To utilize, you add the following entry to your Account Group Aggregation task:
+   
+         <entry key="accountGroupRefreshRule" value="ManagedAttribute CreateUpdate Hook"/>
+   
+
+   Author:  Sean Koontz
+
+-->
+<sailpoint>
+
+  <EmailTemplate name="Detected New Group Notification">
+    <Description>
+      Email Template for notifications on New Groups detected
+    </Description>
+
+    <Body>
+      <![CDATA[
+      <html>
+        <img src="http://localhost:8080/identityiq/images/DemoHeader.png" width="512" height="69" alt="IdentityIQ" />
+        <br><br>
+        Attention Application Team:
+        <br><br>
+        <font color="#0088A3"><b>SailPoint IdentityIQ has detected a new access right in the $appName application.</b></font><br>
+        <br>
+        Please log into IdentityIQ to complete the set-up of this managed entitlement (e.g. assign a Data Steward,
+        determine if this Group should be requestable, define a business-friendly description to use
+        in Certifications and Access Requests.
+        <br><br>
+        <b><u>Application Entitlement Details</u></b><br>
+        <UL>
+          <LI><font color="#0088A3"><b>Application:</font> $appName</b><br>
+          <LI><font color="#0088A3"><b>Group Name :</font> $groupName</b><br>
+          <LI><font color="#0088A3"><b>Description:</font> $description</b><br>
+        </UL>
+        <br>
+        Regards,<br>
+        The IdentityIQ Administration Team<br>
+        <center>
+           <img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/>
+        </center>
+      </html>
+      ]]>
+    </Body>
+
+    <Subject>New Group Detected in $appName Application</Subject>
+  </EmailTemplate>
+
+  <Rule language="beanshell" name="ManagedAttribute CreateUpdate Hook" type="GroupAggregationRefresh">
+    <Source>
+     <![CDATA[
+      
+       import java.util.HashMap;
+       import java.util.List;
+       import java.util.Map;
+       import sailpoint.api.*;
+       import sailpoint.object.*;
+       import sailpoint.tools.*;
+       import sailpoint.object.EmailOptions;
+       import sailpoint.object.EmailTemplate;
+
+
+     // ========================================================
+     //
+     // Send Alert Email Notification for New Group
+     //
+     // ========================================================
+     public void alertNotifyForNewGroup(ManagedAttribute ma, String description) 
+          throws GeneralException 
+     {
+          String toEmail = "AppTeam@sailpointdemo.com";
+
+          EmailTemplate template = (EmailTemplate) context.getObject(EmailTemplate.class, "Detected New Group Notification");
+
+          Map mailArgs = new HashMap();
+
+          mailArgs.put("groupName", ma.getValue());
+          mailArgs.put("description", description);
+          mailArgs.put("appName", ma.getApplication().getName());
+
+          EmailOptions options = new EmailOptions(toEmail,mailArgs);
+
+          options.setSendImmediate(true);
+          options.setNoRetry(true);
+
+          try {
+             context.sendEmailNotification(template, options);
+          }
+          catch (Exception e) {
+              System.out.println("Error Sending Email: " + e);
+          }
+     }
+
+
+     //
+     //  ManagedAttribute objects support multiple languages...just use default locale
+     //
+     public String getDefaultLang() 
+          throws GeneralException 
+     {
+           ObjectConfig config = ManagedAttribute.getObjectConfig();
+           if ( config == null ) 
+               throw new GeneralException("Missing object config for ManagedAttribute.");
+           ObjectAttribute dl = config.getObjectAttributes().get(0);
+           return ( dl != null ) ? dl.getName() : null;
+     }
+
+ 
+     //
+     //  Handle incoming group object; determine if we're creating or updating
+     //
+     public boolean
+     alreadyExists(ManagedAttribute ma)
+           throws GeneralException 
+     {
+           ManagedAttribute existing = ManagedAttributer.get(context, ma.getApplicationId(), ma.getAttribute(), ma.getValue());
+           if (existing == null) {
+               //System.out.println("...in CREATE mode");
+               return false;
+           } else {
+              //System.out.println("...in UPDATE mode");
+              return true;
+           }
+     }
+
+
+     //
+     // Retrieve the Text Description from the Group Object
+     //
+     public String getDescription(Application app, ResourceObject ro) 
+     {
+           String description = null;
+
+           // TODO:  Change attribute name to correspond to group schema for 
+           //              specific app being aggregated.
+           //
+           if ( ro != null ) {
+              description = (String) ro.getStringAttribute("description");
+           }
+
+           return description;
+     }
+
+
+     //
+     // Main Entry Point for AccountGroup (ManagedAttribute) Refresh Rule Logic
+     //
+     // NOTE:  As of 6.0, the input argument "accountGroup" is a handle to the
+     //             ManagedAttribute object we're creating or updating (based on
+     //             ResourceObject we're aggregating).
+
+     String defaultGroupOwner = "spadmin";
+
+     // TODO:  If the group schema has an attribute for owner, update parameter below 
+     //
+     String groupOwner = obj.getStringAttribute("OWNERGUID");
+
+     // Set owner on the ManagedAttribute object...
+     //
+     Identity cube = context.getObjectByName(Identity.class, groupOwner);
+     if (null != cube) {
+          accountGroup.setOwner(cube);
+     }
+
+     try {
+
+           String description = getDescription(groupApplication, obj);
+           if ( description != null ) {
+               if (!alreadyExists(accountGroup)) {
+                   alertNotifyForNewGroup(accountGroup, description);
+                   accountGroup.addDescription("en_US", description);
+
+                   //  set other attribute on the ManagedAttribute as appropriate for use case...
+                   //
+
+               } else {
+                   // do UPDATE processing here...
+                   accountGroup.addDescription("en_US", description);
+               }
+           }
+
+     } catch (GeneralException e) {
+          // Don't puke the agg because of this....
+          System.out.println("ERROR - Group Refresh Rule.  Cannot process ManagedAttribute object..." + e.toString());
+     }
+
+     // return the ManagedAttribute handle that was passed to us so it can be persisted
+     //
+     return accountGroup;
+
+     ]]>      
+    </Source>
+</Rule>
+
+</sailpoint>

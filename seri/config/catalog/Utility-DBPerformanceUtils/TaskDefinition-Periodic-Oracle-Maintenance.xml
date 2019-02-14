@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.task.RuleExecutor" 
+                    name="Periodic Oracle Maintenance"
+                    type="Generic" 
+            resultAction="Delete"
+        progressInterval="5000" 
+            progressMode="String"
+            >      
+   <Attributes>
+      <Map>      
+      
+         <entry key="ruleName" value="Periodic Oracle Maintenance"/>
+         
+         <!-- options we can pass into the executing Rule. -->
+         <!-- We pass the inputs below up to the Rule, they get passed implicitly. -->
+         <entry key="ruleConfig">
+            <value>
+               <Map> 
+                  <entry key="exampleStaticField" value="someStringValue"/>
+               </Map>
+            </value>   
+         </entry>
+         
+      </Map>
+   </Attributes>
+   <Signature>
+      <Inputs>          
+         <Argument multi="false" name="doGatherStatistics" required="true" type="boolean">
+            <Prompt>Execute dbms_stats.gather_table_stats for each spt_ DB table</Prompt>
+            <DefaultValue>
+               <Boolean>true</Boolean>
+            </DefaultValue>
+         </Argument>         
+         <Argument multi="false" name="doIndexRebuilds" required="true" type="boolean">
+            <Prompt>Execute ALTER INDEX ... REBUILD ONLINE for each index</Prompt>
+            <DefaultValue>
+               <Boolean>true</Boolean>
+            </DefaultValue>
+         </Argument>
+         <Argument multi="false" name="doLog4jDebug" required="true" type="boolean">
+            <Prompt>Enable log4j DEBUG logging for the rule</Prompt>
+            <DefaultValue>
+               <Boolean></Boolean>
+            </DefaultValue>
+         </Argument>         
+                  
+      </Inputs>  
+      <Returns/>
+   </Signature>   
+   <Description>Runs the rule 'Periodic Oracle Maintenance' to update oracle statistics.</Description>
+</TaskDefinition>
+
+

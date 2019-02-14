@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint><Rule language="beanshell" name="OracleEBS-Permissions" type="ManagedAttributePromotion">
+  <Description>A ManagedAttributePromotion rule is called when ManagedAttributes are automatically created during aggregation, refresh, or from the missing entitlement descriptions task.
+
+    This can modify the ManagedAttribute that is passed in to set fields such as owner, requestable, or explanations before they are saved.</Description>
+<Signature returnType="null">
+<Inputs>
+<Argument type="attribute">
+<Description>
+The sailpoint.object.ManagedAttribute to modify during promotion.
+</Description>
+</Argument><Argument type="application">
+<Description>
+The sailpoint.object.Application the managed attribute is from.
+</Description>
+</Argument><Argument type="state">
+<Description>
+A Map that contains managed attribute promotion shared state during a task run.
+</Description>
+</Argument></Inputs>
+<Returns>
+</Returns>
+</Signature>
+<!--ReferencedRules>
+  <Reference class="sailpoint.object.Rule" name=""/>
+</ReferencedRules-->
+  <Source><![CDATA[
+  import sailpoint.object.*;
+  import sailpoint.tools.JdbcUtil;
+  
+  String name = attribute.getName();
+  String val = attribute.getValue();
+  System.out.println(name + " : " + val);
+  
+Map map = new HashMap();
+map.put("driverClass","oracle.jdbc.driver.OracleDriver");
+map.put("url","jdbc:oracle:thin:@services-useast.skytap.com:16425:EBSDB");
+map.put("password","apps");
+map.put("user","apps");
+
+System.out.println("HashMap Created");
+
+JdbcUtil jdbcutil = new JdbcUtil();
+ResultSet rs = null;
+Connection dbconnection = null;
+ArrayList templates = new ArrayList();
+CallableStatement statement = null;
+//Statement statement = null;
+
+
+    System.out.println("Starting try");
+    dbconnection = jdbcutil.getConnection(map);
+   System.out.println("Got Connection");
+
+
+    String sql = "SELECT a.responsibility_name,c.prompt,c.description,d.menu_name FROM apps.fnd_responsibility_tl a,apps.fnd_responsibility b,apps.fnd_menu_entries_tl c,apps.fnd_menus_tl g,apps.fnd_menus d,apps.fnd_application_tl e,apps.fnd_application f WHERE a.responsibility_id(+) = b.responsibility_id AND a.responsibility_name like '" + name + "' AND g.menu_id = d.menu_id AND b.menu_id = c.menu_id AND b.menu_id = d.menu_id AND e.application_id = f.application_id AND f.application_id = b.application_id AND a.LANGUAGE = 'US' AND c.LANGUAGE = 'US' AND g.LANGUAGE = 'US' and e.LANGUAGE = 'US';
+    
+    statement = dbconnection.createStatement();
+    rs = stmt.executeQuery(sql);
+     
+    statement.execute();
+    System.out.println("Call Executed");
+   
+   //PROMPT
+   //MENU_NAME
+   //DESCRIPTION
+   List permList = new ArrayList();
+   while(rs.next()){
+       String prompt = rs.getString("PROMPT");
+       String menu = rs.getString("MENU_NAME");
+       String desc = rs.getString("DESCRIPTION");
+       
+       Permission perm = new Permission();
+  	   perm.setRights(prompt);
+	   perm.setAnnotation(desc);
+	   perm.setTarget(menu);
+	   permList = new ArrayList();
+       permList.add (perm);
+    }
+   
+    attribute.setTargetPermissions(permList);
+
+    System.out.println("Finished");
+  ]]></Source>
+</Rule>
+</sailpoint>

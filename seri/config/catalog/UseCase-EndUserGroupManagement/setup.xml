@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Workflow-GroupManagement-CreateGroup.xml'/>
+  <ImportAction name='include' value='Workflow-GroupManagement-EditGroup.xml'/>
+  <ImportAction name='include' value='Form-GroupManagement-Approval.xml'/>
+  <ImportAction name='include' value='Form-GroupManagement-Create.xml'/>
+  <ImportAction name='include' value='Form-GroupManagement-Edit.xml'/>
+  <ImportAction name='include' value='QuickLink-GroupManagement.xml'/>
+</sailpoint>

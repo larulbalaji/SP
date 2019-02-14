@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<ImportAction name='execute' value="sailpoint.seri.execute.SetAttribute">
+  <Custom id="sailpoint.object.UIConfig" name="UIConfig">
+    <Attributes>
+      <Map>
+        <entry key="identityViewAttributes" value="$value,locale"/>
+      </Map>
+     </Attributes>
+  </Custom>
+</ImportAction>
+</sailpoint>
+       

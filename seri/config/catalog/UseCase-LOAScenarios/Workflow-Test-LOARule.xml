@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  libraries="Identity"  name="TestLOARule" type="IdentityEvent">
+  <Variable name="identityModel" type="java.util.Map">
+    <Description>The identity model that is used to represent the identity being created.</Description>
+  </Variable>
+  <Step action="call:getIdentityModel" name="Get Model" posX="70" posY="156" resultVariable="identityModel">
+    <Arg name="identityName" value="APRICE"/>
+    <Arg name="expandLinks" value="script:return true;"/>
+    <Description>This workflow is used scaffolding to allow unit testing of LOA and return from LOA rules.  It will test a single application at a time.  You must update the identityName variable above and the applicationName variable in the script below.</Description>
+    <Transition to="Execute App LOA Rule"/>
+  </Step>
+  <Step icon="Default" name="Execute App LOA Rule" posX="200" posY="155" resultVariable="identityModel">
+    <Script>
+      <Source><![CDATA[
+import java.util.Iterator;
+import sailpoint.object.Application;
+import sailpoint.object.Rule;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TestLOARule.ExecuteRule");
+
+
+String applicationName = "RACF";
+
+serilog.debug("LOA RULE TEST:  ");
+//iterate over each link and look to see if its the one to disable. 
+//if so, then set the field to disabled.
+
+List links = (List) identityModel.get("links");
+//serilog.debug("got my links:  " + links);
+
+for (Map aLink : links) {
+  serilog.debug("got first link");
+  //serilog.debug("Comparing" + ((String) aLink.get("sysName")) + "  " + ((String)((Map) aLink.get("sys")).get("nativeIdentity")));
+  if (((String) aLink.get("sysName")).equals(applicationName)) {
+  
+    serilog.debug("Link before rule:" + aLink );
+    Application app = context.getObjectByName(Application.class, applicationName);
+    String ruleID = app.getAttributeValue("loaRule");
+    Rule rule = context.getObjectById(Rule.class, ruleID);
+    if (rule != null) {
+      Map params = new HashMap();
+      params.put("link", aLink);
+      params.put("identityModel", identityModel);
+      
+      Object val = context.runRule(rule, params);
+      
+      aLink = val;
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("Link after rule:" + aLink );
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+    }
+  
+    ruleID = app.getAttributeValue("returnLOARule");
+    rule = context.getObjectById(Rule.class, ruleID);
+    if (rule != null) {
+      Map params = new HashMap();
+      params.put("link", aLink);
+      params.put("identityModel", identityModel);
+      
+      Object val = context.runRule(rule, params);
+      
+      aLink = val;
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("Link after rule:" + aLink );
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+      serilog.debug("=====================================================================================================");
+    }
+    serilog.debug("Identity Model after rule:" + identityModel);
+
+  }
+  serilog.debug("got first link");
+}
+
+return identityModel;
+      ]]></Source>
+    </Script>
+  </Step>
+</Workflow>

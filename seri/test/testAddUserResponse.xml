@@ -1,0 +1,1 @@
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body><ns2:addUserResponse xmlns:ns2="http://soapserver.userstore.kjames.sailpoint.com/"><return>0</return></ns2:addUserResponse></soap:Body></soap:Envelope>

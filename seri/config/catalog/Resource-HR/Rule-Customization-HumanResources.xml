@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="HR Aggregation Processor" type="ResourceObjectCustomization">
+  <Description>This rule is configured on the application and is called after the connector has build a ResourceObject from the native application data.
+
+Initially designed for non-rule based connectors to add SPPrivileged flag to an object, but could be used to do any transformations.</Description>
+  <Signature returnType="ResourceObject">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="object">
+        <Description>
+          The ResourceObject built by the connector.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          Application that references the connector.
+        </Description>
+      </Argument>
+      <Argument name="connector">
+        <Description>
+          The connector object.
+        </Description>
+      </Argument>
+      <Argument name="state">
+        <Description>
+          A Map containing state information.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="resourceObject">
+        <Description>
+          The updated resource object.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+<![CDATA[
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import sailpoint.object.ResourceObject;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.HRAggregationProcessor");
+
+// need to return IIQDisabled to drive standard UI for disabled accounts
+//
+boolean terminated = object.getBoolAttribute("term");
+if (terminated) {
+   object.put("IIQDisabled", true);
+}
+
+String birthDate = object.getStringAttribute("birthDate");
+if (birthDate != null) {
+    birthDate = birthDate.substring(0, birthDate.indexOf(" "));
+
+    DateFormat hrFormat = new SimpleDateFormat("MM/dd/yyyy");
+    Date date = hrFormat.parse(birthDate);
+    
+    SimpleDateFormat iiqFormat = new SimpleDateFormat("MMdd");
+    
+    object.put("birthDate", iiqFormat.format(date));
+    
+}
+
+
+return object;
+]]>
+</Source>
+</Rule>

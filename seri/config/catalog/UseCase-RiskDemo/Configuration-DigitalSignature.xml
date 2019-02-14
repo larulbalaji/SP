@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="ElectronicSignature">
+      <Attributes>
+        <Map>
+           <entry key="types">
+            <value>
+              <List>
+                 <ESignatureType displayName="Risk Certification Signing" name="RiskCertificationSigning">
+                 <Map>
+                    <entry key="en_US" value="You are now attesting to the information contained within this&amp;#8203; risk-initiated review process, and confirm that the user now has the correct and appropriate access which will result in mitigation of the organisational risk&lt;br>"/>
+                  </Map>
+                </ESignatureType>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>

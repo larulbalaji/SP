@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<TaskDefinition name="Create Dropdown Rules" resultAction="Delete" subType="task_item_type_generic" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="ruleConfig" value="test,test"/>
+      <entry key="ruleName" value="AttrDropdowns"/>
+    </Map>
+  </Attributes>
+  <Description>Create fieldvalue rules to provide Identity Attribute dropdowns in the Provisioning Policy GUI</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Run Rule"/>
+  </Parent>
+</TaskDefinition>
+</sailpoint>

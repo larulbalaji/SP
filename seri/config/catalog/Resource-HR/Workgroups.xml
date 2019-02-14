@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Identity name="AD Admins" workgroup="true">
+  <Attributes>
+    <Map>
+      <entry key="email" value="ad-admins@sailpointdemo.com"/>
+      <entry key="displayName" value="AD Admins"/>
+    </Map>
+  </Attributes>
+  <Capabilities>
+    <Reference class="sailpoint.object.Capability" name="ApplicationAdministrator"/>
+  </Capabilities>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Preferences>
+    <Map>
+      <entry key="workgroupNotificationOption">
+        <value>
+          <WorkgroupNotifationOption>GroupEmailOnly</WorkgroupNotifationOption>
+        </value>
+      </entry>
+    </Map>
+  </Preferences>
+</Identity>
+<Identity name="HR Team" workgroup="true">
+  <Attributes>
+    <Map>
+      <entry key="email" value="hr-team@sailpointdemo.com"/>
+      <entry key="displayName" value="HR Team"/>
+    </Map>
+  </Attributes>
+  <Capabilities>
+    <Reference class="sailpoint.object.Capability" name="ApplicationAdministrator"/>
+  </Capabilities>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Preferences>
+    <Map>
+      <entry key="workgroupNotificationOption">
+        <value>
+          <WorkgroupNotifationOption>GroupEmailOnly</WorkgroupNotifationOption>
+        </value>
+      </entry>
+    </Map>
+  </Preferences>
+</Identity>
+<Identity name="Mainframe Admins" workgroup="true">
+  <Attributes>
+    <Map>
+      <entry key="displayName" value="Mainframe Admins"/>
+      <entry key="email" value="mainframe-admins@sailpointdemo.com"/>
+    </Map>
+  </Attributes>
+  <Description>Team responsible for administering RACF and other mainframe asssets; performs access reviews of mainframe user rights</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Preferences>
+    <Map>
+      <entry key="workgroupNotificationOption">
+        <value>
+          <WorkgroupNotifationOption>GroupEmailOnly</WorkgroupNotifationOption>
+        </value>
+      </entry>
+    </Map>
+  </Preferences>
+</Identity>
+</sailpoint>

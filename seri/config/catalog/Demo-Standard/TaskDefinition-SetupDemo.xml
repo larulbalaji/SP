@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Setup Demo" resultAction="Delete">
+  <Attributes>
+    <Map>
+      <entry key="trace" value="true"/>
+      <entry key="taskList" value="Aggregate HR Authoritative, Aggregate AD Accounts, Aggregate Enterprise Directory Accounts, Aggregate Oracle EBS Accounts, Aggregate Mainframe Accounts, Aggregate ERP Portal Accounts, Aggregate PRISM, Aggregate PRISM Groups, Aggregate TRAKK, Aggregate TRAKK-WS, Identity Refresh - Remove Joiner Event, Aggregate AD Groups, Aggregate Enterprise Directory Groups, Aggregate Oracle EBS Roles and Responsibilities, Aggregate Mainframe Groups, Aggregate Windows FileServer Access, Aggregate SecurityIQ Alerts, Aggregate TRAKK-WS Groups, Import Demo User Responses, Import Demo Roles, Import Demo Policies, Effective Access Index Refresh, Refresh Identity Cube, Refresh Groups, Detect Policy Violations, SERI - Demo Certification Setup, SERI - Demo Trending Setup, Refresh Entitlement Connections, Full Text Index Refresh, Refresh Monitored Users Risk Scores, Create Dropdown Rules, SERI - Demo Request Setup, SERI - Demo Dashboard Setup, SERI - Demo Certification Signoff Setup, Refresh Application Scores, Perform Maintenance"/>
+    </Map>
+  </Attributes>
+  <Description>Run the tasks needed to setup the SERI standard demo</Description>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Sequential Task Launcher"/>
+  </Parent>
+</TaskDefinition>

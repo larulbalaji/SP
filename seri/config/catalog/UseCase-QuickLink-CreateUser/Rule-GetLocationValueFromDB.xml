@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Rule name="getLocationValue">
+    <Signature>
+      <Inputs>
+	<Argument name='context'>
+	  <Description>
+           A SailPointContext object used if its necessary
+           to query objects from the database.
+	  </Description>
+	</Argument>
+	<Argument name='locationName'>
+	  <Description>
+           The Location entry to lookup
+	  </Description>
+	</Argument>
+	<Argument name='locationAttr'>
+	  <Description>
+           The specific location attribute to fetch (e.g., addressline1, city, phone)
+	  </Description>
+	</Argument>
+      </Inputs>
+    </Signature>
+    <Source>
+      <![CDATA[    
+
+import sailpoint.api.*;
+import sailpoint.object.*;
+
+// Expect: java.lang.String locationName
+// Expect: java.lang.String locationAttr
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.GetLocationValueFromDB");
+
+if (locationName == null || locationAttr == null) {
+  // don't blow up a demo...
+  return "";
+}
+
+try {
+
+  Configuration seriConfig = context.getObjectByName(Configuration.class, "SERI Configuration");
+  if (null == seriConfig) {
+    serilog.error("SERI Configuration object is missing!");
+    return "";
+  }
+
+  // get the "locations" map from SERI config
+  Map locMap = seriConfig.get("locations");
+  if (null == locMap) {
+    serilog.error("SERI Configuration missing 'locations' entry!");
+    return "";
+  }
+
+  // get the specific location requested by 'locationName' parameter
+  Map l = locMap.get(locationName);
+  if (null == l) {
+    serilog.error("Location entry [" + locationName + "] is missing from SERI Configuration");
+    // don't blow up a demo
+    return "";
+  }
+
+  // return the specifc location attribute requested by 'locationAttr' parameter
+  return l.get(locationAttr);
+
+} catch (GeneralException ex) {
+    serilog.error("SERI Configuration object is missing!");
+    return "";
+}
+
+      ]]>
+    </Source>
+  </Rule>
+</sailpoint>

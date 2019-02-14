@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="AlertMatcherRule" type="AlertMatch">
+  <Description>Alert Match finder</Description>
+  <Source>
+  <![CDATA[
+  import sailpoint.object.*;
+  import java.text.SimpleDateFormat;
+  import java.util.Calendar;
+  import java.util.Date;
+
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Alert.AlertMatcherRule");
+  
+  serilog.debug("Inside Rule for alert Match " + alert.toXml());
+  Application alertApplication = alert.getSource();
+  
+  String nativeId = alert.getNativeId();
+  
+  if(alertApplication != null && "Alerts".equals(alertApplication.getName())){
+    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			try {
+				Date date = format.parse(nativeId);
+				serilog.debug("Last serilogin Date is " + date);
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(date);
+				int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
+				if(hourOfDay > 0 && hourOfDay < 4){
+          serilog.debug("returning true");
+					return true;
+				}
+				
+			} catch (Exception e) {
+				serilog.debug("Error occured in parsing ", e);
+				return false;
+			}
+  }
+  serilog.debug("returning false");
+  return false;
+  ]]>
+  </Source>
+</Rule>

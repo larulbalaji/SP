@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Configuration PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Configuration name="SAML">
+  <Attributes>
+    <Map>
+      <entry key="IdentityNow">
+        <value>
+          <SAMLConfig assertionConsumerService="https://iiq-server.sailpointdemo.com:8443/identityiq/home.jsf" bindingMethod="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" entityId="https://www.sailpoint.com" idpServiceUrl="https://stg01-useast1-sso.identitynow.com/sso/SSORedirect/metaAlias/demo/idp" issuer="https://demo.identitynow.com" nameIdFormat="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified">
+            <IdpPublicKey>-----BEGIN CERTIFICATE-----
+MIIDOjCCAiKgAwIBAgIESLjUIjANBgkqhkiG9w0BAQsFADBfMQswCQYDVQQGEwJVUzEOMAwGA1UE
+CBMFVGV4YXMxDzANBgNVBAcTBkF1c3RpbjESMBAGA1UEChMJU2FpbFBvaW50MRswGQYDVQQDExJz
+dGcwMS11c2Vhc3QxLWRlbW8wHhcNMTYwNDE4MTg1MjM5WhcNMjYwNDE2MTg1MjM5WjBfMQswCQYD
+VQQGEwJVUzEOMAwGA1UECBMFVGV4YXMxDzANBgNVBAcTBkF1c3RpbjESMBAGA1UEChMJU2FpbFBv
+aW50MRswGQYDVQQDExJzdGcwMS11c2Vhc3QxLWRlbW8wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAw
+ggEKAoIBAQCQnGCsWlVpYfY0bPNkpMZgdGXb5jq3JDkKnBp5QayfXnTdQ42LeI5sBgtIAUZf+XTH
+VZZ/YUD7kxGg2WrUAFuAPHWozl8sqFn6/eTw8ZhdJ9SmuJrxWkOZENPkWWIegwLmJHh1gTg23QU6
+Xk2bm5rGjkdmNqUiAsdm0Z+b1ddpqZiOXGYnKD2eBI1hOl8+8nv/GL5m73MIw8Y54f3TKUfRVExs
+cORPxfKjCs/+ueBDFV3tLrzYHjPYUvNiloVFA2fpoNa1HU5zOJNZubMrhnHgRkYFYoUXTij3HoVN
+LIdluz/sUC05Lj7TmyVCijp6WGtt7dZ+sFr21Gi5xiNADzutAgMBAAEwDQYJKoZIhvcNAQELBQAD
+ggEBAI+TOTbGUhHRmhS/cVboMFhHALiG63iofwzgJdt1JCPUKBJVAH6iT9ABWKdYVAmahTNT1bCx
+ZtFSRwyi6VXxLLioWoFvOWa50/rg5SySYBmuql5s2SWVlwZ3YX1/8N3yxVu+NNpOXbjvylVRx0m4
+oIzyQV+NH+qYxGvyC4KKXbm1UwbraemyhJr2mgquS+a2pPxgeAHH/po6qvhkGN9m/rWAaHdirNk9
+innYkXX30vLND9TjEeImDg1oJyeVp2zneBucvYWoUqnqiOuBeDqxQc19bQY2Qz+cHuk8CyKiZhZ1
+TYafdqYX/YhVCTsuWkFP3PPfultwk7TN8b4I/GZkFh8=
+
+-----END CERTIFICATE-----
+</IdpPublicKey>
+            <RuleRef>
+              <Reference class="sailpoint.object.Rule" name="IdentityNowSAML"/>
+            </RuleRef>
+          </SAMLConfig>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Configuration>

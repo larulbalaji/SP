@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE GroupDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<GroupDefinition   indexed="true" name="Tax Accountant Population" private="true">
+  <Description>Used in the Tax Accountants Demo</Description>
+  <GroupFilter>
+    <CompositeFilter operation="AND">
+      <Filter ignoreCase="true" matchMode="START" operation="LIKE" property="jobTitle" value="Tax Accountant"/>
+    </CompositeFilter>
+  </GroupFilter>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+</GroupDefinition>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Account Provisioning - Parse Application Deprovisioning Policies" type="Workflow">
+  <Description>Make the provisioning configuration from the applications the user has an account on available to the workflow.</Description>
+  <Source><![CDATA[
+import sailpoint.object.*;
+
+// Expect: java.lang.String identityName
+
+Identity identity = context.getObjectByName(Identity.class,identityName);
+//iterate over each link on the user. Look at the deprovisioning attributes assigned to that
+//application definition for that link link.
+//then set the application deprovisioning map accordingly.
+Map accountDeprovisioningMap = new HashMap();
+List links = identity.getLinks();
+for(Link aLink : links) {
+  Application applicationObject = aLink.getApplication();
+
+  if(applicationObject!= null) {
+    HashMap map = new HashMap();
+    map.put("accountDeprovisioningScenario",  applicationObject.getAttributeValue("accountDeprovisionScenario")); 
+    map.put("daysToWaitForDeletion",  applicationObject.getAttributeValue("daysToWaitForDeletion"));
+
+    map.put("accountDeprovisioningPlanRule",  applicationObject.getAttributeValue("accountDeprovisioningPlanRule"));
+    map.put("accountDeprovisioningLinkRule",  applicationObject.getAttributeValue("accountDeprovisioningLinkRule"));
+    map.put("accountDeprovisioningPostProvRule",  applicationObject.getAttributeValue("accountDeprovisioningPostProvRule"));
+
+    accountDeprovisioningMap.put(applicationObject.getName(), map);
+  }
+}
+
+return accountDeprovisioningMap;
+  ]]></Source>
+</Rule>

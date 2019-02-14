@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="AD DN Namer" type="FieldValue">
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+           The Identity object that represents the user needing the field value.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="value">
+        <Description>
+          The string value created.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+    import sailpoint.object.Configuration;
+    
+    String dn = null;
+
+    //String firstName = (String) identity.getAttribute("firstname");
+    //String lastName = (String) identity.getAttribute("lastname");
+	
+	// We will use the cube name, because we already guarenteed it will be unique.
+	// This does however mess up the nice names in AD, as we will now revert to a unique ID.
+	
+	String name = identity.getName();
+	String dnBase = "OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+    
+
+    // lookup OU using Configuration Object
+    //       
+    Configuration confObject = context.getObjectByName(Configuration.class, "Location to OU Configuration");
+    if (null != confObject) {
+       String location = identity.getAttribute("location");
+       String ou = confObject.getString(location);
+	   if (null != ou) {
+	   //   dn = "CN=" + firstName + " " + lastName + ",OU=" + location + ",OU=" + ou + ",OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+	      dn = "CN=" + name + ",OU=" + location + ",OU=" + ou + "," + dnBase;
+	   } else {
+       //   dn = "CN=" + firstName + " " + lastName + ",OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+          dn = "CN=" + name + "," + dnBase;
+	   }
+    }
+    
+    return (dn);
+    ]]></Source>
+</Rule>

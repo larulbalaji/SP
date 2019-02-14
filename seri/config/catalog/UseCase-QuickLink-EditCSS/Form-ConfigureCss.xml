@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Configure CSS">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="IIQ CSS Branding." />
+      <entry key="subtitle"
+        value="Please use the following fields to configure your custom CSS. When complete, to test your configurations click 'Test CSS'. To save your configurations, click 'Save Configurations'. To exit or cancel, click 'Cancel'" />
+    </Map>
+  </Attributes>
+  <Button action="next" label="Test CSS" parameter="test" value="true" />
+  <Button action="cancel" label="Cancel" />
+  <Button action="next" label="Save Configurations" parameter="save"
+    value="true" />
+  <Button action="next" label="Save Configurations and Exit"
+    parameter="saveAndExit" value="true" />
+  <Section label="View">
+    <Field displayName="Editing Mode" name="mode" postBack="true"
+      type="String" value="Advanced">
+      <AllowedValues>
+        <String>Basic</String>
+      </AllowedValues>
+    </Field>
+  </Section>
+  <Section label="Background Style Settings" name="basicBackground">
+    <Field displayName="Background Color" dynamic="true"
+      helpKey="Sets the background color. By default this is blue."
+      name="basic.B1a.css" type="String" />
+    <Field displayName="Background Color (Border Cell)" dynamic="true"
+      helpKey="Sets the background color. Set it to none." name="basic.B1ab.css"
+      type="String" />
+    <Field displayName="Main Menu Cell Background Color" dynamic="true"
+      helpKey="Sets the main menu bar gradient. Change them all to one color or remove and set to background-color "
+      name="basic.B1ac.css" type="String" />
+    <Field displayName="Main Menu Background Color" dynamic="true"
+      helpKey="Sets the main menu bar gradient. Change them all to one color or remove and set to background-color "
+      name="basic.B1ad.css" type="String" />
+    <Field displayName="Main Menu Bottom Border Color" dynamic="true"
+      helpKey="Sets the main menu border color on the bottom. Set to 0 to remove; "
+      name="basic.B1ae.css" type="String" />
+  </Section>
+  <Section label="Login Style Settings" name="basicLogin">
+    <Field displayName="Login Text Font Family" dynamic="true"
+      helpKey="Sets font family login Text color. this by default is blue and says 'Welcome to IdentityIQ'"
+      name="basic.B3aq.css" type="String" />
+    <Field displayName="Login Header Image" dynamic="true"
+      helpKey="Sets the login image. this by default is 'identityIQ'"
+      name="basic.B2.css" type="String" />
+    <Field displayName="Login Text Color" dynamic="true"
+      helpKey="Sets the login Text color. this by default is blue and says 'Welcome to IdentityIQ'"
+      name="basic.B3ai.css" type="String" />
+    <Field displayName="Login Middle Color" dynamic="true"
+      helpKey="Sets the login Middle background color. this by default is white"
+      name="basic.B3ah.css" type="String" />
+    <Field displayName="Login Text Size" dynamic="true"
+      helpKey="Sets the login Text font family. this by default is blue and says 'Welcome to IdentityIQ'"
+      name="basic.B3aj.css" type="String" />
+    <Field displayName="Login Middle Image" dynamic="true"
+      helpKey="Sets the login image. this by default is 'identityIQ'"
+      name="basic.B3ag.css" type="String" />
+    <Field displayName="Login Header Color" dynamic="true"
+      helpKey="Sets the login header color. this by default is blue"
+      name="basic.B3a.css" type="String" />
+  </Section>
+  <Section label="Page Title Style Settings" name="basicHeader">
+    <Field displayName="Page Section Sub-Header Color" dynamic="true"
+      helpKey="Sets color of the section sub-headers on the define objects pages. 'Schema==&gt;Attributes' ,etc."
+      name="basic.B3ar.css" type="String" />
+    <Field displayName="Page Section Sub-Header Font Family"
+      dynamic="true"
+      helpKey="Sets font family of the section sub-headers of define objects page. 'Schema==&gt;Attributes',etc."
+      name="basic.B3as.css" type="String" />
+    <Field displayName="Page Section Heading Font Size" dynamic="true"
+      helpKey="Sets the font size of the content titles. Examples are the section headings on the define application screen."
+      name="basic.B3at.css" type="String" />
+    <Field displayName="Page Section Heading Font Color" dynamic="true"
+      helpKey="Sets the font color of the content titles. Examples are the setion headings on the define application screen."
+      name="basic.B3au.css" type="String" />
+    <Field displayName="Page Header Font Size" dynamic="true"
+      helpKey="Sets font size of the header of each page. 'Dashboard', 'Applications' ,etc."
+      name="basic.B1af.css" type="String" />
+    <Field displayName="Page Header Font Weight" dynamic="true"
+      helpKey="Sets font weight of the header of each page. 'Dashboard', 'Applications' ,etc."
+      name="basic.B1ag.css" type="String" />
+    <Field displayName="Page Header Color" dynamic="true"
+      helpKey="Sets color of the header of each page. 'Dashboard', 'Applications' ,etc."
+      name="basic.B3ak.css" type="String" />
+    <Field displayName="Page Header Font Family" dynamic="true"
+      helpKey="Sets font family of the header of each page. 'Dashboard', 'Applications' ,etc."
+      name="basic.B3al.css" type="String" />
+  </Section>
+  <Section label="'Logged In As' Header Style Settings" name="loggedInAs">
+    <Field displayName="Header Text Tranformation" dynamic="true"
+      helpKey="Sets text to uppercase lowercase or normal.. 'Dashboard', 'Applications' ,etc."
+      name="basic.B1ah.css" type="String" />
+    <Field displayName="Header Text Letter Spacing" dynamic="true"
+      helpKey="Sets text letter spacing.. 'Dashboard', 'Applications' ,etc."
+      name="basic.B1ai.css" type="String" />
+    <Field displayName="Logged In As Header Color" dynamic="true"
+      helpKey="Sets color of the logged in as section. 'Edit my Preferences','logout', etc.."
+      name="basic.B1aj.css" type="String" />
+    <Field displayName="'Logged In As' Font Size" dynamic="true"
+      helpKey="Sets color of the logged in as User Name" name="basic.B1ak.css"
+      type="String" />
+    <Field displayName="Edit Preferences Font Size" dynamic="true"
+      helpKey="Sets font size of the edit preferences text and logout text"
+      name="basic.B1al.css" type="String" />
+    <Field displayName="Edit Preferences Font Color" dynamic="true"
+      helpKey="Sets color of the logged in as section. 'Edit my Preferences','logout', etc.."
+      name="basic.B3am.css" type="String" />
+    <Field displayName="'Logged In As' Font Weight" dynamic="true"
+      helpKey="Sets font weight of the logged in as User Name" name="basic.B3ao.css"
+      type="String" />
+    <Field displayName="Header | Border Color" dynamic="true"
+      helpKey="Sets color of the '|' between the logged in as section. 'Edit my Preferences','logout', etc.."
+      name="basic.B3an.css" type="String" />
+  </Section>
+  <Section label="Text/Heading Settings" name="basictext">
+    <Field displayName="Base Font" dynamic="true"
+      helpKey="Sets the baseline font style. Add a font-family here to change it globally.  Beware. if you set this, you may open Pandoras box with a lot of other configs that will be required"
+      name="basic.B1am.css" type="String" />
+  </Section>
+  <Section label="Page Info Style Settings" name="basicPageInfo">
+    <Field displayName="Page Info Font Family" dynamic="true"
+      helpKey="The page info class is the 'Below are listed the current application...' text when you click on the change password link. This is used on most pages to tell you what to do on the page."
+      name="basic.B4.css" type="String" />
+    <Field displayName="Page Info Font Size" dynamic="true"
+      helpKey="Sets the font size of the page info text. The page info class is the 'Below are listed the current application...' text when you click on the change password link. This is used on most pages to tell you what to do on the page."
+      name="basic.B4aa.css" type="String" />
+    <Field displayName="Page Info H3 Font Size" dynamic="true"
+      helpKey="Sets the font size of the page H3 info text. The page info class is the 'Below are listed the current application...' text when you click on the change password link. This is used on most pages to tell you what to do on the page."
+      name="basic.B4ab.css" type="String" />
+    <Field displayName="Page Info H4 Font Size" dynamic="true"
+      helpKey="Sets the font size of the page H$ info text. The page info class is the 'Below are listed the current application...' text when you click on the change password link. This is used on most pages to tell you what to do on the page."
+      name="basic.B4ac.css" type="String" />
+    <Field displayName="Page Info Font Weight" dynamic="true"
+      helpKey="Sets the font weight of the page info text. The page info class is the 'Below are listed the current application...' text when you click on the change password link. This is used on most pages to tell you what to do on the page."
+      name="basic.B4a.css" type="String" />
+  </Section>
+  <Section label="Title Column Style Settings" name="basicTitleColumn">
+    <Field displayName="Title Column Left Align Font Size"
+      dynamic="true"
+      helpKey="Sets the field label sizes. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B77.css" type="String" />
+    <Field displayName="Title Column Font Weight" dynamic="true"
+      helpKey="Sets the field label Font-weight. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4ae.css" type="String" />
+    <Field displayName="Title Column Font Weight" dynamic="true"
+      helpKey="Sets the field label Font-weight. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4af.css" type="String" />
+    <Field displayName="Title Column Font Size" dynamic="true"
+      helpKey="Sets the field label sizes. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4ad.css" type="String" />
+    <Field displayName="Title Column With Wrap Font Size" dynamic="true"
+      helpKey="Sets the field label sizes. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4ai.css" type="String" />
+    <Field displayName="Title Column With Wrap Font Weight"
+      dynamic="true"
+      helpKey="Sets the field label Font-weight. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4aj.css" type="String" />
+    <Field displayName="Title Column Fixed Width Font Size"
+      dynamic="true"
+      helpKey="Sets the field label sizes. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4ag.css" type="String" />
+    <Field displayName="Title Column Fixed Width Font Weight"
+      dynamic="true"
+      helpKey="Sets the field label Font-weight. This is all over. Cert setup, system, setup, etc.  Set all 4 as they are often used interchangably on the same page"
+      name="basic.B4ah.css" type="String" />
+  </Section>
+  <Section label="Dashboard Style Settings" name="basicDashboard">
+    <Field displayName="Quick Link  Category Font Family" dynamic="true"
+      helpKey="Sets font family of the quicklink categories" name="basic.B2a.css"
+      type="String" />
+    <Field displayName="Quick Link Category Color" dynamic="true"
+      helpKey="Sets color of the quicklink categories." name="basic.B1an.css"
+      type="String" />
+    <Field displayName="Quick Link  Category Font Size" dynamic="true"
+      helpKey="Sets font size of the quicklink categories" name="basic.B1ao.css"
+      type="String" />
+    <Field displayName="Quick Link Category | Border" dynamic="true"
+      helpKey="Sets font size of the quicklink categories" name="basic.B1ap.css"
+      type="String" />
+    <Field displayName="Quick Link Category Text Formation"
+      dynamic="true"
+      helpKey="Sets uppercase or lowercase text formation of the quick link category"
+      name="basic.B2ab.css" type="String" />
+    <Field displayName="Quick Link Font Size" dynamic="true"
+      helpKey="Sets font size of the quicklinks." name="basic.B2ad.css"
+      type="String" />
+    <Field displayName="Quick Link Color" dynamic="true"
+      helpKey="Sets color of the quicklinks." name="basic.B2ac.css"
+      type="String" />
+  </Section>
+  <Section label="Main Menu Style Settings" name="basicMenu">
+    <Field displayName="Main Menu Hover Text Color" dynamic="true"
+      helpKey="Sets color of the text in the main menu when you are hovering it or hovering over it"
+      name="basic.B3ap.css" type="String" />
+    <Field displayName="Main Menu Font Family" dynamic="true"
+      helpKey="Sets Font Family of the text in the main menu items that are not selected or hovered over"
+      name="basic.B2af.css" type="String" />
+    <Field displayName="Main Menu Font Size" dynamic="true"
+      helpKey="Sets font size of the text in the main menu items that are not selected or hovered over"
+      name="basic.B2ae.css" type="String" />
+    <Field displayName="Main Menu Selected Text Color" dynamic="true"
+      helpKey="Sets color of the text in the main menu when you are selecting it or hovering over it"
+      name="basic.B2ah.css" type="String" />
+    <Field displayName="Main Menu Text Transformation" dynamic="true"
+      helpKey="Sets text to either uppercase, lowercase, or none" name="basic.B2ag.css"
+      type="String" />
+    <Field displayName="Main Menu Unselected Text Color" dynamic="true"
+      helpKey="Sets color of the text in the main menu items that are not selected or hovered over"
+      name="basic.B2aj.css" type="String" />
+    <Field displayName="Main Menu Selected Hover Backgound Color"
+      dynamic="true"
+      helpKey="Sets color of the background in the main menu when you are selecting it or hovering over it"
+      name="basic.B2ai.css" type="String" />
+    <Field displayName="Main Menu Selected Hover Background Color"
+      dynamic="true"
+      helpKey="Sets color of the background in the main menu items when they are not selected or hovered over"
+      name="basic.B2ak.css" type="String" />
+  </Section>
+  <Section label="Sub Menu Style Settings" name="basicMenu">
+    <Field displayName="Sub Menu UnSelected Background Color"
+      dynamic="true"
+      helpKey="Sets color of the background in the unselected sub menu items"
+      name="basic.B2aw.css" type="String" />
+    <Field displayName="Sub Menu Selected Hover Background Color"
+      dynamic="true"
+      helpKey="Sets color of the background in the sub menu near the text when you are selecting it or hovering over it"
+      name="basic.B2au.css" type="String" />
+    <Field displayName="Sub Menu Unselected Text Color" dynamic="true"
+      helpKey="Sets color of the text in the sub menu items that are not selected or hovered over"
+      name="basic.B2av.css" type="String" />
+    <Field displayName="Sub Menu Selected Hover Text Color"
+      dynamic="true"
+      helpKey="Sets color of the text in the main menu when you are selecting it or hovering over it"
+      name="basic.B2at.css" type="String" />
+    <Field displayName="Sub Menu Inner Border Style " dynamic="true"
+      helpKey="Sets style of the border around each sub menu item inside the padding. "
+      name="basic.B2aq.css" type="String" />
+    <Field displayName="Sub Menu Inner Border Radius" dynamic="true"
+      helpKey="Sets radium of the border around each sub menu item inside the padding. A higher number rounds the corners more."
+      name="basic.B2ar.css" type="String" />
+    <Field displayName="Sub Menu Text Transformation Color "
+      dynamic="true" helpKey="Sets text to uppercase or lowercase in the submenus"
+      name="basic.B2an.css" type="String" />
+    <Field displayName="Sub Menu Selected/Hover Background Color"
+      dynamic="true"
+      helpKey="Sets color of the background in the sub menu items when they are not selected or hovered over"
+      name="basic.B3aa.css" type="String" />
+    <Field displayName="Sub Menu Padding Size" dynamic="true"
+      helpKey="Sets color of the border around each sub menu item" name="basic.B2am.css"
+      type="String" />
+    <Field displayName="Sub Menu Border Color " dynamic="true"
+      helpKey="Sets color of the border around each sub menu item" name="basic.B2ao.css"
+      type="String" />
+    <Field displayName="Sub Menu Border Display" dynamic="true"
+      helpKey="Sets color of the border around each sub menu item" name="basic.B2al.css"
+      type="String" />
+    <Field displayName="Sub Menu Inner Border Color " dynamic="true"
+      helpKey="Sets Color of the border around each sub menu item. this is inside the padding"
+      name="basic.B2lp.css" type="String" />
+    <Field displayName="Sub Menu Inner Border Size " dynamic="true"
+      helpKey="Sets size of the border around each sub menu item inside the padding. Set to border-width::none; to remove it"
+      name="basic.Bas.css" type="String" />
+  </Section>
+  <Section label="Tab Style Settings" name="basicTabs">
+    <Field displayName="Active Tab Text Color" dynamic="true"
+      helpKey="Sets color of the text active tab" name="basic.B3ac.css"
+      type="String" />
+    <Field displayName="Active Tab Background Color" dynamic="true"
+      helpKey="Sets color of the background of the active tab" name="basic.B3ab.css"
+      type="String" />
+    <Field displayName="InActive Tab Text Color" dynamic="true"
+      helpKey="Sets color of the text inactive tab" name="basic.B3ae.css"
+      type="String" />
+    <Field displayName="InActive Tab Background Color" dynamic="true"
+      helpKey="Sets color of the background of the inactive tab" name="basic.B3ad.css"
+      type="String" />
+    <Field displayName="InActive Tab Background Image" dynamic="true"
+      helpKey="Sets background image of the text inactive tab. set to background-image:none; if you want the background color to show."
+      name="basic.B3af.css" type="String" />
+  </Section>
+  <Section label="Breadcrumbs Style Settings" name="basicBreadcrumbs">
+    <Field displayName="Future Breadcrumbs Font Color" dynamic="true"
+      helpKey="Sets the  Font-color on future breadcrumbs on the request access"
+      name="basic.B5af.css" type="String" />
+    <Field displayName="Future Breadcrumbs Font Weight" dynamic="true"
+      helpKey="Sets the Font-weight on future breadcrumbs on the request access"
+      name="basic.B5ae.css" type="String" />
+    <Field displayName="Current Breadcrumbs Font Color" dynamic="true"
+      helpKey="Sets the Font-color on future breadcrumbs on the request access"
+      name="basic.B5ad.css" type="String" />
+    <Field displayName="Current Breadcrumbs Font Weight" dynamic="true"
+      helpKey="Sets the Font-weight on future breadcrumbs on the request access"
+      name="basic.B5ac.css" type="String" />
+    <Field displayName="Current Breadcrumbs Font Size" dynamic="true"
+      helpKey="Sets the Font-size on breadcrumbs on the request access"
+      name="basic.B5ab.css" type="String" />
+  </Section>
+</Form>

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<ImportAction name="merge">
+<ObjectConfig name="Identity">
+  <ObjectAttribute displayName="Former Identity" editMode="ReadOnly" extendedNumber="1" name="oldIdentity" type="sailpoint.object.Identity"/>
+</ObjectConfig>
+</ImportAction>
+</sailpoint>

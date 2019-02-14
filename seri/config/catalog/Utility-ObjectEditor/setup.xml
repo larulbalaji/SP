@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='include' value='Workflow-EditObjects.xml'/>
+  <ImportAction name='include' value='Form-EditObjects.xml'/>
+  <ImportAction name='include' value='QuickLink-EditObjects.xml'/>
+</sailpoint>

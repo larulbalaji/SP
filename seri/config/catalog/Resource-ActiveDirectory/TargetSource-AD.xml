@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<TargetSource collector="sailpoint.unstructured.WindowsTargetCollector" name="AD Fileshares">
+  <Attributes>
+    <Map>
+      <entry key="IQServiceHost" value="seri.sailpointdemo.com"/>
+      <entry key="IQServicePort" value="5050"/>
+      <entry key="appType" value="Active Directory - Direct"/>
+      <entry key="blockSize" value="100"/>
+      <entry key="shares">
+        <value>
+          <List>
+            <WindowsShare depth="2147483647" filter="*" includeExplicitPermissions="true" password="1:PRYxEtkZL2NkjofXmBp2/A==" path="\\\\AD-SERVER\\share" user="Administrator"/>
+          </List>
+        </value>
+      </entry>
+      <entry key="type" value="Windows FileShare Collector"/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule"  name="AD Fileshare Access Rights Correlation"/>
+  </CorrelationRule>
+  <Description>Discover and manage fileshare access</Description>
+</TargetSource>
+</sailpoint>

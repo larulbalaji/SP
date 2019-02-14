@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <Workflow name='Immediate Terminate' handler='sailpoint.api.StandardWorkflowHandler'>
+
+    <Variable input="true" name="requester"/>
+    <Variable name='trace' initializer='true'/>
+
+    <Variable name='leaver'/>
+    <Variable name='reason'/>
+
+    <Step icon="Start" name="Start">
+      <Transition to="Select Identity"/>
+    </Step>
+    
+    <Step name="Select Identity">
+      <Approval description="Immediate Terminate" owner="ref:requester" return="leaver, reason" send="leaver, reason">
+	<Form>
+	  <Attributes>
+	    <Map>
+	      <entry key="pageTitle" value="Immediate Termination"/>
+	    </Map>
+	  </Attributes>
+	  <Section type='text' label='Select Person'>
+	    <Field>
+	      <Value>
+		<String>Specify the person who is leaving workforce.  Click Next to continue to the confirmation page.</String>
+	      </Value>
+	    </Field>
+	  </Section>
+	  <Section>
+	    <Field displayName="Person" name="leaver" required="true" type="sailpoint.object.Identity" />
+	    <Field displayName="Reason" name="reason" displayType="textarea"/>
+	  </Section>
+	  <Button action="back" label="Cancel Request"/>
+	  <Button action="next" label="Next"/>
+	</Form>
+	<ValidationScript>
+	  <Source>
+	    <![CDATA[	    
+            import sailpoint.object.*;
+
+            String error = null;
+
+	    // Ensure System Name is not already taken
+            //
+            //String sysName = item.getString("systemName");
+            //if (null != context.getObjectByName(Application.class, sysName)) {
+            //    error = "A system by that name already exists.  Please specify a different name.";
+            //}
+
+            System.out.println("....selected leaver is: " + item.getString("leaver"));
+
+            return error;
+	    ]]>
+	  </Source>
+      </ValidationScript>
+    </Approval>
+    <Transition to="Prepare" when="script:approved"/>
+    <Transition to="end"/>
+  </Step>
+
+  <Step name="Prepare">
+    <Script>
+      <Source><![CDATA[
+        import sailpoint.object.Identity;
+
+        Identity cube = context.getObjectByName(Identity.class, leaver);
+        workflow.put("cube", cube);
+        System.out.println(".....leaver displayName : " + cube.getDisplayName());
+	
+     ]]> </Source>
+    </Script>
+    <Transition to="Confirm Identity"/>
+  </Step>
+
+    <Step name="Confirm Identity">
+      <Approval description="Confirm Identity" owner="ref:requester" send="cube, leaver, reason">
+	<Form>
+	  <Attributes>
+	    <Map>
+	      <entry key="pageTitle" value="Immediate Termination"/>
+	    </Map>
+	  </Attributes>
+	  <Section type='text' label='Confirm Person'>
+	    <Field>
+	      <Value>
+		<String>Confirm this is the person you want to process.  Click the Back button to change your selection.</String>
+	      </Value>
+	    </Field>
+	  </Section>
+	  <Section columns='2'>
+	    <Field displayName="Full name" readOnly="true" value='script: cube.getDisplayName();'/>
+	    <Field displayName="Email" readOnly="true" value='script: cube.getEmail();'/>
+	    <Field displayName="Employee Number" readOnly="true" value='script: cube.getAttribute("empId");'/>
+	    <Field displayName="Department" readOnly="true" value='script: cube.getAttribute("Department");'/>
+	  </Section>
+	  <Button action="back" label="Back"/>
+	  <Button action="next" label="Submit"/>
+	</Form>
+    </Approval>
+    <Transition to="Submit Termination" when="script:approved"/>
+    <Transition to="Select Identity"/>
+  </Step>
+
+  <Step name="Submit Termination" action='call:scheduleWorkflowEvent'>
+      <Arg name="workflow" value="Lifecycle Event - Leaver"/>
+      <Arg name="owner" value="ref:leaver"/>
+      <Arg name="requestName" value="Admin Action:  Termination for $(identityDisplayName)"/>
+      <Arg name="identityName" value="ref:leaver"/>
+      <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+      <Arg name="sponsor" value="ref:launcher"/>
+      <!-- Bump this up to add more delay -->
+      <Arg name="scheduleDelaySeconds" value="0"/>
+      <!-- workaround for Bug #27980 -->
+      <Arg name="catchExceptions" value="true"/>
+      <Transition to="end"/>
+  </Step>
+
+  <Step name='end'/>
+  
+  </Workflow>
+  
+</sailpoint>

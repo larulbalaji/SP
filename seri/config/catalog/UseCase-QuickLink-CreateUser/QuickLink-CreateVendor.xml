@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <QuickLink action="workflow" category="Manage" icon="viewIdentity"
+    messageKey="Create Vendor" name="Create Vendor" ordering="10">
+    <Attributes>
+      <Map>
+        <entry key="forceAllowSelf">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="hideAllowOthers">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="launcher">
+          <value>
+            <Script>
+              <Source>return currentUser.getName()</Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="requester">
+          <value>
+            <Script>
+              <Source>return currentUser.getName()</Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="workflowName" value="Workflow-QuickLink-CreateUser" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="VendorAdmins" />
+    </DynamicScopes>
+  </QuickLink>
+</sailpoint>

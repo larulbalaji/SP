@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="BuildMap - PRISM" type="JDBCBuildMap">
+  <Description>
+    This rule is used by the JDBC connector to build a map
+    representation of the Resultset.
+  </Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the
+          SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be
+          used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          The application whose data file is being processed.
+        </Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>
+          The Schema currently in use.
+        </Description>
+      </Argument>
+      <Argument name="state">
+        <Description>
+          A Map containing state information.
+        </Description>
+      </Argument>
+      <Argument name="result">
+        <Description>
+          The ResultSet from database.
+        </Description>
+      </Argument>
+      <Argument name="connection">
+        <Description>
+          A connection object to connect to database.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="map">
+        <Description>
+          A Map of the resource object assembled from the
+          data.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[ 
+import sailpoint.connector.JDBCConnector;
+import sailpoint.connector.Connector;
+import java.util.HashMap;
+
+HashMap map = JDBCConnector.buildMapFromResultSet(result);
+if (schema.getObjectType().compareTo(Connector.TYPE_ACCOUNT) == 0) {
+    String active = map.get("status");
+    if (active.equals("A")) {
+        map.put("IIQDisabled", false);
+        } else {
+        map.put("IIQDisabled", true);
+    }
+    
+    String locked = map.get("locked");
+    if (locked.equals("N")) {
+        map.put("IIQLocked", false);
+        } else {
+        map.put("IIQLocked", true);
+    }
+    
+    } else if (schema.getObjectType().compareTo(Connector.TYPE_GROUP) == 0) {
+    
+    // Handle Groups here...
+}
+return map;
+  ]]></Source>
+</Rule>

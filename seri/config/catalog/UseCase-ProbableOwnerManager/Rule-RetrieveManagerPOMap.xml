@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="RetrieveManagerPOMap" type="Workflow">
+  <Signature>
+    <Inputs>
+      <Argument name='owernName'/>
+    </Inputs>
+  </Signature>
+  <Source><![CDATA[
+
+import sailpoint.object.QueryOptions;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableManagerWorkflow");
+serilog.debug ("Subordinate Retrieval - Manager: " + ownerName);
+
+List filterList = new ArrayList();
+filterList.add(Filter.eq("manager.name", ownerName));
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.and(filterList));
+
+Iterator identities = null;
+Map ownerMap = new HashMap();
+List subordinateList = new ArrayList();
+                        
+
+identities = context.search(Identity.class, qo);
+while (identities.hasNext()) {
+	subordinateList.add(identities.next().getName());
+}
+
+ownerMap.put(ownerName,subordinateList);
+serilog.debug("ownerMap: " +    ownerMap);                 
+return ownerMap;
+      
+  ]]></Source>
+</Rule>

@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Link Attribute - Active Directory Privileged" type="LinkAttribute">
+  <Source>
+<![CDATA[
+
+import sailpoint.object.Configuration;
+
+boolean privileged = false;
+
+List groups = (List) link.getAttribute("memberOf");
+
+if (groups != null) {
+  Configuration configuration = (Configuration) context.getObjectByName(Configuration.class, "Privileged Active Directory Groups");
+
+  if (configuration != null) {
+    List privilegedGroups = configuration.getList("groups");
+
+    if (privilegedGroups != null) {
+      for (String group : groups) {
+        if (privilegedGroups.contains(group)) {
+          privileged = true;
+          break;
+        }
+      }
+    }
+  }
+}
+
+// Tag admin accounts as privileged regardless of group membership
+//
+if (!privileged && ((String)link.getAttribute("sAMAccountName")).contains("-adm")) {
+   privileged = true;
+}
+
+return (privileged);
+
+]]>
+ </Source>
+</Rule>

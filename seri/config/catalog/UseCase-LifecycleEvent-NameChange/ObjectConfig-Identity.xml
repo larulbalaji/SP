@@ -1,0 +1,49 @@
+ <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name="Identity">
+      <ObjectAttribute displayName="att_last_name"
+        editMode="ReadOnly" name="lastname" standard="true" type="string">
+        <AttributeSource name="lastname">
+          <ApplicationRef>
+            <Reference class="sailpoint.object.Application"
+              name="Human Resources" />
+          </ApplicationRef>
+        </AttributeSource>
+
+        <AttributeTargets>
+          <AttributeTarget name="sn"
+            provisionAllAccounts="true">
+            <ApplicationRef>
+              <Reference class="sailpoint.object.Application"
+                name="Active Directory" />
+            </ApplicationRef>
+          </AttributeTarget>
+          <AttributeTarget name="sAMAccountName"
+            provisionAllAccounts="true">
+            <ApplicationRef>
+              <Reference class="sailpoint.object.Application"
+                name="Active Directory" />
+            </ApplicationRef>
+            <RuleRef>
+              <Reference class="sailpoint.object.Rule"
+                name="Rule - Target Mapping - sAMAccountName" />
+            </RuleRef>
+          </AttributeTarget>
+          <AttributeTarget name="userPrincipalName"
+            provisionAllAccounts="true">
+            <ApplicationRef>
+              <Reference class="sailpoint.object.Application"
+                name="Active Directory" />
+            </ApplicationRef>
+            <RuleRef>
+              <Reference class="sailpoint.object.Rule"
+                name="Rule - Target Mapping - userPrincipalName" />
+            </RuleRef>
+          </AttributeTarget>
+        </AttributeTargets>
+      </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>
+      

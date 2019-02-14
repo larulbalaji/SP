@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IntegrationConfig PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IntegrationConfig  execStyle="synchronous" executor="sailpoint.seri.integration.HelpDeskExecutor"  name="an IT Change Management ticket" roleSyncStyle="none">
+  <Attributes>
+    <Map>
+      <entry key="configObjectName" value="SERI Configuration"/>
+      <entry key="manualWorkItem" value="false"/>
+      <entry key="emailWorkItem" value="true"/>
+      <entry key="operations" value="Create, Modify, Delete, Enable, Unlock"/>
+      <entry key="optimisticProvisioning" value="false"/>
+      <entry key="universalManager" value="false"/>
+      <entry key="planRuleName" value="none"/>
+    </Map>
+  </Attributes>
+  <ManagedResources>
+    <ManagedResource>
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application"  name="Mainframe"/>
+      </ApplicationRef>
+    </ManagedResource>
+  </ManagedResources>
+</IntegrationConfig>

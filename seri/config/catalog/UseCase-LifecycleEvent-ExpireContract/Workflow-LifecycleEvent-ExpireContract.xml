@@ -1,0 +1,383 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow created="1371426427573" explicitTransitions="true" handler="sailpoint.api.StandardWorkflowHandler" name="Lifecycle Event - Expired Contract">
+  <Variable name="manager"/>
+  <Variable input="true" name="expirationDate"/>
+  <Variable name="newExpirationDate"/>
+  <Variable name="manager"/>
+  <Variable name="launcher"/>
+  <Variable name="sponsor"/>
+  <Variable name="reason"/>
+  <Variable name="decision"/>
+  <Variable initializer="string:true" name="transient">
+    <Description>Set to false to cause workflow-related objects, such as approval
+      work items, to be saved in the database even if they are only
+      viewed by the person registering.</Description>
+  </Variable>
+  <Variable initializer="string:TerminateUser" name="flow">
+    <Description>The name of the LCM flow that launched this workflow.</Description>
+  </Variable>
+  <Variable editable="true" initializer="string:true" name="optimisticProvisioning">
+    <Description>Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.</Description>
+  </Variable>
+  <Variable editable="true" initializer="string:false" name="foregroundProvisioning">
+    <Description>Normally provisioning is done in a step that uses the "backgroud"
+      option to force the workfow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintanance task to 
+      see the resutls of the request.</Description>
+  </Variable>
+  <Variable editable="true" initializer="string:true" name="doRefresh">
+    <Description>Set to true to cause an identity refresh after the changes in the plan
+      have been provisioned.  This is normally off, you might want this on
+      if you want modification of identity or link attributes to result in
+      an immediate re-evaluation of assigned and detected roles.</Description>
+  </Variable>
+  <Variable initializer="string:Normal" input="true" name="workItemPriority">
+    <Description>The String version of a WorkItem.Priority. This variable is 
+       used to set the priority on all of the workitems generated 
+       as part of this workflow and also set on the IdentityRequest
+       object.</Description>
+  </Variable>
+  <Variable input="true" name="approvalScheme">
+    <Description>A csv string that specifies how approvals should be generated for 
+      the incoming request.
+ 
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+  
+      1. manager
+      2. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the  
+      next phase of approvers.
+
+      none - disabled approvals
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named in the variable securityOfficerName.</Description>
+  </Variable>
+  <Variable initializer="string:spadmin" input="true" name="fallbackApprover">
+    <Description>A String that specifies the name of the Identity that will 
+      be assigned any approvals where the owner of the approver 
+      can't be resolved. Example if the scheme is "owner" and the 
+      application doesn't specify and owner.</Description>
+  </Variable>
+  <Variable initializer="string:continue" input="true" name="policyScheme">
+    <Description>A String that specifies how policy checks effect the overall
+      process.
+
+      none - disabled policy checking
+
+      fail -  fail and exit the workflow if any policy violations are found
+
+      continue -  continue if policy violations are found</Description>
+  </Variable>
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>String version of sailpoint.object.Source to indicate
+      where the request originated.  Defaults to LCM.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity we're creating.</Description>
+  </Variable>
+  <Variable name="identityDisplayName">
+    <Description>The displayName of the identity being updated.</Description>
+  </Variable>
+  <Variable name="plan">
+    <Description>The ProvisioningPlan that gets generated from the form input.</Description>
+  </Variable>
+  <Variable name="identityModel" type="java.util.Map">
+    <Description>The identity model that is used to represent the identity being created.</Description>
+  </Variable>
+  <Variable name="policyViolations">
+    <Description>List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see 
+       pending violations.</Description>
+  </Variable>
+  <Variable input="true" name="requester"/>
+  <Variable name="project"/>
+  <Description>This is a sample Workflow.  It is used to create an approval form.  The form has 
+      fields for Contractor management, but it is geared towards demonstrating various
+      form display concepts.</Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="Approval Library"/>
+    <Reference class="sailpoint.object.Rule"  name="LCM Workflow Library"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="19" posY="21">
+    <Transition to="Initialize"/>
+  </Step>
+  <Step icon="Default" name="Set New Expiration Date And Manager" posX="100" posY="130">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+Calendar x = Calendar.getInstance();
+x.add(Calendar.DATE,180);
+workflow.put("newExpirationDate", x.getTime());  
+identityModel.put("expirationDate",x.getTime());
+
+if(identityModel.get("manager") != null) {
+  String theManager =  (String)identityModel.get("manager");
+  workflow.put("manager", theManager);  
+  workflow.put("sponsor", theManager); 
+} else {
+  workflow.put("manager", "spadmin");  
+  workflow.put("sponsor", "spadmin");  
+}
+]]>
+</Source> 
+    </Script>
+    <Transition to="Display Form"/>
+  </Step>
+  <Step action="call:getIdentityModel" name="Initialize" posX="101" posY="20" resultVariable="identityModel">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Description>Initialize the data for the identity that we are creating.</Description>
+    <Transition to="Set New Expiration Date And Manager"/>
+  </Step>
+  <Step icon="Analysis" name="Display Form" posX="102" posY="271">
+    <Approval description="string:Pending Contract Expiration/Renewal Decision for $(identityName)" name="Display Form" owner="ref:sponsor" return="identityModel" send="identityModel">
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Expire Contractor User Form"/>
+      <Arg name="workItemFormBasePath" value="string:identityModel"/>
+      <Arg name="workItemForm" value="string:Form - Contractor Review"/>
+    </Approval>
+    <Transition to="extend" when="script:((String)identityModel.get(&apos;decision&apos;)).compareToIgnoreCase(&apos;Extend the Contract&apos;) == 0"/>
+    <Transition to="Disable all accounts" when="script:((String)identityModel.get(&apos;decision&apos;)).compareToIgnoreCase(&apos;Terminate Immediately&apos;) == 0"/>
+    <Transition to="Schedule Future Disable All" when="script:((String)identityModel.get(&apos;decision&apos;)).compareToIgnoreCase(&apos;Expire as Scheduled&apos;) == 0"/>
+    <Transition to="end"/>
+  </Step>
+  <Step action="call:disableAllAccounts" icon="Provision" name="Disable all accounts" posX="635" posY="256">
+    <Description>Disable all accounts on the identity.</Description>
+    <Transition to="end"/>
+  </Step>
+  <Step name="extend" posX="262" posY="51">
+    <Approval description="Contract Extension for $(identityName)" owner="ref:manager" return="newExpriationDate" send="newExpirationDate">
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Create User Form"/>
+      <Form>
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Extend Contract"/>
+            <entry key="title" value="Specify Contract Expiration"/>
+          </Map>
+        </Attributes>
+        <Button action="cancel" label="Cancel"/>
+        <Button action="next" label="Next"/>
+        <Section>
+          <Field displayName="Confirm Expiration Date:" name="newExpirationDate" type="date"/>
+        </Section>
+      </Form>
+      <ValidationScript>
+        <Source><![CDATA[ 
+String error = null;
+
+// make sure they've selected a date
+Date expiration = item.getDate("newExpirationDate");
+if (expiration == null) {
+  error = "Please select an expiration date";
+} else { 
+  Date now = new Date();
+  if (expiration.before(now)) {
+    error = "Please select a future date";
+  }
+}
+
+return error;    
+             ]]></Source> 
+      </ValidationScript>
+    </Approval>
+    <Transition to="Schedule Future Event"/>
+  </Step>
+  <Step action="call:scheduleWorkflowEvent" icon="Task" name="Schedule Future Event" posX="364" posY="51">
+    <Arg name="workflow" value="string:Expired Contract"/>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="eventName" value="string:Contract expires on ref:newExpirationDate"/>
+    <Arg name="scheduleDate" value="ref:newExpirationDate"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+    <Transition to="Generate Certification"/>
+  </Step>
+  <Step name="Generate Certification" posX="425" posY="126">
+    <Description>Generate a certification for the new manager</Description>
+    <Script>
+      <Source><![CDATA[ 
+import sailpoint.object.Identity;
+import sailpoint.api.CertificationScheduler;
+import sailpoint.web.certification.CertificationScheduleDTO;
+import sailpoint.object.CertificationDefinition;
+import sailpoint.object.TaskSchedule;
+import sailpoint.object.Certification;
+import sailpoint.object.CertificationSchedule;
+
+Identity requestor = context.getObject(Identity.class, launcher);    
+Identity identity = context.getObject(Identity.class,identityName);
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ExpireContract.GenerateCertification");
+
+serilog.debug("Building certification for " + identityName);
+
+// Certifier is the sponsor...
+//
+Identity certifier = context.getObject(Identity.class, sponsor);
+serilog.debug("Certification will be done by " + certifier.getName());
+
+CertificationScheduler scheduler = new CertificationScheduler(context);
+
+CertificationSchedule schedule = scheduler.initializeScheduleBean(requestor, Certification.Type.Identity);
+schedule.setRunNow(true);
+
+CertificationDefinition definition = schedule.getDefinition();
+definition.setCertifierSelectionType(CertificationDefinition.CertifierSelectionType.Manual);
+definition.setProcessRevokesImmediately(true);
+
+definition.setNameTemplate("Contractor Renewal Access Review of " + identity.getDisplayName() + " for " + certifier.getDisplayName());
+definition.setShortNameTemplate("Contractor Renewal Access Review of " + identity.getDisplayName());
+definition.setName("Contractor Renewal Review : " + identity.getDisplayName() + " [" + new Date().toString() + "]");
+
+List identities = new ArrayList();
+identities.add(identity.getName());
+definition.setIdentitiesToCertify(identities);
+definition.setCertifierName(certifier.getName());
+
+Identity certGroupOwner = context.getObjectByName(Identity.class, "Corporate Compliance");
+if (null == certGroupOwner) {
+  certGroupOwner = context.getObjectByName(Identity.class, "spadmin");
+}
+
+definition.setCertificationOwner(certGroupOwner);
+definition.setCertificationNameTemplate("Contractor Extension Access Review : " + identity.getDisplayName());
+
+TaskSchedule taskSchedule = scheduler.saveSchedule(schedule, false);
+]]></Source> 
+    </Script>
+    <Transition to="Build Provisioning Plan"/>
+  </Step>
+  <Step action="call:scheduleWorkflowEvent" icon="Task" name="Schedule Future Disable All" posX="551" posY="175">
+    <Arg name="workflow" value="string:Process Expired Contract"/>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="eventName" value="string:Contract Expires"/>
+    <Arg name="scheduleDate" value="ref:newExpirationDate"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+    <Transition to="end"/>
+  </Step>
+  <Step action="call:buildPlanFromIdentityModel" name="Build Provisioning Plan" posX="499" posY="51" resultVariable="plan">
+    <Arg name="identityModel" value="ref:identityModel"/>
+    <Description>Convert the registration request into a provisioning plan.</Description>
+    <Transition to="Initialize Request"/>
+  </Step>
+  <Step icon="Task" name="Initialize Request" posX="621" posY="51">
+    <Arg name="formTemplate" value="string:Identity Update"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="launcher" value="ref:launcher"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="policyScheme" value="string:none"/>
+    <Arg name="priority" value="ref:workItemPriority"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="trace" value="ref:trace"/>
+    <Description>Call the standard subprocess to initialize the request, this includes
+      auditing, building the approvalset, compiling the plan into 
+       project and checking policy violations.</Description>
+    <Return name="project" to="project"/>
+    <Return name="approvalSet" to="cart"/>
+    <Return name="identityRequestId" to="identityRequestId"/>
+    <Return name="policyViolations" to="policyViolations"/>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" name="Identity Request Initialize"/>
+    </WorkflowRef>
+    <Transition to="Recompile Project"/>
+  </Step>
+  <Step action="call:recompileProvisioningProject" icon="Task" name="Recompile Project" posX="719" posY="51" resultVariable="project">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="priority" value="ref:workItemPriority"/>
+    <Arg name="project" value="ref:project"/>
+    <Arg name="requester" value="ref:launcher"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Description>Recompile the provisioning project with the plan.
+      The plan may contain modifications from the original plan if
+      it was modified during the approval process.
+      If you need to pass in provisioner options like "noFiltering"
+      or "noRoleDeprovisioning" you must pass them as explicit
+      arguments to the call.
+
+      The evaluation options "requester" and "source" are commonly
+      set here.
+
+      You can also pass things into the Template and Field scripts by
+      defining Args in this step.</Description>
+    <Transition to="Provision"/>
+  </Step>
+  <Step icon="Task" name="Provision" posX="808" posY="52">
+    <Arg name="approvalScheme" value="ref:approvalScheme"/>
+    <Arg name="fallbackApprover" value="ref:fallbackApprover"/>
+    <Arg name="foregroundProvisioning" value="ref:foregroundProvisioning"/>
+    <Arg name="formTemplate" value="string:Identity Update"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="launcher" value="ref:launcher"/>
+    <Arg name="manualActionsEmailTemplate" value="string:Pending Manual Changes"/>
+    <Arg name="optimisticProvisioning" value="ref:optimisticProvisioning"/>
+    <Arg name="priority" value="ref:workItemPriority"/>
+    <Arg name="project" value="ref:project"/>
+    <Arg name="policyScheme" value="string:none"/>
+    <Arg name="trace" value="ref:trace"/>
+    <Description>Call the standard subprocess that will process the 
+      approval decisisions and do provisioning.  This 
+      includes calling any configured provisioning 
+      connectors and building manual actions.</Description>
+    <Return name="project" to="project"/>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow"  name="Identity Request Provision"/>
+    </WorkflowRef>
+    <Transition to="Post Provision"/>
+  </Step>
+  <Step icon="Task" name="Post Provision" posX="896" posY="52">
+    <Description>Mark all of the items in the approvalset provisioned since these
+      are all synchronous activities.</Description>
+    <Transition to="Refresh Identity"/>
+  </Step>
+  <Step action="call:refreshIdentity" condition="ref:doRefresh" icon="Task" name="Refresh Identity" posX="897" posY="161">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="correlateEntitlements" value="string:true"/>
+    <Arg name="provision" value="string:true"/>
+    <Arg name="synchronizeAttributes" value="string:true"/>
+    <Arg name="refreshLinks" value="script:return true;"/>
+    <Description>Add arguments as necessary to enable refresh features.  Typically you only want this
+      to correlate roles and possibly provision if we notice new assigned roles.
+      Note that provisioning will be done in the Identity Refresh workflow so if there
+      are any provisioning forms to display we won't feed them directly to the 
+      current user, they'll have to return to the inbox.</Description>
+    <Transition to="end"/>
+  </Step>
+  <Step catches="complete" icon="Task" name="Finalize" posX="793" posY="418">
+    <Arg name="approvalSet" value="ref:cart"/>
+    <Arg name="project" value="ref:project"/>
+    <Arg name="priority" value="ref:workItemPriority"/>
+    <Arg name="trace" value="ref:trace"/>
+    <Arg name="identityRequestId" value="ref:identityRequestId"/>
+    <Description>Call the standard subprocess that can audit/finalize the request.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow"  name="Identity Request Finalize"/>
+    </WorkflowRef>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Stop" name="end" posX="1013" posY="420"/>
+</Workflow>

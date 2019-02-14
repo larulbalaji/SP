@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<!-- I changed this -->
+<TaskDefinition resultAction="Delete" name="Aggregate HR Authoritative">
+    <Attributes>
+      <Map>
+        <entry key="checkDeleted" value="false"/>
+        <entry key="applications" value="Human Resources"/>
+      </Map>
+    </Attributes>
+    <Parent>
+      <Reference class="sailpoint.object.TaskDefinition" name="Account Aggregation"/>
+    </Parent>
+    <Description>Run this first.  This aggregates from the authoritative resources.</Description>
+  </TaskDefinition>
+</sailpoint>

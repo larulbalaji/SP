@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Filter Dynamic Approval Set" type="Workflow">
+ <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="UtilDynamicApproval"/>
+       <Reference class="sailpoint.object.Rule" name="Dynamic LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+  </ReferencedRules>
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+
+Note that an Attributes map of all variables from the current WorkflowContext, merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="wfcontext">
+        <Description>
+          The current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="handler">
+        <Description>
+          The workflow handler associated with the current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="workflow">
+        <Description>
+          The current Workflow definition.
+        </Description>
+      </Argument>
+      <Argument name="step">
+        <Description>
+          The current Step.
+        </Description>
+      </Argument>
+      <Argument name="approval">
+        <Description>
+          The current Approval.
+        </Description>
+      </Argument>
+      <Argument name="item">
+        <Description>
+          The WorkItem being processed.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="Object">
+        <Description>
+          The result of the workflow rule; dependent on the rule itself.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+      
+	import sailpoint.workflow.IdentityRequestLibrary;
+	import sailpoint.object.ApprovalSet;
+	import sailpoint.object.ApprovalItem;
+	import org.apache.log4j.Logger;
+
+	private static Logger logger = Logger.getLogger("seri.workflow.dynamicApprovals.filterDynamicApprovalSet");
+	
+	private String getString(Object obj) {
+		if(obj != null) {
+			return obj.toString();
+		}
+		return "null";
+	}	
+
+	logger.trace("Entering Filter Dynamic Approval Set....");
+	logger.trace(">>Current tmpApprovalSet: " + getString(tmpApprovalSet));
+
+	logger.debug("Checking Approval Type: " + getString(approvalType));	  
+	if(approvalType != null)
+	{
+		if(approvalType.equals("approveNonResponded"))
+		{
+			logger.debug("Approval Type was approveNonResponded. Calling approveNonResponded from UtilDynamicApproval");
+			approveNonResponded(approvalSet, workItemDescription, sailpoint.tools.Util.otob(includeRejected),  sailpoint.tools.Util.otob(forceDecision), sailpoint.tools.Util.otob(disableMetadataApproval), attributeName,  attributeValue,  attributeObjectType,  sailpoint.tools.Util.otob(includeOnTrue),   sailpoint.tools.Util.otob(disableApprovalRisk), identityRiskThreshold,  entitlementRiskThreshold,  identityName, sailpoint.tools.Util.otob(approvalRequiredRuleAttribute), approvalRequiredRuleAttribute,  approvalRequiredRule,  sailpoint.tools.Util.otob(disableAutoApprove), autoApprovedRule,  autoApprovedRuleAttribute, approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);  
+			logger.debug("Setting tmpApprovalSet to null.");
+			tmpApprovalSet = null;                    
+		}
+		else
+		{	
+			logger.debug("Approval Type was not approve NonResponded.");
+			logger.debug("Calling filterApprovalSetByAttributeAndUserRiskThreshold from UtilDynamicApproval Rule Library");
+			tmpApprovalSet =  filterApprovalSetByAttributeAndUserRiskThreshold(approvalSet, workItemDescription, sailpoint.tools.Util.otob(includeRejected),  sailpoint.tools.Util.otob(forceDecision), sailpoint.tools.Util.otob(disableMetadataApproval), attributeName,  attributeValue,  attributeObjectType,  sailpoint.tools.Util.otob(includeOnTrue),   sailpoint.tools.Util.otob(disableApprovalRisk), identityRiskThreshold,  entitlementRiskThreshold,  workItemTargetName, sailpoint.tools.Util.otob(approvalRequiredRuleAttribute), approvalRequiredRuleAttribute,  approvalRequiredRule,  sailpoint.tools.Util.otob(disableAutoApprove), autoApprovedRule,  autoApprovedRuleAttribute, approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);                       
+		}
+	} else 
+	{
+		log.warn("Approval Type was null. Please check your configuration.");
+	}
+
+	if(tmpApprovalSet == null)
+	{
+		log.info("tmpApprovalSet was null. Returning empty approval set.");
+		return new ApprovalSet();
+	} 
+	else
+	{
+		log.info("tmpApprovalSet had a value. Returning tmpApprovalSet");
+	
+		return tmpApprovalSet;
+	}
+]]></Source>
+</Rule>

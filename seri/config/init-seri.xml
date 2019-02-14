@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+  <ImportAction name='include' value='seri/catalog/Resource-HR/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-OracleEBS/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-RACF/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-ActiveDirectory/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-TRAKK/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-TRAKK-WS/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-PRISM/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-EnterpriseDirectory/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-MSSQLServer/Application-MssqlServer.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-SecurityIQ/setup.xml' />
+  <ImportAction name='include' value='seri/catalog/Utility-DisablePassThrough/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Utility-SODImporter/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Utility-ChallengeAnswerImporter/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Utility-RoleImporter/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Connector-SOAP/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Resource-ERPPortal/setup.xml'/>
+  <ImportAction name='include' value='seri/catalog/Demo-Standard/setup.xml'/>
+  
+</sailpoint>

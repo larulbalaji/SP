@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Form-ServiceManagement - Create" type="Workflow">
+  <Attributes>
+    <Map>
+      <entry key="labelAlign" value="top"/>
+      <entry key="pageTitle" value="Form-ServiceManagement - Create"/>
+    </Map>
+  </Attributes>
+  <Description/>
+  <Section columns="2" label="Input Service Details">
+    <Field displayName="Service Name" filterString="" name="groupName" postBack="true" required="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="vtype" value="alphanum"/>
+        </Map>
+      </Attributes>
+      <ValidationScript>
+        <Source><![CDATA[
+	      
+          import sailpoint.api.ManagedAttributer;
+          import sailpoint.object.ManagedAttribute;
+
+          // Expect: java.lang.String dnTemplate
+          // Expect: java.lang.String appId 
+
+          String error = null;
+
+          // Ensure group name is not already taken
+          //   - We check IIQ Entitlement Catalog
+          //   - You could also call 'getObject' on the connector to be doubly sure
+          //
+
+         String dn = dnTemplate.replace("#", $(groupName));
+         ManagedAttribute ma = ManagedAttributer.get(context, appId, "memberOf", dn);
+         if (null != ma) {
+           error = "A service by that name already exists.  Please specify a different name.";
+         }
+         return error;
+		     
+	    ]]></Source>
+      </ValidationScript>
+    </Field>
+    <Field displayName="Service Owner" filterString="" name="sys.owner" required="true" type="Identity" value="ref:launcher">
+      <Attributes>
+        <Map>
+          <entry key="valueProperty" value="id"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Service Description" displayType="textarea" filterString="" name="description" type="string"/>
+  </Section>
+  <Section columns="2" label="Select the Identities this Service should be applied to">
+    <Field displayName="Select Identity Selection Method" filterString=""  name="selector" required="true" postBack="true" type="string" value="attributeMatch">
+      <AllowedValues>
+        <List>
+          <String>pickIdentities</String>
+          <String>Pick Identities</String>
+        </List>
+        <List>
+          <String>attributeMatch</String>
+          <String>Attribute Match</String>
+        </List>
+        <List>
+          <String>predefinedPopulation</String>
+          <String>Predefined Population</String>
+        </List> 
+        <List>
+          <String>filterString</String>
+          <String>Filter String</String>
+        </List>     
+      </AllowedValues>
+    </Field>
+    <Field displayName="Pick Identities" filterString="" dependencies="selector" multi="true" dynamic="true" name="identities" type="sailpoint.object.Identity">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>   
+                <![CDATA[                     
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.identities" );
+                 serilog.debug("selector: " + selector ); 
+                 if( null != selector && selector.equals("pickIdentities")) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Attribute Match" filterString="" dependencies="selector"  name="attributeMatch" postBack="true" type="string">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <String>jobTitle</String>
+            <String>department</String>
+            <String>manager</String>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>    
+              <![CDATA[                    
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.attributeMatch" );
+                 serilog.debug("attributeMatch: " + attributeMatch ); 
+                 if( null != selector && selector.equals("attributeMatch")) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="jobTitle" filterString="" dependencies="selector,attributeMatch"  dynamic="true" name="jobTitle" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute"/>
+        </RuleRef>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>  
+              <![CDATA[                      
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.jobTitle" );
+                 serilog.debug("selector: " + selector + " attributeMatch: " + attributeMatch ); 
+                 if( null != selector && null != attributeMatch && ( selector.equals("attributeMatch") && attributeMatch.equals("jobTitle" ) ) ) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+
+
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="department" filterString="" dependencies="selector,attributeMatch"  dynamic="true" name="department" type="string">
+      <AllowedValuesDefinition>
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule" name="Query Identity Attribute"/>
+        </RuleRef>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>
+              <![CDATA[                        
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.department" );
+                 serilog.debug("selector: " + selector + " attributeMatch: " + attributeMatch ); 
+                 if( null != selector && null != attributeMatch &&  ( selector.equals("attributeMatch") && attributeMatch.equals("department") ) ) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+
+
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="manager" filterString="managerStatus == true" dependencies="selector,attributeMatch"  dynamic="true" name="manager" type="sailpoint.object.Identity">
+      <Attributes>
+        <Map>
+         <entry key="valueProperty" value="name"/>        
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>
+              <![CDATA[                        
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.manager" );
+                 serilog.debug("selector: " + selector + " attributeMatch: " + attributeMatch ); 
+                 if( null != selector &&  null != attributeMatch && ( selector.equals("attributeMatch") && attributeMatch.equals("manager" ) ) ) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+
+
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Predefined Populations" filterString="" dependencies="selector"  dynamic="true" name="population" type="sailpoint.object.GroupDefinition">
+      <Attributes>
+        <Map>
+          <entry key="valueProperty" value="name"/>
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>
+              <![CDATA[                        
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.population" );
+                 serilog.debug("selector: " + selector ); 
+                 if( null != selector && selector.equals("predefinedPopulation") ) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Filter String" filterString="" dependencies="selector"  dynamic="true" name="filterString" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+            <Script>
+              <Source>
+              <![CDATA[                                      
+                 serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ServiceManagementCreate.Form.filterString" );
+                 serilog.debug("selector: " + selector );
+                 if( null != selector && selector.equals("filterString")) { 
+                   return false; 
+                 } else { 
+                   return true; 
+                 }
+                 ]]>
+              </Source>
+            </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    </Section>
+    <Section>
+    <Field displayName="Assign Service Now" name="assignService" type="boolean" />
+  </Section>
+  <Section>
+    <Attributes>
+      <Map>
+        <entry key="hidden" value="true"/>
+      </Map>
+    </Attributes>
+    <Field dynamic="true" filterString="" name="distinguishedName" type="string">
+      <Script>
+        <Source><![CDATA[
+	        
+            // Expect: java.lang.String dnTemplate
+            // Expect: java.lang.String groupName
+
+            String value = null;
+            if (null != $(groupName)) {
+              value = dnTemplate.replace("#", $(groupName));
+            }
+            return value; 
+          
+        ]]></Source>
+      </Script>
+    </Field>
+    <Field dynamic="true" filterString="" name="GroupScope" type="string">
+      <Script>
+        <Source><![CDATA[
+	        return "Global";    
+	      ]]></Source>
+      </Script>
+    </Field>
+    <Field dynamic="true" filterString="" name="sys.displayName" type="string">
+      <Script>
+        <Source><![CDATA[
+          // Expect: java.lang.String groupName
+	        return $(groupName);
+	      ]]></Source>
+      </Script>
+    </Field>
+  </Section>
+  <Button action="next" label="Submit"/>
+  <Button action="next" label="Cancel" parameter="exitWorkflow" skipValidation="true" value="true"/>
+</Form>

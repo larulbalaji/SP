@@ -1,0 +1,582 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Object Ownership Assignment"
+  type="SERI">
+  <Variable initializer="string:true" name="transient">
+    <Description>Set to false to cause workflow-related objects, such as
+      approval
+      work items, to be saved in the database even if they are only
+      viewed by the person registering.</Description>
+  </Variable>
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>String version of sailpoint.object.Source to indicate
+      where the request originated. Defaults to LCM.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace">
+    <Description>Used for debugging this workflow and when set to true
+      trace
+      will be sent to stdout.</Description>
+  </Variable>
+
+  <Variable name="identityDisplayName">
+    <Description>The displayName of the identity being updated.</Description>
+  </Variable>
+
+  <Variable name="plan">
+    <Description>The ProvisioningPlan that gets generated from the form
+      input.</Description>
+  </Variable>
+  <Variable name="flow" initializer="string:Object Ownership">
+    <Description>The ProvisioningPlan that gets generated from the form
+      input.</Description>
+  </Variable>
+
+
+  <Variable name="attrForm" />
+  <Variable name="ownsBundles">
+    <Description>Designates that the users owns one or more Roles. If
+      this
+      value is true, then we will display a
+      section in the Form for setting
+      the new Role Owner
+    </Description>
+  </Variable>
+  <Variable name="ownsServiceAccounts">
+    <Description>Designates that the user is a sponsor of one or more
+      Identity (service accounts). If this value is true, then we will
+      display a
+      section in the Form for setting the new Service Account
+      Owner
+    </Description>
+  </Variable>
+  <Variable name="ownsApplications">
+    <Description>Designates that the users owns one or more
+      Applications.
+      If this value is true, then we will display a
+      section in the Form for
+      setting the new Application Owner
+    </Description>
+  </Variable>
+  <Variable name="ownsEntitlements">
+    <Description>Designates that the users owns one or more Entitlements
+      (managed attributes). If this value is true, then we will display
+      a
+      section in the Form for setting the new Entitlement Owner
+    </Description>
+  </Variable>
+  <Variable name="newApplicationOwner" />
+  <Variable name="newBundleOwner" />
+  <Variable name="newServiceAccountOwner" />
+  <Variable name="newEntitlementOwner" />
+  <Variable name="FormOwner" initializer="string:spadmin">
+    <Description>Identity of the user or group that will select the new
+      Object Owners.
+    </Description>
+  </Variable>
+  <Variable name="identityName" input="true" />
+
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="Approval Library" />
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library" />
+  </RuleLibraries>
+
+  <Step icon="Start" name="Start" posX="34" posY="26">
+    <Transition to="Check for Object Ownership" />
+  </Step>
+
+
+
+
+  <Step icon="Default" name="Check for Object Ownership" posX="298"
+    posY="89">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Bundle;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.Application;
+import sailpoint.object.Link;
+import sailpoint.object.Identity;
+import sailpoint.api.IdentityService;
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Script;
+import sailpoint.object.DynamicValue;
+import sailpoint.tools.MapUtil;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ObjectOwnership.CheckForObjectOwnership");
+serilog.debug("Entering Check for Object Ownership");
+boolean ownsApplications = false;
+boolean ownsBundles = false;
+boolean ownsEntitlements = false;
+boolean ownsServiceAccounts = false;
+String saIdentityAttribute = "owner";
+int sacount = 0;
+int bundlecount = 0;
+int appcount = 0;
+int macount = 0;
+//Check for Service Account Ownership
+//Try Catch in case there is no Identity Attribute called sponsor, or it is incorrectly spelled
+try {
+    QueryOptions saqo = new QueryOptions();
+    saqo.addFilter(Filter.eq("sponsor.name",identityName));
+    sacount = context.countObjects(Identity.class,saqo);
+    if (sacount != 0) {
+        ownsServiceAccounts = true;
+    }
+} catch (Exception) {
+    serilog.debug("CheckObjectOwnership :: Exception during ServiceAccount Query, possible that Identity Attribute sponsor does not exist");
+}
+serilog.debug("CheckForObjectOwnership :: Service Accounts = " + ownsServiceAccounts + "   Total : " + sacount);
+//Check for Role Onwership
+QueryOptions bundleqo = new QueryOptions();
+bundleqo.addFilter(Filter.eq("owner.name",identityName));
+bundlecount = context.countObjects(Bundle.class,bundleqo);
+if (bundlecount != 0) {
+    ownsBundles = true;
+}
+serilog.debug("CheckForObjectOwnership :: Roles = " + ownsBundles + "   Total : " + bundlecount);
+//Check for Application Ownership
+QueryOptions appqo = new QueryOptions();
+appqo.addFilter(Filter.eq("owner.name",identityName));
+appcount = context.countObjects(Application.class,appqo);
+if (appcount != 0) {
+    ownsApplications = true;
+}
+serilog.debug("CheckForObjectOwnership :: Applications = " + ownsApplications + "   Total : " + appcount);
+//Check for Entitlement Ownership
+QueryOptions maqo = new QueryOptions();
+maqo.addFilter(Filter.eq("owner.name",identityName));
+macount = context.countObjects(ManagedAttribute.class,maqo);
+if (macount != 0) {
+    ownsEntitlements = true;
+}
+serilog.debug("CheckForObjectOwnership :: Entitlements = " + ownsEntitlements + "   Total : " + macount);
+//Put the attributes in the workflow for later use
+workflow.put("ownsServiceAccounts",ownsServiceAccounts);
+workflow.put("ownsBundles",ownsBundles);
+workflow.put("ownsApplications",ownsApplications);
+workflow.put("ownsEntitlements",ownsEntitlements);
+workflow.put("sacount",sacount);
+workflow.put("bundlecount",bundlecount);
+workflow.put("appcount",appcount);
+workflow.put("macount",macount);
+          ]]></Source>
+    </Script>
+    <Transition to="end"
+      when="script:( isFalse(ownsServiceAccounts) &amp;&amp; isFalse(ownsBundles) &amp;&amp; isFalse(ownsEntitlements) &amp;&amp; isFalse(ownsApplications))" />
+    <Transition to="Build Ownership Form"
+      when="script:( isTrue(ownsServiceAccounts) || isTrue(ownsBundles) || isTrue(ownsEntitlements) || isTrue(ownsApplications))" />
+
+
+    <Transition to="Build Ownership Form" />
+  </Step>
+
+  <Step icon="Default" name="Build Ownership Form" posX="298" posY="89"
+    resultVariable="attrForm">
+    <Arg name="ownsBundles" />
+    <Arg name="ownsApps" />
+    <Arg name="ownsEntitlements" />
+    <Arg name="ownsServiceAccounts" />
+    <Arg name="bundlecount" />
+    <Arg name="appcount" />
+    <Arg name="sacount" />
+    <Arg name="macount" />
+    <Script>
+      <Source><![CDATA[
+import java.util.Arrays;
+import java.util.List;
+import sailpoint.object.Bundle;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.Application;
+import sailpoint.object.Link;
+import sailpoint.object.Identity;
+import sailpoint.api.IdentityService;
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Script;
+import sailpoint.object.DynamicValue;
+import sailpoint.tools.MapUtil;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+//Step to dynamically build the form.  This step should only be executed IF they own one of the 4 objects
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ObjectOwnership.BuildOwnershipForm");
+serilog.debug("Entering Build Ownership Form");
+Form frm=new Form();
+frm.put("pageTitle", "User Owned objects for " + identityName);
+frm.setName("Form - User Owned Objects for " + identityName);
+frm.setSubtitle(identityName + " has ownership of some type of object that needs to be re-assigned.  Examples of ownership include Application, Roles, or Entitlements.  This also include Service Account ownership/sponsor.  Please select a new owner for each type of IdentityIQ Object");
+Identity identity = context.getObjectByName(Identity.class,identityName);
+///////////////////////////////////////
+//      Service Accounts
+///////////////////////////////////////
+if (ownsServiceAccounts) {
+    serilog.debug("BuildOwnershipForm :: ownsServiceAccounts = " + ownsServiceAccounts);
+    Section sasection = new Section();
+    sasection.setName("Service Accounts");
+    sasection.setLabel("Service Accounts");
+    sasection.setColumns(1);
+    QueryOptions saqo = new QueryOptions();
+    saqo.addFilter(Filter.eq("sponsor.name",identityName));
+    Iterator saIT = context.search(Identity.class,saqo);
+    Field safield =new Field();
+    safield.setType(Field.TYPE_STRING);
+    safield.setName("serviceAccountList");
+    safield.setDisplayName("Service Accounts");
+    safield.setDisplayType(Field.DISPLAY_TYPE_TEXTAREA);
+    safield.setReadOnly(true);
+    StringBuffer sabuffer = new StringBuffer();
+    List saList = new ArrayList();
+    while (saIT.hasNext()) {
+        Identity saIdentity = (Identity) saIT.next();
+        //Making the text look pretty
+        if (sabuffer.length() == 0) {
+            sabuffer.append(saIdentity.getName());
+        } else {
+            sabuffer.append("\n");
+            sabuffer.append(saIdentity.getName());
+        }
+        saList.add(saIdentity.getName());
+    }
+    workflow.put("saList",saList);
+    serilog.trace("SABuffer = " + sabuffer.toString());
+    safield.setValue(sabuffer.toString());
+    String getValue = safield.getValue();
+    //TextArea has a scroll bar, but it is not obvious.   Resize the textarea to see ALL of the Service Accounts
+    if (sacount > 4) {
+        serilog.debug("BuildOwnershipForm :: Handling Display for Large number of Service Accounts");
+        int height = ((sacount - 4) * 14) + 56;
+        serilog.trace("New Bundle TextArea height will be " + height);
+        safield.setAttribute("height", height);
+    }
+    //f.setValue(Util.listToString(saList));
+    Field saowner = new Field();
+    saowner.setType(Field.TYPE_IDENTITY);
+    saowner.setName("newServiceAccountOwner");
+    saowner.setDisplayName("New Service Account Owner");
+    //saowner.setFilterString("name == &quot;" + identity.getName() + "&quot;");
+    sasection.add(safield);
+    sasection.add(saowner);
+    frm.add(sasection);
+    serilog.debug("BuildOwnershipForm :: Done with ServiceAccounts");
+}
+///////////////////////////////////////
+//      Bundles
+///////////////////////////////////////
+if (ownsBundles) {
+    serilog.debug("BuildOwnershipForm :: ownsBundles = " + ownsBundles);
+    Section bundlesection = new Section();
+    bundlesection.setName("Roles");
+    bundlesection.setLabel("Roles");
+    bundlesection.setColumns(1);
+    QueryOptions bundleqo = new QueryOptions();
+    bundleqo.addFilter(Filter.eq("owner.name",identityName));
+    Iterator bundleIT = context.search(Bundle.class,bundleqo);
+    Field bundlefield =new Field();
+    bundlefield.setType(Field.TYPE_STRING);
+    bundlefield.setName("bundleList");
+    bundlefield.setDisplayName("Roles");
+    bundlefield.setDisplayType(Field.DISPLAY_TYPE_TEXTAREA);
+    bundlefield.setReadOnly(true);
+    StringBuffer bundlebuffer = new StringBuffer();
+    List bundleList = new ArrayList();
+    while (bundleIT.hasNext()) {
+        Bundle bundle = (Bundle) bundleIT.next();
+        //Making the text look pretty
+        if (bundlebuffer.length() == 0) {
+            bundlebuffer.append(bundle.getName());
+        } else {
+            bundlebuffer.append("\n");
+            bundlebuffer.append(bundle.getName());
+        }
+        bundleList.add(bundle.getName());
+    }
+    workflow.put("bundleList",bundleList);
+    serilog.trace("BundleBuffer = " + bundlebuffer.toString());
+    bundlefield.setValue(bundlebuffer.toString());
+    //TextArea has a scroll bar, but it is not obvious.   Resize the textarea to see ALL of the Bundles
+    if (bundlecount > 4) {
+        serilog.debug("BuildOwnershipForm :: Handling Display for Large number of Roles");
+        int height = ((bundlecount - 4) * 14) + 56;
+        serilog.trace("New Bundle TextArea height will be " + height);
+        bundlefield.setAttribute("height", height);
+    }
+    Field bundleowner = new Field();
+    bundleowner.setType(Field.TYPE_IDENTITY);
+    bundleowner.setName("newBundleOwner");
+    bundleowner.setDisplayName("New Role Owner");
+    //saowner.setFilterString("name == &quot;" + identity.getName() + "&quot;");
+    bundlesection.add(bundlefield);
+    bundlesection.add(bundleowner);
+    frm.add(bundlesection);
+}
+///////////////////////////////////////
+//      Applications
+///////////////////////////////////////
+if (ownsApplications) {
+    serilog.debug("BuildOwnershipForm :: ownsApplications = " + ownsApplications);
+    Section appsection = new Section();
+    appsection.setName("Application");
+    appsection.setLabel("Application");
+    appsection.setColumns(1);
+    QueryOptions appqo = new QueryOptions();
+    appqo.addFilter(Filter.eq("owner.name",identityName));
+    Iterator appIT = context.search(Application.class,appqo);
+    Field appfield =new Field();
+    appfield.setType(Field.TYPE_STRING);
+    appfield.setName("appList");
+    appfield.setDisplayName("Applications");
+    appfield.setDisplayType(Field.DISPLAY_TYPE_TEXTAREA);
+    appfield.setReadOnly(true);
+    StringBuffer appbuffer = new StringBuffer();
+    List applicationList = new ArrayList();
+    while (appIT.hasNext()) {
+        Application app = (Application) appIT.next();
+        //Making the text look pretty
+        if (appbuffer.length() == 0) {
+            appbuffer.append(app.getName());
+        } else {
+            appbuffer.append("\n");
+            appbuffer.append(app.getName());
+        }
+        applicationList.add(app.getName());
+    }
+    workflow.put("applicationList",applicationList);
+    serilog.trace("AppBuffer = " + appbuffer.toString());
+    appfield.setValue(appbuffer.toString());
+    //TextArea has a scroll bar, but it is not obvious.   Resize the textarea to see ALL of the Application
+    if (appcount > 4) {
+        int height = ((appcount - 4) * 14) + 56;
+        serilog.debug("New appfield height will be " + height);
+        appfield.setAttribute("height", height);
+    }
+    //f.setValue(Util.listToString(saList));
+    Field appowner = new Field();
+    appowner.setType(Field.TYPE_IDENTITY);
+    appowner.setName("newApplicationOwner");
+    appowner.setDisplayName("New Application Owner");
+    //saowner.setFilterString("name == &quot;" + identity.getName() + "&quot;");
+    appsection.add(appfield);
+    appsection.add(appowner);
+    frm.add(appsection);
+}
+///////////////////////////////////////
+//      Entitlements
+///////////////////////////////////////
+if (ownsEntitlements) {
+    serilog.debug("BuildOwnershipForm :: ownsEntitlements = " + ownsEntitlements);
+    Section masection = new Section();
+    masection.setName("Entitlements");
+    masection.setLabel("Entitlements");
+    masection.setColumns(1);
+    QueryOptions maqo = new QueryOptions();
+    maqo.addFilter(Filter.eq("owner.name",identityName));
+    int newmacount = context.countObjects(ManagedAttribute.class,maqo);
+    Iterator maIT = context.search(ManagedAttribute.class,maqo);
+    Field mafield =new Field();
+    mafield.setType(Field.TYPE_STRING);
+    mafield.setName("appList");
+    mafield.setDisplayName("Entitlements");
+    mafield.setDisplayType(Field.DISPLAY_TYPE_TEXTAREA);
+    mafield.setReadOnly(true);
+    // Use the buffer for display and the list for worklfow variable
+    StringBuffer mabuffer = new StringBuffer();
+    List maList = new ArrayList(); 
+    while (maIT.hasNext()) {
+        ManagedAttribute ma = (ManagedAttribute) maIT.next();
+        //Making the text look pretty
+        if (mabuffer.length() == 0) {
+            mabuffer.append(ma.getDisplayableName() + " \t\t\t " + ma.getApplication().getName());
+        } else {
+            mabuffer.append("\n");
+            mabuffer.append(ma.getDisplayableName()  + " \t\t\t " + ma.getApplication().getName());
+        }
+        //Update the variable to return
+        maList.add(ma.getApplication().getName() + "|" + ma.getDisplayableName());
+    }
+    workflow.put("maList",maList);
+    serilog.trace("MABuffer = " + mabuffer.toString());
+    mafield.setValue(mabuffer.toString());
+    //TextArea has a scroll bar, but it is not obvious.   Resize the textarea to see ALL of the Entitlements
+    if (macount > 4) {
+        int height = ((macount - 4) * 14) + 56;
+        serilog.debug("New mafield height will be " + height);
+        mafield.setAttribute("height", height);
+    }
+    //f.setValue(Util.listToString(saList));
+    Field maowner = new Field();
+    maowner.setType(Field.TYPE_IDENTITY);
+    maowner.setName("newEntitlementOwner");
+    maowner.setDisplayName("New Entitlement Owner");
+    //saowner.setFilterString("name == &quot;" + identity.getName() + "&quot;");
+    masection.add(mafield);
+    masection.add(maowner);
+    frm.add(masection);
+}
+//Default next and cancel buttons
+List buttons=new ArrayList();
+buttons.add(new Button("Next", "next"));
+buttons.add(new Button("Cancel", "cancel"));
+frm.setButtons(buttons);
+serilog.trace(frm.toXml());
+serilog.debug("BuildOwnershipForm :: Exiting Build Form");
+return frm;
+          ]]></Source>
+    </Script>
+    <Transition to="Display Form" />
+  </Step>
+
+  <Step icon="Approval" name="Display Form" posX="373" posY="186">
+    <Approval name="Display Object Owner Form" owner="ref:FormOwner"
+      send="launcher"
+      return="newApplicationOwner, newBundleOwner, newEntitlementOwner, newServiceAccountOwner">
+      <Arg name="workItemType" value="string:Form" />
+      <Arg name="workItemDescription" value="string:Edit Object Ownership" />
+      <Arg name="workItemForm" value="ref:attrForm" />
+      <AfterScript>
+        <Source><![CDATA[
+      
+                ]]></Source>
+      </AfterScript>
+    </Approval>
+    <Description>Display the UI attributes to the user to see which
+      attributes
+      to display on the Identity cube's 'attributes' tab
+    </Description>
+
+    <Transition to="Update ServiceAccount Owner" />
+  </Step>
+
+
+
+  <Step condition="ref:newServiceAccountOwner" name="Update ServiceAccount Owner">
+    <Script>
+      <Source> <![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.tools.Util;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ObjectOwnership.UpdateServiceAccountOwner");
+serilog.debug("UpdateServiceAccountOwner :: Entering");
+serilog.debug("UpdateServiceAccountOwner :: newServiceAccountOwner ID = " + newServiceAccountOwner); 
+Identity saNewOwnerIdentity = context.getObjectById(Identity.class,newServiceAccountOwner);
+serilog.debug("UpdateServiceAccountOwner :: newServiceAccountOwner name = " + saNewOwnerIdentity.getName()); 
+serilog.debug("UpdateServiceAccountOwner :: List of Accounts to Update = " +   Util.listToCsv(saList));  
+for(String sa : saList) {
+  Identity saIdentity = context.getObjectByName(Identity.class,sa);
+  if (saIdentity != null) {
+    saIdentity.setAttribute("sponsor",saNewOwnerIdentity);
+    context.saveObject(saIdentity);
+    context.commitTransaction();
+  } else {
+    serilog.debug("Oops, ServiceAccount Identity is null");
+  }
+}
+serilog.debug("UpdateServiceAccountOwner :: Exiting");
+      ]]></Source>
+    </Script>
+    <Transition to="Update Bundle Owner" />
+  </Step>
+
+  <Step condition="ref:newBundleOwner" name="Update Bundle Owner">
+    <Script>
+      <Source><![CDATA[
+  
+import sailpoint.object.Identity;
+import sailpoint.tools.Util;
+import sailpoint.object.Bundle;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ObjectOwnership.UpdateBundleOwner");
+serilog.debug("UpdateBundleOwner :: Entering");
+serilog.debug("UpdateBundleOwner :: newBundleOwner ID = " + newBundleOwner); 
+Identity bundleNewOwnerIdentity = context.getObjectById(Identity.class,newBundleOwner);
+serilog.debug("UpdateBundleOwner :: newBundlerOwner Name = " + bundleNewOwnerIdentity.getName());   
+serilog.debug("UpdateBundleOwner :: List of Roles to update = " + Util.listToCsv(bundleList));
+for(String bundle : bundleList) {
+    Bundle role = context.getObjectByName(Bundle.class,bundle);
+    if (role != null) {
+        role.setOwner(bundleNewOwnerIdentity);
+        context.saveObject(role);
+        context.commitTransaction();
+    } else {
+        serilog.debug("Oops, Role is null");
+    }
+}
+serilog.debug("UpdateBundleOwner :: Exiting");
+      ]]></Source>
+    </Script>
+    <Transition to="Update Application Owner" />
+  </Step>
+
+  <Step condition="ref:newApplicationOwner" name="Update Application Owner">
+    <Script>
+      <Source><![CDATA[
+  
+import sailpoint.object.Identity;
+import sailpoint.tools.Util;
+import sailpoint.object.Application;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ObjectOwnership.UpdateApplicationOwner");
+serilog.debug("UpdateApplicationOwner :: Entering");
+serilog.debug("UpdateApplicationOwner :: newApplicationOwner ID = " + newApplicationOwner); 
+Identity applicationNewOwnerIdentity = context.getObjectById(Identity.class,newApplicationOwner);
+serilog.debug("UpdateApplicationOwner :: newApplicationOwner Name = " + applicationNewOwnerIdentity.getName());   
+serilog.debug("UpdateApplicationOwner :: List of Applications to Update = " + Util.listToCsv(applicationList));   
+for(String app : applicationList) {
+    Application application = context.getObjectByName(Application.class,app);
+    if (application != null) {
+        application.setOwner(applicationNewOwnerIdentity);
+        context.saveObject(application);
+        context.commitTransaction();
+    } else {
+        serilog.debug("UpdateApplicationOwner :: Oops, application is null");
+    }
+}
+serilog.debug("UpdateApplicationOwner :: Exiting");
+      ]]></Source>
+    </Script>
+    <Transition to="Update Entitlement Owner" />
+  </Step>
+
+  <Step condition="ref:newEntitlementOwner" name="Update Entitlement Owner">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.tools.Util;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.api.ManagedAttributer;
+import sailpoint.object.Application;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ObjectOwnership.UpdateEntitlementOwner");
+serilog.debug("UpdateEntitlementOwner :: Entering");
+serilog.debug("UpdateEntitlementOwner :: newEntitlementOwner ID = " + newEntitlementOwner); 
+Identity entitlementNewOwnerIdentity = context.getObjectById(Identity.class,newEntitlementOwner);
+serilog.debug("UpdateEntitlementOwner :: newEntitlementOwner Name = " + entitlementNewOwnerIdentity.getName());   
+serilog.debug("UpdateEntitlementOwner :: List of Entitlments to Update = " + Util.listToCsv(maList));
+for(String maTuple : maList) {
+  serilog.debug("UpdateEntitlmentOwner :: maTuple = " + maTuple);
+  String[] maparts = maTuple.split("\\|");
+  serilog.debug("UpdateEntitlementOwner :: Entitlement Application = " + maparts[0]);
+  serilog.debug("UpdateEntitlementOwner :: Entitlement DisplayName = " + maparts[1]);
+  Application application = context.getObjectByName(Application.class,maparts[0]);
+  if (application != null) {
+    ManagedAttribute ma = ManagedAttributer.getByDisplayName(context,application,maparts[1]);
+    if (ma != null) {
+      ma.setOwner(entitlementNewOwnerIdentity);
+      context.saveObject(ma);
+      context.commitTransaction();
+    } else {
+      serilog.debug("UpdateEntitlementOwner :: Oops, ManagedAttribute is null.  Possibly found multiple");
+    }
+  } else {
+    serilog.debug("UpdateEntitlementOwner :: Oops, application for entitlments is null");
+  }
+}
+serilog.debug("UpdateEntitlementOwner :: Exiting");
+       
+      ]]></Source>
+    </Script>
+    <Transition to="end" />
+  </Step>
+
+  <Step icon="Stop" name="end" posX="648" posY="267" />
+</Workflow>

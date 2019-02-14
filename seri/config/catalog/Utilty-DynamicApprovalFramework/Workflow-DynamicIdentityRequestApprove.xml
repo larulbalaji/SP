@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Dynamic Identity Request Approve" type="Subprocess">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity object being modified.</Description>
+  </Variable>
+  <Variable input="true" name="identityDisplayName">
+    <Description>The displayName of the identity being updated.
+      This may be passed in, if not the script queries for this
+      using a projection query and falls back to the name.</Description>
+  </Variable>
+  <Variable input="true" name="identityId">
+    <Description>The id of the identity being updated.</Description>
+  </Variable>
+  <Variable input="true" name="approvalScheme">
+    <Description>A csv string that specifies how approvals should be generated for 
+      the incoming request.
+ 
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+  
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the  
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing 
+              with things like Unlock and other account level changes 
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.</Description>
+  </Variable>
+  <Variable initializer="string:serial" input="true" name="approvalMode">
+    <Description>A string that specifies how we should handle the approvals.  
+
+     By default this is serial since most of these request with
+     the exception of manager transfers will have only one approver.
+
+     parallel
+       Approvals are processed concurrently and there must be consensus,
+       we wait for all approvers to approve.  The first approver that
+       rejects terminates the entire approval.
+ 
+     parallelPoll 
+       Approvals are processed concurrently but consensus is not required.
+       All approvals will be process, we don&amp;#39;t stop if there any
+       rejections.  
+
+     serial
+       Approvals are processed one at a time and there must be consensus.
+       The first approver that rejects terminates the entire approval.
+
+     serialPoll
+       Approvals are processed in order but consensus is not required.
+       All approvals will be processed, we don&amp;#39;t stop if there are any
+       rejections.  In effect we are &amp;quot;taking a poll&amp;quot; of the approvers.
+
+     any
+      Approvals are processed concurrently, the first approver to 
+      respond makes the decision for the group.</Description>
+  </Variable>
+  <Variable input="true" name="fallbackApprover">
+    <Description>A String that specifies the name of the Identity that will 
+      be assigned any approvals where the owner of the approver 
+      can&amp;#39;t be resolved. Example if the scheme is &amp;quot;owner&amp;quot; and the 
+      application doesn&amp;#39;t specify and owner.</Description>
+  </Variable>
+  <Variable input="true" name="securityOfficerName">
+    <Description>The name of the identity that will be sent approvals 
+       during security officer approvals.</Description>
+  </Variable>
+  <Variable initializer="string:false" input="true" name="includeRejectedItemsInApprovalChain">
+    <Description>When using multi approvalSchemes a flag to indicate if new
+       approvals in the chain will include rejected items.</Description>
+  </Variable>
+  <Variable input="true" name="policyViolations">
+    <Description>List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see 
+       pending violations.</Description>
+  </Variable>
+  <Variable input="true" name="flow">
+    <Description>The name of the LCM flow that launched this workflow.
+
+      This is one of these values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest
+      IdentityCreateRequest
+      IdentityEditRequest
+      ForgotPassword
+      ExpiredPassword
+      PasswordRequest</Description>
+  </Variable>
+  <Variable initializer="true" name="trace">
+    <Description>Used for debugging this subprocess and when set to true trace
+      statements will be sent to stdout.</Description>
+  </Variable>
+  <Variable name="tmpApprovalSet">
+    <Description>Temporary and transient  ApprovalSet used to hold filtered
+       approval sets as we transition through the approval chain.</Description>
+  </Variable>
+  <Variable input="true" name="approvalSet" output="true">
+    <Description>This attributes is set during the &amp;quot;Build Approval Set&amp;quot; step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of 
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions 
+       and comments from the Approvals copy of the ApprovalItem.</Description>
+  </Variable>
+  <Variable initializer="string:LCM Identity Update Approval" input="true" name="managerEmailTemplate">
+    <Description>Name of the email template to use when manager of pending approvals.</Description>
+  </Variable>
+  <Variable initializer="string:LCM Identity Update Approval" input="true" name="ownerEmailTemplate">
+    <Description>Name of the email template to use when notifying the owner of pending approvals.</Description>
+  </Variable>
+  <Variable initializer="string:LCM Identity Update Approval" input="true" name="securityOfficerEmailTemplate">
+    <Description>Name of the email template to use when notifying the security officer of pending approvals.</Description>
+  </Variable>
+  <Variable input="true" name="workItemComments">
+    <Description>List of global workflow comments to be appended to the approval workitem.</Description>
+  </Variable>
+  <Variable name="managersDirectorApprover"/>
+  <Variable name="selectedApprover"/>
+   <Variable input="true" name="project"/>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule" name="Dynamic LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule" name="UtilDynamicApproval"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="379" posY="32">
+
+  </Step>
+  
+  <Step icon="Stop" name="Stop" posX="896" posY="183"/>
+</Workflow>

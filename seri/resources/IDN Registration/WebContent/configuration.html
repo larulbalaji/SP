@@ -1,0 +1,75 @@
+<html>
+  <head>
+	  <link rel="styleSheet" href="idnReg.css"/>
+	  <script src="webjars/angular/1.6.6/angular.min.js"></script>
+	  <script src="webjars/angular-tooltips/1.1.7/dist/angular-tooltips.min.js"></script>
+	  <script src="configApp.js"></script>
+	  <script src="configCtrl.js"></script>
+	  <script src="configService.js"></script>
+	  <script src="idnRegService.js"></script>
+	  <script src="base64.js"></script>
+
+    <link rel="stylesheet" href="webjars/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="webjars/angular-tooltips/1.1.7/dist/angular-tooltips.min.css" />
+  </head>
+
+  <body>
+
+    <div ng-app="idnRegApp" ng-controller="configCtrl">
+      <table><tr><td>
+      <form name="confForm" ng-submit="save()" novalidate>
+        <table><tr><td>
+        <table>
+          <tr><td>Org</td><td><input type="text" ng-model="org" required>  note:just the name, not the full URL</td></tr>
+          <!-- tr<td>Username</td><td><input type="text" ng-model="username"></td></tr>
+          <tr><td>Password</td><td><input type="text" ng-model="password"></td></tr-->
+          <tr><td>Client ID</td><td><input type="text" ng-model="clientID" required></td></tr>
+          <tr><td>Secret</td><td><input type="text" ng-model="secret" required></td></tr>
+          <tr><td/><td><input type="button" ng-click="getSourceList()" value="Get Sources"/></td></tr>
+          <tr><td>Application</td><td><select name="appSelect" id="appSelect" ng-model="source" ng-change="getAccountSchema(source)">
+            <option ng-repeat="option in sources" value="{{option.id}}">{{option.name}}</option>
+          </select></td></tr>
+          
+        </table>
+        
+        <div>Fields <i class="fa fa-question-circle" aria-hidden="true" tooltips tooltip-template="These fields should be configured according to the account schema of the application (source) you have configured above" tooltip-side="right"></i></div>
+        <table>
+          <tr><th>name</th><th>description</th><th>Required</th>
+          <tr ng-repeat="field in fields">
+            <td><input ng-model="field.name" required></td>
+            <td><input ng-model="field.label" required></td>
+            <td><input ng-model="field.required" type="checkbox"></td>
+          </tr>
+        </table>
+        <input type="button" ng-click="addField()" value="Add Row" ng-disabled="confForm.$invalid">
+        
+        <input type="submit" value="Save"/>
+        <!-- input type="button" ng-click="$location.path( 'editFields.html' )" value="Edit Fields"/-->
+        
+        <!-- Waiting on update on how to do this, if it's even possible -->
+        <!-- input type="button" ng-click="getClientSecret()" value="Generate"/ -->
+                
+        </td>
+        </tr>
+        <tr><td>
+          <table>
+            <tr ng-repeat="attribute in schema"><td>{{attribute.name}}</td></tr>
+          </table>
+        </td></tr>
+        </table>
+      </form>
+      </td><td>
+        <table ng-hide="appSchema==null"><th><td>Attribute Name</td><td>Description</td>
+          <tr ng-repeat="attr in appSchema">
+          <td>{{attr.name}}</td><td>{{attr.description}}</td></tr>
+        </table>
+      </td></tr>
+      </table>
+	    <p style="color: green" ng-show="successMessage">{{successMessage}}</p>
+	    <p style="color: red" ng-show="errorMessage">{{errorMessage}}</p>
+    </div>
+      
+    <a href="index.html">Main Page</a>
+
+  </body>
+</html>

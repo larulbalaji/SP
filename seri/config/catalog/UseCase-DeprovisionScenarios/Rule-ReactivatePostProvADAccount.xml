@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Account Reactivation - PostProvisioning - Update Reactivated AD Account DN" type="Workflow">
+<Description>Update a reactivated link</Description>
+  <Source><![CDATA[
+
+import sailpoint.object.*;
+import sailpoint.api.*;
+
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String identityName
+// Expect: java.lang.String nativeIdentity
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Reprovisioning.UpdateADAccountPostProvisioning");
+
+serilog.debug("Setting the new plan:    "+ nativeIdentity);
+
+Identity cube = context.getObjectByName(Identity.class, identityName);
+Application app = context.getObjectByName(Application.class, applicationName);
+
+IdentityService is = new IdentityService(context);
+Link link = is.getLink(cube, app, null, nativeIdentity);
+serilog.debug("Link Is:    "+ link);
+String oldDN = link.getNativeIdentity();
+
+//String cn = link.getAttribute("cn");
+String cn = cube.getFirstname()  +" "+ cube.getLastname();
+String newDN = "cn=" + cn + cube.get("originalADContainer");
+
+serilog.debug("nativeIdentity is " + newDN);
+link.setAttribute("distinguishedName", newDN);
+link.setNativeIdentity(newDN);
+context.saveObject(link);
+context.saveObject(cube);
+context.commitTransaction();
+
+List appList = new ArrayList();
+appList.add(app);
+List entGroups =  cube.getExceptions(appList);
+serilog.debug("EntGroups:    "+ entGroups);
+
+if(entGroups!=null) {
+  for(EntitlementGroup aEG: entGroups) {
+    serilog.debug("Got an EntitlementGroup :   "+ aEG);
+    if( aEG.getNativeIdentity().equalsIgnoreCase(oldDN) ) {
+      serilog.debug("Matches:    ");
+      //set the displayName here too if need be
+
+      aEG.setNativeIdentity(newDN);
+      context.saveObject(aEG);
+      context.saveObject(cube);
+      context.commitTransaction();       
+    } 
+  }
+}
+
+serilog.debug("Saved NativeIdentity AFTER COMMIT = " + link.getNativeIdentity());
+
+
+  ]]></Source>
+</Rule>

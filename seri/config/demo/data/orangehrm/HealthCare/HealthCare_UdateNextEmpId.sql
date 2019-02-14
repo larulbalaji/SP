@@ -1,0 +1,1 @@
+UPDATE orangehrm.hs_hr_unique_id SET last_id=499 WHERE table_name='hs_hr_employee';

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="LifeCycle Event - ContractorToEmployee" type="IdentityLifecycle">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable name="iContractor">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ContractorToEmployee.Initialize");
+
+Identity iContractor;
+try {
+  Identity identity = context.getObjectByName(Identity.class,identityName);
+  if (identity!=null) {
+    String sFirstname = identity.getFirstname();
+    String sLastname = identity.getLastname();
+    /*  String sSSN = identity.getAttribute("SSN");
+    must be a searchable identity attribute */
+    QueryOptions qo = new QueryOptions();
+    qo.addFilter(Filter.and(Filter.eq("workgroup",false),Filter.and(Filter.eq("firstname",sFirstname),Filter.eq("lastname",sLastname))));
+    List items = context.getObjects(Identity.class,qo);
+    if (items==null) {items = new ArrayList();}
+    if (items.size()==2) {
+      for (Identity item : items) {
+        if (item!=identity) {iContractor = item;}
+      }
+    }
+  }
+} catch (Exception e) {
+  serilog.error("ERROR setting iContractor: "+e);
+}
+
+return iContractor;
+      ]]></Source>
+    </Script>
+  </Variable>
+  <Variable name="iEmployee">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+Identity iEmployee;
+try {
+  Identity identity = context.getObjectByName(Identity.class,identityName);
+
+//serilog.error("==> iEmployee Object ref: "+identity.toXml());
+  if (identity!=null) {
+    if (identity.getAttribute("employeeType")!=null) {
+      if (identity.getAttribute("employeeType").equals("Employee")) {
+        iEmployee = identity;
+
+      }
+    }
+  }
+} catch (Exception e) {
+  serilog.error("ERROR setting iEmployee: "+e);
+}
+
+return iEmployee
+    ]]></Source>
+    </Script>
+  </Variable>
+  <Variable initializer="false" name="exitWorkflow"/>
+  <Step icon="Start" name="Start">
+    <Transition to="Prior Contractor">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ContractorToEmployee.Initialize");
+
+boolean bReturn = false;
+try {
+  Identity id = context.getObjectByName(Identity.class,identityName);
+  serilog.error("==> Current ID being considered: "+id);
+  if (id!=null) {//Skip Joiner for orphaned accounts.
+    if (id.isCorrelated()) {bReturn=true;}
+  }
+} catch (Exception e) {
+  serilog.error("ERROR Start Step transition: "+e);
+}
+
+return bReturn;
+        ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Task" name="Prior Contractor" posX="86" posY="104">
+    <Transition to="Validate">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ContractorToEmployee.PriorTask");
+boolean bReturn = false;
+try {
+  if (iContractor!=null && iEmployee!=null) {
+    bReturn = true;
+  }
+} catch (Exception e) {
+  serilog.error("ERROR Prior Contractor Step transition: "+e);
+}
+return bReturn;
+        ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Task" name="Validate" posX="195" posY="177">
+    <Approval name="Contractor to Employee Approval Form" owner="SecurityIT" return="exitWorkflow" send="iContractor,iEmployee,exitWorkflow">
+      <Form name="Contractor to Employee Approval Form">
+        <Attributes>
+          <Map>
+            <entry key="labelAlign" value="top"/>
+            <entry key="pageTitle" value="Contractor to Employee Approval Form"/>
+            <entry key="title" value="Action Required!"/>
+          </Map>
+        </Attributes>
+        <Section columns="2" label="Contractor and Employee Details">
+          <Field columnSpan="1" displayName="EmployeeId" name="employeeName" type="string" value="script:return iEmployee.getName()">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="true"/>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field columnSpan="1" displayName="ContractorId" name="contractorName" type="string" value="script:return iContractor.getName()">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="true"/>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field columnSpan="1" displayName="Employee Firstname" name="employeeFirstname" type="string" value="script:return iEmployee.getFirstname()">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="true"/>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field columnSpan="1" displayName="Contractor Firstname" name="contractorFirstname" type="string" value="script:return iContractor.getFirstname()">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="true"/>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field columnSpan="1" displayName="Employee Lastname" name="employeeLastname" type="string" value="script:return iEmployee.getLastname()">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="true"/>
+              </Map>
+            </Attributes>
+          </Field>
+          <Field columnSpan="1" displayName="Contractor Lastname" name="contractorLastname" type="string" value="script:return iContractor.getLastname()">
+            <Attributes>
+              <Map>
+                <entry key="readOnly" value="true"/>
+              </Map>
+            </Attributes>
+          </Field>
+        </Section>
+        <Button action="next" label="Approve"/>
+        <Button action="back" label="Reject" parameter="exitWorkflow" value="true"/>
+      </Form>
+      <WorkItemConfig escalationStyle="none" noWorkItem="true">
+        <NotificationEmailTemplateRef>
+          <Reference class="sailpoint.object.EmailTemplate" name="ContractorEmployee"/>
+        </NotificationEmailTemplateRef>
+      </WorkItemConfig>
+    </Approval>
+    <Transition to="RefreshIdentity">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ContractorToEmployee.Validate");
+boolean bReturn = false;
+try {
+  if (exitWorkflow.equals("true")) {
+    bReturn = true;
+  }
+} catch (Exception e) {
+  serilog.error("ERROR Validate Step transition: "+e);
+}
+return bReturn;
+        ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Process"/>
+  </Step>
+  <Step icon="Task" name="Process" posX="261" posY="257">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ContractorToEmployee.Process");
+
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.eq("identity",iContractor));
+List items = context.getObjects(Link.class,qo);
+if (items==null) {items = new ArrayList();}
+Identity idEmployee = context.getObjectByName(Identity.class,iEmployee.getName());
+Identity idContractor = context.getObjectByName(Identity.class,iContractor.getName());
+serilog.error("Contractor Accounts:");
+for (Link item : items) {
+  serilog.error("\t"+item.getApplicationName()+" - "+item.getDisplayableName());
+//  Need logic to skip authoritative source(s)
+iContractor.remove(item);
+iEmployee.add(item);
+}
+idEmployee.setAttribute("oldIdentity",idContractor);
+idContractor.setAttribute("inactive","true");
+context.saveObject(idEmployee);
+context.commitTransaction();
+context.saveObject(idContractor);
+context.commitTransaction();
+context.decache();
+context.commitTransaction();
+    ]]></Source>
+    </Script>
+    <Transition to="RefreshContractor"/>
+  </Step>
+  <Step action="refreshIdentity" icon="Task" name="RefreshContractor" posX="368" posY="255">
+    <Arg name="identityName" value="script:return iContractor.getName();"/>
+    <Arg name="refreshScorecard" value="true"/>
+    <Arg name="correlateScope" value="true"/>
+    <Arg name="refreshManagerStatus" value="true"/>
+    <Arg name="checkHistory" value="true"/>
+    <Arg name="refreshCertifications" value="true"/>
+    <Arg name="refreshLinks" value="true"/>
+    <Arg name="refreshRoleMetadata" value="true"/>
+    <Arg name="provision" value="true"/>
+    <Arg name="promoteAttributes" value="true"/>
+    <Arg name="correlateEntitlements" value="true"/>
+    <Arg name="refreshIdentityEntitlements" value="true"/>
+    <Arg name="refreshGroups" value="true"/>
+    <Arg name="synchronizeAttributes" value="true"/>
+    <Arg name="noRoleDeprovisioning" value="true"/>
+    <Arg name="checkPolicies" value="true"/>
+    <Arg name="doManualActions" value="true"/>
+    <Transition to="RefreshIdentity"/>
+  </Step>
+  <Step action="refreshIdentity" icon="Task" name="RefreshIdentity" posX="460" posY="172">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="refreshScorecard" value="true"/>
+    <Arg name="correlateScope" value="true"/>
+    <Arg name="refreshManagerStatus" value="true"/>
+    <Arg name="checkHistory" value="true"/>
+    <Arg name="refreshCertifications" value="true"/>
+    <Arg name="refreshLinks" value="true"/>
+    <Arg name="refreshRoleMetadata" value="true"/>
+    <Arg name="promoteAttributes" value="true"/>
+    <Arg name="correlateEntitlements" value="true"/>
+    <Arg name="refreshGroups" value="true"/>
+    <Arg name="noRoleDeprovisioning" value="true"/>
+    <Arg name="checkPolicies" value="true"/>
+    <Arg name="doManualActions" value="true"/>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="831" posY="17">
+    <Arg name="identityName"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="project"/>
+    <Arg name="identityRequestId"/>
+    <Arg name="trigger"/>
+    <Arg name="source"/>
+    <Arg name="identityDisplayName"/>
+    <Arg name="foregroundProvisioning"/>
+    <Arg name="baseURL"/>
+    <Arg name="trace"/>
+    <Arg name="appsToNotify"/>
+    <Arg name="optimisticProvisioning"/>
+    <Arg name="event"/>
+    <Arg name="plan"/>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" name="Lifecycle Event - Joiner"/>
+    </WorkflowRef>
+  </Step>
+</Workflow>

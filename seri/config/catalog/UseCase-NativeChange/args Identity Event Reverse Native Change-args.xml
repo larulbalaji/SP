@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Attributes PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Attributes>
+  <Map>
+    <entry key="approvalSet"/>
+    <entry key="argsFileLocation" value="/tmp/"/>
+    <entry key="event"/>
+    <entry key="fallbackApprover" value="spadmin"/>
+    <entry key="foregroundProvisioning" value="true"/>
+    <entry key="identityDisplayName" value="Aaron Nichols"/>
+    <entry key="identityName" value="Aaron.Nichols"/>
+    <entry key="identityRequestId"/>
+    <entry key="inactive" value="false"/>
+    <entry key="launcher" value="RequestHandler"/>
+    <entry key="operations" value="Modify"/>
+    <entry key="optimisticProvisioning" value="false"/>
+    <entry key="plan">
+      <value>
+        <ProvisioningPlan>
+          <AccountRequest application="Active_Directory" nativeIdentity="CN=Aaron Nichols,OU=Singapore,OU=Asia-Pacific,OU=Demo,DC=seri,DC=sailpointdemo,DC=com" op="Disable"/>
+        </ProvisioningPlan>
+      </value>
+    </entry>
+    <entry key="project"/>
+    <entry key="provisionRejectedItems" value="true"/>
+    <entry key="sessionOwner" value="RequestHandler"/>
+    <entry key="source" value="LCM"/>
+    <entry key="sponsor" value="Scheduler"/>
+    <entry key="trace" value="true"/>
+    <entry key="trigger"/>
+    <entry key="workItemPriority" value="Normal"/>
+  </Map>
+</Attributes>

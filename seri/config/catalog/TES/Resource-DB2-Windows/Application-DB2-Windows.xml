@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DB2WindowsServerConnector" featuresString="DIRECT_PERMISSIONS, DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, SEARCH" icon="databaseIcon" name="DB2" profileClass="" type="DB2 Windows - Direct">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="DB2"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1469455377704</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1469455377544</Date>
+        </value>
+      </entry>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="driverClass" value="com.ibm.db2.jcc.DB2Driver"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="hipaa">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="managerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="nerc">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ownerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="password" value="1:PRYxEtkZL2NkjofXmBp2/A=="/>
+      <entry key="retryableErrors">
+        <value>
+          <List>
+            <String>Server is not operational</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="securityApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sox">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="DB2 Server"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DB2 Windows Server Template"/>
+      <entry key="url" value="jdbc:db2://10.0.4.6:50000/SAMPLEDB"/>
+      <entry key="user" value="Administrator"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="Create User" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="Create User"/>
+        </Map>
+      </Attributes>
+      <Section>
+        <Field displayName="con_prov_policy_user_create_usernamedb" filterString="" helpKey="help_con_prov_policy_user_create_usernamedb" name="GRANTEE" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getFirstname().toUpperCase() + identity.getLastname().toUpperCase();]]></Source>
+          </Script>
+        </Field>
+      </Section>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="GRANTEE" identityAttribute="GRANTEE" includePermissions="true" instanceAttribute="" nativeObjectType="syscat.dbauth" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="GRANTEE" type="string">
+        <Description>Grantee name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRANTEETYPE" type="string">
+        <Description>Grantee type</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRANTOR" type="string">
+        <Description>Grantor name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRANTORTYPE" type="string">
+        <Description>Grantor type</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="BINDADDAUTH" type="string">
+        <Description>Authority to create packages</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATETABAUTH" type="string">
+        <Description>Authority to create tables</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CONNECTAUTH" type="string">
+        <Description>Authority to connect to the database</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DBADMAUTH" type="string">
+        <Description>DBADM authority</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EXTERNALROUTINEAUTH" type="string">
+        <Description>Authority to create external routines</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="IMPLSCHEMAAUTH" type="string">
+        <Description>Authority to implicitly create schemas</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LOADAUTH" type="string">
+        <Description>Authority to use the DB2(R) load utility</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NOFENCEAUTH" type="string">
+        <Description>Authority to create non-fenced user-defined functions</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="QUIESCECONNECTAUTH" type="string">
+        <Description>Authority to access the database when it is quiesced</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SECURITYADMAUTH" type="string">
+        <Description>Security Administrator authority</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="roles" schemaObjectType="group" type="string">
+        <Description>Entitlement attribute</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="ROLENAME" featuresString="PROVISIONING" identityAttribute="ROLENAME" includePermissions="true" instanceAttribute="" nativeObjectType="syscat.roles" objectType="group" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="ROLENAME" type="string">
+        <Description>Name of the role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLEID" type="string">
+        <Description>Identifier for the role</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATE_TIME" type="string">
+        <Description>Time when the role was created</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AUDITPOLICYID" type="string">
+        <Description>Identifier for the audit policy</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AUDITPOLICYNAME" type="string">
+        <Description>Identifier for the audit policy</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REMARKS" type="string">
+        <Description>User-provided comments</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" multi="true" name="HierarchicalRoles" type="string">
+        <Description>Child roles</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard>
+    <Attributes>
+      <Map>
+        <entry key="dormantAccount" value="0"/>
+        <entry key="inactiveAccount" value="0"/>
+        <entry key="privilegedAccount" value="0"/>
+        <entry key="riskyAccount" value="0"/>
+        <entry key="serviceAccount" value="0"/>
+        <entry key="totalEntitlements" value="0"/>
+        <entry key="totalLinks" value="0"/>
+        <entry key="violatorAccount" value="0"/>
+      </Map>
+    </Attributes>
+  </ApplicationScorecard>
+</Application>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="servicestools/src"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="test/src"/>
+	<classpathentry kind="lib" path="lib/catalina-ant.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="lib/java-sdk-0.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/services-tools.jar"/>
+	<classpathentry kind="lib" path="lib/sp-gems.jar"/>
+	<classpathentry kind="lib" path="lib/velocity-1.7.jar"/>
+	<classpathentry kind="lib" path="lib/xmltask.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/ant"/>
+	<classpathentry kind="lib" path="build/extract/WEB-INF/lib/json.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
+	<classpathentry kind="lib" path="lib/ant/stringtree-json-2.0.9.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/ant-contrib-1.0b3.jar"/>
+	<classpathentry kind="lib" path="test/lib/junit-addons-1.4.jar"/>
+	<classpathentry kind="lib" path="test/lib/system-rules-1.2.0.jar"/>
+	<classpathentry kind="lib" path="lib/ant/lib/ant.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.34-bin.jar"/>
+	<classpathentry kind="lib" path="build/extract/WEB-INF/lib/httpclient-4.3.6.jar"/>
+	<classpathentry kind="lib" path="build/extract/WEB-INF/lib/flexjson-2.1.jar"/>
+	<classpathentry kind="lib" path="build/extract/WEB-INF/lib/httpcore-4.3.3.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/identityiq"/>
+	<classpathentry kind="lib" path="D:/Git/codes/ProjectSpace/Eclipse/Java/seri/lib/jasperreports.jar"/>
+	<classpathentry kind="lib" path="D:/Git/codes/ProjectSpace/Eclipse/Java/seri/lib/jaxrs-api.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.14-20160307.jar"/>
+	<classpathentry kind="lib" path="lib/poi-ooxml-3.14-20160307.jar"/>
+	<classpathentry kind="lib" path="lib/poi-ooxml-schemas-3.14-20160307.jar"/>
+	<classpathentry kind="lib" path="lib/xmlbeans-2.6.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

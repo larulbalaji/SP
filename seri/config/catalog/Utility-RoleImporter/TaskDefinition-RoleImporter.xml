@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.seri.task.RoleImporter" name="Role Importer" type="Generic" template="true">
+  <Description>
+    IdentityIQ Role Importer -- Import role definitions contained in a CSV file
+  </Description>
+  <Attributes>
+    <Map>
+      <entry key="roleFile" value="WEB-INF/config/seri/catalog/Utility-RoleImporter/sampleRoleImport.csv"/>
+    </Map>
+  </Attributes>
+  <Signature>
+    <Inputs>
+      <Argument name="roleFile" required="true" type="string">
+        <Prompt>CSV file containing role definitions.</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="lines" type="String">
+        <Prompt>Lines Processed:</Prompt>
+      </Argument>
+      <Argument name="rolesCreated" type="String">
+        <Prompt>Roles Created:</Prompt>
+      </Argument>
+      <Argument name="rolesAssigned" type="String">
+        <Prompt>Roles Assigned:</Prompt>
+      </Argument>
+      <Argument name="profilesCreated" type="String">
+        <Prompt>Profiles Created:</Prompt>
+      </Argument>
+      <Argument name="scopesCreated" type="String">
+        <Prompt>Scopes Created:</Prompt>
+      </Argument>
+      <Argument name="scopesAssigned" type="String">
+        <Prompt>Scopes Assigned:</Prompt>
+      </Argument>      
+    </Returns>
+  </Signature>
+</TaskDefinition>

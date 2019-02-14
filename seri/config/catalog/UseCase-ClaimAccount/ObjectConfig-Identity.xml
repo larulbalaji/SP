@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <ImportAction name="merge">
+    <ObjectConfig name="Identity">
+      <ObjectAttribute displayName="Accounts Claimed"
+        editMode="ReadOnly" name="accountsClaimed" type="boolean" />
+
+      <ObjectAttribute displayName="BirthDate" name="birthDate">
+        <AttributeSource name="birthDate">
+          <ApplicationRef>
+            <Reference class="sailpoint.object.Application"
+              name="Human Resources" />
+          </ApplicationRef>
+        </AttributeSource>
+      </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

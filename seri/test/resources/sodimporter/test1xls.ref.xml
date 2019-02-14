@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Policy certificationActions="Remediated,Mitigated,Delegated" configPage="sodpolicy.xhtml" executor="sailpoint.policy.SODPolicyExecutor" name="Test SOD Policy L1-L2" state="Active" type="SOD" typeKey="policy_type_sod" violationOwnerType="Manager">
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <Description>Separation of Duty policy between roles L1 and L2</Description>
+  <SODConstraints>
+    <SODConstraint name="rule summary" violationOwnerType="Manager">
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle" name="L1"/>
+      </LeftBundles>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle" name="L2"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>
+<Policy certificationActions="Remediated,Mitigated,Delegated" configPage="sodpolicy.xhtml" executor="sailpoint.policy.SODPolicyExecutor" name="Test SOD Policy L2-L3" state="Active" type="SOD" typeKey="policy_type_sod" violationOwnerType="Manager">
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <Description>Separation of Duty policy between roles L2 and L3</Description>
+  <SODConstraints>
+    <SODConstraint name="rule summary" violationOwnerType="Manager">
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle" name="L2"/>
+      </LeftBundles>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle" name="L3"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>
+<Policy certificationActions="Remediated,Mitigated,Delegated" configPage="sodpolicy.xhtml" executor="sailpoint.policy.SODPolicyExecutor" name="Test SOD Policy L2-L4" state="Active" type="SOD" typeKey="policy_type_sod" violationOwnerType="Manager">
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <Description>Separation of Duty policy between roles L2 and L4</Description>
+  <SODConstraints>
+    <SODConstraint name="rule summary" violationOwnerType="Manager">
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle" name="L2"/>
+      </LeftBundles>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle" name="L4"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>
+<Policy certificationActions="Remediated,Mitigated,Delegated" configPage="sodpolicy.xhtml" executor="sailpoint.policy.SODPolicyExecutor" name="Test SOD Policy L3-L4" state="Active" type="SOD" typeKey="policy_type_sod" violationOwnerType="Manager">
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <Description>Separation of Duty policy between roles L3 and L4</Description>
+  <SODConstraints>
+    <SODConstraint name="rule summary" violationOwnerType="Manager">
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle" name="L3"/>
+      </LeftBundles>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle" name="L4"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>
+</sailpoint>

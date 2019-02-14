@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="Corporate Roles" name="CorporateRoles" type="organizational">
+  <Attributes>
+    <Map>
+      <entry key="accountSelectorRules"/>
+      <entry key="addlApproval"/>
+      <entry key="adminRole">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="isoRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="managerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeTemplates" value="false"/>
+      <entry key="nercRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ownerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="pciRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="roleTag"/>
+      <entry key="soxRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Jerry.Bennett"/>
+  </Owner>
+</Bundle>

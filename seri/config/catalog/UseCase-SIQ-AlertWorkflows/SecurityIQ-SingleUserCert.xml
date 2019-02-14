@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="SecurityIQ-SingleUserCert" type="IdentityEvent">
+  <Variable initializer="ref:identityName" input="true" name="identityName"/>
+  <Variable initializer="ref:identityName" input="true" name="identityName"/>
+  <Variable initializer="true" name="trace">
+    <Description>Used for debugging this workflow and when set to true
+        trace will be sent to stdout.</Description>
+  </Variable>
+  <Description>Single User Certification based on SecurityIQ alert.</Description>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Single User Cert"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="224" posY="10"/>
+  <Step icon="Default" name="Single User Cert" posX="95" posY="10">
+    <Description>Single User Certification</Description>
+    <Script>
+      <Source>import java.util.List;
+import java.util.ArrayList;
+import sailpoint.object.Identity;
+import sailpoint.object.PolicyViolation;      
+import sailpoint.api.CertificationScheduler;
+import sailpoint.web.certification.CertificationScheduleDTO;
+import sailpoint.object.CertificationDefinition;
+import sailpoint.object.TaskSchedule;
+import sailpoint.object.Certification;
+import sailpoint.object.CertificationSchedule;
+import sailpoint.task.CertificationExecutor.CertifierSelectionType;
+ import sailpoint.server.Auditor;
+
+
+// Get the identity causing the violation         
+Identity requestor = context.getObject(Identity.class, launcher);      
+Identity identity = (Identity) context.getObject(Identity.class, identityName);
+
+//Define manager object
+Identity manager;
+
+//Get the manager's identity
+String managerId   = identity.getAttribute("manager");
+if(null != managerId) {
+         manager = (Identity) context.getObject(Identity.class, managerId);
+}
+else {  
+         manager = (Identity) context.getObject(Identity.class, "spadmin");
+}
+
+// Build and configure a certification schedule         
+CertificationScheduler scheduler = new CertificationScheduler(context);
+CertificationSchedule schedule = scheduler.initializeScheduleBean(requestor, Certification.Type.Identity);
+schedule.setRunNow(true);
+
+// Build the certification definition
+CertificationDefinition definition = schedule.getDefinition();
+definition.setCertifierSelectionType(CertificationDefinition.CertifierSelectionType.Manual);
+
+// Set the cert names
+definition.setNameTemplate("SecurityIQ Sensitive Data Violation Review of " + identity.getDisplayName() + " for " + manager.getDisplayName());
+definition.setShortNameTemplate("SecurityIQ Sensitive Data Violation Review of " + identity.getDisplayName());
+definition.setName("SecurityIQ Sensitive Data Violation Review : " + identity.getDisplayName() + " [" + new Date().toString() + "]");
+
+// Set the behaviour
+definition.setProcessRevokesImmediately(true);
+definition.setAllowItemDelegation(true);
+definition.setIncludePolicyViolations(false);
+definition.setAutomaticClosingEnabled(true);
+definition.setAutomaticClosingSigner(manager);
+definition.setDisplayEntitlementDescriptions(true);
+definition.setAutomateSignoffPopup(true);
+definition.setElectronicSignatureRequired(true);
+definition.setElectronicSignatureName("RiskCertificationSigning");
+definition.setCertPageListItems(Util.atob("false"));
+
+// Set the target identity in the cert
+List identities = new ArrayList();
+identities.add(identity.getName());
+definition.setIdentitiesToCertify(identities);
+definition.setCertifierName(manager.getName());
+
+// Figure out the cert owner
+Identity certGroupOwner = context.getObjectByName(Identity.class, "IT Security");
+if (null == certGroupOwner) {
+         certGroupOwner = context.getObjectByName(Identity.class, "spadmin");
+}
+
+definition.setCertificationOwner(certGroupOwner);
+definition.setCertificationNameTemplate("Event-Initiated Access Review : " + identity.getDisplayName());
+
+// Schedule it
+TaskSchedule taskSchedule = scheduler.saveSchedule(schedule, false);
+
+Auditor.logAs(null, "SIQ-SingleUserCert", identityName, "", "", "Manager: " + manager.getName(), "Reason: SecurityIQ Certify Access Needed.");
+
+          context.commitTransaction();
+
+</Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+</Workflow>

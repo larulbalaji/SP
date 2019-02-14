@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle    name="Accounts Receivable Accountant" type="business">
+  <Attributes>
+    <Map>
+      <entry key="accountSelectorRules"/>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="isoRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="mergeTemplates" value="false"/>
+      <entry key="nercRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="pciRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="soxRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Manages the accounts receivable function within the organization&apos;s established policies. Arranges and oversees completion of all work including posting, processing, and verification of receipts, credit claims, refunds, interest charges, or other similar records. Produces regular or special written reports. Suggests improvements in processes to increase effectiveness of unit."/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Inheritance>
+    <Reference class="sailpoint.object.Bundle"  name="Finance &amp; Accounting"/>
+  </Inheritance>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Lori.Ferguson"/>
+  </Owner>
+  <Requirements>
+    <Reference class="sailpoint.object.Bundle"  name="Accounts Receivable Access"/>
+  </Requirements>
+  <Selector>
+    <IdentitySelector>
+      <MatchExpression>
+        <MatchTerm name="jobTitle" value="Accounts Receivable Analyst"/>
+        <MatchTerm name="oldJobTitle" value="Accounts Receivable Analyst"/>
+        <MatchTerm name="lastname" value="Rivera"/>
+      </MatchExpression>
+    </IdentitySelector>
+  </Selector>
+</Bundle>

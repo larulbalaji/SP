@@ -1,0 +1,2242 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+<!-- Rules -->
+<Rule language="beanshell" name="PAM JDBC Provisioning Rule" type="JDBCProvision">
+  <Description>This rule is called on any provisioning request through the JDBC PAM engine.</Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          The application whose data file is being processed
+        </Description>
+      </Argument>
+      <Argument name="connection">
+        <Description>
+          A connection object to connect to database
+        </Description>
+      </Argument>
+      <Argument name="plan">
+        <Description>
+          The ProvisioningPlan created against the JDBC application.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>
+          A ProvisioningResult with information about provisioning.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+    import java.sql.Connection;
+    import java.sql.PreparedStatement;
+    import java.sql.ResultSet;
+    import java.sql.SQLException;
+    import java.sql.Statement;
+    import java.util.ArrayList;
+    import java.util.HashMap;
+    import java.util.List;
+    import java.util.Map;
+
+    import sailpoint.connector.Connector;
+    import sailpoint.connector.ConnectorException;
+    import sailpoint.connector.ConnectorFactory;
+    import sailpoint.object.Application;
+    import sailpoint.object.ProvisioningPlan;
+    import sailpoint.object.ProvisioningPlan.AbstractRequest;
+    import sailpoint.object.ProvisioningPlan.AccountRequest;
+    import sailpoint.object.ProvisioningPlan.AccountRequest.Operation;
+    import sailpoint.object.ProvisioningPlan.AttributeRequest;
+    import sailpoint.object.ProvisioningPlan.ObjectOperation;
+    import sailpoint.object.ProvisioningPlan.ObjectRequest;
+    import sailpoint.object.ProvisioningResult;
+    import sailpoint.object.ResourceObject;
+    import sailpoint.tools.GeneralException;
+    import sailpoint.tools.JdbcUtil;
+    import sailpoint.tools.Util;
+
+
+    String TYPE_CONTAINER = "Container";
+    String TYPE_PRIVILEGED_DATA = "PrivilegedData";
+    String TYPE_CONTAINER_PERMISSION = "ContainerPermission";
+    String TYPE_PRIVILEGED_DATA_PERMISSION = "PrivilegedDataPermission";
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // PROVISION - The main method that gets called
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Execute the given ProvisioningPlan.
+     *
+     * @param app  The JDBC Application.
+     * @param connection  The Connection to use to communicate with the database.
+     * @param plan  The ProvisioningPlan to execute.
+     *
+     * @return A ProvisioningResult that contains the status and updated ResourceObject (if operation is not delete).
+     *
+     * @throws Exception If any errors occur while provisioning, or the ProvisioningPlan has bad data.
+     */
+    public static ProvisioningResult provision(Application app, Connection connection, ProvisioningPlan plan)
+        throws Exception {
+
+        String id = null;
+
+        // Handle all account requests in the plan.
+        for (AccountRequest acctReq : Util.iterate(plan.getAccountRequests())) {
+            Operation op = acctReq.getOperation();
+
+            if (Operation.Enable.equals(op) || Operation.Disable.equals(op)) {
+                id = enableOrDisable(connection, acctReq.getNativeIdentity(), Operation.Enable.equals(op));
+            }
+            else if (Operation.Delete.equals(op)) {
+                delete(connection, Connector.TYPE_ACCOUNT, acctReq.getNativeIdentity());
+            }
+            else if (Operation.Create.equals(op) || Operation.Modify.equals(op)) {
+                id = createOrUpdate(connection, app, acctReq);
+            }
+            else {
+                throw new ConnectorException("Unhandled account operation - " + op);
+            }
+        }
+
+        // Handle all object requests in the plan.
+        for (ObjectRequest objReq : Util.iterate(plan.getObjectRequests())) {
+            ObjectOperation op = objReq.getOp();
+
+            if (ObjectOperation.Delete.equals(op)) {
+                delete(connection, objReq.getType(), objReq.getNativeIdentity());
+            }
+            else if (ObjectOperation.Create.equals(op) || ObjectOperation.Modify.equals(op)) {
+                id = createOrUpdate(connection, app, objReq);
+            }
+            else {
+                throw new ConnectorException("Unhandled object operation - " + op);
+            }
+        }
+
+        // Create a provisioning result with the updated/created object in it.  Note that for a delete
+        // the ID is null, so there will be no object to return.
+        ProvisioningResult result = new ProvisioningResult();
+        result.setObject(loadObject(app, id, plan));
+        return result;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // ENABLE / DISABLE
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Enable or disable the account with the given native identity.
+     *
+     * @param conn  The database connection to use.
+     * @param nativeIdentity  The native identity of the account to enable/disable.
+     * @param isEnable  Whether to enable the account, false indicates disable.
+     *
+     * @return The ID of the account that was enabled/disabled.
+     */
+    private static String enableOrDisable(Connection conn, String nativeIdentity, boolean isEnable) throws Exception {
+        int activeValue = (isEnable) ? 1 : 0;
+
+        String sql = "update users set active = ? where id = ?";
+        PreparedStatement stmt = null;
+        try {
+            stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, activeValue);
+            stmt.setString(2, nativeIdentity);
+            int updated = stmt.executeUpdate();
+            handleUpdateResult(updated);
+        }
+        finally {
+            JdbcUtil.closeStatement(stmt);
+        }
+
+        return nativeIdentity;
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // DELETE
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Delete the given object.
+     *
+     * @param conn  The database connection to use.
+     * @param objectType  The type of the object to delete.
+     * @param nativeIdentity  The native identity of the object to delete.
+     */
+    private static void delete(Connection conn, String objectType, String nativeIdentity) throws Exception {
+        // First, clean up any references to the object being deleted.
+        cleanForeignKeys(conn, objectType, nativeIdentity);
+
+        // Delete the actual object - we expect a single row to be deleted.
+        delete(conn, getTableName(objectType), "id", nativeIdentity, true);
+    }
+
+    /**
+     * Clean up any foreign key references for the given object that is about to be deleted.
+     *
+     * @param conn  The database connection to use.
+     * @param objectType  The type of the object for which the foreign keys should be cleaned.
+     * @param nativeIdentity  The native identity of the object for which the foreign keys should be cleaned.
+     */
+    private static void cleanForeignKeys(Connection conn, String objectType, String nativeIdentity) throws Exception {
+        if (Connector.TYPE_ACCOUNT.equals(objectType)) {
+            delete(conn, "user_group_assignments", "user_id", nativeIdentity, false);
+            delete(conn, "container_permission_assignments", "user_id", nativeIdentity, false);
+            delete(conn, "priv_data_permission_assignments", "user_id", nativeIdentity, false);
+        }
+        else if (Connector.TYPE_GROUP.equals(objectType)) {
+            delete(conn, "user_group_assignments", "group_id", nativeIdentity, false);
+            delete(conn, "container_permission_assignments", "group_id", nativeIdentity, false);
+            delete(conn, "priv_data_permission_assignments", "group_id", nativeIdentity, false);
+            setNull(conn, "groups", "parent_group_id", nativeIdentity);
+        }
+        else if (TYPE_CONTAINER.equals(objectType)) {
+            delete(conn, "container_priv_data_assignments", "container_id", nativeIdentity, false);
+            delete(conn, "container_permission_assignments", "container_id", nativeIdentity, false);
+        }
+        else if (TYPE_PRIVILEGED_DATA.equals(objectType)) {
+            delete(conn, "container_priv_data_assignments", "privileged_data_id", nativeIdentity, false);
+            delete(conn, "priv_data_permission_assignments", "privileged_data_id", nativeIdentity, false);
+        }
+    }
+
+    /**
+     * Delete the rows from the given table where the value matches for the given column.
+     *
+     * @param conn  The database connection to use.
+     * @param tableName  The name of the table to delete from.
+     * @param column  The name of the column being compared in the WHERE clause.
+     * @param value  The value to compare the column against in the WHERE clause.
+     * @param expectSingleUpdate  Whether to expect that a single row will have been deleted.  If true, and the delete
+     *     operation does not affect a single row, an exception is thrown.
+     */
+    private static void delete(Connection conn, String tableName, String column, String value, boolean expectSingleUpdate)
+        throws Exception {
+
+        String sql = "delete from " + tableName + " where " + column + " = ?";
+        PreparedStatement stmt = null;
+        try {
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, value);
+            int updated = stmt.executeUpdate();
+
+            if (expectSingleUpdate) {
+                handleUpdateResult(updated);
+            }
+        }
+        finally {
+            JdbcUtil.closeStatement(stmt);
+        }
+    }
+
+    /**
+     * Set the given column to null when its value matches the given value.
+     *
+     * @param conn  The database connection to use.
+     * @param tableName  The name of the table to set the null values on.
+     * @param column  The name of the column to null out, and which we compare the value against.
+     * @param value  The value to match for the given column.
+     */
+    private static void setNull(Connection conn, String tableName, String column, String value)
+        throws Exception {
+
+        String sql = "update " + tableName + " set " + column + " = NULL where " + column + " = ?";
+        PreparedStatement stmt = null;
+        try {
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, value);
+            int updated = stmt.executeUpdate();
+            handleUpdateResult(updated);
+        }
+        finally {
+            JdbcUtil.closeStatement(stmt);
+        }
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // CREATE / UPDATE
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Create or update an object using the given request.
+     *
+     * @param conn  The database connection to use.
+     * @param app  The JDBC Application.
+     * @param objReq  The request to execute.
+     *
+     * @return The ID of the object that was created/updated.
+     */
+    private static String createOrUpdate(Connection conn, Application app, AbstractRequest objReq)
+        throws Exception {
+
+        String objectType = getObjectType(objReq);
+        String nativeIdentity = objReq.getNativeIdentity();
+
+        if ((null == nativeIdentity) && ObjectOperation.Modify.equals(objReq.getOp())) {
+            throw new ConnectorException("nativeIdentity is required for a modify operation");
+        }
+
+        // Create or update the object.
+        Map values = getValues(app, objReq, objectType);
+        nativeIdentity = createOrUpdate(conn, objectType, values, nativeIdentity);
+
+        // Handle any attributes that need to be provisioned on other tables, such as group membership.
+        provisionSecondaryTables(conn, app, objReq, nativeIdentity);
+
+        return nativeIdentity;
+    }
+
+    /**
+     * Return the object type for the given request.
+     */
+    private static String getObjectType(AbstractRequest objReq) {
+        String type = objReq.getType();
+        return (null != type) ? type : Connector.TYPE_ACCOUNT;
+    }
+
+    /**
+     * Create a Map that maps a table column name to the value to set for that column.
+     *
+     * @param app  The JDBC Application.
+     * @param objReq  The request for which to create the value map.
+     * @param objectType  The type of object represented in the request.
+     *
+     * @return A Map that maps a table column name to the value to set for that column.
+     */
+    private static Map getValues(Application app, AbstractRequest objReq, String objectType)
+        throws ConnectorException {
+
+        Map values = new HashMap();
+
+        for (AttributeRequest attrReq : Util.iterate(objReq.getAttributeRequests())) {
+            // If this attribute is managed in a secondary table, it will be handled later.
+            if (isAttributeInSecondaryTable(attrReq.getName(), objectType)) {
+                continue;
+            }
+
+            ProvisioningPlan.Operation op = attrReq.getOperation();
+            String column = getColumn(attrReq.getName(), objectType);
+
+            if (null == column) {
+                log.info("Ignoring setting '" + attrReq.getName() + "' since there is not mapped in the database");
+            }
+            else {
+                Object value = getValue(attrReq.getName(), attrReq.getValue(), objectType);
+
+                if (ProvisioningPlan.Operation.Set.equals(op)) {
+                    values.put(column, value);
+                }
+                else {
+                    throw new ConnectorException("Unhandled attribute operation - only single-valued Set is handled: " + op);
+                }
+            }
+        }
+
+        // Note that none of these requests should have permissions.  Even ContainerPermission and
+        // PrivilegedDataPermission requests will have been changed to AttributeRequests before they
+        // are sent.
+
+        return values;
+    }
+
+    /**
+     * Return whether the given attribute should be provisioned in a secondary table - not inlined in the primary table.
+     *
+     * @param attrName  The name of the attribute.
+     * @param objectType  The type of object being provisioned.
+     *
+     * @return True if the given attribute should be provisioned in a secondary table, false otherwise.
+     */
+    private static boolean isAttributeInSecondaryTable(String attrName, String objectType) {
+        return isGroupMembersAttribute(attrName, objectType) || isContainerPrivilegedDataAttribute(attrName, objectType);
+    }
+
+    /**
+     * Return whether the given attribute is the "members" attribute on Group.
+     */
+    private static boolean isGroupMembersAttribute(String attrName, String objectType) {
+        return Connector.TYPE_GROUP.equals(objectType) && "members".equals(attrName);
+    }
+
+    /**
+     * Return whether the given attribute is the "members" attribute on Group.
+     */
+    private static boolean isContainerPrivilegedDataAttribute(String attrName, String objectType) {
+        return TYPE_CONTAINER.equals(objectType) && "privilegedData".equals(attrName);
+    }
+
+    /**
+     * Provision any attributes in the given request to secondary tables, if any exist.
+     *
+     * @param conn  The database connection to use.
+     * @param app  The JDBC application.
+     * @param objReq  The request in which to look for secondary attributes to provision.
+     * @param nativeIdentity  The native identity of the object being provisioned.
+     */
+    private static void provisionSecondaryTables(Connection conn, Application app, AbstractRequest objReq, String nativeIdentity)
+        throws ConnectorException, SQLException, GeneralException {
+
+        String objectType = getObjectType(objReq);
+
+        for (AttributeRequest attrReq : Util.iterate(objReq.getAttributeRequests())) {
+            if (isGroupMembersAttribute(attrReq.getName(), objectType)) {
+                provisionGroupMembership(conn, app, attrReq, nativeIdentity);
+            }
+
+            // TODO: implement provisioning for a container's privileged data, any others?
+        }
+    }
+
+    /**
+     * Provision the membership changes in the given attribute request.
+     *
+     * @param conn  The connection to use.
+     * @param app  The JDBC application.
+     * @param groupAttrReq  The AttributeRequest with the group changes.
+     * @param groupId  The ID of the group to change.
+     */
+    private static void provisionGroupMembership(Connection conn, Application app, AttributeRequest groupAttrReq, String groupId)
+        throws ConnectorException, SQLException, GeneralException {
+
+        // The attribute request contains the ID's of the members that should be added/removed from the group.
+        List userIds = Util.asList(groupAttrReq.getValue());
+        ProvisioningPlan.Operation op = groupAttrReq.getOperation();
+
+        List usersToAdd = new ArrayList();
+        List usersToRemove = new ArrayList();
+
+        // Determine which users to add/remove.
+        if (ProvisioningPlan.Operation.Add.equals(op)) {
+            usersToAdd = userIds;
+        }
+        else if (ProvisioningPlan.Operation.Remove.equals(op)) {
+            usersToRemove = userIds;
+        }
+        else if (ProvisioningPlan.Operation.Set.equals(op)) {
+            // If we are setting, we need to load the current membership and determine which need to be added
+            // or removed based on the desired state.
+            ResourceObject group = loadObject(app, Connector.TYPE_GROUP, groupId);
+            List currentMembers = group.getStringList("members");
+            usersToAdd = getAddedItems(currentMembers, userIds);
+            usersToRemove = getRemovedItems(currentMembers, userIds);
+        }
+
+        // Execute the add/remove operations.
+        for (String userToAdd : Util.iterate(usersToAdd)) {
+            provisionGroupMember(conn, groupId, userToAdd, true);
+        }
+        for (String userToRemove : Util.iterate(usersToRemove)) {
+            provisionGroupMember(conn, groupId, userToRemove, false);
+        }
+    }
+
+    /**
+     * Return a list of values that have been added to the newList that are not in the previousList.
+     *
+     * @param previousList  The previous list to compare against.
+     * @param newList  The list in which to look for added items.
+     *
+     * @return A possibly-null list of items added to the new list.
+     */
+    private static List getAddedItems(List previousList, List newList) {
+        // If there is nothing in the previous list, then everything is an add.
+        if (Util.isEmpty(previousList)) {
+            return newList;
+        }
+
+        // If the new list is not null, figure out which items have been added.
+        if (null != newList) {
+            List added = new ArrayList(newList);
+            added.removeAll(previousList);
+            return added;
+        }
+
+        // Both lists were null or empty, return null.
+        return null;
+    }
+
+    /**
+     * Return a list of values that have been removed from the previousList that are no longer in the newList.
+     *
+     * @param previousList  The previous list to compare against.
+     * @param newList  The list in which to look for removed items.
+     *
+     * @return A possibly-null list of items removed from the new list.
+     */
+    private static List getRemovedItems(List previousList, List newList) {
+        return getAddedItems(newList, previousList);
+    }
+
+    /**
+     * Add or remove the given group user to the given group.  This will not try to add a user that is already a
+     * member of the group.
+     *
+     * @param conn  The connection to use.
+     * @param groupId  The ID of the group to add/remove the member on.
+     * @param userId  The ID of the user to add/remove on the group.
+     * @param isAdd  Whether to add the user.  If false, the user is removed from the group.
+     */
+    private static void provisionGroupMember(Connection conn, String groupId, String userId, boolean isAdd)
+        throws ConnectorException, SQLException {
+
+        String sql = null;
+
+        if (isAdd) {
+            // We only want to add this group member if they are not already a member.
+            if (!doesGroupAssignmentExist(conn, groupId, userId)) {
+                sql = "insert into user_group_assignments (user_id, group_id) values (?, ?)";
+            }
+            else {
+                log.info("Not adding user '" + userId + "' to group '" + groupId + "' - already a member");
+            }
+        }
+        else {
+            sql = "delete from user_group_assignments where user_id = ? and group_id = ?";
+        }
+
+        // This may be null if the user being added is already a member.
+        if (null != sql) {
+            PreparedStatement stmt = null;
+            try {
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, userId);
+                stmt.setString(2, groupId);
+                stmt.executeUpdate();
+            }
+            finally {
+                JdbcUtil.closeStatement(stmt);
+            }
+        }
+    }
+
+    /**
+     * Return whether the given group already has the given user as a member.
+     *
+     * @param conn  The connection to use.
+     * @param groupId  The ID of the group to check.
+     * @param userId  The ID of the user to look for.
+     *
+     * @return True if the user is a member of the group, false otherwise.
+     */
+    private static boolean doesGroupAssignmentExist(Connection conn, String groupId, String userId)
+        throws SQLException, ConnectorException {
+
+        String sql = "select count(*) from user_group_assignments where user_id = ? and group_id = ?";
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, userId);
+            stmt.setString(2, groupId);
+            rs = stmt.executeQuery();
+
+            if (!rs.next()) {
+                throw new ConnectorException("Expected a single row for a count query");
+            }
+            int count = rs.getInt(1);
+            return (count > 0);
+        }
+        finally {
+            JdbcUtil.closeResult(rs);
+            JdbcUtil.closeStatement(stmt);
+        }
+    }
+
+    /**
+     * Return the name of the column in the database that corresponds to the given attribute.
+     *
+     * @param attrName  The name of the attribute.
+     * @param objectType  The type of object that the attribute is on.
+     *
+     * @return The column name, or null if the given attribute is not mapped in the database.
+     */
+    private static String getColumn(String attrName, String objectType) {
+
+        // Unmapped attributes.
+        if ("entitlements".equals(attrName)) {
+            return null;
+        }
+        else if ("roles".equals(attrName)) {
+            return null;
+        }
+        else if ("sourceNativeIdentifier".equals(attrName)) {
+            return null;
+        }
+        else if ("source".equals(attrName)) {
+            return null;
+        }
+
+        // Columns whose names differ.
+        if (Connector.TYPE_ACCOUNT.equals(objectType)) {
+            if ("firstname".equalsIgnoreCase(attrName)) {
+                return "givenName";
+            }
+            else if ("lastname".equalsIgnoreCase(attrName)) {
+                return "familyName";
+            }
+            else if ("IIQDisabled".equalsIgnoreCase(attrName)) {
+                return "active";
+            }
+        }
+        else if (TYPE_CONTAINER.equals(objectType) || TYPE_PRIVILEGED_DATA.equals(objectType)) {
+            if ("owner".equalsIgnoreCase(attrName)) {
+                return "ownerId";
+            }
+        }
+        else if (TYPE_CONTAINER_PERMISSION.equals(objectType) || TYPE_PRIVILEGED_DATA_PERMISSION.equals(objectType)) {
+            if ("container".equalsIgnoreCase(attrName)) {
+                return "container_id";
+            }
+            else if ("privilegedData".equalsIgnoreCase(attrName)) {
+                return "privileged_data_id";
+            }
+            else if ("user".equalsIgnoreCase(attrName)) {
+                return "user_id";
+            }
+            else if ("group".equalsIgnoreCase(attrName)) {
+                return "group_id";
+            }
+        }
+
+        // If there is no mapping, just return the attribute name.
+        return attrName;
+    }
+
+    /**
+     * Return the value to set in the database for the given attribute.  This can transform values into something more
+     * appropriate for the database.
+     *
+     * @param attrName  The name of the attribute being set.
+     * @param value  The value from the provisioning plan.
+     * @param objectType  The type of the object on which the value is being set.
+     *
+     * @return  The value to set.
+     */
+    private static Object getValue(String attrName, Object value, String objectType) {
+
+        // Disabled is represented as "active" on Users, so we need to invert the value.
+        if (Connector.TYPE_ACCOUNT.equals(objectType)) {
+            if ("IIQDisabled".equalsIgnoreCase(attrName)) {
+                return !Util.otob(value);
+            }
+        }
+
+        // Otherwise, no transformation, so just return the value.
+        return value;
+    }
+
+    /**
+     * Create or update an object by setting the given values.
+     *
+     * @param conn  The database connection to use.
+     * @param objectType  The type of object to create or update.
+     * @param values  The values to set in the database, mapped by column name.
+     * @param nativeIdentity  The native identity of the object to update, or null if creating.
+     *
+     * @return The ID of the updated or created object.
+     */
+    private static String createOrUpdate(Connection conn, String objectType, Map values, String nativeIdentity)
+        throws Exception {
+
+        String tableName = getTableName(objectType);
+
+        if (null != nativeIdentity) {
+            update(conn, tableName, values, nativeIdentity);
+        }
+        else {
+            nativeIdentity = create(conn, objectType, tableName, values);
+        }
+
+        return nativeIdentity;
+    }
+
+    /**
+     * Create an object by inserting the given values into the given table.  This will optionally create an ID for
+     * the object or allow the database to do this, depending insertRequiresID().
+     *
+     * @param conn  The database connection to use.
+     * @param objectType  The type of object to create.
+     * @param tableName  The name of the table to insert into.
+     * @param values  A map of column names mapped to the value to set.
+     *
+     * @return The ID of the newly created object.
+     */
+    private static String create(Connection conn, String objectType, String tableName, Map values)
+        throws SQLException, ConnectorException {
+
+        // The SQL will end up looking like:
+        //   insert into users (name, blah) values ('jimmy', 'foo')
+        String newId = null;
+
+        // Get a set of keys for the value map with a consistent order.
+        List keys = new ArrayList(values.keySet());
+
+        boolean autoGenerateId = !insertRequiresID(objectType);
+
+        String sql = "insert into " + tableName + " (";
+
+        // Add the names of the columns being inserted.
+        String sep = "";
+        for (String key : keys) {
+            sql += sep + key;
+            sep = ", ";
+        }
+
+        // If we are supplying an ID, add the ID column name.
+        if (!autoGenerateId) {
+            sql += ", " + getIDColumn(objectType);
+        }
+
+        sql += ") values (";
+
+        // Add the values to set for the columns.  We need one extra value if we are supplying the ID.
+        int numValues = (!autoGenerateId) ? keys.size() + 1 : keys.size();
+        sep = "";
+        for (int i = 0; i < numValues; i++) {
+            sql += sep + "?";
+            sep = ", ";
+        }
+
+        sql += ")";
+
+        int returnKeys = (autoGenerateId) ? Statement.RETURN_GENERATED_KEYS : Statement.NO_GENERATED_KEYS;
+        PreparedStatement stmt = null;
+
+        try {
+            // Prepare a statement with the given values.
+            stmt = conn.prepareStatement(sql, returnKeys);
+            setParameters(stmt, values, keys);
+
+            // If we are supplying an ID, generate one and set it on the statement.
+            if (!autoGenerateId) {
+                newId = generateID(objectType);
+                stmt.setString(keys.size() + 1, newId);
+            }
+
+            // Insert the object.
+            int updated = stmt.executeUpdate();
+            handleUpdateResult(updated);
+
+            // If the database generated the ID, retrieve it from the statement.
+            if (autoGenerateId) {
+                ResultSet rs = null;
+                try {
+                    rs = stmt.getGeneratedKeys();
+                    if (!rs.next()) {
+                        throw new ConnectorException("Could not read generated key from insert statement - " + sql);
+                    }
+                    newId = Long.toString(rs.getLong(1));
+                }
+                finally {
+                    JdbcUtil.closeResult(rs);
+                }
+            }
+        }
+        finally {
+            JdbcUtil.closeStatement(stmt);
+        }
+
+        return newId;
+    }
+
+    /**
+     * Return true if the given object type requires an ID to be supplied when inserting a row.  If this is true,
+     * getIDColumn() and generateID() should both return values for this objectType.
+     * @throws ConnectorException 
+     */
+    private static boolean insertRequiresID(String objectType) throws ConnectorException {
+        // Any string ID columns are managed by us, any number ID columns are auto-generated.
+        return isIDString(getTableName(objectType));
+    }
+
+    /**
+     * Return the name of the ID column if the given object type requires an ID to be supplied when inserting a row.
+     */
+    private static String getIDColumn(String objectType) {
+        return "id";
+    }
+
+    /**
+     * Return whether the given table uses a string for its ID.
+     *
+     * @param tableName  The name of the table.
+     *
+     * @return True if the table uses a string for its ID, false otherwise.
+     */
+    private static boolean isIDString(String tableName) {
+        return !"container_permission_assignments".equals(tableName) && !"priv_data_permissions".equals(tableName);
+    }
+
+    /**
+     * Return generated ID if the given object type requires an ID to be supplied when inserting a row.
+     */
+    private static String generateID(String objectType) {
+        return Util.uuid();
+    }
+
+    /**
+     * Update the given table by setting the columns to the values supplied in the values Map.
+     *
+     * @param conn  The database connection to use.
+     * @param tableName  The name of the table to update.
+     * @param values  A Map of column names to values to be updated.
+     * @param nativeIdentity  The native identity of the object to update.
+     */
+    private static void update(Connection conn, String tableName, Map values, String nativeIdentity)
+        throws SQLException, ConnectorException {
+
+        // The SQL will end up looking like:
+        //   update users set name = 'jimmy', blah = 'foo' where id = '1234'
+
+        // Get a set of keys for the value map with a consistent order.
+        List keys = new ArrayList(values.keySet());
+
+        String sql = "update " + tableName + " set ";
+
+        String sep = "";
+        for (String key : keys) {
+            sql += sep + key + " = ?";
+            sep = ", ";
+        }
+
+        sql += " where id = ?";
+
+        PreparedStatement stmt = null;
+
+        try {
+            stmt = conn.prepareStatement(sql);
+            setParameters(stmt, values, keys);
+    
+            // Add the ID parameter value (note that the indexes are 1-based.
+            if (isIDString(tableName)) {
+                stmt.setString(keys.size() + 1, nativeIdentity);
+            }
+            else {
+                stmt.setInt(keys.size() + 1, Integer.valueOf(nativeIdentity));
+            }
+    
+            int numUpdated = stmt.executeUpdate();
+            handleUpdateResult(numUpdated);
+        }
+        finally {
+            JdbcUtil.closeStatement(stmt);
+        }
+    }
+
+    /**
+     * Set the parameters on the PreparedStatement to the given values, in the order of the keys.
+     *
+     * @param stmt  The statement to set the parameter values on.
+     * @param values  A Map of column name to value to set.
+     * @param keys  An ordered list of keys, which specify the index of each parameter being set.
+     */
+    private static void setParameters(PreparedStatement stmt, Map values, List keys)
+        throws SQLException, ConnectorException {
+
+        for (int i = 0; i < keys.size(); i++) {
+            String key = keys.get(i);
+            int paramIdx = i + 1;
+            Object value = values.get(key);
+
+            if ((null == value) || (value instanceof String)) {
+                stmt.setString(paramIdx, (String) value);
+            }
+            else if (value instanceof Integer) {
+                stmt.setInt(paramIdx, (Integer) value);
+            }
+            else if (value instanceof Long) {
+                stmt.setLong(paramIdx, (Long) value);
+            }
+            else if (value instanceof Double) {
+                stmt.setDouble(paramIdx, (Double) value);
+            }
+            else if (value instanceof Float) {
+                stmt.setFloat(paramIdx, (Float) value);
+            }
+            else if (value instanceof Boolean) {
+                stmt.setBoolean(paramIdx, (Boolean) value);
+            }
+            else if (value instanceof List) {
+                stmt.setString(paramIdx, Util.listToCsv((List) value));
+            }
+            else {
+                throw new ConnectorException("Unknown data type for " + value + ": " + value.getClass());
+            }
+        }
+    }
+
+    /**
+     * Load a ResourceObject being provisioned by the given plan, or return null if the nativeIdentity is null.
+     *
+     * @param app  The JDBC Application.
+     * @param nativeIdentity  The native identity of the object to load, or null if an object should not be loaded.
+     * @param plan  The ProvisioningPlan, from which the object type can be determined.
+     *
+     * @return A ResourceObject, or null if the native identity is null.
+     */
+    private static ResourceObject loadObject(Application app, String nativeIdentity, ProvisioningPlan plan)
+        throws ConnectorException, GeneralException {
+
+        if (null == nativeIdentity) {
+            return null;
+        }
+
+        String objectType = null;
+        if (!Util.isEmpty(plan.getAccountRequests())) {
+            objectType = Connector.TYPE_ACCOUNT;
+        }
+        else if (!Util.isEmpty(plan.getObjectRequests())) {
+            objectType = plan.getObjectRequests().get(0).getType();
+        }
+
+        if (null == objectType) {
+            throw new ConnectorException("Could not determine object type");
+        }
+
+        return loadObject(app, objectType, nativeIdentity);
+    }
+
+    /**
+     * Load a ResourceObject by native identity.
+     *
+     * @param app  The JDBC Application.
+     * @param objectType  The type of object to load.
+     * @param nativeIdentity  The native identity of the object to load, or null if an object should not be loaded.
+     *
+     * @return A ResourceObject.
+     */
+    private static ResourceObject loadObject(Application app, String objectType, String nativeIdentity)
+        throws GeneralException, ConnectorException {
+
+        Connector conn = ConnectorFactory.getConnector(app, null);
+        return conn.getObject(objectType, nativeIdentity, null);
+    }
+
+    /**
+     * Throw an exception if a single row was not updated.
+     */
+    private static void handleUpdateResult(int numUpdated) throws ConnectorException {
+        if (1 != numUpdated) {
+            throw new ConnectorException("Expected a single row to be updated - actual update count: " + numUpdated);
+        }
+    }
+
+    /**
+     * Return the table name for the given object type.
+     */
+    private static String getTableName(String objectType) throws ConnectorException {
+        // Assume an account request for a null type.
+        objectType = (null != objectType) ? objectType : Connector.TYPE_ACCOUNT;
+
+        switch (objectType) {
+        case Connector.TYPE_ACCOUNT: return "users";
+        case Connector.TYPE_GROUP: return "groups";
+        case TYPE_CONTAINER: return "containers";
+        case TYPE_PRIVILEGED_DATA: return "privileged_data";
+        case TYPE_CONTAINER_PERMISSION: return "container_permission_assignments";
+        case TYPE_PRIVILEGED_DATA_PERMISSION: return "priv_data_permission_assignments";
+        }
+
+        throw new ConnectorException("Unknown schema type: " + objectType);
+    }
+
+
+    // PROVISION!
+    return provision(application, connection, plan);
+  ]]></Source>
+</Rule>
+
+<Rule language="beanshell" name="PAM Access Mapping Correlation Rule" type="TargetCorrelation">
+  <Description>This rule is called when a Target is correlated.</Description>
+  <Signature returnType="Map">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          The Application which owns the Target.
+        </Description>
+      </Argument>
+      <Argument name="nativeId">
+        <Description>
+          The native id associated with an AccessMapping.
+        </Description>
+      </Argument>
+      <Argument name="target">
+        <Description>
+          The Target being correlated.
+        </Description>
+      </Argument>
+      <Argument name="targetSource">
+        <Description>
+          The source of the configuration for the collector.
+        </Description>
+      </Argument>
+      <Argument name="isGroup">
+        <Description>
+          Indicates whether or not this is a GroupMapping.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>
+          A Map containing either a ManagedAttribute object ('group') or the name ('groupAttributeName') and value ('groupAttributeValue') of a ManagedAttribute. Link may also be returned since targets may also be correlated to a link object.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+    import sailpoint.connector.Connector;
+
+    Map result = new HashMap();
+
+    // Add a list of possible applications.
+    List apps = new ArrayList();
+	
+	// If the target source is on a single app, the "application" variable is available.  For multiple apps,
+    // the variable is named "applications".
+    if (void != application && null != application) {
+        apps.add(application);
+    }
+    else if (void != applications && null != applications) {
+        apps = new ArrayList(applications);
+    }
+    result.put("applications", apps);
+
+    if (isGroup) {
+        result.put("groupAttributeName", "nativeIdentity");
+        result.put("groupAttributeValue", nativeId);
+        result.put("groupType", Connector.TYPE_GROUP);
+    }
+    else {
+        result.put("linkIdentity", nativeId);
+    }
+
+    return result;
+  ]]></Source>
+</Rule>
+
+<Rule language='beanshell' type='MergeMaps' name='Privileged Access Management Merge Maps'>
+  <Description>
+  This rule merges two maps together. This is used when there are multiple lines that represent the same object, and certain attributes have to merged.
+  </Description>
+  <Signature returnType='Map'>
+    <Inputs>
+      <Argument name='application'>
+        <Description>
+          The application associated with the Connector calling the rule.
+        </Description>
+      </Argument>
+      <Argument name='schema'>
+        <Description>
+          The Schema from the application.
+        </Description>
+      </Argument>
+      <Argument name='current'>
+        <Description>
+          The current Map object that needs merging.
+        </Description>
+      </Argument>
+      <Argument name='newObject'>
+        <Description>
+          The new Map object that needs merging.
+        </Description>
+      </Argument>
+      <Argument name='mergeAttrs'>
+        <Description>
+          A List of the attributes to merge.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name='map'>
+        <Description>
+          A Map of the current and new maps, merged according to the attributes list.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+    import sailpoint.tools.Util;
+
+    Map merged = new HashMap();
+
+    if (null == current) {
+        return newObject;
+    }
+    else if ((null == newObject) || Util.isEmpty(newObject)) {
+        return current;
+    }
+
+    for (Map.Entry newEntry : newObject.entrySet()) {
+        String key = newEntry.getKey();
+        Object newValue = newEntry.getValue();
+        Object currentValue = current.get(key);
+
+        // All merged attributes will be turned into lists.
+        if (mergeAttrs.contains(key)) {
+            Object currentVal = current.get(key);
+
+            // If there is no currentValue, just use the new value.
+            Object mergedVal = newValue;
+
+            // If there are two values, put them into a list.
+            if ((null != currentValue) && (null != newValue)) {
+                List mergedList = Util.asList(currentValue);
+                mergedList.addAll(Util.asList(newValue));
+                mergedValue = mergedList;
+            }
+
+            merged.put(key, mergedValue);
+        }
+        else {
+            // This is not a merged value, just use the currentValue (if non-nul);
+            Object mergedValue = currentValue;
+            if (null == currentValue) {
+                mergedValue = newValue;
+            }
+            merged.put(key, mergedValue);
+        }
+    }
+
+    // If there is anything in the currentObject that's not in the new object, use it.
+    for (Map.Entry currentEntry : current.entrySet()) {
+        String key = currentEntry.getKey();
+        if (!merged.containsKey(key)) {
+            merged.put(key, currentEntry.getValue());
+        }
+    }
+
+    return merged;
+  ]]>
+  </Source>
+</Rule>
+
+<Rule language="beanshell" name="Map Demodata PAM Application Names"
+      type="ResourceObjectCustomization">
+  <Description>
+    This rule will map "source" names on PAM objects to the name of the corresponding
+    Application in IIQ.
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name='context'>
+        <Description>
+           A SailPointContext object used if its necessary
+           to query objects from the database.
+        </Description>
+      </Argument>
+      <Argument name='object'>
+        <Description>
+          The ResourceObject built by the connector.
+        </Description>
+      </Argument>
+      <Argument name='application'>
+        <Description>
+          Application that references the connector
+        </Description>
+      </Argument>
+      <Argument name='connector'>
+        <Description>
+          The connector object
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name='A ResourceObject'>
+        <Description>
+          The updated resource object.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+      // NOTE: You can replace the values in the map below to match your deployment configuration.
+      // The name on the left side is the name of the directory in the PAM application.
+      // The name on the right side is the name of the corresponding application in IIQ.
+      Map applicationMappings = new HashMap();
+      applicationMappings.put("PAM Active Directory", "ADDirectDemodata");
+      applicationMappings.put("PAM Corp Directory", "Active_Directory");
+
+      // Use the mapped name if available.
+      String source = (String) object.getAttribute("source");
+      if (null != source) {
+          String mapped = applicationMappings.get(source);
+          if (null != mapped) {
+              object.put("source", mapped);
+          }
+      }
+
+      return object;
+    ]]>
+  </Source>
+</Rule>
+
+<!--jdbc application-->
+  <Application connector="sailpoint.connector.JDBCConnector" featuresString="DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, DIRECT_PERMISSIONS, ENABLE, UNLOCK" icon="databaseIcon" name="JDBC PAM Application" profileClass="" type="JDBC">
+    <Attributes>
+      <Map>
+        <entry key="BoolAttr">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="Container.SQL" value="SELECT c.id, c.name, c.displayname, c.description, c.type, c.ownerId as owner,&#13;&#10;       cp.privileged_data_id as privilegedData, pd.name as `privilegedData.display`, pd.type as `privilegedData.type`&#13;&#10;  FROM containers c&#13;&#10;         LEFT OUTER JOIN container_priv_data_assignments cp on c.id = cp.container_id&#13;&#10;         LEFT OUTER JOIN privileged_data pd on pd.id = cp.privileged_data_id&#13;&#10; ORDER BY c.id"/>
+        <entry key="Container.aggregationMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="Container.deltaTable"/>
+        <entry key="Container.driverClass"/>
+        <entry key="Container.getDeltaSQL"/>
+        <entry key="Container.getDirectPermObjectSQL"/>
+        <entry key="Container.getObjectSQL" value="SELECT c.id, c.name, c.displayname, c.description, c.type, c.ownerId as owner,&#13;&#10;       cp.privileged_data_id as privilegedData, pd.name as `privilegedData.display`, pd.type as `privilegedData.type`&#13;&#10;  FROM containers c&#13;&#10;         LEFT OUTER JOIN container_priv_data_assignments cp on c.id = cp.container_id&#13;&#10;         LEFT OUTER JOIN privileged_data pd on pd.id = cp.privileged_data_id&#13;&#10; WHERE c.id = '$(identity)'&#13;&#10; ORDER BY c.id&#13;&#10;"/>
+        <entry key="Container.indexColumns">
+          <value>
+            <List>
+              <String>id</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="Container.isPermissionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="Container.mergeColumns">
+          <value>
+            <List>
+              <String>privilegedData</String>
+              <String>privilegedData.display</String>
+              <String>privilegedData.type</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="Container.mergeRows">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="Container.password"/>
+        <entry key="Container.url"/>
+        <entry key="Container.useExecuteQuery">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="Container.user"/>
+        <entry key="ContainerPermission.SQL" value="SELECT cp.id, cp.container_id as container, c.name as containerName, c.displayname as containerDisplayName,&#13;&#10;       cp.user_id as user, u.displayName as userDisplayName,&#13;&#10;       cp.group_id as `group`, g.displayName as groupDisplayName,&#13;&#10;       cp.rights&#13;&#10;  FROM container_permission_assignments cp&#13;&#10;&#9;&#9;inner join containers c on cp.container_id = c.id&#13;&#10;        left outer join users u on cp.user_id = u.id&#13;&#10;        left outer join groups g on cp.group_id = g.id"/>
+        <entry key="ContainerPermission.aggregationMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="ContainerPermission.deltaTable"/>
+        <entry key="ContainerPermission.driverClass"/>
+        <entry key="ContainerPermission.getDeltaSQL"/>
+        <entry key="ContainerPermission.getDirectPermObjectSQL"/>
+        <entry key="ContainerPermission.getObjectSQL" value="SELECT cp.id, cp.container_id as container, c.name as containerName, c.displayname as containerDisplayName,&#13;&#10;       cp.user_id as user, u.displayName as userDisplayName,&#13;&#10;       cp.group_id as `group`, g.displayName as groupDisplayName,&#13;&#10;       cp.rights&#13;&#10;  FROM container_permission_assignments cp&#13;&#10;&#9;&#9;inner join containers c on cp.container_id = c.id&#13;&#10;        left outer join users u on cp.user_id = u.id&#13;&#10;        left outer join groups g on cp.group_id = g.id&#13;&#10; WHERE cp.id = '$(identity)'"/>
+        <entry key="ContainerPermission.isPermissionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="ContainerPermission.mergeRows">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="ContainerPermission.password"/>
+        <entry key="ContainerPermission.url"/>
+        <entry key="ContainerPermission.useExecuteQuery">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="ContainerPermission.user"/>
+        <entry key="PrivilegedData.SQL" value="SELECT pd.id, pd.name, pd.description, pd.type&#13;&#10;  FROM privileged_data pd"/>
+        <entry key="PrivilegedData.aggregationMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedData.deltaTable"/>
+        <entry key="PrivilegedData.driverClass"/>
+        <entry key="PrivilegedData.getDeltaSQL"/>
+        <entry key="PrivilegedData.getDirectPermObjectSQL"/>
+        <entry key="PrivilegedData.getObjectSQL" value="SELECT pd.id, pd.name, pd.description, pd.type&#13;&#10;  FROM privileged_data pd&#13;&#10; WHERE pd.id = '$(identity)'"/>
+        <entry key="PrivilegedData.isPermissionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedData.mergeRows">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedData.password"/>
+        <entry key="PrivilegedData.url"/>
+        <entry key="PrivilegedData.useExecuteQuery">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedData.user"/>
+        <entry key="PrivilegedDataPermission.SQL" value="SELECT pdp.id, pdp.privileged_data_id as privilegedData, pd.name as privilegedDataName,&#13;&#10;       pdp.user_id as user, u.displayName as userDisplayName,&#13;&#10;       pdp.group_id as `group`, g.displayName as groupDisplayName,&#13;&#10;       pdp.rights&#13;&#10;  FROM priv_data_permission_assignments pdp&#13;&#10;&#9;&#9;inner join privileged_data pd on pdp.privileged_data_id = pd.id&#13;&#10;        left outer join users u on pdp.user_id = u.id&#13;&#10;        left outer join groups g on pdp.group_id = g.id"/>
+        <entry key="PrivilegedDataPermission.aggregationMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedDataPermission.deltaTable"/>
+        <entry key="PrivilegedDataPermission.driverClass"/>
+        <entry key="PrivilegedDataPermission.getDeltaSQL"/>
+        <entry key="PrivilegedDataPermission.getDirectPermObjectSQL"/>
+        <entry key="PrivilegedDataPermission.getObjectSQL" value="SELECT pdp.id, pdp.privileged_data_id as privilegedData, pd.name as privilegedDataName,&#13;&#10;       pdp.user_id as user, u.displayName as userDisplayName,&#13;&#10;       pdp.group_id as `group`, g.displayName as groupDisplayName,&#13;&#10;       pdp.rights&#13;&#10;  FROM priv_data_permission_assignments pdp&#13;&#10;&#9;&#9;inner join privileged_data pd on pdp.privileged_data_id = pd.id&#13;&#10;        left outer join users u on pdp.user_id = u.id&#13;&#10;        left outer join groups g on pdp.group_id = g.id&#13;&#10; WHERE pdp.id = '$(identity)'"/>
+        <entry key="PrivilegedDataPermission.isPermissionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedDataPermission.mergeRows">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedDataPermission.password"/>
+        <entry key="PrivilegedDataPermission.url"/>
+        <entry key="PrivilegedDataPermission.useExecuteQuery">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="PrivilegedDataPermission.user"/>
+        <entry key="SQL" value="SELECT u.id, u.userName, u.formattedName, u.familyName as lastname, u.givenName as firstname, u.middleName, u.honorificPrefix, u.honorificSuffix,&#13;&#10;       u.displayName, u.nickname as nickName, u.profileURL as profileUrl, u.title, u.usertype as userType, u.preferredLanguage, u.locale, u.timezone,&#13;&#10;       !u.active as IIQDisabled, u.email, u.source, u.source_native_identifier as sourceNativeIdentifier, g.id as groups, g.displayName as groupNames&#13;&#10;  FROM users u&#13;&#10;        left outer join user_group_assignments uga on uga.user_id = u.id&#13;&#10;        left outer join groups g on g.id = uga.group_id&#13;&#10;ORDER BY u.id"/>
+        <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+        <entry key="aggregationMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="compositeDefinition"/>
+        <entry key="daysToWaitForDeletion"/>
+        <entry key="deltaTable"/>
+        <entry key="driverClass" value="com.mysql.jdbc.Driver"/>
+        <entry key="enableOnReactivation">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="getDeltaSQL"/>
+        <entry key="getObjectSQL" value="SELECT u.id, u.userName, u.formattedName, u.familyName as lastname, u.givenName as firstname, u.middleName, u.honorificPrefix, u.honorificSuffix,&#13;&#10;       u.displayName, u.nickname as nickName, u.profileURL as profileUrl, u.title, u.usertype as userType, u.preferredLanguage, u.locale, u.timezone,&#13;&#10;       !u.active as IIQDisabled, u.email, u.source, u.source_native_identifier as sourceNativeIdentifier, g.id as groups, g.displayName as groupNames&#13;&#10;  FROM users u&#13;&#10;        left outer join user_group_assignments uga on uga.user_id = u.id&#13;&#10;        left outer join groups g on g.id = uga.group_id&#13;&#10;WHERE u.id = '$(identity)'"/>
+        <entry key="group.SQL" value="SELECT g.id, g.displayName, g.parent_group_id, u.source, u.source_native_identifier as sourceNativeIdentifier, u.id as members, u.displayName as userDisplayNames&#13;&#10;  FROM groups g&#13;&#10;        left outer join user_group_assignments uga on uga.group_id = g.id&#13;&#10;        left outer join users u on u.id = uga.user_id&#13;&#10;ORDER BY g.id"/>
+        <entry key="group.aggregationMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="group.deltaTable"/>
+        <entry key="group.getDeltaSQL"/>
+        <entry key="group.getObjectSQL" value="SELECT g.id, g.displayName, g.parent_group_id, u.source, u.source_native_identifier as sourceNativeIdentifier, u.id as members, u.displayName as userDisplayNames&#13;&#10;  FROM groups g&#13;&#10;        left outer join user_group_assignments uga on uga.group_id = g.id&#13;&#10;        left outer join users u on u.id = uga.user_id&#13;&#10;WHERE g.id = '$(identity)'"/>
+        <entry key="group.indexColumns">
+          <value>
+            <List>
+              <String>id</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="group.isPermissionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="group.mergeColumns">
+          <value>
+            <List>
+              <String>members</String>
+              <String>userDisplayNames</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="group.mergeRows">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="group.useExecuteQuery">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="indexColumns">
+          <value>
+            <List>
+              <String>id</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="isPermissionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="jdbcProvisionRule" value="PAM JDBC Provisioning Rule"/>
+        <entry key="mergeColumns">
+          <value>
+            <List>
+              <String>groupNames</String>
+              <String>groups</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="mergeMapsRule" value="Privileged Access Management Merge Maps"/>
+        <entry key="mergeRows">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+        <entry key="nativeChangeDetectionAttributes"/>
+        <entry key="nativeChangeDetectionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="nativeChangeDetectionOperations"/>
+        <entry key="partitionMode">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="partitionStatements"/>
+        <entry key="password" value="1:8ORggiEVfa289a0+YccD4QQO0Eec3V9eSHaQwFHsNR4="/>
+        <entry key="provisionRule" value="globalRule"/>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="templateApplication" value="JDBC Template"/>
+        <entry key="testConnSQL" value="select count(*) from users;"/>
+        <entry key="url" value="jdbc:mysql://localhost/identityiqPlugin?useOldAliasMetadataBehavior=true"/>
+        <entry key="useExecuteQuery">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="user" value="identityiqPlugin"/>
+      </Map>
+    </Attributes>
+    <Owner>
+      <Reference class="sailpoint.object.Identity" name="spadmin"/>
+    </Owner>
+    <Schemas>
+      <Schema displayAttribute="displayName" identityAttribute="id" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+        <AttributeDefinition name="id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="userName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="formattedName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="lastname" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="firstname" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="middleName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="honorificPrefix" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="honorificSuffix" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="nickName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="profileUrl" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="title" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="userType" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="preferredLanguage" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="locale" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="timezone" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="IIQDisabled" type="boolean">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="email" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="groups" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="groupNames" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="source" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="sourceNativeIdentifier" type="string">
+          <Description/>
+        </AttributeDefinition>
+      </Schema>
+      <Schema aggregationType="group" displayAttribute="displayname" identityAttribute="id" instanceAttribute="" nativeObjectType="Container" objectType="Container" permissionsRemediationModificationType="None">
+        <AttributeDefinition name="id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="name" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayname" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="description" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="type" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="owner" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData.display" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData.type" type="string">
+          <Description/>
+        </AttributeDefinition>
+      </Schema>
+      <Schema aggregationType="group" displayAttribute="privilegedDataName" identityAttribute="id" instanceAttribute="" nativeObjectType="PrivilegedDataPermission" objectType="PrivilegedDataPermission" permissionsRemediationModificationType="None">
+        <AttributeDefinition name="id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="privilegedData" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="privilegedDataName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="user" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="userDisplayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="group" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="groupDisplayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="rights" type="string">
+          <Description/>
+        </AttributeDefinition>
+      </Schema>
+      <Schema aggregationType="group" displayAttribute="containerName" identityAttribute="id" instanceAttribute="" nativeObjectType="ContainerPermission" objectType="ContainerPermission" permissionsRemediationModificationType="None">
+        <AttributeDefinition name="id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="container" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="containerName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="containerDisplayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="user" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="userDisplayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="group" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="groupDisplayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="rights" type="string">
+          <Description/>
+        </AttributeDefinition>
+      </Schema>
+      <Schema aggregationType="group" displayAttribute="name" identityAttribute="id" instanceAttribute="" nativeObjectType="PrivilegedData" objectType="PrivilegedData" permissionsRemediationModificationType="None">
+        <AttributeDefinition name="id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="name" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="description" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="type" type="string">
+          <Description/>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="displayName" identityAttribute="id" instanceAttribute="" nativeObjectType="group" objectType="group" permissionsRemediationModificationType="None">
+        <AttributeDefinition name="id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayName" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="parent_group_id" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="source" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition name="sourceNativeIdentifier" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="members" type="string">
+          <Description/>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="userDisplayNames" type="string">
+          <Description/>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <ApplicationScorecard/>
+  </Application>
+
+
+<!-- TargetSource for PAM App -->
+<TargetSource collector="sailpoint.unstructured.PAMCollector" name="PAMTargetSource">
+  <Attributes>
+    <Map>
+      <entry key="appType" value="Privileged Access Management"/>
+      <entry key="authType" value="basic"/>
+      <entry key="explicitAttributesRequest" value="false"/>
+      <entry key="host" value="http://localhost:8080/identityiq/plugin/rest/scimPamBridge/scim/v2"/>
+      <entry key="oauthBearerToken"/>
+      <entry key="pageSize" value="5000"/>
+      <entry key="password" value="1:JlrOP/UBonF7u1wXAXVWgw=="/>
+      <entry key="provisioningOverridden">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="schemaPropertyMappings">
+        <value>
+          <List>
+            <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:pam:1.0:ContainerPermission">
+              <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="id" property="id" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              <AttributePropertyMapping name="container">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="container.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="container.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="container.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </AttributePropertyMapping>
+              <AttributePropertyMapping name="user">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="user.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="user.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="user.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </AttributePropertyMapping>
+              <AttributePropertyMapping name="group">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="group.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="group.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="group.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </AttributePropertyMapping>
+              <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="rights" setter="openconnector.connector.scim2.SCIM2MultiValuedPropertySetter"/>
+            </SchemaPropertyMapping>
+            <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:pam:1.0:PrivilegedDataPermission">
+              <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="id" property="id" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              <AttributePropertyMapping name="privilegedData">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="privilegedData.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="privilegedData.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="privilegedData.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </AttributePropertyMapping>
+              <AttributePropertyMapping name="user">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="user.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="user.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="user.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </AttributePropertyMapping>
+              <AttributePropertyMapping name="group">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="group.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="group.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="group.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </AttributePropertyMapping>
+              <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="rights" setter="openconnector.connector.scim2.SCIM2MultiValuedPropertySetter"/>
+            </SchemaPropertyMapping>
+          </List>
+        </value>
+      </entry>
+      <entry key="type" value="Privileged Access Management Collector"/>
+      <entry key="user" value="jerry.bennett"/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="PAM Access Mapping Correlation Rule"/>
+  </CorrelationRule>
+</TargetSource>
+
+<!-- PAM Application -->
+  <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="DISCOVER_SCHEMA, PROVISIONING, SYNC_PROVISIONING, ENABLE, PASSWORD, UNSTRUCTURED_TARGETS" icon="internetIcon" name="Privileged Account Management" profileClass="" type="Privileged Account Management">
+    <Attributes>
+      <Map>
+        <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+        <entry key="authType" value="basic"/>
+        <entry key="compositeDefinition"/>
+        <entry key="connectorClass" value="openconnector.connector.scim2.SCIM2Connector"/>
+        <entry key="daysToWaitForDeletion"/>
+        <entry key="enableOnReactivation">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="explicitAttributesRequest">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="host" value="http://localhost:8080/identityiq/plugin/rest/scimPamBridge/scim/v2"/>
+        <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+        <entry key="nativeChangeDetectionAttributes"/>
+        <entry key="nativeChangeDetectionEnabled">
+          <value>
+            <Boolean/>
+          </value>
+        </entry>
+        <entry key="nativeChangeDetectionOperations"/>
+        <entry key="oauthBearerToken"/>
+        <entry key="pageSize" value="5000"/>
+        <entry key="pamPermissions">
+          <value>
+            <List>
+              <String>Create object</String>
+              <String>Delete object</String>
+              <String>Update object</String>
+              <String>Rename object</String>
+              <String>Unlock object</String>
+              <String>Manage Owners</String>
+              <String>Change password</String>
+              <String>Use password</String>
+              <String>View password</String>
+              <String>View permissions</String>
+            </List>
+          </value>
+        </entry>
+        <entry key="password" value="1:p+qvPBo4Rig8PYlNWbr3Zg=="/>
+        <entry key="schemaPropertyMappings">
+          <value>
+            <List>
+              <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:core:2.0:User">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="id" property="id" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="userName" property="userName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping name="name">
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="formatted" property="name.formatted" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="familyName" property="name.familyName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="givenName" property="name.givenName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="middleName" property="name.middleName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="honorificPrefix" property="name.honorificPrefix" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="honorificSuffix" property="name.honorificSuffix" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                </AttributePropertyMapping>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="displayName" property="displayName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="nickName" property="nickName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="profileUrl" property="profileUrl" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="title" property="title" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="userType" property="userType" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="preferredLanguage" property="preferredLanguage" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="locale" property="locale" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="timezone" property="timezone" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="active" property="active" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="password" property="password" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="emails" setter="openconnector.connector.scim2.SCIM2MultiValuedPropertySetter">
+                  <AttributePropertyMapping name="value" property="value"/>
+                  <AttributePropertyMapping name="display" property="display"/>
+                  <AttributePropertyMapping name="type" property="type"/>
+                  <AttributePropertyMapping name="primary" property="primary"/>
+                </AttributePropertyMapping>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="groups" property="groups" setter="openconnector.connector.scim2.SCIM2PropertySetter">
+                  <AttributePropertyMapping name="value" property="value"/>
+                  <AttributePropertyMapping name="$ref" property="$ref"/>
+                  <AttributePropertyMapping name="display" property="display"/>
+                  <AttributePropertyMapping name="type" property="type"/>
+                </AttributePropertyMapping>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="entitlements" property="entitlements" setter="openconnector.connector.scim2.SCIM2PropertySetter">
+                  <AttributePropertyMapping name="value" property="value"/>
+                  <AttributePropertyMapping name="display" property="display"/>
+                  <AttributePropertyMapping name="type" property="type"/>
+                  <AttributePropertyMapping name="primary" property="primary"/>
+                </AttributePropertyMapping>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="roles" property="roles" setter="openconnector.connector.scim2.SCIM2PropertySetter">
+                  <AttributePropertyMapping name="value" property="value"/>
+                  <AttributePropertyMapping name="display" property="display"/>
+                  <AttributePropertyMapping name="type" property="type"/>
+                  <AttributePropertyMapping name="primary" property="primary"/>
+                </AttributePropertyMapping>
+              </SchemaPropertyMapping>
+              <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:pam:1.0:LinkedObject">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="source" property="source" setter="openconnector.connector.scim2.SCIM2ExtendedPropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="nativeIdentifier" property="nativeIdentifier" setter="openconnector.connector.scim2.SCIM2ExtendedPropertySetter"/>
+              </SchemaPropertyMapping>
+              <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:pam:1.0:Container">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="id" property="id" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="name" property="name" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="displayName" property="displayName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="description" property="description" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="type" property="type" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping name="owner">
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="value" property="owner.value" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="$ref" property="owner.$ref" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                  <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="display" property="owner.display" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                </AttributePropertyMapping>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="privilegedData" setter="openconnector.connector.scim2.SCIM2MultiValuedPropertySetter">
+                  <Attributes>
+                    <Map>
+                      <entry key="excludeTypeFromAttributeName" value="true"/>
+                    </Map>
+                  </Attributes>
+                  <AttributePropertyMapping name="value" property="value"/>
+                  <AttributePropertyMapping name="$ref" property="$ref"/>
+                  <AttributePropertyMapping name="display" property="display"/>
+                  <AttributePropertyMapping name="type" property="type"/>
+                </AttributePropertyMapping>
+              </SchemaPropertyMapping>
+              <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:pam:1.0:PrivilegedData">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="id" property="id" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="name" property="name" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="description" property="description" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="type" property="type" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+              </SchemaPropertyMapping>
+              <SchemaPropertyMapping urn="urn:ietf:params:scim:schemas:core:2.0:Group">
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="id" property="id" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2PropertyGetter" name="displayName" property="displayName" setter="openconnector.connector.scim2.SCIM2PropertySetter"/>
+                <AttributePropertyMapping getter="openconnector.connector.scim2.SCIM2MultiValuedPropertyGetter" name="members" property="members" setter="openconnector.connector.scim2.SCIM2PropertySetter">
+                  <AttributePropertyMapping name="value" property="value"/>
+                  <AttributePropertyMapping name="$ref" property="$ref"/>
+                  <AttributePropertyMapping name="type" property="type"/>
+                </AttributePropertyMapping>
+              </SchemaPropertyMapping>
+            </List>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US"/>
+            </Map>
+          </value>
+        </entry>
+        <entry key="templateApplication" value="Privileged Account Management"/>
+        <entry key="user" value="spadmin"/>
+      </Map>
+    </Attributes>
+    <Owner>
+      <Reference class="sailpoint.object.Identity" name="Jerry.Bennett"/>
+    </Owner>
+    <ProvisioningForms>
+      <Form name="Create Account Form" objectType="account" type="Create">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Create Account Form"/>
+          </Map>
+        </Attributes>
+        <Description>Provisioning form for create account.</Description>
+        <Section>
+          <Field displayName="Given Name" name="name.givenName" required="true" type="string">
+            <Script>
+              <Source><![CDATA[return identity.getFirstname();]]></Source>
+            </Script>
+          </Field>
+          <Field displayName="Last Name" name="name.familyName" required="true" type="string">
+            <Script>
+              <Source><![CDATA[return identity.getLastname();]]></Source>
+            </Script>
+          </Field>
+          <Field displayName="User Name" name="userName" required="true" type="string">
+            <Script>
+              <Source><![CDATA[return identity.getName();]]></Source>
+            </Script>
+          </Field>
+          <Field displayName="Display Name" name="displayName" required="true" type="string">
+            <Script>
+              <Source><![CDATA[return identity.getDisplayName();]]></Source>
+            </Script>
+          </Field>
+          <Field displayName="Email" name="emails.work.value" required="true" type="string">
+            <Script>
+              <Source><![CDATA[return identity.getEmail();]]></Source>
+            </Script>
+          </Field>
+        </Section>
+      </Form>
+    </ProvisioningForms>
+    <Schemas>
+      <Schema displayAttribute="userName" identityAttribute="id" instanceAttribute="" nativeObjectType="User" objectType="account">
+        <AttributeDefinition name="id" type="string">
+          <Description>The unique identifier of the User.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="userName" type="string">
+          <Description>Unique identifier for the User, typically used by the user to directly authenticate to the service provider.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name.formatted" type="string">
+          <Description>The full name, including all middle names, titles, and suffixes as appropriate, formatted for display (e.g., 'Ms. Barbara J Jensen, III').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name.familyName" type="string">
+          <Description>The family name of the User, or last name in most Western languages (e.g., 'Jensen' given the full name 'Ms. Barbara J Jensen, III').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name.givenName" type="string">
+          <Description>The given name of the User, or first name in most Western languages (e.g., 'Barbara' given the full name 'Ms. Barbara J Jensen, III').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name.middleName" type="string">
+          <Description>The middle name(s) of the User (e.g., 'Jane' given the full name 'Ms. Barbara J Jensen, III').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name.honorificPrefix" type="string">
+          <Description>The honorific prefix(es) of the User, or title in most Western languages (e.g., 'Ms.' given the full name 'Ms. Barbara J Jensen, III').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name.honorificSuffix" type="string">
+          <Description>The honorific suffix(es) of the User, or suffix in most Western languages (e.g., 'III' given the full name 'Ms. Barbara J Jensen, III').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayName" type="string">
+          <Description>The name of the User, suitable for display to end-users.  The name SHOULD be the full name of the User being described, if known.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="nickName" type="string">
+          <Description>The casual way to address the user in real life, e.g., 'Bob' or 'Bobby' instead of 'Robert'.  This attribute SHOULD NOT be used to represent a User's username (e.g., 'bjensen' or 'mpepperidge').</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="profileUrl" type="string">
+          <Description>A fully qualified URL pointing to a page representing the User's online profile.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="title" type="string">
+          <Description>The user's title, such as "Vice President."</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="userType" type="string">
+          <Description>Used to identify the relationship between the organization and the user.  Typical values used might be 'Contractor', 'Employee', 'Intern', 'Temp', 'External', and 'Unknown', but any value may be used.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="preferredLanguage" type="string">
+          <Description>Indicates the User's preferred written or spoken language.  Generally used for selecting a localized user interface; e.g., 'en_US' specifies the language English and country US.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="locale" type="string">
+          <Description>Used to indicate the User's default location for purposes of localizing items such as currency, date time format, or numerical representations.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="timezone" type="string">
+          <Description>The User's time zone in the 'Olson' time zone database format, e.g., 'America/Los_Angeles'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="active" type="boolean">
+          <Description>A Boolean value indicating the User's administrative status.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.work.primary.value" type="string">
+          <Description>Email addresses for the user.  The value SHOULD be canonicalized by the service provider, e.g., 'bjensen@example.com' instead of 'bjensen@EXAMPLE.COM'. Canonical type values of 'work', 'home', and 'other'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.work.secondary.value" type="string">
+          <Description>Email addresses for the user.  The value SHOULD be canonicalized by the service provider, e.g., 'bjensen@example.com' instead of 'bjensen@EXAMPLE.COM'. Canonical type values of 'work', 'home', and 'other'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.work.primary.display" type="string">
+          <Description>A human-readable name, primarily used for display purposes.  READ-ONLY.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.work.secondary.display" type="string">
+          <Description>A human-readable name, primarily used for display purposes.  READ-ONLY.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.home.primary.value" type="string">
+          <Description>Email addresses for the user.  The value SHOULD be canonicalized by the service provider, e.g., 'bjensen@example.com' instead of 'bjensen@EXAMPLE.COM'. Canonical type values of 'work', 'home', and 'other'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.home.secondary.value" type="string">
+          <Description>Email addresses for the user.  The value SHOULD be canonicalized by the service provider, e.g., 'bjensen@example.com' instead of 'bjensen@EXAMPLE.COM'. Canonical type values of 'work', 'home', and 'other'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.home.primary.display" type="string">
+          <Description>A human-readable name, primarily used for display purposes.  READ-ONLY.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.home.secondary.display" type="string">
+          <Description>A human-readable name, primarily used for display purposes.  READ-ONLY.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.other.primary.value" type="string">
+          <Description>Email addresses for the user.  The value SHOULD be canonicalized by the service provider, e.g., 'bjensen@example.com' instead of 'bjensen@EXAMPLE.COM'. Canonical type values of 'work', 'home', and 'other'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.other.secondary.value" type="string">
+          <Description>Email addresses for the user.  The value SHOULD be canonicalized by the service provider, e.g., 'bjensen@example.com' instead of 'bjensen@EXAMPLE.COM'. Canonical type values of 'work', 'home', and 'other'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.other.primary.display" type="string">
+          <Description>A human-readable name, primarily used for display purposes.  READ-ONLY.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="emails.other.secondary.display" type="string">
+          <Description>A human-readable name, primarily used for display purposes.  READ-ONLY.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="groups" schemaObjectType="group" type="string">
+          <Description>A list of groups to which the user belongs, either through direct membership, through nested groups, or dynamically calculated.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="entitlements" type="string">
+          <Description>A list of entitlements for the User that represent a thing the User has.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition entitlement="true" managed="true" multi="true" name="roles" type="string">
+          <Description>A list of roles for the User that collectively represent who the User is, e.g., 'Student', 'Faculty'.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition correlationKey="1" name="source" type="string">
+          <Description>The name of the external application on which the object lives.  If this is a PAM local object, this is null.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition correlationKey="2" name="nativeIdentifier" type="string">
+          <Description>The native identifier of the object on the external application (eg - the LDAP DN).  If this is a PAM local object, this is null.</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema aggregationType="group" displayAttribute="displayName" featuresString="PROVISIONING" identityAttribute="id" instanceAttribute="" nativeObjectType="Container" objectType="Container">
+        <AttributeDefinition name="id" type="string">
+          <Description>The unique identifier of the Container</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name" type="string">
+          <Description>The name of the container.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayName" type="string">
+          <Description>The display name of the container.  This is optional.  If null, the name will be used as the display name.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="description" type="string">
+          <Description>The description of the container.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="type" type="string">
+          <Description>The type of container (eg - management set or account store).  This is optional if the PAM system does not support multiple types of containers.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="owner.value" type="string">
+          <Description>The ID of the user that owns this container</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="owner.$ref" type="string">
+          <Description>A URI reference to the user that owns this container.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="owner.display" type="string">
+          <Description>The display name of the user that owns this container</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData.value" type="string">
+          <Description>The ID of the privileged data.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData.$ref" type="string">
+          <Description>A URI reference to the PrivilegedData</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData.display" type="string">
+          <Description>The displayable value of the PrivilegedData</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="privilegedData.type" type="string">
+          <Description>The type of the PrivilegedData</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema aggregationType="group" displayAttribute="name" featuresString="PROVISIONING" identityAttribute="id" instanceAttribute="" nativeObjectType="PrivilegedData" objectType="PrivilegedData">
+        <AttributeDefinition name="id" type="string">
+          <Description>The unique identifier of the PrivilegedData.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="name" type="string">
+          <Description>A descriptive name for this piece of PrivilegedData.  For example, root@mylinuxhost</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="description" type="string">
+          <Description>A description for this piece of PrivilegedData.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="type" type="string">
+          <Description>The type of PrivilegedData.  The value will be dependent on what is supported by the PAM system.  Examples include 'credential', 'ssh key', 'file', etc...</Description>
+        </AttributeDefinition>
+      </Schema>
+      <Schema displayAttribute="displayName" featuresString="PROVISIONING" identityAttribute="id" instanceAttribute="" nativeObjectType="Group" objectType="group">
+        <AttributeDefinition name="id" type="string">
+          <Description>The unique identifier of the Group</Description>
+        </AttributeDefinition>
+        <AttributeDefinition name="displayName" type="string">
+          <Description>A human-readable name for the Group. REQUIRED.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition multi="true" name="members" type="string">
+          <Description>A list of members of the Group.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition correlationKey="1" name="source" type="string">
+          <Description>The name of the external application on which the object lives.  If this is a PAM local object, this is null.</Description>
+        </AttributeDefinition>
+        <AttributeDefinition correlationKey="2" name="nativeIdentifier" type="string">
+          <Description>The native identifier of the object on the external application (eg - the LDAP DN).  If this is a PAM local object, this is null.</Description>
+        </AttributeDefinition>
+      </Schema>
+    </Schemas>
+    <TargetSources>
+      <Reference class="sailpoint.object.TargetSource" name="PAMTargetSource"/>
+    </TargetSources>
+    <ApplicationScorecard/>
+  </Application>
+
+
+
+  <!-- Identity ObjectConfig -->
+<ImportAction name="merge">
+  <ObjectConfig name="Identity">
+    <ObjectAttribute displayName="att_first_name" editMode="ReadOnly" name="firstname" standard="true" type="string">
+      <AttributeSource name="name.givenName">
+        <ApplicationRef>
+           <Reference class="sailpoint.object.Application" name="Privileged Account Management"/>
+        </ApplicationRef>
+      </AttributeSource>
+    </ObjectAttribute>
+    <ObjectAttribute displayName="att_last_name" editMode="ReadOnly" name="lastname" standard="true" type="string">
+      <AttributeSource name="name.familyName">
+        <ApplicationRef>
+          <Reference class="sailpoint.object.Application" name="Privileged Account Management"/>
+        </ApplicationRef>
+      </AttributeSource>
+    </ObjectAttribute>
+  </ObjectConfig>
+</ImportAction>
+
+<!-- Aggregation tasks -->
+<TaskDefinition formPath="/monitor/tasks/accountAggregationTask.xhtml" name="Aggregate PAM Accounts" resultAction="Delete" subType="task_item_type_acct_aggregation" type="AccountAggregation">
+  <Attributes>
+    <Map>
+      <entry key="applications" value="Privileged Account Management"/>
+      <entry key="checkDeleted" value="true"/>
+      <entry key="checkHistory" value="false"/>
+      <entry key="checkPolicies" value="false"/>
+      <entry key="correlateEntitlements" value="false"/>
+      <entry key="correlateOnly" value="false"/>
+      <entry key="correlateScope" value="false"/>
+      <entry key="deltaAggregation" value="false"/>
+      <entry key="enablePartitioning" value="false"/>
+      <entry key="haltOnMaxError" value="false"/>
+      <entry key="noAutoCreateApplications" value="false"/>
+      <entry key="noAutoCreateScopes" value="false"/>
+      <entry key="noNeedsRefresh" value="false"/>
+      <entry key="noOptimizeReaggregation" value="true"/>
+      <entry key="promoteManagedAttributes" value="false"/>
+      <entry key="refreshCertifications" value="false"/>
+      <entry key="refreshScorecard" value="false"/>
+      <entry key="sequential" value="false"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+    </Map>
+  </Attributes>
+  <Description>Task template for application account scanning.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="jerry.bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Account Aggregation"/>
+  </Parent>
+</TaskDefinition>
+
+<TaskDefinition formPath="/monitor/tasks/accountGroupAggregationTask.xhtml" name="Aggregate PAM Groups" resultAction="Delete" subType="task_item_type_acct_grp_aggregation" type="AccountGroupAggregation">
+  <Attributes>
+    <Map>
+      <entry key="aggregationType" value="group"/>
+      <entry key="applications" value="Privileged Account Management"/>
+      <entry key="checkDeleted" value="true"/>
+      <entry key="deltaAggregation" value="false"/>
+      <entry key="descriptionLocale" value="en_US"/>
+      <entry key="groupSchema"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+    </Map>
+  </Attributes>
+  <Description>Task template for application group scanning.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="jerry.bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Account Group Aggregation"/>
+  </Parent>
+</TaskDefinition>
+
+<TaskDefinition name="Aggregate PAM Container Permissions" resultAction="Delete" subType="task_item_type_target_aggregation" type="TargetAggregation">
+  <Attributes>
+    <Map>
+      <entry key="promoteInherited" value="false"/>
+      <entry key="targetSource" value="PAMTargetSource"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+    </Map>
+  </Attributes>
+  <Description>Template Task for running target aggregations.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="jerry.bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Target Aggregation"/>
+  </Parent>
+</TaskDefinition>
+
+<TaskDefinition formPath="/monitor/tasks/sequentialTask.xhtml" name="setupPAM" resultAction="Delete" subType="task_item_type_generic" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="exitOnError" value="false"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+      <entry key="taskList" value="Aggregate PAM Accounts, Aggregate PAM Groups, Aggregate PAM Container Permissions, Effective Access Index Refresh, Refresh Identity Cube, Full Text Index Refresh"/>
+      <entry key="trace" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>Template for creating a task that runs multiple other tasks.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="jerry.bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Sequential Task Launcher"/>
+  </Parent>
+</TaskDefinition>
+
+<!--SysConfig - set PAM Application -->
+<ImportAction name="merge">
+  <Configuration name="SystemConfiguration">
+    <Attributes>
+      <Map>
+        <entry key="pamApplicationName" value="Privileged Account Management"/>
+      </Map>
+     </Attributes>
+  </Configuration>
+</ImportAction>
+
+</sailpoint>

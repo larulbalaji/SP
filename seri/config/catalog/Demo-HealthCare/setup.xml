@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  
+  <!-- The following need to be updated to healthcare specific -->
+  <ImportAction name='include' value='ObjectConfig-LinkHealthCare.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoCertificationSetupHealthCare.xml'/>
+  <ImportAction name='include' value='TaskDefinition-IdentityRefresh-RemoveJoinerEventHealthCare.xml'/>
+  <ImportAction name='include' value='TaskDefinition-RefreshEntitlementConnectionsHealthCare.xml'/>
+  <ImportAction name='include' value='TaskDefinition-RefreshIdentityCubeHealthCare.xml'/>
+  <ImportAction name='include' value='TaskDefinition-RoleImporter-LoadHealthCareDemoRoles.xml'/>
+  <ImportAction name='include' value='TaskDefinition-SetupDemo-HealthCare.xml'/>
+  <ImportAction name='include' value='UIConfig-Healthcare.xml'/>
+  <ImportAction name='include' value='TaskDefinition-ProvisionHealthCareAccountsSetup.xml'/>
+</sailpoint>

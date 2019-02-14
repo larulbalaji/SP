@@ -1,0 +1,26 @@
+<ConnectorGateway>
+    
+    <SM>
+        <!-- Connector Manager/Agents Hostname or IP Address-->
+        <hostname>172.16.7.248</hostname>
+
+        <!--Connector Manager/Agents port number-->
+        <port>2474</port>
+        
+        <!-- Use "AS400" for AS400 system and "MAINFRAME" for Mainframes and leave empty in all other cases.-->
+        <platform>MAINFRAME</platform>
+
+        <!--Use in case of agents only where ebcdic conversion is required. Default value is IBM500 -->
+        <characterSet></characterSet>
+    </SM>
+
+    <Server>
+        <!-- Connector Gateway port number-->
+        <port>2476</port>
+        
+        <!-- Delay(in seconds) between two retry attempts while connecting to Connector Manager/Agents-->
+        <sm_connect_retry>3</sm_connect_retry>
+
+    </Server>
+
+</ConnectorGateway>

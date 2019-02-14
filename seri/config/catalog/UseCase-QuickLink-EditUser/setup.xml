@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='include' value='Rule-SelectProperUpdateUserForm.xml'/>
+  <ImportAction name='include' value='Form-UpdateUserForm.xml'/>
+  <ImportAction name='include' value='QuickLink-EditUser.xml'/>
+  <ImportAction name='include' value='Workflow-QuickLink-UpdateUser.xml'/> 
+  <ImportAction name='include' value='Form-UpdateUserForm.xml'/>
+  <ImportAction name='include' value='Form-UpdateUserNonEmployeeForm.xml'/>
+</sailpoint>

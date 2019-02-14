@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Provisioning Policy - Domino Fullname" type="FieldValue">
+  <Description>This rule can be used to generate a field value (eg - an account name) using data from the given Identity. If this rule is run in the context of a workflow step then the arguments passed into the step will also be available. Also, any field values that have been processed so far from the policy related to the Application/Role will be available.</Description>
+  <Signature returnType="String"/>
+  <Source><![CDATA[
+  
+  String location = identity.getAttribute("location");
+  
+  if (location.equals("Austin") || location.equals("Boston") || location.equals("New York") || location.equals("San Jose") || location.equals("Sao Paulo")) {
+  return identity.getFirstname() + " " + identity.getLastname() + "/" + location + "/Americas/SERI";
+  }
+  else if (location.equals("Brussels") || location.equals("London") || location.equals("Munich")) {
+  return identity.getFirstname() + " " + identity.getLastname() + "/" + location + "/EMEA/SERI";
+  }
+  else if (location.equals("Singapore") || location.equals("Taipei") || location.equals("Tokyo")) {
+  return identity.getFirstname() + " " + identity.getLastname() + "/" + location + "/APAC/SERI";
+  }
+  else {
+    return identity.getFirstname() + " " + identity.getLastname() + "/SERI";
+  }
+
+  ]]></Source>
+</Rule>

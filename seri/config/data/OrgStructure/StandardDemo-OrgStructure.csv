@@ -1,0 +1,31 @@
+Add Org,identityinc,Identity Inc.
+Add Org,amer,Americas,identityinc
+Add Org,apac,Asia-Pacific,identityinc
+Add Org,eu,Europe,identityinc
+Add Org,aus,Austin,amer
+Add Org,gig,Sao Paulo,amer
+Add Org,sjc,San Jose,amer
+Add Org,sin,Singapore,apac
+Add Org,tsa,Taipei,apac
+Add Org,hnd,Tokyo,apac
+Add Org,bru,Brussels,eu
+Add Org,ldn,London,eu
+Add Org,muc,Munich,eu
+Add Responsible,aus,Regional Head,Helen.King
+Add Responsible,aus,Chief Risk Officer,Mark.Allen
+Add Responsible,gig,Regional Head,Deborah.Collins
+Add Responsible,gig,Chief Risk Officer,Edward.Baker
+Add Responsible,sjc,Regional Head,Pamela.Kelly
+Add Responsible,sjc,Chief Risk Officer,Raymond.James
+Add Responsible,sin,Regional Head,Bonnie.Carroll
+Add Responsible,sin,Chief Risk Officer,Craig.Hart
+Add Responsible,tsa,Regional Head,Mike.Chapman
+Add Responsible,tsa,Chief Risk Officer,Grace.Stanley
+Add Responsible,hnd,Regional Head,Earl.Sims
+Add Responsible,hnd,Chief Risk Officer,Emily.Kelley
+Add Responsible,bru,Regional Head,Doris.Jordan
+Add Responsible,bru,Chief Risk Officer,Joe.Myers
+Add Responsible,ldn,Regional Head,Judy.Warren
+Add Responsible,ldn,Chief Risk Officer,Kathy.Burns
+Add Responsible,muc,Regional Head,Marie.Hughes
+Add Responsible,muc,Chief Risk Officer,Roy.Porter

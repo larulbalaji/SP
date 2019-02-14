@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='include' value='Bundle-NonDigitalAsset.xml'/>
+  <ImportAction name='include' value='Resource-NonDigitalAsset.xml'/>
+  <ImportAction name='include' value='Rule-JDBCProvisioningRule.xml'/>
+</sailpoint>

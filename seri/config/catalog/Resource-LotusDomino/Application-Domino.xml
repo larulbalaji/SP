@@ -1,0 +1,205 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.LotusDomino"  featuresString="GROUP_PROVISIONING, PROVISIONING, MANAGER_LOOKUP, ENABLE, AUTHENTICATE, SEARCH, UNLOCK, PASSWORD, CURRENT_PASSWORD, ACCOUNT_ONLY_REQUEST"   name="Domino" profileClass="" type="IBM Lotus Domino - Direct">
+  <Attributes>
+    <Map>
+      <entry key="AdminIDFilePath"/>
+      <entry key="IQServiceHost" value="spwinxpvm"/>
+      <entry key="IQServicePort" value="5050"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1375911539348</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1375911539203</Date>
+        </value>
+      </entry>
+      <entry key="adminName" value="administrator spadmin/support"/>
+      <entry key="afterProvisioningRule"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="dbName" value="names.nsf"/>
+      <entry key="hostName" value="spwinxpvm:63148"/>
+      <entry key="indxDb" value="N"/>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="pageSize" value="100"/>
+      <entry key="password" value="1:8ST3VIgBcf18gzBCMbvQhQ=="/>
+      <entry key="searchAccount"/>
+      <entry key="searchGroup"/>
+      <entry key="serverName" value="sailpoint/support"/>
+      <entry key="templateApplication" value="IBM Lotus Domino - Direct"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema  displayAttribute="FullName" groupAttribute="Groups"  identityAttribute="NOTEID" instanceAttribute=""  nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="FirstName" remediationModificationType="None" required="true" type="string"/>
+      <AttributeDefinition name="MiddleInitial" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="LastName" remediationModificationType="None" required="true" type="string"/>
+      <AttributeDefinition name="FullName" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="ShortName" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Type" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Owner" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="MailSystem" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="MailDomain" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="MailServer" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="MailFile" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="InternetAddress" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="JobTitle" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="CompanyName" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Department" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="EmployeeID" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Location" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Manager" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficePhoneNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeFAXPhoneNumber " remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="CellPhoneNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PhoneNumber_6" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Assistant" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeStreetAddress" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeCity" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeState" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeZIP" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeCountry" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="OfficeNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="StreetAddress" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="State" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Zip" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Country" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PhoneNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="HomeFAXPhoneNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Spouse" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Children" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PersonalID" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Comment" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="WebSite" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PhotoURL" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="LocalAdmin" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="CheckPassword" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PasswordChangeInterval" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PasswordGracePeriod" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Policy" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Profiles" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="ClientType" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PostalAddress" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="HomePostalAddress" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Street" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="BusinessCategory" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="CarLicense" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="DepartmentNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="EmployeeNumber" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="EmployeeType" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="PasswordChangeDate" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="HTTPPasswordChangeDate" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="NOTEID" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="$UpdatedBy" remediationModificationType="None" type="string"/>
+      <AttributeDefinition entitlement="true" managed="true" name="Groups" remediationModificationType="None" type="string"/>
+    </Schema>
+    <Schema  displayAttribute="GroupName"  identityAttribute="ListName" instanceAttribute=""  nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="ListName" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="GroupType" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="ListDescription" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="ListOwner" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="LocalAdmin" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="MailDomain" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="InternetAddress" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="Comments" remediationModificationType="None" type="string"/>
+      <AttributeDefinition multi="true" name="Members" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="$UpdatedBy" remediationModificationType="None" type="string"/>
+    </Schema>
+  </Schemas>
+  <Templates>
+    <Template name="account" usage="Create">
+      <Field displayName="Server Name" helpKey="Name of the server on which the user will be created" name="ServerName" required="true" type="string" value="sailpoint/support"/>
+      <Field displayName="Certifier ID File Path" helpKey="ID file path of the certifier for eg. d:\id\cert.id" name="CertifierIDFile" required="true" type="string">
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule"  name="Domino - Cert ID"/>
+        </RuleRef>
+      </Field>
+      <Field displayName="Certifier Password" helpKey="Password of the certifier id file" name="CertifierPassword" required="true" type="secret">
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule"  name="Domino - Cert Password"/>
+        </RuleRef>
+      </Field>
+      <Field displayName="Last Name" name="LastName" required="true" type="string">
+        <Script>
+          <Source>return identity.getLastname();</Source>
+        </Script>
+      </Field>
+      <Field displayName="User Full Name" helpKey="Full Name of the user which will be added to the group&apos;s members field for eg. FirstName LastName/OName" name="FullName" required="true" type="string">
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule"  name="Domino - FullName"/>
+        </RuleRef>
+      </Field>
+      <Field displayName="User ID File Path" name="IDFilePath" required="true" type="string">
+        <Script>
+          <Source>return ("c:\\" +identity.getName() + ".id");</Source>
+        </Script>
+      </Field>
+      <Field displayName="User ID File Password" name="UserIDFilePassword" required="true" type="secret" value="Joiner123!"/>
+      <Field displayName="ID Type" name="IDType" required="true" type="string" value="HIERARCHICAL">
+        <AllowedValues>
+          <String>FLAT</String>
+          <String>HIERARCHICAL</String>
+          <String>CERTIFIER</String>
+        </AllowedValues>
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>FLAT</String>
+              <String>HIERARCHICAL</String>
+              <String>CERTIFIER</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field name="FirstName" required="true" type="string">
+        <Script>
+          <Source>return (identity.getFirstname());</Source>
+        </Script>
+      </Field>
+    </Template>
+    <Template name="group" usage="CreateGroup">
+      <Field displayName="GroupName" helpKey="Name of the group" name="ListName" required="true" type="string"/>
+    </Template>
+    <Template name="group" usage="UpdateGroup">
+      <Field displayName="Group Type" name="GroupType" required="true" type="string" value="Multi-purpose">
+        <AllowedValues>
+          <String>Multi-purpose</String>
+          <String>Mail only</String>
+          <String>Access Control List only</String>
+          <String>Deny List only</String>
+          <String>Servers only</String>
+        </AllowedValues>
+        <AllowedValuesDefinition>
+          <Value>
+            <List>
+              <String>Multi-purpose</String>
+              <String>Mail only</String>
+              <String>Access Control List only</String>
+              <String>Deny List only</String>
+              <String>Servers only</String>
+            </List>
+          </Value>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="List Description" helpKey="Description of group" name="ListDescription" reviewRequired="true" type="string"/>
+      <Field displayName="List Owner" helpKey="Owner of the group" name="ListOwner" reviewRequired="true" type="string"/>
+      <Field displayName="Local Admin" helpKey="Local Admin of group" name="LocalAdmin" reviewRequired="true" type="string"/>
+      <Field displayName="Mail Domain" name="MailDomain" reviewRequired="true" type="string"/>
+      <Field displayName="Internet Address" name="InternetAddress" reviewRequired="true" type="string"/>
+      <Field displayName="Comments" name="Comments" reviewRequired="true" type="string"/>
+    </Template>
+  </Templates>
+</Application>

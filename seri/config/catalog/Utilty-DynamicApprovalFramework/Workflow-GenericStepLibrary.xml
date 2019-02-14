@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow name="Generic Step Library" template="true" type="StepLibrary">
+ <Step icon="Default" name="Generic Step"/>
+  <Step icon="Start" name="Start"/>
+  <Step icon="Stop" name="Stop"/>
+  <Step icon="Approval" name="Approve Items With No Approvals" configForm="Configure Filter Approval Step Form">
+ <Arg name="msg"/>
+    <Arg name="approvalOwner"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="approvalOwnerRule"/>
+    <Arg name="workItemComments"/>
+    <Arg name="disableApprovalRequired" value="string:true"/>
+    <Arg name="identityRequestId" value="ref:identityRequestId"/>
+    <Arg name="workItemDescription"/>
+    <Arg name="identityDisplayName"/>
+    <Arg name="workItemTargetId"/>
+    <Arg name="workItemTargetClass"/>
+    <Arg name="autoApprovedRuleAttribute"/>
+    <Arg name="includeRejectedItemsInApprovalChain"/>
+    <Arg name="entitlementRoleThreshold"/>
+    <Arg name="flow"/>
+    <Arg name="identityName"/>
+    <Arg name="approvalRequiredRule"/>
+    <Arg name="managersDirectorApprover"/>
+    <Arg name="workItemTargetName"/>
+    <Arg name="attributeValue"/>
+    <Arg name="approvalRequiredRuleAttribute"/>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="tmpApprovalSet"/>
+    <Arg name="ownerEmailTemplate"/>
+    <Arg name="approvalOwnerAttribute"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="managerEmailTemplate"/>
+    <Arg name="identityRiskThreshold"/>
+    <Arg name="approvalScheme"/>
+    <Arg name="autoApprovedRule"/>
+    <Arg name="includeOnTrue" value="string:true"/>
+    <Arg name="disableAutoApprove" value="string:true"/>
+    <Arg name="approvalType" value="approveNonResponded"/>
+    <Arg name="approvalOwnerType"/>
+    <Arg name="workItemRequester"/>
+    <Arg name="approvalMode"/>
+    <Arg name="trace"/>
+    <Arg name="attributeObjectType" value="string:any"/>
+    <Arg name="attributeName"/>
+    <Arg name="workItemNotificationTemplate"/>
+    <Arg name="selectedApprover"/>
+    <Arg name="disableApprovalRisk" value="string:true"/>
+    <Arg name="policyViolations"/>
+    <Arg name="entitlementRiskThreshold"/>
+    <Arg name="forceDecision" value="string:true"/>
+    <Arg name="autoApprovedApprovalSet"/>
+    <Arg name="approvalOwnerRuleAttribute"/>
+    <Arg name="includeRejected" value="string:true"/>
+    <Arg name="identityId"/>
+    <Arg name="disableMetadataApproval" value="string:true"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <Arg name="project" value="ref:project"/>
+    <Return name="approvalSet"/>
+    <Return name="workItemComments"/>
+    <Return name="project"/>
+      
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" name="Dynamic Identity Request Approve Subprocess"/>
+    </WorkflowRef>
+  </Step>
+  <Step icon="Approval" name="Approval" configForm="Configure Filter Approval Step Form">
+     <Arg name="msg"/>
+    <Arg name="approvalOwner"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="approvalOwnerRule"/>
+    <Arg name="workItemComments"/>
+    <Arg name="disableApprovalRequired" value="string:true"/>
+    <Arg name="identityRequestId" value="ref:identityRequestId"/>
+    <Arg name="workItemDescription"/>
+    <Arg name="identityDisplayName"/>
+    <Arg name="workItemTargetId" value="ref:identityId"/>
+    <Arg name="workItemTargetClass" value="string:sailpoint.object.Identity"/>
+    <Arg name="autoApprovedRuleAttribute"/>
+    <Arg name="includeRejectedItemsInApprovalChain"/>
+    <Arg name="entitlementRoleThreshold"/>
+    <Arg name="flow"/>
+    <Arg name="identityName" value="string:$(identityName)"/>
+    <Arg name="approvalRequiredRule"/>
+    <Arg name="managersDirectorApprover"/>
+    <Arg name="workItemTargetName" value="string:$(identityName)"/>
+    <Arg name="attributeValue" value="true"/>
+    <Arg name="approvalRequiredRuleAttribute"/>
+    <Arg name="approvalSet" value="ref:approvalSet"/>
+    <Arg name="ownerEmailTemplate"/>
+    <Arg name="approvalOwnerAttribute"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="managerEmailTemplate"/>
+    <Arg name="identityRiskThreshold"/>
+    <Arg name="approvalScheme"/>
+    <Arg name="autoApprovedRule"/>
+    <Arg name="includeOnTrue" value="string:true"/>
+    <Arg name="disableAutoApprove" value="string:true"/>
+    <Arg name="approvalType" value="filterApprovalSetByUserRiskThreshold"/>
+    <Arg name="approvalOwnerType" value="Manager"/>
+    <Arg name="workItemRequester" value="string:$(launcher)"/>
+    <Arg name="approvalMode"/>
+    <Arg name="trace"/>
+    <Arg name="attributeObjectType" value="string:any"/>
+    <Arg name="attributeName" value="managerApprover"/>
+    <Arg name="workItemNotificationTemplate" value="ref:securityOfficerEmailTemplate"/>
+    <Arg name="selectedApprover"/>
+    <Arg name="disableApprovalRisk" value="string:true"/>
+    <Arg name="policyViolations"/>
+    <Arg name="entitlementRiskThreshold"/>
+    <Arg name="forceDecision" value="string:false"/>
+    <Arg name="autoApprovedApprovalSet"/>
+    <Arg name="approvalOwnerRuleAttribute"/>
+    <Arg name="includeRejected" value="string:true"/>
+    <Arg name="identityId"/>
+    <Arg name="disableMetadataApproval" value="string:false"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <Arg name="project" value="ref:project"/>
+    <Return name="approvalSet"/>
+    <Return name="workItemComments"/>
+    <Return name="project"/>
+       
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" name="Dynamic Identity Request Approve Subprocess"/>
+    </WorkflowRef>
+  </Step>
+ 
+  
+</Workflow>

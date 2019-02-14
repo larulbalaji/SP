@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="SERI - Demo Dashboard Setup" hidden="true" resultAction="Delete">
+  <Attributes>
+    <Map>
+      <entry key="actionsFile" value="./WEB-INF/config/seri/data/DashboardActions.csv"/>
+      <entry key="mode" value="DASHBOARD_SETUP"/>
+    </Map>
+  </Attributes>
+  <Description>
+         Set up initial manager and application owner certifications.
+    </Description>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="SERI - Demo Setup"/>
+  </Parent>
+</TaskDefinition>

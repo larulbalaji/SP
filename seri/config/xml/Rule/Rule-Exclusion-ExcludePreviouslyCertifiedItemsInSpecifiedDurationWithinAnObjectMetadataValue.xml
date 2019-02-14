@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Rule  language="beanshell"  name="Exclude All Items Previously Certified Within A Specified Time Period With a Specific Object Attribute Value" type="CertificationExclusion">
+  <Description>This rule will exclude all Entitlements defined in a specific population that have a prior certification date not within the specified days window. This will only work for entitlements and assumes that 'Include Roles' and "Include Policy Violations' features are not selected in the certification template.</Description>
+   <ReferencedRules>
+    <Reference class="sailpoint.object.Rule"  name="Exclusion Utility Library"/>
+  </ReferencedRules>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="entity" type="AbstractCertifiableEntity">
+        <Description>
+          The AbstractCertifiableEntity that is part of the certification.
+          Currently, this is either an Identity, ManagedAttribute, or Bundle.
+        </Description>
+      </Argument>
+      <Argument name="certification" type="Certification">
+        <Description>
+          The certification that this identity is part of.
+        </Description>
+      </Argument>
+      <Argument name="certContext" type="CertificationContext">
+        <Description>
+          The CertificationContext that is being used to generate the
+          certification.
+        </Description>
+      </Argument>
+      <Argument name="items" type="List">
+        <Description>
+          List of Certifiable items that are currently part of the
+          certification for this identity.  Any items that should be excluded
+          from the certification should be deleted from this list and added
+          to the itemsToExclude list.
+        </Description>
+      </Argument>
+      <Argument name="itemsToExclude" type="List">
+        <Description>
+          A List of Certifiable items that should not be included in the
+          certification.  This list will be empty when the rule is executed
+          and any items that should not be part of the certification should
+          be moved from the items list to the itemsToExclude list.
+        </Description>
+      </Argument>
+      <Argument name="state" type="Map">
+        <Description>
+          A Hashmap available to you to store stuff in. Scope of state is per the certification.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="explanation" type="String">
+        <Description>
+          An optional explanation describing why the items were excluded.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+// Method Signature
+//  	public void filter(
+//            String metadataObjectType, 
+//		    String attributeName,
+//			Object attributeValue,
+//			boolean excludeItemOnCriteriaMatch);
+//
+// Allowed MetadataObjectType Values are "MANAGED_ATTRIBUTE", "ACCOUNT", and "APPLICATION"
+
+filter("ACCOUNT", "privileged",true, 90);
+
+return null;
+    ]]></Source>
+  </Rule>
+</sailpoint>

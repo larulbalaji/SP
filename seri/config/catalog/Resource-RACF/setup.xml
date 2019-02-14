@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+
+  <!-- We use rule-based correlation for RACF -->
+  <ImportAction name='include' value='Rule-Correlation-RACF.xml'/>
+
+  <ImportAction name='include' value='Application-RACF.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AA-RACF.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AGA-RACF.xml'/>
+  <ImportAction name='include' value='LocalizedAttribute-RACF.xml'/>
+</sailpoint>

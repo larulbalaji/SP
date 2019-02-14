@@ -1,0 +1,945 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <EmailTemplate name="Service Creation Rejection Notification">
+    <Description>
+      Email Template for notifying IIQ user that their request to create a service got rejected
+    </Description>
+    <Body>
+      <![CDATA[
+      <html>
+        <br>
+        This is an automated notification from IdentityIQ.<br><br>
+        Your request to create the Service, $groupName, was rejected.<br><br>
+        <b>Reason:</b>  $groupModel.sys.approverComments<br><br>
+        Sincerely,<br>
+        IT Oversight Team
+      </html>
+      ]]>
+    </Body>
+    <Subject>Service Creation - Rejected</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Service Creation - Create Request">
+    <Description>
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='groupModel' type='java.util.Map'>
+          <Description>The model for the group; populated via form binding</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>APPROVAL:  Create Group Request for $requesterDisplayName</Subject>
+    <Body>
+      <![CDATA[
+      <html>
+        <br>
+        You are a designated approver for this request.<br><br>
+        <b>Service Name:</b>  $groupModel.sys.displayName<br>
+        <b>Requester:</b>  $requesterDisplayName<br><br>
+        Please login to IdentityIQ and view your inbox to complete this approval at your earliest convenience.
+      </html>
+      ]]>
+     </Body>
+  </EmailTemplate>
+
+  <Workflow name='Service Management - Create' libraries="Identity,LCM,ManagedAttribute">
+  
+    <Description>    
+      A workflow for providing AD Service Management to the business user.
+    </Description>
+    
+    <Variable name='transient' initializer='true'>
+      <Description>
+        Set to false to cause workflow-related objects, such as approval
+        work items, to be saved in the database even if they are only
+        viewed by the person registering.
+      </Description>
+    </Variable>
+      
+    <Variable name='trace' initializer='true'>
+      <Description>enable this to see stuff spit out to stdout</Description>  
+    </Variable>
+
+    <Variable name='requesterDisplayName'/>
+        
+    <Variable name='groupDN' initializer="script: new String();">
+      <Description>The DN for the candidate group (based on DN template)</Description>
+    </Variable>
+
+    <Variable name='groupAttributeName' initializer="memberOf"/>
+
+    <Variable name='groupMembership'>
+      <Description>List of identities to be added to group</Description>
+    </Variable>
+
+    <Variable name='appId' type='string'>
+      <Description>The application id for the app we're creating groups on</Description>
+    </Variable>
+        
+    <Variable name='readOnlyForm'>
+      <Description>Read only form for confirmation dialog.</Description>
+    </Variable>
+    
+    <Variable initializer='Form-ServiceManagement - Create' name='formName'>
+       <Description>The name of the form used by this request process</Description>
+    </Variable>
+
+    <Variable initializer='Form-ServiceManagement - Create Approval' name='approvalFormName'>
+       <Description>The name of the approval form used by this request process</Description>
+    </Variable>
+    
+    <Variable initializer='groupModel' name='basePath'>
+       <Description>The form path to the group model we're filling in for create</Description>
+    </Variable>
+
+    <Variable name="dnTemplate" initializer="CN=#,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+      <Description>
+	The DN template we'll use for group creation in AD.
+      </Description>
+    </Variable>
+
+    <Variable initializer='serial' input='true' name='approvalMode'>
+      <Description>
+       A string that specifies how we should handle the approvals.  
+
+       By default this is serial since most of these request with
+       the exception of manager transfers will have only one approver.
+
+       parallel
+         Approvals are processed concurrently and there must be consensus,
+         we wait for all approvers to approve.  The first approver that
+         rejects terminates the entire approval.
+ 
+       parallelPoll 
+         Approvals are processed concurrently but consensus is not required.
+         All approvals will be process, we don't stop if there any
+         rejections.  
+
+       serial
+         Approvals are processed one at a time and there must be consensus.
+         The first approver that rejects terminates the entire approval.
+
+       serialPoll
+         Approvals are processed in order but consensus is not required.
+         All approvals will be processed, we don't stop if there are any
+         rejections.  In effect we are "taking a poll" of the approvers.
+
+       any
+        Approvals are processed concurrently, the first approver to 
+        respond makes the decision for the group.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='owner' input='true' name='approvalScheme'>
+      <Description>
+      A csv string that specifies how approvals should be generated for 
+      the incoming request.
+ 
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+  
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the  
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing 
+              with things like Unlock and other account level changes 
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.
+
+      </Description>
+    </Variable>    
+    
+    <Variable initializer='continue' input='true' name='policyScheme'>
+      <Description>
+        A String that specifies how policy checks effect the overall
+        process.
+
+        none - disabled policy checking
+
+        continue -  continue if policy violations are found
+
+        interactive -  allow requester to remove request items which are causing violations
+
+        fail -  this option will cause the workflow to terminate immediately if any policy violations are found.
+                Note that the requester will not be notified that the workflow has terminated.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='user,requester' input='true' name='notificationScheme'>
+      <Description>
+       A string that specifies who should be notified when the request has been complete.
+       The value can be null or a csv of one or more of the following options. 
+
+       none or null
+         disable notifications
+
+       user 
+         Identity that is being update will be notified.
+
+       manager
+         The manager of the Identity that is being updated will be notified.
+
+       requester
+         The person that has requested the update will be notified.
+      </Description>
+    </Variable>
+    <Variable editable="true" initializer="true" name="foregroundProvisioning">
+      <Description>
+      Normally provisioning is done in a step that uses the "background"
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to
+      see the results of the request.
+      </Description>
+    </Variable>        
+    <Variable name='doRefresh' editable='true'>
+      <Description>
+        Set to true to cause an identity refresh after the changes in the plan
+        have been provisioned.  This is normally off, you might want this on
+        if you want modification of identity or link attributes to result in
+        an immediate re-evaluation of assigned and detected roles.
+      </Description>
+    </Variable>
+    
+    <Variable name="exitWorkflow" type="Boolean" initializer='false' >
+       <Description>
+         Value posted by the "Exit Workflow" form button, to indicate the workflow should end.
+         This is somethign handled in transitions on Approvals that have forms and gives
+         a way for customers to exit the workflow.
+       </Description>    
+    </Variable>
+
+    <Variable name="groupModel"/>
+    <Variable name="plans"/>
+    <Variable name="identityRefreshFilterString"/>
+    <Variable name="identityRefreshFilterGoups"/>                   
+    
+                     
+    <Step icon="Start" name="start" resultVariable='appId'>
+      <Script>
+        <Source>
+          <![CDATA[ 
+            import sailpoint.object.Application;
+            
+            serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ServiceManagementCreate.Start" );            
+            Application app = context.getObjectByName(Application.class, "Active Directory");
+            if ( app == null ) {
+                throw new Exception("This example workflow requires an Active Directory application named 'Active Directory', which could not be found.");
+            }
+
+            // populate requesterDisplayName as well
+            workflow.put("requesterDisplayName", resolveDisplayName(launcher));
+
+            return app.getId();
+          ]]>	
+        </Source>
+      </Script>
+      <Transition to='Build Group Model'/>
+    </Step>
+
+    <Step name='Build Group Model' icon='Task' resultVariable='groupModel' action='call:getManagedAttributeModel'>
+      <Arg name='name' value='ref:groupAttributeName'/>
+      <Arg name='appId' value='ref:appId'/>
+      <Arg name='value' value='ref:groupDN'/>
+      <Transition to='Present Create Form'/>
+    </Step>
+    
+    <Step name="Present Create Form" posX="88">
+      <Approval owner="ref:launcher" 
+               return="groupModel, exitWorkflow" 
+                 send="launcher, groupModel">
+	      <Arg name="dnTemplate" value="ref:dnTemplate"/>
+	      <Arg name="appId" value="ref:appId"/>
+	      <Arg name="workItemDescription" value="Request Service - Input Service Details"/>
+	      <Arg name="workItemFormBasePath" value="ref:basePath"/>
+        <Arg name='workItemForm' value='ref:formName'/>
+      </Approval>
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Prepare Model'/>
+    </Step>
+
+    <Step name='Prepare Model' icon='Task' resultVariable='groupDN'>
+      <Script>
+	      <Source>
+	        <![CDATA[ 
+            import sailpoint.tools.MapUtil;
+            import sailpoint.tools.xml.XMLObjectFactory;
+            
+            serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ServiceManagementCreate.PrepareModel" );
+            
+            MapUtil.put(groupModel, "sys.nativeIdentity", $(groupModel.distinguishedName));
+            MapUtil.put(groupModel, "sys.attribute", groupAttributeName);
+            MapUtil.put(groupModel, "sys.type", "Entitlement");
+            MapUtil.put(groupModel, "sAMAccountName", groupModel.get("groupName") );
+            MapUtil.put(groupModel, "GroupType", "Security" );
+            
+            // if assignService is set store it for the workflow
+            // used for doing an IdentityRefresh
+            if( groupModel.get("assignService") ) {
+              workflow.put("assignService", groupModel.get("assignService") ); 
+            } 
+           
+            serilog.debug("MODEL AFTER: \n" + XMLObjectFactory.getInstance().toXml(groupModel));
+            serilog.debug("attributeMatch: " +  groupModel.get("attributeMatch") ); 
+            serilog.debug("groupName: " + groupModel.get("groupName") );
+            serilog.debug("description: " + groupModel.get("description") );
+            serilog.debug("jobTitle: " + groupModel.get("jobTitle" ) );
+            if( null != groupModel.get("sys").get("owner") ) {
+              serilog.debug("owner: " + groupModel.get("sys").get("owner") );
+            }
+            if( null  != groupModel.get("identities") ) { 
+              serilog.debug("identities: " + groupModel.get("identities").toString() );
+            } 
+            serilog.debug("department: " + groupModel.get("department") );
+            if( null != groupModel.get("manager") ) {
+              serilog.debug("manager: " + groupModel.get("manager") );
+            }
+            if( null != groupModel.get("population") ) {
+              serilog.debug("population: " + groupModel.get("population") );
+            }
+            serilog.debug("filterString: " + groupModel.get("filterString") );
+            return $(groupModel.distinguishedName); 
+	        ]]> 
+	      </Source>
+      </Script>
+      <Transition to='Prepare Approval'/>
+    </Step>
+    
+    <Step name='Prepare Approval' resultVariable='appOwner'>
+      <Script>
+	      <Source>
+	        <![CDATA[
+            import sailpoint.object.Application;
+            import sailpoint.tools.MapUtil;
+            serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ServiceManagementCreate.PrepareApproval" );
+            
+            // Build an informal String depicting how the Service should be assigned
+            String selectorMethod = groupModel.get("selector");
+            String assignedBy;
+            if( selectorMethod.equals("pickIdentities") ) {
+              List nameList = groupModel.get("identities");
+              if( null == nameList ) {
+                serilog.info("No Identities found but Selection method pickIdentities selected. Skip assignment");
+              } else {
+                assignedBy = "directly: " + nameList.toString() ;  
+              }
+            } else if( selectorMethod.equals("attributeMatch") ) {
+              String attributeMatch = groupModel.get("attributeMatch");
+              if( null != attributeMatch ) {
+                String value = groupModel.get( attributeMatch );
+                if( null == value ) {
+                  serilog.info("Missing value for attributeMatch: " + attributeMatch );
+                } else {
+                  assignedBy = "match of: " + attributeMatch + " = " + value;                 
+                }
+              }             
+            } else if( selectorMethod.equals("predefinedPopulation") ) {
+               String populationName = groupModel.get("population");
+               if( null == populationName ) {
+                 serilog.info("No populationName found but Selection method predefinedPopulation selected. Skip assignment");
+               } else {
+                  assignedBy = "members of: " + populationName;               
+               }               
+             } else if( selectorMethod.equals("filterString") ) {
+               String filterString = groupModel.get("filterString");
+               if( null == filterString ) {
+                 serilog.info("No filterString found but Selection method filterString selected. Skip assignment");
+               } else {
+                  assignedBy = "filterString: " + filterString;               
+               }
+             } else {
+               serilog.debug("Unknown selector method: " + selectorMethod );
+             }
+            MapUtil.put(groupModel, "assignedBy" , assignedBy );
+                        
+            Application app = context.getObjectByName(Application.class, "Active Directory");
+            return app.getOwner();
+	        ]]>
+	      </Source>
+      </Script>
+    </Step>
+
+    <Step name='Approve Request'>
+      <Approval owner="ref:appOwner" return="groupModel, requestRejected" send="launcher, groupModel">
+	      <WorkItemConfig>
+	        <NotificationEmailTemplateRef> 
+	          <Reference class='EmailTemplate' name='Service Creation - Create Request'/>
+	        </NotificationEmailTemplateRef> 
+	      </WorkItemConfig>
+	      <Arg name="dnTemplate" value="ref:dnTemplate"/>
+	      <Arg name="appId" value="ref:appId"/>
+	      <Arg name="workItemDescription" value="Request Service - Approval"/>
+	      <Arg name="workItemFormBasePath" value="ref:basePath"/>
+        <Arg name='workItemForm' value='ref:approvalFormName'/>
+      </Approval>
+      <Transition to='Request Rejected' when='requestRejected'/>
+      <Transition to='cleanUpModel' when='approved'/>
+    </Step>
+    
+    <Step name="cleanUpModel">
+    <Description>
+      There might be a smarter, more efficient way, but I did not found it ;-)
+      The buildPlansFormManagedAttributeModel takes EVERY attribute that is stored on the model
+      and builds a provisioning plan with it. 
+      We gathered a lot more then the usual AD Group Attributes in the initial form.
+      IIQ barfs on provisioning then.
+      I'll have to clean out the attributes not known by AD.
+      I'll do that by creating a new Model (a Hash) and remove the unwanted attributes.
+    </Description>
+      <Script>
+        <Source>
+          <![CDATA[
+            import java.util.Map;
+            
+            serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ServiceManagementCreate.cleanModel" );
+            Map cleanModel = new HashMap();          
+                                 
+            for (Map.Entry entry : groupModel.entrySet() ) {
+              cleanModel.put( entry.getKey(), entry.getValue() ); 
+            }   
+            cleanModel.remove("assignService");
+            cleanModel.remove("attributeMatch");
+            cleanModel.remove("department");
+            cleanModel.remove("filterString");
+            cleanModel.remove("identities");
+            cleanModel.remove("jobTitle");
+            cleanModel.remove("manager");
+            cleanModel.remove("population");
+            cleanModel.remove("selector");
+            cleanModel.remove("groupName");
+            cleanModel.remove("identityMembership");
+            cleanModel.remove("identityAssignment");
+            cleanModel.remove("assignedBy");
+            
+            workflow.put("cleanModel", cleanModel);
+            serilog.debug("cleanModel: " + cleanModel.toString() );
+          ]]>
+        </Source>
+      </Script>
+      <Transition to='Build Provisioning Plans'/>      
+    </Step>
+
+    <Step name='Build Provisioning Plans' icon='Task' resultVariable='plans' action='call:buildPlansFromManagedAttributeModel' posX='186' posY='10'>
+      <Description>
+        For now, build a map of the data. Eventually this will use the Identity
+        transformer to build a Map based on an existing identityName, or 
+        Identity object.
+      </Description>
+      <Arg name='maModel' value='ref:cleanModel'/>  
+      <Transition to='Execute Plans'/>
+    </Step>
+
+    <Step name='Execute Plans' icon='Task' action='call:executeManageAttributePlans'>
+      <Arg name='plans' value='ref:plans'/>  
+      <!-- groupWorkflow and identityWorkflow can be specified here to override default workflows -->
+      <Arg name='flow' value='EntitlementRequest'/>  
+      <Arg name='approvalScheme' value='none'/>  
+      <Arg name='notificationScheme' value='none'/>  
+      <Arg name='doRefresh' value='true'/>  
+      <Arg name='policyScheme' value='none'/>  
+      <Arg name='trace' value='true'/>
+      
+      <Transition to="createItRole"/>
+    </Step>
+
+
+    <Step name="createItRole" icon="Task">
+      <Script>
+        <Source>
+          <![CDATA[
+            import sailpoint.object.Bundle;
+            import sailpoint.object.Identity;
+            import sailpoint.object.Application;
+            import sailpoint.object.Filter;
+            import sailpoint.object.Scope;           
+            import sailpoint.object.Profile;
+            import sailpoint.object.ManagedAttribute;
+            import sailpoint.api.ManagedAttributer;
+            import sailpoint.api.Describer;
+            import sailpoint.api.SailPointContext;
+            
+            serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ServiceManagementCreate.createItRole" );
+            
+            Boolean doExit = false;
+            String itRoleName = "IT-" + groupModel.get("groupName");
+            String itRoleType = "it";
+            String itParentName = "technicalServiceRoles";
+
+            serilog.debug("Got: " + groupModel.get("groupName") + " about to create IT Role: " + itRoleName  );
+
+            
+            Bundle itRole = context.getObjectByName(Bundle.class, itRoleName );                                  
+            if ( null != itRole ) {
+              serilog.info("IT Role name exists: " + itRoleName + ". Can't create Service, Skipping");
+              doExit = true;
+           } else {
+             // Create a new role
+             itRole = new Bundle();
+
+             serilog.debug("Create new IT Role: " + itRoleName );
+           
+             // Set the role name, description and type
+             itRole.setName( itRoleName );
+             itRole.setType( itRoleType );
+             itRole.setDisplayName( itRoleName );                  
+               
+             // Add some attributes
+             itRole.setAttribute("mergeTemplates", (Object) "false" );
+             itRole.setAttribute("allowDuplicateAccounts", (Object) "false" );
+             itRole.setAttribute("allowMultipleAssignments", (Object) "false" );
+             
+             // These are just empty - no value set
+             itRole.setAttribute("isoRelevant", Boolean.parseBoolean("false") );
+             itRole.setAttribute("nercRelevant", Boolean.parseBoolean("false") );
+             itRole.setAttribute("pciRelevant", Boolean.parseBoolean("false") );
+             itRole.setAttribute("soxRelevant", Boolean.parseBoolean("false") );
+
+             itRole.setAttribute("accountSelectorRules", null );
+             itRole.setAttribute("adminRole", Boolean.parseBoolean("false") );
+                       
+             // Get the Identity of the owner.  If it's not found, default to spadmin
+             Identity owner = context.getObjectById(Identity.class, groupModel.get("sys").get("owner") );
+             if (owner != null) {
+                itRole.setOwner(owner);
+             } else {
+               // Let the role come in with a default owner
+               serilog.warn("Cannot find ownerId [" + owner + "].  Using spadmin.");
+               owner = context.getObjectByName(Identity.class, "spadmin");
+               itRole.setOwner(owner);
+             }
+
+
+             // Save it before we set the profile and the description
+             // otherwise description is not stored
+             context.saveObject(itRole);
+             if (null != groupModel.get("description") ) {             
+                Describer describer = new Describer( itRole );
+
+                // Use default language of IIQ instance when no locale specified
+                if (null == locale || void == locale ) {
+                  describer.setDefaultDescription(context, groupModel.get("description") );
+                } else {
+                  Map descriptions = new HashMap();
+                  descriptions.put(locale, desc);
+                  describer.addDescriptions(descriptions); 
+                }
+                describer.saveLocalizedAttributes(context);
+                context.commitTransaction();             
+             }              
+           
+             serilog.debug("itRole before Profile: " + itRole.toXml() );
+
+             Bundle parent = context.getObjectByName(Bundle.class, itParentName);
+             if( null == parent ) {
+               serilog.warn("Cannot find default parent container [" + itParentName + "].  Role will be created in root.");
+             } else {
+               itRole.addInheritance(parent);
+             }
+
+             // get the scope from application
+             //Scope scope = app.getAssignedScope();
+                 
+             //if( null != scope ) {
+             //  itRole.setAssignedScope( scope );
+             //} else {
+             //  serilog.warn("No Scope defined for application: " + app.getName() );
+             // }
+
+             // Now add the group (Managed Attribute) created before 
+             Profile profile = new Profile();
+             // If you add the description you end up in advanced view and can't switch back to simple view
+             //if (null != groupDescription) {
+             //   profile.setDescription(groupDescription);
+             //} 
+             String applicationName = "Active Directory";
+             Application app = context.getObjectByName(Application.class, applicationName );
+             if( null == app ) {
+               serilog.debug("Application: " + applicationName + " not found " );
+               doExit = true;
+             } else {
+               profile.setApplication(app);
+             }
+
+             // This one does not work - despite the fact that the artifacts look identical.
+             String filterString = "memberOf.containsAll({" + '"' + groupModel.get("distinguishedName") + '"' + "})";
+             Filter filter = Filter.compile( filterString );
+             
+             // this approach works - thanks to Steve Kendall
+             //List groups=new ArrayList();
+             //groups.add( groupModel.get("distinguishedName") );
+             //Filter filter = Filter.containsAll("memberOf", groups);
+
+             profile.addConstraint(filter);
+             serilog.debug( "profile: " + profile.toXml() );
+             itRole.add(profile);
+
+             serilog.debug("IT Role before safe: " + itRole.toXml() );
+             
+             // For direct Save use the code below       
+             if( ! doExit ) {
+                context.saveObject(itRole);
+                context.commitTransaction();
+                context.decache(itRole);           
+                serilog.debug("IT Role created: " + itRole.toXml() );
+             }
+            }
+
+          ]]>
+        </Source>
+      </Script>
+      <Transition to='end' when='doExit'/>
+      <Transition to="createSrRole"/>
+    </Step>
+
+
+    <Step name="createSrRole" icon="Task">
+      <Script>
+        <Source>
+          <![CDATA[
+            import java.util.ArrayList;
+            import java.util.HashMap;
+            import java.util.List;
+            import java.util.Map;
+            import sailpoint.object.Bundle;
+            import sailpoint.object.Identity;
+            import sailpoint.object.IdentitySelector;
+            import sailpoint.object.IdentitySelector.MatchExpression;
+            import sailpoint.object.IdentitySelector.MatchTerm;
+            import sailpoint.object.CompoundFilter;
+            import sailpoint.object.Application;
+            import sailpoint.object.Filter;
+            import sailpoint.object.Scope;           
+            import sailpoint.object.Profile;
+            import sailpoint.object.ManagedAttribute;
+            import sailpoint.object.GroupDefinition;
+            
+            import sailpoint.api.ManagedAttributer;
+            import sailpoint.api.Describer;
+            import sailpoint.api.SailPointContext;
+            serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ServiceManagementCreate.createSrRole" );
+            
+            serilog.debug("Entering createSrRole" );
+            Boolean doExit = false;
+            
+            String itRoleName = "IT-" + groupModel.get("groupName");
+            String srRoleName = "SR-" + groupModel.get("groupName");
+            String srRoleType = "business";
+            String srParentName = "serviceRoles";
+            
+            serilog.debug("Got: " + groupModel.get("groupName") + " about to create Service Role: " + srRoleName );
+                       
+            Bundle srRole = context.getObjectByName(Bundle.class, srRoleName );                                  
+            if ( null != srRole ) {
+              serilog.info("SR Role name exists: " + srRoleName + ". Can't create Service, Skipping");
+              doExit = true;
+           } else {
+             // Create a new role
+             srRole = new Bundle();
+
+             serilog.debug("Create new SR Role: " + srRoleName );
+           
+             // Set the role name, description and type
+             srRole.setName( srRoleName );
+             srRole.setType( srRoleType );
+             srRole.setDisplayName( srRoleName );         
+             
+             // Add some attributes
+             srRole.setAttribute("mergeTemplates", (Object) "false" );
+             srRole.setAttribute("allowDuplicateAccounts", (Object) "false" );
+             srRole.setAttribute("allowMultipleAssignments", (Object) "false" );
+             
+             // These are just empty - no value set
+             srRole.setAttribute("isoRelevant", Boolean.parseBoolean("false") );
+             srRole.setAttribute("nercRelevant", Boolean.parseBoolean("false") );
+             srRole.setAttribute("pciRelevant", Boolean.parseBoolean("false") );
+             srRole.setAttribute("soxRelevant", Boolean.parseBoolean("false") );
+
+             srRole.setAttribute("accountSelectorRules", null );
+             srRole.setAttribute("adminRole", Boolean.parseBoolean("false") );
+                                    
+             // Get the Identity of the owner.  If it's not found, default to spadmin
+             Identity owner = context.getObjectById(Identity.class, groupModel.get("sys").get("owner") );
+             if (owner != null) {
+                srRole.setOwner(owner);
+             } else {
+               // Let the role come in with a default owner
+               serilog.warn("Cannot find ownerId [" + owner + "].  Using spadmin.");
+               owner = context.getObjectByName(Identity.class, "spadmin");
+               srRole.setOwner(owner);
+             }
+
+
+             // Save it before we set the profile and the description
+             // otherwise description is not stored
+             context.saveObject(srRole);
+
+             if (null != groupModel.get("description") ) {             
+                Describer describer = new Describer( srRole );
+
+                // Use default language of IIQ instance when no locale specified
+                if (null == locale || void == locale ) {
+                  describer.setDefaultDescription(context, groupModel.get("description") );
+                } else {
+                  Map descriptions = new HashMap();
+                  descriptions.put(locale, desc);
+                  describer.addDescriptions(descriptions); 
+                }
+                describer.saveLocalizedAttributes(context);
+                context.commitTransaction();             
+             }              
+
+             Bundle parent = context.getObjectByName(Bundle.class, srParentName);
+             if( null == parent ) {
+               serilog.warn("Cannot find default parent container [" + srParentName + "].  Role will be created in root.");
+             } else {
+               srRole.addInheritance(parent);
+             }
+
+             // get the scope from application
+             //Scope scope = app.getAssignedScope();
+                 
+             //if( null != scope ) {
+             //  itRole.setAssignedScope( scope );
+             //} else {
+             //  serilog.warn("No Scope defined for application: " + app.getName() );
+             // }
+
+             // Lookup and add the it role
+             Bundle itRole = context.getObjectByName(Bundle.class, itRoleName );                                  
+             if ( null == itRole ) {
+               serilog.info("IT Role not found: " + itRoleName + ". Can't create Service, Skipping");
+               doExit = true;
+             } else {
+               srRole.addRequirement( itRole );
+             }
+             
+             serilog.debug("srRole after adding required: " + srRole.toXml() );
+
+             // Now the trickery part: add the matchlist and the filterString for IdentityRefresh
+             // We have 
+             // 1) a list of identites on  identities OR
+             //    name equals 
+             // 2) a population on  population
+             //   <Selector>
+             //     <IdentitySelector>
+             //      <PopulationRef>
+             //        <Reference class="sailpoint.object.GroupDefinition" id="4028be8b560f59cb01560f5ab6b403b5" name="Monitored Users"/>
+             //      </PopulationRef>
+             //    </IdentitySelector>
+             //  </Selector>               
+             // 3) attributeMatch = ["jobTitle","department","manager"], value on jobTitle (String) or department (String) or manager (identity)
+             //    content of attributeMatch equals content of apropriate attribute
+             //   <Selector>
+             //     <IdentitySelector>
+             //       <MatchExpression>
+             //         <MatchTerm name="jobTitle" value="blah"/>
+             //       </MatchExpression>
+             //    </IdentitySelector>
+             //  </Selector>
+             
+             // 4) or as a filterString
+             // compile as is
+
+             String selectorMethod = groupModel.get("selector");
+             Boolean skipAssigning = false;
+             
+             IdentitySelector selector = new IdentitySelector();
+             
+             if( selectorMethod.equals("pickIdentities") ) {
+               // Pick Identities
+               List nameList = groupModel.get("identities");
+               // For the IdentityRefresh filterString
+               String filterString = "";
+               
+               if( null == nameList ) {
+                 serilog.info("No Identities found but Selection method pickIdentities selected. Skip assignment");
+                 skipAssigning = true;
+               } else {
+                 serilog.debug("nameList: " + nameList.toString() );
+                 CompoundFilter cf = new CompoundFilter();
+                                  
+                 List identityFilterList = new ArrayList();
+                 for( String identityName : nameList ) {
+                   identityFilterList.add(Filter.eq("name", identityName ) );
+                   
+                   if( ! filterString.isEmpty() ) {
+                     filterString = filterString + " || ";
+                   }
+                   filterString = filterString + "name == \"" + identityName + "\"";
+                 }
+                 Filter f = (Filter.or( identityFilterList ) );
+                 
+                 CompoundFilter cf = new CompoundFilter();
+                 cf.setFilter( f );
+                 selector.setFilter( cf );
+                 
+                 // Store the filter for later usage
+                 serilog.debug("identityRefreshFilterString: " + filterString );
+                 workflow.put("identityRefreshFilterString", filterString ); 
+                 workflow.put("identityRefreshFilterGoups", "" );                                   
+               }
+             } else if( selectorMethod.equals("attributeMatch") ) {
+               // Attribute Matcher
+               
+               String filterString = "";
+               String attributeMatch = groupModel.get("attributeMatch");
+               if( null != attributeMatch ) {
+                 String value = groupModel.get( attributeMatch );
+                 if( null == value ) {
+                   serilog.info("Missing value for attributeMatch: " + attributeMatch );
+                   skipAssigning = true;
+                 } else {
+                  MatchTerm term = new MatchTerm();
+                  term.setName( attributeMatch );
+                  term.setValue( value );
+                  
+                  MatchExpression matcher = new MatchExpression();                  
+                  matcher.addTerm(term);
+                  selector.setMatchExpression(matcher);
+
+                  // Store the filter for later usage                  
+                  filterString = attributeMatch + " == " + '"' + value + '"';
+                  serilog.debug("identityRefreshFilterString: " + filterString );
+                  workflow.put("identityRefreshFilterString", filterString );                   
+                  workflow.put("identityRefreshFilterGoups", "" );                   
+                 }
+               } else {
+                 serilog.info("No attributeMatcher found but Selection method attributeMatcher selected. Skip assignment");
+                 skipAssigning = true;
+               }
+               
+             } else if( selectorMethod.equals("predefinedPopulation") ) {
+               String populationName = groupModel.get("population");
+               if( null == populationName ) {
+                 serilog.info("No populationName found but Selection method predefinedPopulation selected. Skip assignment");
+                 skipAssigning = true;                                
+               } else {
+                 GroupDefinition population = context.getObjectByName(GroupDefinition.class, populationName );
+                 if( null == population ) {
+                   serilog.info("Population: " +  populationName + " not found but Selection method predefinedPopulation selected. Skip assignment");
+                   skipAssigning = true;                                                 
+                 } else {
+                   selector.setPopulation( population ); 
+                   
+                   workflow.put("identityRefreshFilterString", null ); 
+                   serilog.debug("identityRefreshFilterGoups: " + population.getId() );
+                   workflow.put("identityRefreshFilterGoups", population.getId() );                   
+                 }
+               }
+               
+             } else if( selectorMethod.equals("filterString") ) {
+               String filterString = groupModel.get("filterString");
+               if( null == filterString ) {
+                 serilog.info("No filterString found but Selection method filterString selected. Skip assignment");
+                 skipAssigning = true;                                
+               } else {               
+                 Filter f = Filter.compile( filterString ) ;                 
+                 CompoundFilter cf = new CompoundFilter();
+                 cf.setFilter( f );
+                 selector.setFilter( cf );
+                 
+                 // Store the filter for later usage
+                 workflow.put("identityRefreshFilterString", filterString ); 
+                 workflow.put("identityRefreshFilterGoups", "" );                                    
+                 }             
+             } else {
+               serilog.debug("Unknown selector method: " + selectorMethod );
+             }
+             
+             // Add the Assignemnt Rule
+             if( ! skipAssigning ) {
+               srRole.setSelector(selector);
+             }
+              
+             serilog.debug("SR Role before safe: " + srRole.toXml() );
+             
+             if( ! doExit ) {
+                context.saveObject(srRole);
+                context.commitTransaction();
+                context.decache(srRole);           
+                serilog.debug("SR Role created: " + srRole.toXml() );
+             }
+            }
+
+          ]]>
+        </Source>
+      </Script>    
+      <Transition to="doRefresh" when='assignService'/>
+      <Transition to="end"/>
+    </Step>
+
+
+  <Step action="launchTask" icon="Task" name="doRefresh" posX="916" posY="240">
+    <Arg name="catchExceptions" value="true"/>
+    <Arg name="taskDefinition" value="Refresh Identity Cube"/>
+    <Arg name="correlateEntitlements" value="string:true"/>
+    <Arg name="provision" value="true"/>
+    <Arg name="promoteAttributes" value="true"/>
+    <Arg name="refreshManagerStatus" value="true"/>
+    <!--  make sure to reset the filter, otherwise the refresh might not fire -->    
+    <Arg name="filter" value="ref:identityRefreshFilterString"/>
+    <Arg name="filterGroups" value="ref:identityRefreshFilterGoups"/>
+    <Transition to="FullTextIndexRefresh"/>
+  </Step>
+
+
+  <Step action="launchTask" icon="Task" name="FullTextIndexRefresh" posX="916" posY="240">
+    <Arg name="catchExceptions" value="true"/>
+    <Arg name="taskDefinition" value="Full Text Index Refresh"/>
+    <Transition to="end"/>
+  </Step>
+
+
+    <Step action="call:sendEmail" icon="Email" name="Request Rejected" posX="98" posY="10">
+      <Arg name="template" value="Group Request Rejection Notification"/>
+      <Arg name="to">
+	      <Script>
+	        <Source>
+	          <![CDATA[
+	            import sailpoint.object.Identity;
+
+              Identity cube = context.getObjectByName(Identity.class, launcher);
+              return cube.getEmail();           
+	          ]]> 
+	        </Source>
+	      </Script>
+      </Arg>
+      <Arg name='from' value='iiq-noreply@sailpointdemo.com'/>
+      <Arg name='groupName' value='$(groupModel.sAMAccountName)'/>
+      <Transition to="end"/>
+    </Step>
+    
+    <Step name='end' icon='Stop' posX='1510' posY='10'/>
+    
+  </Workflow>
+
+</sailpoint>

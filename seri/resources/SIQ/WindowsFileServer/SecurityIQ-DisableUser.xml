@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="SecurityIQ-DisableUser" type="IdentityEvent">
+  <Variable input="true" name="identityName"/>
+  <Variable input="true" name="identityName"/>
+  <Description>Based on SecurityIQ Alert - Disable the user.</Description>
+  <Step icon="Start" name="Start" posX="101" posY="23">
+    <Transition to="Disable User"/>
+  </Step>
+  <Step icon="Default" name="Disable User" posX="330" posY="9">
+    <Description>Disable the supplied identityName</Description>
+    <Script>
+      <Source>
+import sailpoint.Version;
+      import sailpoint.object.Identity;
+      import sailpoint.object.Link;
+      import java.text.*;
+      import sailpoint.tools.xml.XMLObjectFactory;
+      import sailpoint.object.ObjectAttribute;
+      import sailpoint.object.ObjectConfig;
+      import bsh.*;
+import sailpoint.server.Auditor;
+
+SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+       Date date = new Date();
+
+
+Identity identity = context.getObjectByName(Identity.class, identityName);
+String email = identity.getEmail();
+      String dept = identity.getAttribute("department");
+      String displayName = identity.getDisplayName();
+      Identity manager = identity.getManager();
+
+
+identity.setInactive(true);
+context.saveObject(identity);
+context.commitTransaction();
+
+System.out.println(date + " ========================================");
+System.out.println(date + " SecurityIQ DISABLED USER:  " + identityName );
+System.out.println(date + " Reason: Policy Violation.");
+System.out.println(date + " ========================================");
+
+Auditor.logAs(null, "SIQ-DisableUser", identityName, email, dept, manager.getName(), "Reason: SecurityIQ Disable User");          
+context.commitTransaction();
+</Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="473" posY="10"/>
+</Workflow>

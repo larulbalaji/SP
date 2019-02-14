@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="SIQ AccountName" type="LinkAttribute">
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="environment">
+        <Description>
+          The optional arguments passed from the task executor, if the rule is running within a task.
+        </Description>
+      </Argument>
+      <Argument name="link">
+        <Description>
+          The Link whose attribute is being promoted.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="value">
+        <Description>
+          An Object to be used as the attribute value.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+  <![CDATA[
+
+import sailpoint.object.Application;
+import sailpoint.object.Link;
+import sailpoint.tools.Util;
+import java.util.List;
+
+if (link != null && link.getApplication() != null) {
+  String sAMAccountName = link.getAttribute("sAMAccountName");
+  String distinguishedName = link.getAttribute("distinguishedName");
+  List settings = link.getApplication().getAttributeValue("domainSettings");
+  if (settings != null && Util.isNotNullOrEmpty(sAMAccountName) && Util.isNotNullOrEmpty(distinguishedName)) {
+    for (Map settingObj : Util.iterate(settings)) {
+      if (!Util.isEmpty(settingObj)) {
+        String domainNetBIOSName = Util.getString(settingObj, "domainNetBiosName");
+		if (domainNetBIOSName == null) {
+		   domainNetBIOSName = "SERI";
+		}
+        String domainDN = Util.getString(settingObj, "domainDN");
+        if (Util.isNotNullOrEmpty(domainNetBIOSName) &&
+            Util.isNotNullOrEmpty(domainDN) &&
+            distinguishedName.toLowerCase().endsWith(domainDN.toLowerCase())) {
+              value = domainNetBIOSName + "\\" + sAMAccountName;
+        }
+      }
+    }
+  }
+}
+return value;
+]]>
+</Source>
+</Rule>

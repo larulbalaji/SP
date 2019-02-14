@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.reporting.LiveReportExecutor" name="Attribute History Report" progressMode="Percentage" resultAction="Rename" subType="Identity and User Reports" template="true" type="LiveReport">
+  <Attributes>
+    <Map>
+      <entry key="report">
+        <value>
+          <LiveReport title="Attribute Change Report">
+            <DataSource objectType="AuditEvent" type="Hql">
+              <Query>from AuditEvent event, Identity identity</Query>
+              <QueryParameters>
+                <Parameter argument="historyAttributes" property="historyAttributes"/>
+              </QueryParameters>
+              <QueryScript>
+                <Source>
+<![CDATA[  
+import sailpoint.reporting.ReportingLibrary;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Report.AttributeHistoryReport.QueryScript");
+serilog.debug("args="+args);
+String whereClause = ""; 
+
+List clauseItems = new ArrayList();
+clauseItems.add("event.target=identity.id");
+clauseItems.add("event.action='IdentityAttributeChange'");
+
+String historyClause = ReportingLibrary.buildHqlFilter("historyAttributes", "event.string1", args);
+if (historyClause != null)
+  clauseItems.add(historyClause);
+
+
+String firstnameClause = ReportingLibrary.buildHqlFilter("_attr_firstname", "identity.firstname", args);
+if (firstnameClause != null)
+  clauseItems.add(firstnameClause);
+
+String lastnameClause = ReportingLibrary.buildHqlFilter("_attr_lastname", "identity.lastname", args);
+if (lastnameClause != null)
+  clauseItems.add(lastnameClause);
+
+String displayNameClause = ReportingLibrary.buildHqlFilter("_attr_displayName", "identity.displayName", args);
+if (displayNameClause != null)
+  clauseItems.add(displayNameClause);
+
+String emailClause = ReportingLibrary.buildHqlFilter("_attr_email", "identity.email", args);
+if (emailClause != null)
+  clauseItems.add(emailClause);
+
+String managerClause = ReportingLibrary.buildHqlFilter("_attr_manager", "identity.manager", args);
+if (managerClause != null)
+  clauseItems.add(managerClause);
+
+Date fromdate=args.get("startDate");
+serilog.debug("fromdate="+fromdate);
+if(fromdate!=null) {
+  clauseItems.add("event.created>="+fromdate.getTime());
+}
+Date todate=args.get("endDate");
+serilog.debug("todate="+todate);
+if(todate!=null) {
+  // need to make this the date at 23:59:59 - default is the date at 00:00:00
+  GregorianCalendar gc=new GregorianCalendar();
+  gc.setTime(todate);
+  gc.set(Calendar.HOUR_OF_DAY, 23);
+  gc.set(Calendar.MINUTE, 59);
+  gc.set(Calendar.SECOND, 59);
+  gc.set(Calendar.MILLISECOND, 999);
+
+  clauseItems.add("event.created<="+gc.getTimeInMillis());
+}
+
+ 
+for(String c : clauseItems){
+  if (whereClause == ""){
+    whereClause = " where ";
+  } else {
+    whereClause += " and ";
+  }
+  whereClause += c;
+}
+serilog.debug("Query="+query+whereClause);
+
+return query + whereClause;
+]]>
+                </Source>
+              </QueryScript>
+            </DataSource>
+            <ReportForm>
+              <Reference class="sailpoint.object.Form" name="Base Attribute History Form"/>
+            </ReportForm>
+            <Columns>
+              <ReportColumnConfig field="name" header="rept_user_details_col_identity" property="identity.displayName" sortable="true" width="110"/>
+              <ReportColumnConfig field="attributeName" header="Attribute Name" property="event.string1" sortable="true" width="110"/>
+              <ReportColumnConfig field="date" header="Date of change" property="event.created" sortable="true" width="110"/>
+              <ReportColumnConfig field="from" header="Changed From" property="event.string2" sortable="true" width="110"/>
+              <ReportColumnConfig field="to" header="Changed To" property="event.string3" sortable="true" width="110"/>
+            </Columns>
+            <InitializationRule>
+              <Reference class="sailpoint.object.Rule" name="Attribute History Form Customizer"/>
+            </InitializationRule>
+          </LiveReport>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Description>A historical view of identity attribute changes.</Description>
+  <RequiredRights>
+    <Reference class="sailpoint.object.SPRight" name="FullAccessUserReport"/>
+  </RequiredRights>
+  <Signature>
+    <Inputs>
+      <Argument multi="true" name="groupDefinitions" type="string">
+        <Description>rept_input_user_report_group_definition</Description>
+      </Argument>
+      <Argument name="capabilities" type="string">
+        <Description>rept_input_user_report_capabilities</Description>
+      </Argument>
+      <Argument multi="true" name="historyAttributes" type="string">
+        <Description>history attributes</Description>
+      </Argument>
+      <Argument name="startDate" type="date">
+        <Description>start date</Description>
+      </Argument>
+      <Argument name="endDate" type="date">
+        <Description>end date</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+</TaskDefinition>

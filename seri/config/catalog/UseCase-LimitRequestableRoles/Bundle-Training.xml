@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="Training Services" name="training" type="business">
+  <Attributes>
+    <Map>
+      <entry key="accountSelectorRules"/>
+      <entry key="addlApproval"/>
+      <entry key="adminRole">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="isoRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="managerApproval">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="mergeTemplates" value="false"/>
+      <entry key="nercRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ownerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="pciRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="roleTag" value="Employee"/>
+      <entry key="soxRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Corporate role for training employees. People from different parts of the organization are included in Training efforts and may need access to related data and application (LearnCore)"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Inheritance>
+    <Reference class="sailpoint.object.Bundle" name="CorporateRoles"/>
+  </Inheritance>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Amanda.Ross"/>
+  </Owner>
+</Bundle>

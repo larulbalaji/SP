@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <Rule language="beanshell" name="Windows FileServer Access Correlation" type="TargetCorrelation">
+    <Source>
+      <![CDATA[
+       import sailpoint.api.Correlator;  
+       import sailpoint.object.AccessMapping;  
+       import sailpoint.unstructured.SecurityIQTargetCollector;  
+       import sailpoint.tools.xml.XMLObjectFactory;  
+  
+       private String ATTR_OBJECT_SID = "objectSid";  
+       Map returnMap = new HashMap();  
+       if ( isGroup ) {  
+          //AD Group  
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE,ATTR_OBJECT_SID);  
+          returnMap.put(Correlator.RULE_RETURN_GROUP_ATTRIBUTE_VALUE, access.getAttribute(SecurityIQTargetCollector.defaultIterateColumns.role_uid.name()));
+       } else {
+          returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE, ATTR_OBJECT_SID);  
+          returnMap.put(Correlator.RULE_RETURN_LINK_ATTRIBUTE_VALUE, access.getAttribute(SecurityIQTargetCollector.defaultIterateColumns.user_uid.name()));
+       }
+       
+       //serilog.debug("Incomming ["+nativeId+"] correlated ["+XMLObjectFactory.getInstance().toXml(returnMap)+"]");
+       
+       return returnMap;  
+      ]]>
+    </Source>
+  </Rule>
+
+</sailpoint>

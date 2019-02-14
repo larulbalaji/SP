@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <SPRight displayName="onlineTutorialsRESTAllow" name="onlineTutorialsRESTAllow"/>
+  <SPRight displayName="onlineTutorialsRESTAllow" name="onlineTutorialsWidget"/>
+  
+    <Capability displayName="showOnlineTutorials" name="showOnlineTutorials">
+        <Description>Allow access to OnlineTutorials Widget Plugin</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="onlineTutorialsWidget"/>
+            <Reference class="sailpoint.object.SPRight" name="onlineTutorialsRESTAllow"/>
+        </RightRefs>
+    </Capability>
+</sailpoint>

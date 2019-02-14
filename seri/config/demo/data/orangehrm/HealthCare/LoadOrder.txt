@@ -1,0 +1,10 @@
+use orangehrm;
+source HealthCare_JobTitle.sql;
+source HealthCare_Departments.sql;
+source HealthCare_Employees.sql;
+source HealthCare_EmpManager.sql;
+source HealthCare_EmpJobtitle.sql;
+source HealthCare_EmpLocation.sql;
+source HealthCare_EmpDepartment.sql;
+source HealthCare_EmpEmpStatus.sql;
+source HealthCare_UdateNextEmpId.sql;

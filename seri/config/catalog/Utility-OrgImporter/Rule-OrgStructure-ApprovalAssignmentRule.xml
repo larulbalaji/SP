@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Org Structure - Approval Assignment Rule">
+  <Description>Allows all objects to be selected (no filtering)</Description>
+  <Source><![CDATA[
+  import sailpoint.api.ObjectUtil;
+  import sailpoint.object.ApprovalSet;
+  import sailpoint.object.ApprovalItem;
+  import sailpoint.object.Workflow;
+  import sailpoint.object.Workflow.Approval;
+  import sailpoint.object.WorkItem;
+  import sailpoint.object.Identity;
+  import sailpoint.plugin.common.ClassLoaderSwitcher;
+  import sailpoint.plugin.external.PluginFrameworkHelpers;
+  import sailpoint.tools.Util;
+  import sailpoint.workflow.IdentityApprovalGenerator;
+  import sailpoint.workflow.IdentityLibrary;
+  
+  // Expect: String approvalMode
+  // Expect: String approvalScheme
+  // Expect: sailpoint.object.ApprovalSet approvalSet
+  // Expect: String identityDisplayName
+  // Expect: String identityName
+  // Expect: String fallbackApprover
+  // Expect: String launcher
+  // Expect: sailpoint.workflow.WorkflowContext wfcontext
+  
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.OrgStructure.ApprovalAssignmentRule");
+  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copied from sailpoint.workflow.IdentityApprovalGenerator, since the method is private:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+    private List<String> getWorkgroupMemberNames(Identity workGroup) {
+        List memberNames = new ArrayList<String>();
+        Iterator memberItr = ObjectUtil.getWorkgroupMembers(context, workGroup, Util.csvToList("name"));
+        if(memberItr != null) {
+            while(memberItr.hasNext()) {
+                memberNames.add((String)memberItr.next()[0]);
+            }
+        }
+        
+        return memberNames;
+    }
+    
+    /**
+     * Method to return workgroup member names given a workgroup string name
+     * @param workGroupName
+     * @return
+     * @throws GeneralException
+     */
+    private List<String> getWorkGroupMemberNames(String workGroupName) {
+        Identity workGroup = context.getObjectByName(Identity.class, workGroupName);
+        if(workGroup != null && workGroup.isWorkgroup()) {
+            return getWorkgroupMemberNames(workGroup);
+        } else {
+            return null;
+        }
+    }
+    
+    Approval buildApprovalInternal(ApprovalSet set, String approverName) {        
+        Approval approval = null;
+        List<String> workGroupMembers = getWorkGroupMemberNames(approverName);
+        if ( (Util.nullSafeEq(approverName, launcher) || Util.nullSafeContains(workGroupMembers, launcher)) /* Disabled: behaviour undefined with ESigs && autoApproveAllowed() */) {          
+            serilog.debug("buildApprovalInternal: Auto approving for '"+approverName+"'");
+            List<ApprovalItem> items = set.getItems();
+            for (ApprovalItem item : items) {
+                if (item == null)
+                    continue;
+                item.setState(WorkItem.State.Finished);
+                item.setOwner(launcher);
+
+                //Audit the auto approval. Should we spawn off a private context to do this? -rap
+                try {
+                    IdentityLibrary.auditDecision(wfcontext, item);
+                } catch(GeneralException ge) {
+                    log.error("Failed to audit approval auto approve");
+                }
+            }
+        } else {
+            serilog.debug("buildApprovalInternal: Creating approval item for '"+approverName+"'");                    
+            approval = new Approval();
+            if ( approverName != null )
+                approval.setOwner("\"" + approverName + "\"");  // quote the owner in case the user name has a comma
+            approval.setApprovalSet(set);
+            approval.addArg(Workflow.ARG_WORK_ITEM_TARGET_CLASS, "sailpoint.object.Identity");
+            approval.addArg(Workflow.ARG_WORK_ITEM_TARGET_NAME, identityName);    
+        }
+        return approval;        
+    }
+
+  
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+      print("Beanshell namespace:");
+    for (int i = 0 ; i < this.variables.length ; i++) {
+       String name = this.variables[i];
+       Object value = eval(name);
+       if /*(value == void)
+           print(name + " = void");
+       else if*/ (value == null)
+           print(name + " = null");
+       else
+           print(name + ": " + value.getClass().getSimpleName() + " = " + value);
+    }
+    
+    // Since this rule is called from a subprocess of LCM Provisioning, we would need
+    // to modify that subprocess _just to pass an extra arg_
+    // So, they were concatenated as [orgIdentifier]:[approvalScheme]
+
+    String orgId=approvalScheme.substring(0,approvalScheme.indexOf(":"));
+    String apScheme=approvalScheme.substring(approvalScheme.indexOf(":")+1);
+   
+    // Because this will already have gone through the 'standard' path to try and assign
+    // approvers, and our approvalScheme doesn't match the standard list, it will go to
+    // the fallback approver. If you're logged in as the same user as the fallback approver,
+    // the standard code will approve all the items. Before this rule gets called
+    
+    List<ApprovalItem> items = approvalSet.getItems();
+    for (ApprovalItem item : items) {
+        if (item == null)
+            continue;
+        item.setState(null);
+    }
+    
+    // Now we need to get the approver(s) from the org
+    List approvals=new ArrayList();
+    
+    ClassLoaderSwitcher switcher = null;
+    try {
+      // Get a handle to the API for the org structure
+      switcher = PluginFrameworkHelpers.getPluginContext("orgstructure");
+      sailpoint.plugin.orgstructure.OrgStructure structure=new sailpoint.plugin.orgstructure.OrgStructure(context);
+      
+      // Get an IdentityApprovalGenerator for normal (owner, manager, securityofficer) approvals
+      IdentityApprovalGenerator gen=new IdentityApprovalGenerator(wfcontext);
+      
+      // Get the attribute value from the recipient that identifies the org we need
+      Identity iden=context.getObjectByName(Identity.class, identityName);
+      serilog.debug("identity("+identityName+")="+iden);
+      String orgName=iden.getAttribute(orgId);
+      serilog.debug("orgName="+orgName);
+      
+      // Get the approver(s) from the org
+      sailpoint.plugin.orgstructure.Org org=structure.getOrgByName(orgName);
+      if (org==null) {
+        serilog.debug("warn: couldn't find org "+orgName+" - using fallbackApprover "+fallbackApprover);
+        approvals.add( buildApprovalInternal(approvalSet, fallbackApprover) );
+      } else {
+        Map responsibles=org.getResponsibles();
+        for (String appType: apScheme.split(",")) {
+          appType=appType.trim();
+          switch(appType) {
+            case "owner": 
+                Approval parentApp = new Approval();
+                parentApp.setMode(Workflow.ApprovalModeParallelPoll);
+                parentApp.setChildren(gen.buildOwnerApprovals());
+                approvals.add(parentApp);
+                break;
+            case "manager":
+                approvals.add(gen.buildManagerApproval());
+                break;
+            case "securityofficer":
+                approvals.add(gen.buildSecurityOfficerApproval());
+                break;
+            default:
+                String approver=responsibles.get(appType);
+                if(approver==null) {
+                  serilog.error("No approver for "+orgName+" of type "+appType+" - skipping approval (TODO: go up the tree)");
+                } else {
+                  Approval approval=buildApprovalInternal(approvalSet, approver);
+                  String description = appType + " Approval - Account Changes for User: " + identityDisplayName;
+                  approval.setDescription(description );
+                  approvals.add(approval);
+                }
+          }
+        }
+      }
+    } finally {
+      if (switcher!=null) {
+        switcher.close();
+      }
+    }
+    
+    return approvals;
+  ]]></Source>
+</Rule>

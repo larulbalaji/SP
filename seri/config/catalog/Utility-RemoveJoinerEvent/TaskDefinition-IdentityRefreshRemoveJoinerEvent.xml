@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Identity Refresh - Remove Joiner Event" resultAction="Delete" type="Identity">
+  <Attributes>
+    <Map>
+      <entry key="promoteAttributes" value="true" />
+      <entry key="refreshManagerStatus" value="true" />
+      <entry key="refreshRule" value="Identity Refresh - Clear needsCreateProcessing Trigger" />
+    </Map>
+  </Attributes>
+  <Description>Runs a rule on each identity to stop processing of the
+    Joiner Event (for initial loading)</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin" />
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Identity Refresh" />
+  </Parent>
+</TaskDefinition>

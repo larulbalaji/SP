@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://seri.sailpointdemo.com/" />
+<title>OrangeHRM-AddNewUser</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">OrangeHRM-AddNewUser</td></tr>
+</thead><tbody>
+<!--Login to Orange HRM-->
+<tr>
+	<td>open</td>
+	<td>/orangehrm/symfony/web/index.php/auth/login</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=txtUsername</td>
+	<td>${loginUsername}</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=txtPassword</td>
+	<td>${loginPassword}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnLogin</td>
+	<td></td>
+</tr>
+<!--Add a New Employee. First we add basic details..-->
+<tr>
+	<td>assertElementPresent</td>
+	<td>id=menu_pim_addEmployee</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=menu_pim_addEmployee</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=firstName</td>
+	<td>${firstName}</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=lastName</td>
+	<td>${lastName}</td>
+</tr>
+<tr>
+	<td>storeValue</td>
+	<td>id=employeeId</td>
+	<td>employeeId</td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>employeeId=${employeeId}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnSave</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='pdMainContainer']/div/h1</td>
+	<td>Personal Details</td>
+</tr>
+<!--Then we add some job details..-->
+<tr>
+	<td>clickAndWait</td>
+	<td>xpath=(//a[contains(text(),'Job')])[4]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=btnSave</td>
+	<td></td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=job_job_title</td>
+	<td>label=${jobTitle}</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=job_emp_status</td>
+	<td>label=${employeeStatus}</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=job_sub_unit</td>
+	<td>label=${department}</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=job_location</td>
+	<td>label=${location}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnSave</td>
+	<td></td>
+</tr>
+<!--Then we set who they report to-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Report-to</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=btnAddSupervisorDetail</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=reportto_supervisorName_empName</td>
+	<td>${manager}</td>
+</tr>
+<tr>
+	<td>select</td>
+	<td>id=reportto_reportingMethodType</td>
+	<td>label=Direct</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=btnSaveReportTo</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=welcome</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Logout</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

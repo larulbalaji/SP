@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="SERI - Demo Certification Setup Health Care" hidden="true" resultAction="Delete">
+  <Attributes>
+    <Map>
+      <!-- Provides comments for the cert for past decisions -->
+<!--       <entry key="actionsFile" value="./WEB-INF/config/seri/data/CertificationActions.csv"/> -->
+
+      <!-- Generates an application owner certification for the application name provided -->      
+      <entry key="certAppName" value="EPIC"/>
+      
+      <!-- certFocusXXX are used to add and remove entitlements for the specificied User  -->
+      <entry key="certFocusUser" value="Carla.Espinosa"/>
+      <entry key="certFocusEnts" value="CN=campusAccess,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com"/>
+      <entry key="certFocusApp" value="Active Directory"/>
+      <entry key="certFocusEntName" value="memberOf"/>
+      
+      
+      <entry key="certGroupOwner" value="Jerry.Bennett"/>
+      
+      <!-- Name for generating manager certification -->
+      <entry key="certManagerName" value="Bob.Kelso"/>
+      <entry key="certRemediationUser" value="Howard.Rose"/>
+      
+      <entry key="certTweakAppName" value="Active Directory"/>
+      <entry key="certTweakEntName" value="memberOf"/>
+      <entry key="certTweakEnts" value="CN=TimesheetAdmin,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com"/>
+      <entry key="certTweakUsers" value="Laverne.Roberts"/>
+
+      <!--  Defines the mode that the SEDemoSetupExecutor class will be running -->
+      <entry key="mode" value="CERT_SETUP"/>
+    </Map>
+  </Attributes>
+  <Description>
+         Set up initial manager and application owner certifications.
+    </Description>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="SERI - Demo Setup"/>
+  </Parent>
+</TaskDefinition>

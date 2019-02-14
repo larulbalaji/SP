@@ -1,0 +1,23 @@
+# Add Business Roles 
+# Add Role,Role Type,Role Name,Displayname,Role Description,Owner,Parent
+Add Role,business,Role Admin,,Adding an Identity to the RoleAdmin Workgroup,spadmin,
+# and the IT Role
+Add Role,it,IT Role Admin,,Adding an Identity to the RoleAdmin Workgroup,spadmin,Role Admin
+
+# Add Profile,Role Name,Profile Description,Profile Application,Profile Filter,
+Add Profile,IT Role Admin,,IdentityIQ Loopback,"workgroups.name.containsAll({""roleAdmin""})"
+
+# Add required / permited relationships. 
+#
+Add Required,Role Admin,IT Role Admin
+
+# Assign Roles
+Add RoleAssignment,Role Admin,Annie.Chavez
+Add RoleAssignment,Role Admin,Alice.Ford
+Add RoleAssignment,Role Admin,Alan.Bradley
+Add RoleAssignment,Role Admin,Allen.Burton
+Add RoleAssignment,Role Admin,Adam.Kennedy
+Add RoleAssignment,Role Admin,Antonio.Franklin
+Add RoleAssignment,Role Admin,Amanda.Ross
+
+

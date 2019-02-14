@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Configuration PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Configuration name="Location to OU Configuration">
+  <Attributes>
+    <Map>
+      <entry key="San Jose" value="Americas"/>
+      <entry key="London" value="Europe"/>
+      <entry key="New York" value="Americas"/>
+      <entry key="Brussels" value="Europe"/>
+      <entry key="Munich" value="Europe"/>
+      <entry key="Austin" value="Americas"/>
+      <entry key="Boston" value="Americas"/>
+      <entry key="Sao Paulo" value="Americas"/>
+      <entry key="Singapore" value="Asia-Pacific"/>
+      <entry key="Taipei" value="Asia-Pacific"/>
+      <entry key="Tokyo" value="Asia-Pacific"/>
+    </Map>
+  </Attributes>
+</Configuration>

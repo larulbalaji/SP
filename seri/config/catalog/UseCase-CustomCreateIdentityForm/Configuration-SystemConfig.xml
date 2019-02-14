@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+	<Map>
+	  <entry key="createIdentityForm" value="IdentityInc - Create Identity"/>
+      <entry key="workflowLCMIdentityCreateRequest" value="SERI - LCM Create and Update Wrapper"/>
+	</Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>

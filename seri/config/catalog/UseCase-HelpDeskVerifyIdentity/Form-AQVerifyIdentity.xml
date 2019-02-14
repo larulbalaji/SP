@@ -1,0 +1,122 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Form name="AQVerify Identity">
+    <Attributes>
+      <Map>
+        <entry key="pageTitle" value="Verify Identity for $(identityName)" />
+      </Map>
+    </Attributes>
+
+    <Description>This form is used to verify the identity of a user.</Description>
+    <Button action="next" label="Submit" />
+    <Button action="cancel" label="nav_cancel" />
+
+    <Section name="Questions" type="Questions" columns="3">
+      <Field name="question1" displayName="Question 1" type="string"
+        postBack="true" columnSpan="2">
+        <AllowedValuesDefinition>
+          <Script>
+            <Source>
+import sailpoint.object.Identity;
+import sailpoint.object.AuthenticationQuestion;
+import sailpoint.object.AuthenticationAnswer;
+import java.util.List;
+import java.util.ArrayList;
+
+// Expect: java.lang.String identityName
+
+Identity identity = context.getObjectByName(Identity.class,identityName);
+List answers = identity.getAuthenticationAnswers();
+List av = new ArrayList();
+for (AuthenticationAnswer aa : answers) {
+  AuthenticationQuestion aq = aa.getQuestion();
+  av.add(aq.getQuestion());
+}
+return av;
+            </Source>
+          </Script>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field name="answer1" displayName="Answer 1" type="string"
+        columnSpan="1" dependencies="question1">
+        <ValidationScript>
+          <Source>
+import sailpoint.object.Identity;
+import sailpoint.object.AuthenticationQuestion;
+import sailpoint.object.AuthenticationAnswer;
+import java.util.List;
+import java.util.ArrayList;
+
+// Expect: java.lang.String identityName
+
+Identity identity = context.getObjectByName(Identity.class,identityName);
+List answers = identity.getAuthenticationAnswers();
+String encValue = context.encrypt((String)value);
+for (AuthenticationAnswer aa : answers) {
+  if (aa.getAnswer().equals(encValue)) {
+    AuthenticationQuestion aq = aa.getQuestion();
+    if (aq.getQuestion().equals(question1)) {
+      return null;
+    }
+  }
+}
+return "Incorrect Answer";
+          </Source>
+        </ValidationScript>
+      </Field>
+      <Field name="question2" displayName="Question 2" postBack="true"
+        type="string" columnSpan="2">
+        <AllowedValuesDefinition>
+          <Script>
+            <Source>
+import sailpoint.object.Identity;
+import sailpoint.object.AuthenticationQuestion;
+import sailpoint.object.AuthenticationAnswer;
+import java.util.List;
+import java.util.ArrayList;
+
+// Expect: java.lang.String identityName
+
+Identity identity = context.getObjectByName(Identity.class,identityName);
+List answers = identity.getAuthenticationAnswers();
+List av2 = new ArrayList();
+for (AuthenticationAnswer aa : answers) {
+  AuthenticationQuestion aq = aa.getQuestion();
+  av2.add(aq.getQuestion());
+}
+return av2;
+            </Source>
+          </Script>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field name="answer2" displayName="Answer 2" type="string"
+        columnSpan="1" dependencies="question2">
+        <ValidationScript>
+          <Source>
+import sailpoint.object.Identity;
+import sailpoint.object.AuthenticationQuestion;
+import sailpoint.object.AuthenticationAnswer;
+import java.util.List;
+import java.util.ArrayList;
+
+// Expect: java.lang.String identityName
+
+Identity identity = context.getObjectByName(Identity.class,identityName);
+List answers = identity.getAuthenticationAnswers();
+String encValue = context.encrypt((String)value);
+for (AuthenticationAnswer aa : answers) {
+  if (aa.getAnswer().equals(encValue)) {
+    AuthenticationQuestion aq = aa.getQuestion();
+    if (aq.getQuestion().equals(question2)) {
+      return null;
+    }
+  }
+}
+return "Incorrect Answer";
+          </Source>
+        </ValidationScript>
+      </Field>
+    </Section>
+  </Form>
+</sailpoint>

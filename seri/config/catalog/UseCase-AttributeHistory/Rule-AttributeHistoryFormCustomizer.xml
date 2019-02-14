@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Attribute History Form Customizer" type="ReportCustomizer">
+  <Description>
+    This rule populates a form with fields for the standard and extended identity attributes.
+  </Description>
+  <Signature returnType="Map"> 
+    <Inputs>
+      <Argument name="locale">
+        <Description>
+          The current user's locale
+        </Description>
+      </Argument>
+      <Argument name="report">
+        <Description>
+          The base report
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+<![CDATA[
+import sailpoint.object.*;
+import sailpoint.tools.GeneralException;
+import sailpoint.reporting.ReportingLibrary;
+
+// Expect: java.lang.String sectionName;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.AttributeHistoryReport.AttributeHistoryFormCustomizer");
+
+ObjectConfig identityConfig = ObjectConfig.getObjectConfig(Identity.class);
+List standardAttributes = new ArrayList();
+standardAttributes.add(identityConfig.getObjectAttributeMap().get("manager"));
+standardAttributes.add(identityConfig.getObjectAttributeMap().get("firstname"));
+standardAttributes.add(identityConfig.getObjectAttributeMap().get("lastname"));
+standardAttributes.add(identityConfig.getObjectAttributeMap().get("displayName"));
+standardAttributes.add(identityConfig.getObjectAttributeMap().get("email"));
+
+//standardAttributes.add(identityConfig.getObjectAttributeMap().get("inactive"));
+
+ReportingLibrary.addAttributes(context, report, Identity.class, standardAttributes, null,
+"Identity Attributes", locale);
+
+List extendedAttrs = new ArrayList();
+for(ObjectAttribute att : identityConfig.getSearchableAttributes()){
+  if (!att.isStandard())
+    extendedAttrs.add(att);
+}
+
+for(ObjectAttribute att : identityConfig.getMultiAttributeList()){
+  extendedAttrs.add(att);
+}
+
+// Set up history attributes possible values
+// I think we're going to have to look for any attributes that have the rule "Update attribute history" as the 'ListenerRule'
+
+Form form=report.getForm();
+Form.Section section = null;
+section = form.getSection("Identity Attributes");
+if (section == null){ 
+  section = new Form.Section(sectionName);
+  form.add(section);
+}
+Field historyAttributes=section.getField("historyAttributes");
+//serilog.debug("Field="+historyAttributes);
+
+List possibleValues=new ArrayList();
+
+List objAttrs=identityConfig.getObjectAttributes();
+
+Rule r=context.getObjectByName(Rule.class, "Update attribute history");
+if(r==null) {
+  throw new GeneralException("Can't find rule 'Update attribute history' to check for");
+}
+String ruleId=r.getId();
+
+for(ObjectAttribute attr: objAttrs) {
+  // If this attribute has a listener rule
+  // and it is 'Update attribute history'
+  // get the name and display name of the attribute
+  // add to the lists
+  Rule lsnr=attr.getListenerRule();
+  if(lsnr!=null && lsnr.getId().equals(ruleId)) {  
+    String attrName=attr.getName();
+    List pv=new ArrayList();
+    pv.add(attr.getName());
+    pv.add(attr.getDisplayName());
+    possibleValues.add(pv);
+  }
+}
+
+
+DynamicValue dv=new DynamicValue();
+dv.setValue(possibleValues);
+
+// Add a parameter to the query
+ReportDataSource.Parameter param = new ReportDataSource.Parameter();
+param.setArgument("historyAttrs");
+param.setValueClass("string");
+ReportDataSource ds = report.getDataSource();
+ds.addParameter(param);
+
+//serilog.debug("Adding possibles to form");
+historyAttributes.setAllowedValuesDefinition(dv);
+]]>
+</Source>
+</Rule>

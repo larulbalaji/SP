@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Task Result Report Search Fields">
+  <Section columns="2" label="Task Result Report Arguments">
+
+	<Field name="completionStatus" displayName="Completion Status"
+		   helpKey="Warning or Error"
+		   multi="true"
+		   type="sailpoint.object.TaskResult.CompletionStatus"
+		   value="ref:completionStatus">
+      <AllowedValues>
+		      <String>Error</String>
+		      <String>Warning</String>
+		      <String>Success</String>
+		      <String>Terminated</String>
+	  </AllowedValues>
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+		    <String>Error </String>
+            <String>Warning</String>
+            <String>Success</String>
+            <String>Terminated</String>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field> 
+    <Field columnSpan="1" displayName="Completed Date" helpKey="Help I need a date range to search" name="completed" type="string" value="ref:completed">
+      <Attributes>
+        <Map>
+          <entry key="xtype" value="daterange"/>
+        </Map>
+      </Attributes>
+    </Field>
+
+
+  </Section>
+
+</Form>

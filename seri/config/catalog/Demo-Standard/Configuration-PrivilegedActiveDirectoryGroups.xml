@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Configuration PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Configuration   name="Privileged Active Directory Groups">
+  <Attributes>
+    <Map>
+      <entry key="groups">
+        <value>
+          <List>
+            <String>CN=SysAdministration,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=HelpDesk,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=sysadmin,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=TCOMControls,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=CompCommittee,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=DBAs,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=UnixAdministration,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=WindowsAdministration,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+            <String>CN=Administrators,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Configuration>

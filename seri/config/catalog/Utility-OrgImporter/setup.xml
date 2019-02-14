@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='TaskDefinition-OrgImporter.xml'/>
+  <ImportAction name='include' value='TaskDefinition-OrgImporter-LoadOrgStructure.xml'/>
+  <ImportAction name='include' value='Form-ProvisioningWorkflowConfigOrgStructure.xml'/>
+  <ImportAction name='include' value='Workflow-LCMProvisioningOrgStructure.xml'/>
+  <ImportAction name='include' value='Configuration-SystemConfiguration.xml'/>
+  <ImportAction name='include' value='Rule-OrgStructure-ApprovalAssignmentRule.xml'/>
+  <ImportAction name='include' value='ObjectConfig-Identity.xml'/>
+  <ImportAction name='execute' value="sailpoint.seri.execute.SetAttribute">
+    <Custom id="sailpoint.object.TaskDefinition" name="Setup Demo">
+      <Attributes>
+        <Map>
+          <entry key="methodName" value="Argument"/>
+          <entry key="taskList" value="$value,Import Org Structure"/>
+        </Map>
+       </Attributes>
+    </Custom>
+  </ImportAction>
+</sailpoint>

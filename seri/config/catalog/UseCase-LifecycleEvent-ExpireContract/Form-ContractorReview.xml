@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form    name="Form - Contractor Review">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Contractor and Contract Management"/>
+      <entry key="subtitle" value="The Contract detailed below is about to expire. Please review the following information and choose to either extend this contractor or expire this contractor. Expiration of a contractor will result in immediate disabling of all accounts. Please take the necessary steps to either extend the contract or to reassign tasks this person was working. Please note that extending the contract will result in an immediate re-certification of the users access."/>
+      <entry key="title" value="Contract Expiration Alert"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Complete"/>
+  <Button action="cancel" label="Cancel"/>
+  <Section label="Details pertaining to the Contractor&apos;s Sponsor">
+    <Field displayName="manager" name="manager" readOnly="true" type="identity"/>
+  </Section>
+  <Section label="Contractor Information">
+    <Field displayName="Contractor ID" name="name" readOnly="true" type="string"/>
+    <Field displayName="Contractor Name" name="displayName" readOnly="true" type="string"/>
+    <Field displayName="Job Title" name="jobTitle" readOnly="true" type="string"/>
+    <Field displayName="Email" name="email" readOnly="true" type="string"/>
+    <Field displayName="Expiration Date" name="expirationDate" readOnly="true" type="date"/>
+  </Section>
+  <Section columns="2" label="Location Information">
+    <Field columnSpan="2" displayName="Office Location" name="workOfficeLocation" readOnly="true" type="string"/>
+    <Field columnSpan="2" displayName="Office Location" hidden="true" name="workAddress" type="string"/>
+    <Field columnSpan="2" displayName="Address Line 1" name="addressLine1" readOnly="true" type="string">
+      <Script>
+        <Source><![CDATA[
+if(form.getField("workAddress")!= null) {
+  String[] splits = ((String)form.getField("workAddress").getValue()).split(":");
+  return splits[0];
+}
+return null;
+        ]]></Source> 
+      </Script>
+    </Field>
+    <Field columnSpan="2" displayName="Address Line 2" name="addressLine2" readOnly="true" type="string">
+      <Script>
+        <Source><![CDATA[
+if(form.getField("workAddress")!= null) {
+  String[] splits = ((String)form.getField("workAddress").getValue()).split(":");
+  if(splits.length>1) {
+    return splits[1];
+  }
+}
+return null;
+        ]]></Source> 
+      </Script>
+    </Field>
+    <Field displayName="City" name="workCity" readOnly="true" type="string"/>
+    <Field displayName="State/Prov Name" name="workState" readOnly="true" type="string"/>
+    <Field displayName="Postal Code" name="workPostalCode" readOnly="true" type="string"/>
+    <Field displayName="Country" name="workCountry" readOnly="true" type="string"/>
+  </Section>
+  <Section label="Contract Management and Administration" type="text">
+    <Field value="&#xA;                  Please consider corporate policy when determining whether this contract should&#xA;                  be terminated immediately, or should be extended&#xA;                  without interruption.  Selecting to extend the contract will require the &#xA;                  necessary department-level approvals.&#xA;&#x9;&#x9;"/>
+  </Section>
+  <Section label="Contract Disposition">
+    <Field displayName="Your Decision..." name="decision" required="true" type="string">
+      <AllowedValues>
+        <String>Extend the Contract</String>
+        <String>Terminate Contractor Immediately</String>
+      </AllowedValues>
+    </Field>
+    <Field displayName="Completion Comments (Optional)" multi="true" name="reason" type="string"/>
+  </Section>
+</Form>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="SERI Role Changes Propagation"
+  type="Role Changes">
+  <Variable editable="true" input="true" name="plan">
+    <Description>The provisioning plan that contains entitlements
+      changes
+      related to role changes</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The identity being processed by the Role Changes
+      Propagation task</Description>
+  </Variable>
+  <Variable name="firstName" />
+  <Variable name="lastName" />
+  <Variable name="userId" />
+  <Variable editable="true" name="project" />
+  <Variable editable="true" initializer="SERI - Notify Role Changes Propagation"
+    name="userEmailTemplate">
+    <Description>The EmailTemplate to use to notify the end user</Description>
+  </Variable>
+  <Description>This workflow is triggered for each identity who has a
+    role that has been modified (add/remove entitlements)
+    It sends an email to the user with relevant information on role changes
+    that occured</Description>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Execute plan" />
+  </Step>
+  <Step name="Execute plan" posX="150" posY="9" resultVariable="project">
+    <Arg name="plan" value="ref:plan" />
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningProject;
+import sailpoint.api.Provisioner;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.RoleChangesNotification.ExecutePlan");
+
+if (plan == null) {
+    serilog.warn("ProvisioningPlan is null");
+} else {
+    serilog.debug("Plan is:" + plan.toXml());
+    Provisioner provisioner = new Provisioner(context);
+    ProvisioningProject proj = provisioner.compile(plan, null);
+    provisioner.execute();
+
+    return proj;
+}
+    ]]></Source>
+    </Script>
+    <Transition to="Prepare email information" when="(project != null)" />
+    <Transition to="Stop" />
+  </Step>
+  <Step name="Prepare email information" posX="253" posY="175">
+    <Arg name="project" value="ref:project" />
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningProject;
+import sailpoint.api.Provisioner;
+        
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.RoleChangesNotification.PrepareEmail");
+        
+Identity user = context.getObjectByName(Identity.class, identityName);
+wfcontext.setVariable("firstName", user.getFirstname());
+wfcontext.setVariable("lastName", user.getLastname());
+wfcontext.setVariable("userId", user.getAttribute("employeeId"));
+        
+serilog.debug("Project is : " + project.toXml());
+        
+        ]]></Source>
+    </Script>
+    <Transition to="Notify User" />
+  </Step>
+  <Step action="call:sendEmail" icon="Email" name="Notify User"
+    posX="460" posY="176">
+    <Arg name="template" value="ref:userEmailTemplate" />
+    <Arg name="to" value="script:getUserEmail(identityName, plan)" />
+    <Transition to="Stop" />
+  </Step>
+  <Step icon="Stop" name="Stop" posX="572" posY="10" />
+</Workflow>

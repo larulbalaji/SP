@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Rule_InitiateLOAWorkflows" type="Workflow">
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+
+Note that an Attributes map of all variables from the current WorkflowContext, merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="wfcontext">
+        <Description>
+          The current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="handler">
+        <Description>
+          The workflow handler associated with the current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="workflow">
+        <Description>
+          The current Workflow definition.
+        </Description>
+      </Argument>
+      <Argument name="step">
+        <Description>
+          The current Step.
+        </Description>
+      </Argument>
+      <Argument name="approval">
+        <Description>
+          The current Approval.
+        </Description>
+      </Argument>
+      <Argument name="item">
+        <Description>
+          The WorkItem being processed.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="Object">
+        <Description>
+          The result of the workflow rule; dependent on the rule itself.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.object.WorkflowLaunch;
+import sailpoint.api.WorkflowSession;
+import sailpoint.api.IdentityLifecycler;
+import java.util.Iterator;
+import sailpoint.object.Filter;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+import java.util.Date;
+import java.util.Calendar;
+import sailpoint.api.Terminator;
+import sailpoint.tools.xml.XMLObjectFactory;
+import sailpoint.tools.xml.XMLReferenceResolver;
+import sailpoint.object.*;
+import sailpoint.api.*;
+
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String identityName
+// Expect: java.lang.String nativeIdentity
+// Expect: java.util.Map accountDeprovisioningMap
+// Expect: java.lang.String userName
+// Expect: sailpoint.object.IdentityTrigger trigger
+// Expect: java.lang.String trace
+// Expect: sailpoint.object.ProvisioningPlan plan
+// Expect: sailpoint.object.ProvisioningProject project
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.LOA.Rule_InitiateLOAWorkflows");
+
+serilog.debug("In Rule Rule_InitiateLOAWorkflows" );
+
+Identity identObj = context.getObjectByName(Identity.class,identityName);
+List links = identObj.getLinks();
+serilog.debug("Got Here: a"+links+"  "+identObj);
+String workflowName = null;       
+
+//loop over every account and perform the proper deprovisioning scenario according to the deprovisioning map we created when we inititialized the workflow.
+//one or more flows can be initiated, depending on what in the world you are doing to the account. Renames/moves are treated separate from disables and deleted on purpose 
+//as certain applications may only support certain functions directly and we dont want to wait for a rename before we can disable the account or vice versa.  
+IdentityLifecycler cycler = new IdentityLifecycler(context);
+
+for(Link aLink : links) {
+  Map accountMap = (Map)accountDeprovisioningMap.get(aLink.getApplication().getName());
+  serilog.debug("Account Map:" + accountMap );
+              
+  /** Create the plan for the identity and stick the requests on it **/
+  Attributes args = new Attributes();
+  // pass in the display name to avoid having to do a lookup
+  args.put("identityName", identityName);
+  args.put("doRefresh", false);
+  args.put("identityDisplayName", identObj.getName());
+  args.put("nativeIdentity", aLink.getNativeIdentity());
+  args.put("applicationName", aLink.getApplicationName());
+  args.put("accountLOAScenario", accountMap.get("accountLOAScenario"));
+  serilog.debug("In For Loop");
+            
+  if(accountMap.get("accountLOAScenario")!= null) {
+    if(((String)accountMap.get("accountLOAScenario")).equals("Disable Account Immediately")) {
+                  
+			workflowName="Lifecycle Event - LOA Disable Accounts";
+			
+			serilog.debug("Launching Workflow:" + workflowName);
+			args.put("userName", userName);
+			args.put("trigger", trigger);
+			args.put("trace", trace);
+			args.put("plan", plan);
+			args.put("project",project);
+			
+			//Create WorkflowLaunch and set values
+			WorkflowLaunch wflaunch = new WorkflowLaunch();
+			Workflow wf = (Workflow) context.getObjectByName(Workflow.class,workflowName);
+			wflaunch.setWorkflowName(wf.getName());
+			wflaunch.setWorkflowRef(wf.getName());
+			wflaunch.setCaseName("LOA Disable");
+			wflaunch.setVariables(args);
+			//Create Workflower and launch workflow from WorkflowLaunch
+			Workflower workflower = new Workflower(context);
+			WorkflowLaunch launch = workflower.launch(wflaunch);
+			// print workflowcase ID (example only; might not want to do this in the task)
+			 String workFlowId = launch.getWorkflowCase().getId();
+			serilog.debug("workFlowId: "+workFlowId);
+    }
+  } else if(accountMap.get("loaRule")!= null) {
+    workflowName="Lifecycle Event - LOA Rule Accounts";
+    args.put("userName", userName);
+    args.put("trigger", trigger);
+    args.put("trace", trace);
+    args.put("plan", plan);
+    args.put("project",project);
+    cycler = new IdentityLifecycler(context);
+
+		WorkflowLaunch wflaunch = new WorkflowLaunch();
+		Workflow wf = (Workflow) context.getObjectByName(Workflow.class,workflowName);
+		wflaunch.setWorkflowName(wf.getName());
+		wflaunch.setWorkflowRef(wf.getName());
+		wflaunch.setCaseName("LOA Disable");
+		wflaunch.setVariables(args);
+		//Create Workflower and launch workflow from WorkflowLaunch
+		Workflower workflower = new Workflower(context);
+		WorkflowLaunch launch = workflower.launch(wflaunch);
+		// print workflowcase ID (example only; might not want to do this in the task)
+    String workFlowId = launch.getWorkflowCase().getId();
+		serilog.debug("workFlowId: "+workFlowId);
+  }
+}
+
+]]></Source>
+</Rule>

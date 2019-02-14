@@ -1,0 +1,115 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <Form name='Group Management - Request AD Group'>
+    <Attributes>
+      <Map>
+	<entry key="pageTitle" value="Request Group"/> 
+	<entry key="labelAlign" value="top"/>
+      </Map>
+    </Attributes>
+    <Section label='Input Group Details' columns='2'>
+      <Field displayName="Group Name" name="sAMAccountName" required="true" type="string" postBack='true'>
+	<Attributes>
+	  <Map>
+	    <entry key="vtype" value="alphanum"/>
+	  </Map>
+	</Attributes>
+	<ValidationScript>
+	  <Source><![CDATA[
+import sailpoint.api.ManagedAttributer;
+import sailpoint.object.ManagedAttribute;
+
+// Expect: java.lang.String dnTemplate
+// Expect: java.lang.String appId 
+
+String error = null;
+
+// Ensure group name is not already taken
+//   - We check IIQ Entitlement Catalog
+//   - You could also call 'getObject' on the connector to be doubly sure
+//
+
+String dn = dnTemplate.replace("#", $(sAMAccountName));
+ManagedAttribute ma = ManagedAttributer.get(context, appId, "memberOf", dn);
+if (null != ma) {
+  error = "A group by that name already exists.  Please specify a different name.";
+}
+
+return error;
+		  ]]> 
+	  </Source>
+	</ValidationScript>
+      </Field>
+      <Field displayName="Group Owner" name="sys.owner" required="true" type="Identity" value="ref:launcher">
+	<Attributes>
+	  <Map>
+	    <entry key="valueProperty" value="id"/>
+	  </Map>
+	</Attributes>
+      </Field>
+      <Field displayName="Group Description" columnSpan="2" name="description" displayType="textarea"/>
+      <Field displayName='Identity Membership' name='identityMembership' type='Identity' multi='true' helpKey="Select initial persons who should be a member of this group">
+	<Attributes>
+	  <Map>
+	    <entry key="valueProperty" value="id"/>
+	  </Map>
+	</Attributes>
+      </Field>
+      <Field displayName='Group Membership' name='memberOf' type='ManagedAttribute' multi='true' filterString='application.name == "Active Directory" &amp;&amp; attribute == "memberOf"' helpKey="Select initial parent groups for this group"/>
+      <Field displayName="Group Type" name="GroupType" value='script: ( value == null ) ? "Security" : value'>
+	<AllowedValuesDefinition> 
+          <Value>
+            <List>
+	      <String>Security</String>
+              <String>Distribution</String>
+            </List>
+          </Value>
+	</AllowedValuesDefinition>
+      </Field>
+    </Section>
+    <Section>
+      <Attributes>
+	<Map>
+	  <entry key='hidden' value='true'/>
+	</Map>      
+      </Attributes>
+      <Field name='distinguishedName' type='string' dynamic='true'>
+	<Script>
+	  <Source><![CDATA[
+// Expect: java.lang.String dnTemplate
+// Expect: java.lang.String sAMAccountName
+
+String value = null;
+if (null != $(sAMAccountName)) {
+    value = dnTemplate.replace("#", $(sAMAccountName));
+}
+return value; 
+          ]]></Source> 
+	</Script>
+      </Field> 
+      <Field name='GroupScope' type='string' dynamic='true'>
+	<Script>
+	  <Source>
+	    return "Global";    
+	  </Source>
+	</Script>
+      </Field>
+      <Field name='sys.displayName' type='string' dynamic='true'>
+	<Script>
+	  <Source>
+    // Expect: java.lang.String sAMAccountName
+	    return $(sAMAccountName);
+	  </Source>
+	</Script>
+      </Field>
+    </Section>
+    <Button label='Submit' action='next'/>
+    <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+  </Form>
+
+</sailpoint>

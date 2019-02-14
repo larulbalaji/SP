@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Terminate User Confirmation">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Confirm Selected User Termination(s)"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Terminate Now"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Description>This form is used to delete selected users that are duplicates.</Description>
+  <Section type="text">
+    <Attributes>
+      <Map>
+        <entry key="subtitle" value="Please review the following selected user(s) you wish to terminate. Note: Users terminated through this method will still undergo the standard corporate Deprovisioning process."/>
+      </Map>
+    </Attributes>
+    <Field value=" "/>
+  </Section>
+  <Section>
+    <Field displayName="Users(s) To Terminate" name="identityNames" type="string" multi="true"/>
+    <Field displayName="Termination Date" name="terminationDate" type="date"/>
+    <Field displayName="Show User Detail" name="showDetail" postBack="true" type="string" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[ 
+                  import sailpoint.object.*;  
+                  import sailpoint.web.*;
+                  import java.util.*;     
+
+                  if (form.getField("identityNames").getValue()!=null) {
+                      Object ids = form.getField("identityNames").getValue();
+                      if (ids instanceof ArrayList) {
+                         ArrayList al = (ArrayList) ids;
+                         if (al.size() > 1)
+                           return true;
+                      }
+                  }
+
+                  return false;
+                ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+          List myValues = new ArrayList();
+          myValues.add("Yes");
+          myValues.add("No");
+
+          return myValues;
+        ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+    </Field>
+  </Section>
+  <Section label="Employee" columns="2">
+    <Attributes>
+      <Map>
+        <entry key="hidden">
+          <value>
+            <Script>
+              <Source><![CDATA[
+                import sailpoint.object.*;  
+                import sailpoint.web.*;     
+      
+                if (form.getField("showDetail").getValue()==null || form.getField("showDetail").getValue().equals("No")) {
+                    return true;
+                }
+                
+                return false;
+      
+              ]]></Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Field displayName="First Name" name="firstname" required="true" type="string" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Last Name" name="lastname" required="true" type="string" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Manager" name="manager" required="true" type="identity" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+  <Section label="Access" columns="2">
+    <Attributes>
+      <Map>
+        <entry key="hidden">
+          <value>
+            <Script>
+              <Source><![CDATA[
+                import sailpoint.object.*;  
+                import sailpoint.web.*;     
+      
+                if (form.getField("showDetail").getValue()==null || form.getField("showDetail").getValue().equals("No")) {
+                    return true;
+                }
+                
+                return false;
+      
+              ]]></Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <Field displayName="Detected Roles" multi="true" name="detectedRoles" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Assigned Roles" multi="true" name="assignedRoles" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Applications" multi="true" name="applications" columnSpan="2">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[
+          
+           import sailpoint.object.*;
+           import sailpoint.web.*;
+           import java.util.*;
+          
+           List values = new ArrayList();
+           String identityName = null;
+        
+           if (form.getField("identityNames").getValue()!=null) {
+                Object ids = form.getField("identityNames").getValue();
+                if (ids instanceof ArrayList) {
+                   ArrayList al = (ArrayList) ids;
+                   if (al.size() > 1) {
+                     return null;
+                   } else {
+                     identityName = al.get(0);
+                   }
+                }
+           }
+        
+             Identity identity = context.getObjectByName(Identity.class, identityName);
+
+             List links = identity.getLinks();
+
+
+             for (Link link : links) {
+                 values.add(link.getApplicationName());
+             }
+      
+
+              return values;
+           ]]> </Source>
+      </Script>
+    </Field>
+  </Section>
+</Form>

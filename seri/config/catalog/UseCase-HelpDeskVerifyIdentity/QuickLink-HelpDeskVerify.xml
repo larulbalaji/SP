@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <QuickLink action="workflow" category="ITServices"
+    messageKey="Verify Identity" name="Help Desk Verify" enabled="true"
+    ordering="8">
+    <Attributes>
+      <Map>
+        <entry key="forceAllowOthers" value="true" />
+        <entry key="hideAllowSelf" value="true" />
+        <entry key="forceAllowSelf" value="false" />
+        <entry key="launcher">
+          <value>
+            <Script>
+              <Source>return currentUser.getName()</Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="requester">
+          <value>
+            <Script>
+              <Source>return currentUser.getName()</Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="workflowName" value="Help Desk Verify User" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="Admins" />
+    </DynamicScopes>
+  </QuickLink>
+</sailpoint>

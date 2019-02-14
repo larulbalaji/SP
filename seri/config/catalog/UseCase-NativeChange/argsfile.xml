@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Attributes PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Attributes>
+  <Map>
+    <entry key="approvalSet"/>
+    <entry key="argsFileLocation" value="/tmp/"/>
+    <entry key="event">
+      <value>
+        <IdentityChangeEvent deletedObjectName="AAAExch.tst1" objectName="AAAExch.tst1" operation="Modify">
+          <NativeChanges>
+            <NativeChangeDetection application="Active_Directory" identity="CN=Exch Tst,OU=Singapore,OU=Asia-Pacific,OU=Demo,DC=seri,DC=sailpointdemo,DC=com" operation="Modify">
+              <Differences>
+                <Difference attribute="IIQDisabled" oldValue="true"/>
+              </Differences>
+            </NativeChangeDetection>
+          </NativeChanges>
+          <Trigger>
+            <Reference class="sailpoint.object.IdentityTrigger" id="4028810e41907c5f014190d49b44005a" name="Native Change Maintain Disable"/>
+          </Trigger>
+        </IdentityChangeEvent>
+      </value>
+    </entry>
+    <entry key="fallbackApprover" value="spadmin"/>
+    <entry key="foregroundProvisioning" value="true"/>
+    <entry key="identityDisplayName" value="Exch Tst"/>
+    <entry key="identityName" value="AAAExch.tst1"/>
+    <entry key="identityRequestId"/>
+    <entry key="inactive" value="false"/>
+    <entry key="launcher" value="Scheduler"/>
+    <entry key="operations" value="Modify"/>
+    <entry key="optimisticProvisioning" value="false"/>
+    <entry key="plan"/>
+    <entry key="project"/>
+    <entry key="provisionRejectedItems" value="true"/>
+    <entry key="sessionOwner" value="Scheduler"/>
+    <entry key="source" value="LCM"/>
+    <entry key="trace" value="true"/>
+    <entry key="trigger">
+      <value>
+        <IdentityTrigger created="1381114354500" handler="sailpoint.api.WorkflowTriggerHandler" id="4028810e41907c5f014190d49b44005a" name="Native Change Maintain Disable" type="NativeChange">
+          <Owner>
+            <Reference class="sailpoint.object.Identity" id="4028810e418dd9f901418dda301500ce" name="spadmin"/>
+          </Owner>
+          <HandlerParameters>
+            <Attributes>
+              <Map>
+                <entry key="workflow" value="4028810e418f19e101418f1cd50d0003"/>
+              </Map>
+            </Attributes>
+          </HandlerParameters>
+        </IdentityTrigger>
+      </value>
+    </entry>
+    <entry key="workItemPriority" value="Normal"/>
+  </Map>
+</Attributes>

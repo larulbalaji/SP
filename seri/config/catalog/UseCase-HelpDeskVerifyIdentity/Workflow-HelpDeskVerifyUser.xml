@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Help Desk Verify User"
+  type="SERI">
+  <Variable initializer="string:true" name="transient" />
+
+  <Variable initializer="string:LCM" input="true" name="source" />
+
+  <Variable initializer="string:false" name="trace" />
+
+  <Variable name="flow" initializer="string:HelpDesk Password" />
+  <Variable name="identityModel" />
+  <Variable name="identityName" input="true">
+    <Description>The name of the identity we using.</Description>
+  </Variable>
+  <Description>This workflow will present authentication questions to
+    verify a user</Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="Approval Library" />
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library" />
+  </RuleLibraries>
+
+  <Step icon="Start" name="Start" posX="34" posY="26">
+    <Transition to="Get User ID" />
+  </Step>
+  <Step icon="Default" name="Get User ID" posX="113" posY="25">
+    <Description>Quicklinks user select passes in the Identity ID rather
+      than the identityName</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+
+// Expect: java.lang.String quickLinkIdentityId
+
+Identity aUser = context.getObjectById(Identity.class, quickLinkIdentityId);
+workflow.put("identityName", aUser.getName());
+      ]]></Source>
+    </Script>
+    <Transition to="getIdentityModel" />
+  </Step>
+
+  <Step action="call:getIdentityModel" name="getIdentityModel"
+    posX="209" posY="26" resultVariable="identityModel">
+    <Arg name="identityName" value="ref:identityName" />
+
+    <Description>Initialize the data for the identity that we are
+      creating.</Description>
+    <Transition to="Verify User Form" />
+  </Step>
+
+  <Step name="Verify User Form">
+    <Description>Presents form for HelpDesk User to enter the selected
+      users Authentication Answers</Description>
+    <Approval name="Verify User" owner="ref:requester">
+      <Arg name="workItemType" value="string:Form" />
+      <Arg name="workItemDescription" value="string:Verify User" />
+      <Arg name="workItemForm" value="string:AQVerify Identity" />
+      <Arg name="workItemFormBasePath" value="identityModel" />
+      <Arg name="identityName" value="ref:identityName" />
+    </Approval>
+    <Transition to="Verified User" />
+  </Step>
+
+  <Step name="Verified User">
+    <Description>Presents form once the user has been verified. This
+      includes a deeplink to LCM password change</Description>
+    <Approval name="Verify User" owner="ref:requester">
+      <Arg name="workItemType" value="string:Form" />
+      <Arg name="workItemDescription" value="string:Verified User" />
+      <Arg name="workItemForm" value="string:Is Verified" />
+      <Arg name="identityName" value="ref:identityName" />
+    </Approval>
+    <Transition to="end" />
+  </Step>
+
+  <Step icon="Stop" name="end" posX="648" posY="267" />
+</Workflow>

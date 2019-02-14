@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Query Identity Attribute Values" type="AllowedValues">
+  <Description>
+   Returns a list of all available (distinct) values for a specific identity attribute (e.g., get all unique job titles for the jobTitle identity attribute).
+  </Description>
+  <Signature returnType="List">
+    <Inputs>
+      <Argument name="context">
+	<Description>
+	  A sailpoint.api.SailPointContext object that can be used to
+	  query the database to aid in correlation.
+	</Description>
+      </Argument>
+      <Argument name="attributeName">
+	<Description>
+	  Name of the identity attribute you want to query
+	</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source>
+    <![CDATA[
+      
+      import sailpoint.api.*;
+      import sailpoint.object.*;
+
+      List resultList = new ArrayList();
+
+      QueryOptions qo = new QueryOptions();
+      qo.setDistinct(true);
+      qo.addOrdering(attributeName, true);
+      //qo.setResultLimit(100);  //Set this to a lower value for test or if you have a huge result set.
+
+      List props = new ArrayList();
+      props.add(attributeName);
+      Iterator result = context.search(Identity.class, qo, props);
+      while (result.hasNext()) {
+          Object [] record = result.next();
+          String attr = (String) record[0];
+          resultList.add(attr);
+      }
+
+      return resultList;
+
+    ]]>
+  </Source>
+</Rule>

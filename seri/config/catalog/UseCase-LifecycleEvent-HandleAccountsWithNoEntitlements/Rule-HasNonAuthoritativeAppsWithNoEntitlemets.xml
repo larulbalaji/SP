@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Rule - Has Non Authoritative Apps With No Entitlements" type="IdentityTrigger">
+  <Description>This rule returns true when a user has non-authortative appilcations with no entitlements if so, we deprovision those accounts.</Description>
+  <Signature returnType="boolean">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="previousIdentity">
+        <Description>
+          The identity before the refresh/aggregation (this will be null when an
+          identity is created).
+        </Description>
+      </Argument>
+      <Argument name="newIdentity">
+        <Description>
+          The identity after the refresh/aggregation (this will be null when an
+          identity is deleted).
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>
+          A boolean describing the result of the rule.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+  <![CDATA[ 
+  
+import sailpoint.object.Identity;
+import sailpoint.object.*;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.IdentityTrigger-HasNonAuthoritativeAppsWithNoEntitlements");
+
+if(previousIdentity != null)
+{
+	List links = newIdentity.getLinks();
+	if (links != null)
+	{
+  		for (int x=0; x<links.size(); x++)
+  		{
+			Link link =(Link) links.get(x);
+            serilog.debug("Checking Application: " + link.getApplication().getName() );
+            // serilog.debug("link: " + link.toXml() );
+            // serilog.debug("previousIdentity: " + previousIdentity.toXml() );
+            
+            // serilog.debug("link.hasEntitlements() == false: " + (link.hasEntitlements() == false) );
+            // serilog.debug("previousIdentity.getLinks() != null: " + ( null != previousIdentity.getLinks() ) );
+            // serilog.debug("previousIdentity.getLinks().size()>0: " + (previousIdentity.getLinks().size()>0) );
+            // serilog.debug("previousIdentity.getLinks().size()>x: " + (previousIdentity.getLinks().size()>x) );
+            // serilog.debug("((Link)previousIdentity.getLinks().get(x)).getApplication().getName().equals(link.getApplication().getName()): " + (((Link)previousIdentity.getLinks().get(x)).getApplication().getName().equals(link.getApplication().getName())) );
+            // serilog.debug("((Link)previousIdentity.getLinks().get(x)).getNativeIdentity().equals(link.getNativeIdentity()): " + (((Link)previousIdentity.getLinks().get(x)).getNativeIdentity().equals(link.getNativeIdentity())));
+            // serilog.debug("((Link)previousIdentity.getLinks().get(x)).hasEntitlements(): " + (((Link)previousIdentity.getLinks().get(x)).hasEntitlements()));
+            // serilog.debug("link.getApplication().isAuthoritative() == false: " + (link.getApplication().isAuthoritative() == false));                                                                                    
+            // serilog.debug("link.getApplication().getAttributeValue(\"accountNoEntitlementsDeprovisioningPolicy\")!=null: " + (link.getApplication().getAttributeValue("accountNoEntitlementsDeprovisioningPolicy")!=null));
+            // serilog.debug("((String) link.getApplication().getAttributeValue(\"accountNoEntitlementsDeprovisioningPolicy\")).equals(\"Do Nothing\") == false: " + (((String) link.getApplication().getAttributeValue("accountNoEntitlementsDeprovisioningPolicy")).equals("Do Nothing") == false) );
+            // serilog.debug("link.getApplication().isDisabled() == false: " + (link.getApplication().isDisabled() == false));
+   			if(link.hasEntitlements() == false &&
+      		   previousIdentity.getLinks() != null &&
+    	 	   previousIdentity.getLinks().size()>0 &&
+     		   previousIdentity.getLinks().size()>x &&
+     		   ((Link)previousIdentity.getLinks().get(x)).getApplication().getName().equals(link.getApplication().getName()) &&
+     		   ((Link)previousIdentity.getLinks().get(x)).getNativeIdentity().equals(link.getNativeIdentity()) &&
+
+     		   // not sure why this test was present. In my session this was ALWAYS false ar      
+    		   //((Link)previousIdentity.getLinks().get(x)).hasEntitlements() &&
+      		   link.getApplication().isAuthoritative() == false  &&
+      		   link.getApplication().getAttributeValue("accountNoEntitlementsDeprovisioningPolicy")!=null && 
+			   ((String) link.getApplication().getAttributeValue("accountNoEntitlementsDeprovisioningPolicy")).equals("Do Nothing") == false &&
+      		   link.getApplication().isDisabled() == false )
+  			{
+  			    serilog.debug("Application: " + link.getApplication().getName() + ", Found Account: " + link.getNativeIdentity() + " that should get disabled/removed" );
+  				return true;
+   			}
+  		}
+	} else {
+      serilog.debug("No Accounts found for: " + newIdentity.getName() + ", Skipping");	
+	}
+} else {
+  serilog.debug(" previousIdentity == Null, Skipping");
+}
+return false;
+
+]]>
+</Source> 
+</Rule>

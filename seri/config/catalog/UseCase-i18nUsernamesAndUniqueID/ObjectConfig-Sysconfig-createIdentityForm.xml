@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<ImportAction name="merge" value="replace">
+<Configuration name="SystemConfiguration">
+  <Attributes>
+    <Map>
+      <entry key="createIdentityForm" value="New Identity Registration Form"/>
+    </Map>
+  </Attributes>
+</Configuration>
+</ImportAction>
+</sailpoint>

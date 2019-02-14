@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form hidden="true" name="Create CSS File Name" type="RegisterIdentity">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Create CSS File Name" />
+      <entry key="subtitle"
+        value="Please enter the following required information in order to upload the correct css file from your IIQ host server.. To continue, click 'Continue'. To cancel this request, click 'Cancel'." />
+    </Map>
+  </Attributes>
+  <Button action="next" label="Continue" />
+  <Button action="cancel" label="nav_cancel" />
+  <Description>This form is used to for self-service registration.</Description>
+  <Section columns="2" label="General Information">
+    <Field columnSpan="2" displayName="CSS Config File Name" name="configurationFileName"
+      required="true" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[  
+import sailpoint.object.Custom;
+import sailpoint.object.SailPointObject;
+List    temps=context.getObjects(Custom.class);
+List items=new ArrayList();
+if(temps!=null) 
+{
+    for (SailPointObject temp: temps) 
+    {
+        String name=temp.getName();
+        items.add(name);
+    }
+}
+
+return items;
+		  ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field columnSpan="2" displayName="Save AS CSS Config File Name"
+      name="saveAsConfigurationFileName" type="string">
+      <Script>
+        <Source><![CDATA[  
+		      
+		  ]]></Source>
+      </Script>
+    </Field>
+    <Field columnSpan="2" displayName="CSS File Name" name="cssFileName"
+      required="true" type="string">
+      <Script>
+        <Source><![CDATA[  
+		        return "iiq-custom.css";
+		  ]]></Source>
+      </Script>
+    </Field>
+    <Field columnSpan="2" displayName="CSS Folder Location" name="cssFolderLocation"
+      required="true" type="string">
+      <Script>
+        <Source><![CDATA[  
+return "/usr/local/tomcat/webapps/identityiq/css/";
+		  ]]></Source>
+      </Script>
+      <ValidationScript>
+        <Source><![CDATA[     
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+
+String cssFolderLocation = form.getField("cssFolderLocation").getValue();
+
+File file = new File(cssFolderLocation+"iiq-custom.css");
+//BufferedReader reader = null;
+
+try {
+    //  reader = new BufferedReader(new FileReader(file));
+    if(file.exists() == false || file.length()==0)
+    {
+        return "Invalid Path. Please enter the fully qualified path to your iiq-custom.css file. Include the trailing '\' (i.e. '/usr/local/tomcat/webapps/identityiq/css/') ";
+    }
+
+    // String text = null;
+
+    //          while ((text = reader.readLine()) != null) {       }
+
+}
+catch (FileNotFoundException e) 
+{
+    return "Invalid Path. Please enter the fully qualified path to your iiq-custom.css file. Include the trailing '\' (i.e. '/usr/local/tomcat/webapps/identityiq/css/') ";
+}
+	  ]]></Source>
+      </ValidationScript>
+    </Field>
+  </Section>
+</Form>

@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle    name="Accounts Payable Accountant" type="business">
+  <Attributes>
+    <Map>
+      <entry key="accountSelectorRules"/>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="isoRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="mergeTemplates" value="false"/>
+      <entry key="nercRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="pciRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="soxRelevant">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Manages the accounts payable function within the organization&apos;s established policies. Arranges and oversees completion of all work. Examines records of amounts due and makes sure invoices are paid according to terms and discounts taken. Directs invoice processing and verification, expense coding, and drafting of payment checks or vouchers. Supplies regular or written reports.&lt;br>"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Inheritance>
+    <Reference class="sailpoint.object.Bundle"  name="Finance &amp; Accounting"/>
+  </Inheritance>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Lori.Ferguson"/>
+  </Owner>
+  <Permits>
+    <Reference class="sailpoint.object.Bundle"  name="Accounts Payable Access"/>
+  </Permits>
+  <Requirements>
+    <Reference class="sailpoint.object.Bundle"  name="Accounting General Access"/>
+  </Requirements>
+  <Selector>
+    <IdentitySelector>
+      <PopulationRef>
+        <Reference class="sailpoint.object.GroupDefinition"  name="Accounts Payable Accountants Role assignment without Amy"/>
+      </PopulationRef>
+    </IdentitySelector>
+  </Selector>
+</Bundle>

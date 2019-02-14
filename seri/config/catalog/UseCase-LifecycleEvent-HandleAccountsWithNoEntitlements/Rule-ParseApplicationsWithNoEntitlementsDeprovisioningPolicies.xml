@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Rule - Parse Applications With No Entitlements Deprovisioning Policies" type="Workflow">
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+
+Note that an Attributes map of all variables from the current WorkflowContext, merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+  <Signature returnType="Object"/>
+  <Source><![CDATA[ 
+import sailpoint.object.*;
+
+// Expect: java.lang.String identityName
+ 
+Identity identity = context.getObjectByName(Identity.class,identityName);
+
+//iterate over each link on the user. Look at the deprovisioning attributes assigned to that
+//application definition for that link link.
+//then set the application deprovisioning map accordingly.
+
+Map accountDeprovisioningMap = new HashMap();
+List links = identity.getLinks();
+for(Link aLink : links) {
+  Application applicationObject = aLink.getApplication();
+  
+  if(applicationObject!= null) {
+    HashMap map = new HashMap();
+    map.put("daysToWaitForDeletionOnLossOfEntitlements",  applicationObject.getAttributeValue("daysToWaitForDeletionOnLossOfEntitlements")); 
+    map.put("accountNoEntitlementsDeprovisioningPolicy",  applicationObject.getAttributeValue("accountNoEntitlementsDeprovisioningPolicy"));
+  
+    map.put("accountNoEntitlementsPostProvRule",  applicationObject.getAttributeValue("accountNoEntitlementsPostProvRule"));
+    map.put("accountNoEntitlementsModelRule",  applicationObject.getAttributeValue("accountNoEntitlementsModelRule"));
+    map.put("accountNoEntltlementsPlanRule",  applicationObject.getAttributeValue("accountNoEntltlementsPlanRule"));
+  
+    accountDeprovisioningMap.put(applicationObject.getName(), map);
+  
+  }
+}
+
+return accountDeprovisioningMap;
+    
+  ]]></Source>
+</Rule>

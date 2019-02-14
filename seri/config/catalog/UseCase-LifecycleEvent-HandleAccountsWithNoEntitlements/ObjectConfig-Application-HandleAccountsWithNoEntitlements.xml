@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <ImportAction name="merge">
+    <ObjectConfig name="Application">
+<ObjectAttribute categoryName="Accounts with No Entitlement Deprovisioning Settings" defaultValue="Delete Account Immediately" displayName="Action Upon Losing All Entitlements" editMode="Permanent" name="accountNoEntitlementsDeprovisioningPolicy" required="true">
+    <AllowedValues>
+      <String>Disable Account Immediately</String>
+      <String>Disable Account Immediately, Wait, then Delete</String>
+      <String>Delete Account Immediately</String>
+      <String>Do Nothing</String>
+    </AllowedValues>
+  </ObjectAttribute>
+  <ObjectAttribute categoryName="Accounts with No Entitlement Deprovisioning Settings" displayName="Days Until Deletion After Disable" editMode="Permanent" name="daysToWaitForDeletionOnLossOfEntitlements" type="int"/>
+ <ObjectAttribute categoryName="Accounts with No Entitlement Deprovisioning Settings" displayName="Update Post Provisioning Rule" editMode="Permanent" name="accountNoEntitlementsPostProvRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+   <ObjectAttribute categoryName="Accounts with No Entitlement Deprovisioning Settings" displayName="Update Model Rule" editMode="Permanent" name="accountNoEntitlementsModelRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+   <ObjectAttribute categoryName="Accounts with No Entitlement Deprovisioning Settings" displayName="Update Plan Rule" editMode="Permanent" name="accountNoEntltlementsPlanRule" type="sailpoint.object.Rule">
+    <Description></Description>
+  </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

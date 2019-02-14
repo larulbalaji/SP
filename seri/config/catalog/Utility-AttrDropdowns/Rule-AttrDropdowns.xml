@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Rule language="beanshell" name="AttrDropdowns">
+  <Description>
+  </Description>
+  <Signature returnType="string">
+    <Inputs>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to
+          access the database.
+        </Description>
+      </Argument>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.object.Rule;
+import sailpoint.object.ObjectConfig;
+import sailpoint.object.ObjectAttribute;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.AttrDropdowns");
+
+String resultString = "SUCCESS";
+Rule rul;
+ObjectConfig identityMapping;
+List items;
+String sName;
+String sScriptSource;
+
+identityMapping = context.getObjectByName(ObjectConfig.class,"Identity");
+items = identityMapping.getObjectAttributes();
+
+if (items==null) {
+  items = new ArrayList();
+}
+
+for (ObjectAttribute item: items) {
+  if (!item.isSystem()) {
+    sName = item.getName();
+    if (item.isStandard()) {
+      sScriptSource = "return identity.get"+sName.substring(0,1).toUpperCase()+sName.substring(1,sName.length())+"();";
+    } else {
+      sScriptSource = "return identity.getAttribute(\""+sName+"\");";
+    }
+    rul = context.getObjectByName(Rule.class,sName);
+    if (rul!=null) {
+      rul.setSource(sScriptSource);
+      rul.setType(Rule.Type.FieldValue);
+      context.saveObject(rul);
+      context.commitTransaction();
+      serilog.debug("EXISTED overwrote rule: "+sName);
+    } else {
+      rul = new Rule();
+      rul.setName(sName);
+      rul.setSource(sScriptSource);
+      rul.setType(Rule.Type.FieldValue);
+      context.saveObject(rul);
+      context.commitTransaction();
+      serilog.debug("CREATED rule: "+sName);
+    }
+  }
+}
+
+return resultString;
+  ]]></Source>
+</Rule>
+</sailpoint>

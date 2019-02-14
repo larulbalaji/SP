@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.services.standard.connector.LoopbackConnector" featuresString="PROVISIONING, SEARCH" icon="databaseIcon" name="IdentityIQ Loopback" profileClass="" type="IdentityIQ Loopback Connector">
+  <Attributes>
+    <Map>
+      <entry key="accountDeltaTimeStamp">
+        <value>
+          <Date>1502110353536</Date>
+        </value>
+      </entry>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1502110368458</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1502110353598</Date>
+        </value>
+      </entry>
+      <entry key="attributeTransformMap">
+        <value>
+          <Map>
+            <entry key="capabilities.name" value="Capabilities"/>
+            <entry key="workgroups.name" value="workgroups"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="capabilityDeltaTimeStamp">
+        <value>
+          <Date>1502110378536</Date>
+        </value>
+      </entry>
+      <entry key="compositeDefinition"/>
+      <entry key="connectorClass" value="sailpoint.services.standard.connector.LoopbackConnector"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="IdentityIQ Loopback Connector"/>
+      <entry key="workgroupDeltaTimeStamp">
+        <value>
+          <Date>1502110378397</Date>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="name" identityAttribute="name" instanceAttribute="" nativeObjectType="Identity" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="name" remediationModificationType="None" required="true" type="string">
+        <Description>Account name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="firstname" remediationModificationType="None" type="string">
+        <Description>First name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="lastname" remediationModificationType="None" type="string">
+        <Description>Last name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="displayName" remediationModificationType="None" type="string">
+        <Description>Display name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="workgroups.name" remediationModificationType="None" schemaObjectType="workgroup" type="string">
+        <Description>Identity's workgroups</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="capabilities.name" remediationModificationType="None" schemaObjectType="capability" type="string">
+        <Description>Identity's capabilities</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="inactive" remediationModificationType="None" type="string">
+        <Description>Identity's inactive flag</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema aggregationType="group" displayAttribute="name" identityAttribute="name" instanceAttribute="" nativeObjectType="Workgroup" objectType="workgroup" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="name" remediationModificationType="None" required="true" type="string">
+        <Description>Workgroup name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="displayName" remediationModificationType="None" type="string">
+        <Description>Display name</Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema aggregationType="group" displayAttribute="name" identityAttribute="name" instanceAttribute="" nativeObjectType="Capability" objectType="capability" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="name" remediationModificationType="None" required="true" type="string">
+        <Description>Capability name</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

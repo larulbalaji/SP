@@ -1,0 +1,24 @@
+<project name="TestSetupRelative" default="test">
+    <taskdef name="setupRelative" classname="sailpoint.seri.tools.ant.SetupRelativeTask">
+        <classpath>
+            <pathelement location="../../lib/services-tools.jar"/>
+        </classpath>
+    </taskdef>
+    
+    <target name="reset">
+    	<copy file="../resources/ant/setuprelative/folder1/folder/folder3/setup.orig"
+    		tofile="../resources/ant/setuprelative/folder1/folder/folder3/setup.xml"
+    		overwrite="true"
+   		/>
+    </target>
+    		
+    <target name="test" depends="reset">
+    	<setupRelative baseDir="setuprelative">
+    		<fileset dir="..">
+    			<include name="resources/ant/**/setup.xml"/>
+    		</fileset>
+    	</setupRelative>
+    </target>
+    
+</project>
+    

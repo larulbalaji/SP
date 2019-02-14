@@ -1,0 +1,66 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Account Deprovisioning - Plan - Move AD Account" type="Workflow">
+  <Description>Modify the DN on an AD Link to point to a "disabled" container, and create an account request to do the same on AD</Description>
+  <Source><![CDATA[
+import sailpoint.object.Application;
+import sailpoint.object.Configuration;
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String identityName
+// Expect: java.lang.String nativeIdentity
+// Expect: sailpoint.object.ProvisioningPlan plan
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.Deprovisioning.MoveADAccount");
+
+String newParent=null;
+
+Configuration conf=context.getObjectByName(Configuration.class, "Deprovisioning Configuration");
+if(conf!=null){
+  newParent=conf.get("ADDisabledContainer");
+}
+
+if(newParent==null) {
+  serilog.warn("Not moving AD Account for "+identityName+", no Disabled container configured");
+  return;
+}
+
+Identity id=context.getObjectByName(Identity.class, identityName);
+// Strip up to first ',' from nativeIdentity
+int comma=nativeIdentity.indexOf(",");
+
+String originalContainer=nativeIdentity.substring(comma+1);
+
+serilog.debug("original Container: "+originalContainer);
+Application app=context.getObjectByName(Application.class, applicationName);
+
+id.setAttribute("originalADContainer", originalContainer); 
+
+serilog.debug("cube is "+id.toXml());
+
+context.saveObject(id);
+context.commitTransaction();
+
+AccountRequest acctReq = new AccountRequest();	            		
+acctReq.setApplication(applicationName);
+acctReq.setNativeIdentity(nativeIdentity);
+acctReq.setOperation(AccountRequest.Operation.Modify);
+
+AttributeRequest attrReq = new AttributeRequest();
+attrReq.setName("AC_NewParent");
+attrReq.setOperation(ProvisioningPlan.Operation.Set);
+attrReq.setValue(newParent);
+acctReq.add(attrReq);
+
+plan.add(acctReq);
+
+serilog.debug("Set the plan:    "+ plan.toXml());
+
+workflow.put("plan",plan);
+  ]]></Source>
+</Rule>

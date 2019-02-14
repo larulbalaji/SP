@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+<!--  Standard Create User -->
+   <ImportAction name='include' value='ObjectConfig-Identity.xml'/>
+  <ImportAction name='include' value='Rule-GetLocationValueFromDB.xml'/> 
+  <ImportAction name='include' value='QuickLink-CreateNewUser.xml'/>
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-HasWritePermission.xml'/>
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-HasViewPermission.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-CreateNewUser.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-Company.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-Department.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-StartDate.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-NationalIdentifier.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-DateOfBirth.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-HomeAddress.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-OfficeAddress.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-WorkerType.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-Sponsor.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-Manager.xml'/>
+  <ImportAction name='include' value='/seri/xml/SPRight/SPRights-ExpirationDate.xml'/>
+  <ImportAction name='include' value='/seri/xml/Capability/Capability-Manager.xml'/>
+  <ImportAction name='include' value='Form-CreateUser.xml'/>
+  <ImportAction name='include' value='Workflow-CreateUser.xml'/>  
+</sailpoint>

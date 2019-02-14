@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="IdentityDashboard-JerryComplianceDashboardConfig.xml"/>
+    <ImportAction name="include" value="TaskDefinition-RefreshRiskScores.xml"/> 
+    <ImportAction name="include" value="Rule-FixImportsWithIds.xml"/>
+    <ImportAction name="include" value="Configuration-SystemConfiguration.xml"/>
+    <ImportAction name="include" value="TaskDefinition-ManagerAccessReviewReport.xml"/>        
+</sailpoint>

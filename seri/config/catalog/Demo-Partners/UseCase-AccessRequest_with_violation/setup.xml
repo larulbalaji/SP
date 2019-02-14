@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="Population-AccountsPayableAccountantsRoleAssignmentWithoutAmy.xml"/>
+    <ImportAction name="include" value="Bundle-AccountsPayableAccountantWithoutAmy.xml"/>  
+    <ImportAction name="include" value="Policy-SodPolicyAccounting.xml"/>
+    <ImportAction name="include" value="Bundle-AccountsReceivableAccountantWithFrank.xml"/>
+	<ImportAction name="include" value="Configuration-ScoreConfig.xml"/>     	
+</sailpoint>	

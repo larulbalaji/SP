@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.seri.task.ReportExecutorAndExporter" type="Generic" name="Report Executor and Exporter" progressInterval="5000" progressMode="String" template="true" >
+  <Description>
+            Task template for report execution and export. The task does execute the selected report and stores the result in the specified location.
+  </Description>
+  <Attributes>
+    <Map>
+      <entry key="csvExport" value="true"/>
+    </Map>
+  </Attributes>
+  <Signature>
+    <Inputs>
+      <Argument  required="true" filterString="(type == TaskItemDefinition.Type.Report || type == TaskItemDefinition.Type.LiveReport) &amp;&amp; template == false" name="report" type="TaskDefinition">
+        <Prompt>Report to execute</Prompt>
+      </Argument>
+      <Argument name="location" type="string" required = "true">
+        <Prompt>Target location</Prompt>
+      </Argument>
+      <Argument name="csvExport" type="boolean">
+        <Prompt>Export as CSV ?</Prompt>
+      </Argument>
+      <Argument name="pdfExport" type="boolean">
+        <Prompt>Export as PDF ?</Prompt>
+      </Argument>
+      <!-- NOT YET IMPLEMENTED -->
+      <!-- <Argument name="nameFormat" type="string">
+        <Prompt>Naming convention for output filename</Prompt>
+      </Argument>
+      -->
+    </Inputs>
+    <Returns>
+      <Argument name="result" type="String">
+        <Prompt>Execution result</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>

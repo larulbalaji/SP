@@ -1,0 +1,6 @@
+"Path","FileSystemRights","AccessControlType","IdentityReference","IsInherited","InheritanceFlags","PropagationFlags"
+"X:\Corporate Data\Example\subDir1","ReadAndExecute","Allow","SERI\Aaron.Nichols","False","None","None"
+"X:\Corporate Data\Example\subDir2","FullControl","Allow","SERI\Adam.Kennedy","False","None","None"
+"X:\Corporate Data\Example\subDir3","Modify","Allow","SERI\Alan.Bradley","False","None","None"
+"X:\Corporate Data\Example\subDir4","CreateFiles","Allow","SERI\Albert.Woods","False","None","None"
+"X:\Corporate Data\Example\subDir5","AppendData","Allow","SERI\Alice.Ford","True","None","None"

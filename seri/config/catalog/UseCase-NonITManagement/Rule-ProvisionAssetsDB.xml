@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="ProvisionAssetsDB" type="JDBCProvision">
+   <Description>A Provisioning rule for the LnSyncDB application. Handles
+      Account Creates/Deletes/Modifies/Enables/Disables</Description>
+   <Signature returnType="ProvisioningResult">
+      <Inputs>
+         <Argument name="log">
+            <Description>
+               The log object associated with the SailPointContext.
+            </Description>
+         </Argument>
+         <Argument name="context">
+            <Description>
+               A sailpoint.api.SailPointContext object that can be used to query
+               the database if necessary.
+            </Description>
+         </Argument>
+         <Argument name="application">
+            <Description>
+               The application whose data file is being processed.
+            </Description>
+         </Argument>
+         <Argument name="schema">
+            <Description>
+               The Schema currently in use.
+            </Description>
+         </Argument>
+         <Argument name="connection">
+            <Description>
+               A connection object to connect to database.
+            </Description>
+         </Argument>
+         <Argument name="plan">
+            <Description>
+               The ProvisioningPlan created against the JDBC application.
+            </Description>
+         </Argument>
+      </Inputs>
+      <Returns>
+         <Argument name="result">
+            <Description>
+               A Provisioning Result object is desirable to return the status.IT
+               can be a new object or part of Provisioning Plan
+            </Description>
+         </Argument>
+      </Returns>
+   </Signature>
+   <Source>
+    <![CDATA[
+import java.util.Date;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Types;
+import java.util.List;
+import sailpoint.api.SailPointContext;
+import sailpoint.connector.JDBCConnector;
+import sailpoint.object.Application;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.PermissionRequest;
+import sailpoint.object.ProvisioningResult;
+import sailpoint.object.Schema;
+import sailpoint.tools.xml.XMLObjectFactory;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import sailpoint.tools.Util;
+
+Log serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ProvisionAssetsDB");
+serilog.debug("Entering RuleProvisionAccessDB" );
+//
+// Internal method for grabbing an Attribute Request Value.
+//
+      
+public Object getAttributeRequestValue(AccountRequest acctReq, String attribute) {
+   if ( acctReq != null ) {
+      AttributeRequest attrReq = acctReq.getAttributeRequest(attribute);
+      if ( attrReq != null ) {
+         return attrReq.getValue();
+      }
+   }
+   return null;
+}
+
+//
+// JDBC Provisioning Rule Body
+//
+// We will handle these cases right now: 
+// 
+// Account Request Create
+// Account Request Modify
+// Account Request Delete
+// Account Lock/Unlock
+// Account Enable/Disable
+//
+   
+Date now = new Date();
+
+//
+// The ProvisioningResult is the return object for this type of rule. We'll create it here and then populate it later
+//
+ProvisioningResult result = new ProvisioningResult();
+
+
+//
+// Check if the plan is null or not, if not null, process it... 
+//
+if ( plan != null ) {
+  serilog.debug("*********Prov-Plan: " + plan.toXml());
+   List accounts = plan.getAccountRequests();
+   
+   // 
+   //  Get all Account Requests out of the plan
+   // 
+
+   if ( ( accounts != null ) && ( accounts.size() > 0 ) ) {
+      //
+      // If the plan contains one or more account requests, we'll iterate through them
+      //
+      
+      for ( AccountRequest account : accounts ) {
+         try {         
+            // 
+            // All of the account operations will reside in a try block in case we have any errors, we can mark the provisioningresult as "Failed" if we have an issue.
+            //
+            serilog.debug("requestee is: " + (plan.getIdentity()).getName());
+            serilog.debug("Operation: " + account.getOperation() );          
+            if (AccountRequest.Operation.Create.equals(account.getOperation())) {
+               //
+               // CREATE Operation
+               //                         
+               //                                                                                   1       2              3             4           5               6          7               8          9                  1 2 3 4 5 6 7 8 9 
+               PreparedStatement statement = connection.prepareStatement("insert into accounts (user_id,user_firstname,user_lastname,user_org_id,user_department,user_email,user_manager_id,user_phone,user_disabled) values (?,?,?,?,?,?,?,?,?)");
+               
+               statement.setString(1, (String) account.getNativeIdentity());
+               statement.setString(2, (String)getAttributeRequestValue(account, "user_firstname"));
+               statement.setString(3, (String)getAttributeRequestValue(account, "user_lastname"));
+               statement.setString(4, (String)getAttributeRequestValue(account, "user_org_id"));               
+               statement.setString(5, (String)getAttributeRequestValue(account, "user_department"));
+               statement.setString(6, (String)getAttributeRequestValue(account, "user_email"));
+               statement.setString(7, (String)getAttributeRequestValue(account, "user_manager_id"));
+               statement.setString(8, (String)getAttributeRequestValue(account, "user_phone"));
+               statement.setString(9, (String)getAttributeRequestValue(account, "user_disabled"));
+
+               // Note this works for mysql and postgres, don't know for other jdbc drivers
+               serilog.debug("PreparedStatement createAccount: " + statement.toString() ); 
+               statement.executeUpdate();  // Account created
+                  
+               // now check are there addtional entitltements to add
+               List mod_attr_requests = account.getAttributeRequests();
+               List add_groups = new ArrayList(); 
+                                    
+               if (mod_attr_requests != null) {
+                  for (AttributeRequest req : mod_attr_requests ) {
+                     if (req.getName().equals("asset_id")) {
+                        if (ProvisioningPlan.Operation.Add.equals(req.getOperation())) {
+                           // Process Adds Second
+                           serilog.debug("Add Group: " + req.getValue());
+                           if (req.getValue() instanceof String) {
+                              add_groups.add(req.getValue());
+                           } 
+                        } 
+                     } 
+                  }
+               }
+               // cleanup
+               statement.close();
+               
+               serilog.debug("Number of Groups to add: " + add_groups.size());
+          
+               // now iterate all 
+               if (!add_groups.isEmpty()) {
+                  for (Object item: add_groups) {
+                     serilog.debug("add Group: " + item);
+                     Statement curr_stmt = connection.createStatement();
+                     String queryString = "select * from assets where asset_id = '" + (String) item + "'";
+                     serilog.debug("Statement searchGroup: " + queryString );
+                     ResultSet rs = curr_stmt.executeQuery(queryString); 
+
+                     rs.next();
+                     // make sure that the object really exists
+                      String vID = (String) rs.getString("asset_id");
+                      curr_stmt.close();
+              
+                      statement = connection.prepareStatement("insert into accounts_assets(user_id, asset_id) values (?,?)");
+                      statement.setString(1, (String) account.getNativeIdentity());
+                      statement.setString(2, vID ); 
+                      statement.executeUpdate();      
+                      statement.close();   
+                      rs.close();             
+                  }
+               }
+               
+               //
+               // Sucessful Create, so mark result as COMMITTED
+               //               
+               result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+               
+            } else if (AccountRequest.Operation.Modify.equals(account.getOperation())) {
+               //
+               // MODIFY Operation
+               // 
+            
+               // first figure out if some of the account attributes have changed.
+               String userId     = account.getNativeIdentity();
+              
+               String queryString = "select * from accounts where user_id = '" + userId + "'";
+               Statement curr_stmt = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_READ_ONLY);
+               serilog.debug("Statement searchAccount: " + queryString );
+               ResultSet rs = curr_stmt.executeQuery( queryString );
+               //
+               //  Check result set. Should only be one row since login is a unique key for the table
+               //  
+               int noOfRows = ( rs.last() ) ? rs.getRow() : 0;         
+               rs.beforeFirst(); // make sure to reset the resultset
+               if( noOfRows > 1 ) {
+                 serilog.debug( "Found more then one result row while searching for " + account.getNativeIdentity() + ". Using the first row!" );
+               }
+               serilog.debug("noOfRows: " + noOfRows );
+               curr_stmt.close();
+               rs.close();
+               //
+               // Process update SQL operation
+               //
+               String statement = "update accounts set ";
+               String attrs = "";
+               for (int z=0; z < account.getAttributeRequests().size(); z++) {
+                  AttributeRequest ar = account.getAttributeRequests().get(z);
+
+                  if( z > 0 ) {
+                     attrs = attrs +",";
+                  }
+                  if (ar.getName().equalsIgnoreCase("asset_id")) {
+                     // Ignore it, it is linked by the cross table 
+                  } else {
+                     attrs = attrs + ar.getName() + "='" + ar.getValue() + "'";
+                  }  
+               }   
+               if(  attrs.isEmpty() ) {
+                  serilog.debug("No attributes found to update accounts" );
+               } else {
+                  statement = statement + attrs + " where user_id = '" + userId + "'";
+
+                  PreparedStatement stmtx = connection.prepareStatement( statement );
+                  serilog.debug("PreparedStatement updateAccounts: " + statement.toString() );
+                  stmtx.execute();
+                  result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+                  stmtx.close();
+               }
+              
+               //
+               // We have a modify, this one is trickier, as we can have "Add" and "Remove" 
+               // operations and each can be a single string value or a list
+               //
+
+               //
+               // Determine what the current groups are first... 
+               //
+
+               curr_stmt = connection.createStatement();
+
+               queryString = "select * from accounts_assets where user_id = '" + account.getNativeIdentity() + "'";
+               serilog.debug("Statement searchCrosstable: " + queryString ); 
+
+               rs = curr_stmt .executeQuery( queryString );
+          
+               List current_groups = null;
+               String groups = "";
+
+               while (rs.next()) {
+                  groups = groups + "," + rs.getString("asset_id");
+               } 
+               current_groups = Util.csvToList(groups,true);
+          
+               serilog.debug("Current Groups: " + groups);
+               
+               if (current_groups == null) {
+                  current_groups = new ArrayList();
+               }
+
+               //
+               // Get all Attribute Requests and pull out just the entitlement ones. 
+               //
+                              
+               List remove_groups = new ArrayList();
+               List add_groups = new ArrayList(); 
+               //
+               // Get all attribute requests and then we will filter for those related to the groups column
+               //
+               List mod_attr_requests = account.getAttributeRequests();
+                     
+               if (mod_attr_requests != null) {
+                  for (AttributeRequest req : mod_attr_requests ) {
+                     if (req.getName().equals("asset_id")) {
+                        if (ProvisioningPlan.Operation.Remove.equals(req.getOperation())) {
+                           // Process Removes First
+                           if (req.getValue() instanceof String) {
+                              remove_groups.add(req.getValue());
+                           } 
+                        } else if (ProvisioningPlan.Operation.Add.equals(req.getOperation())) {
+                           // Process Adds Second
+                           if (req.getValue() instanceof String) {
+                              add_groups.add(req.getValue());
+                           } 
+                        } 
+                     } 
+                  }
+               }
+               //
+               //  We now have a calculated list of the groups we are adding, the groups we are removing, and the current groups for the user.
+               //
+               serilog.debug("groupsToBeRemoved: " + remove_groups);
+               curr_stmt.close();
+               rs.close();
+               //
+               // If we have groups to remove, remove them
+               //
+               if (!remove_groups.isEmpty()) {
+                  serilog.debug("About to remove groups: " + remove_groups.toString() + "from the current_groups = " + current_groups.toString());
+                  for (Object item: remove_groups) {              
+                     curr_stmt = connection.createStatement();
+                     queryString = "select asset_id from assets where asset_id = '" + ((String) item) + "'";
+                     serilog.debug("Statement searchAssets: " + queryString ); 
+                     rs = curr_stmt .executeQuery( queryString );
+                     rs.next();
+                   
+                     String vID = (String) rs.getString("asset_id");
+                     serilog.debug("found item to be removed: " + vID);
+                     curr_stmt.close();
+                     rs.close();
+              
+                     if (current_groups.contains(vID)) {
+                        serilog.debug("item to be removed is currently assigned: " + vID);
+                        PreparedStatement prepStatement = connection.prepareStatement("delete from accounts_assets where user_id = ? and asset_id = ?");
+                        prepStatement.setString(1, (String) account.getNativeIdentity());
+                        prepStatement.setString(2, vID ); 
+                        
+                        serilog.debug("PreparedStatement deleteFromCrosstable: " + prepStatement.toString() ); 
+                        
+                        prepStatement.executeUpdate();
+                        prepStatement.close();                      
+                     }
+                  }
+               }
+               //
+               // If we have groups to add, check if they are there and add them as we iterate through
+               //          
+               serilog.debug("items to add: " + add_groups);
+               
+               if (!add_groups.isEmpty()) {
+                  for (Object item: add_groups) {
+                     serilog.debug("group: " + item + " will be added");
+                     curr_stmt = connection.createStatement();
+                     queryString = "select * from assets where asset_id = '" + ((String) item) + "'";
+                     serilog.debug("Statement searchCrosstable: " + queryString ); 
+                     rs = curr_stmt .executeQuery( queryString );
+                
+                     rs.next();
+                     String vID = (String) rs.getString("asset_id");
+                     serilog.debug("found group :" + vID);
+              
+                     if (!current_groups.contains(vID)) {
+                        serilog.debug("item to add: " + vID);
+                        PreparedStatement prepStatement = connection.prepareStatement("insert into accounts_assets(user_id, asset_id) values(?,?)");
+                        prepStatement.setString(1, (String) account.getNativeIdentity());
+                        prepStatement.setString(2, vID ); 
+                        serilog.debug("PreparedStatement insertIntoCrosstable: " + prepStatement.toString() ); 
+                        
+                        prepStatement.executeUpdate();   
+                        prepStatement.close();                   
+                      }
+                      curr_stmt.close();
+                      rs.close();
+                  }               
+               }
+               
+               result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+
+            } else if (AccountRequest.Operation.Delete.equals(account.getOperation())) {
+            
+               //
+               // DELETE Operation
+               // 
+               // first delete entries from cross table
+               PreparedStatement statement = connection.prepareStatement("delete from accounts_assets where user_id = ?");
+               statement.setString(1, (String) account.getNativeIdentity());
+               serilog.debug("PreparedStatement deleteFromCrosstable: " + statement.toString() );           
+               statement.executeUpdate();
+          
+               // now delete the account
+               statement = connection.prepareStatement("delete from accounts where user_id = ?");
+               statement.setString(1, (String) account.getNativeIdentity());
+               serilog.debug("PreparedStatement deleteFromAccounts: " + statement.toString() );               
+               statement.executeUpdate();
+
+               // commit to db
+               result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+
+            } else if (AccountRequest.Operation.Disable.equals(account.getOperation())) {
+
+               PreparedStatement statement = connection.prepareStatement("update accounts set user_disabled = '1' where user_id = ?");
+               statement.setString(1, (String) account.getNativeIdentity());
+               serilog.debug("PreparedStatement disableAccount: " + statement.toString() );               
+               statement.executeUpdate();
+               result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+
+            } else if (AccountRequest.Operation.Enable.equals(account.getOperation())) {
+
+               PreparedStatement statement = connection.prepareStatement("update accounts set user_disabled = '0' where user_id = ?");
+               statement.setString(1, (String) account.getNativeIdentity());
+               serilog.debug("PreparedStatement enableAccount: " + statement.toString() );                
+               statement.executeUpdate();
+               result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+
+ 
+               // Unknown operation!
+            }
+
+         } catch (SQLException e) {
+            result.setStatus(ProvisioningResult.STATUS_FAILED);
+            result.addError(e);
+            serilog.debug("Exception: " + e.getMessage() );
+         } 
+      }    // account request loop
+   }     // if account requests exist
+}   // if plan not null
+      
+return result;
+    ]]>
+   </Source>
+</Rule>

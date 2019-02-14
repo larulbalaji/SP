@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Provisioning Policy - AD Display Name" type="FieldValue">
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+           The Identity object that represents the user needing the field value.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="value">
+        <Description>
+          The string value created.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Configuration;
+
+// We are implementing this as a method so that it can also be used by the Distinguished Name rule
+String createDisplayName(Identity id) {
+  String first=id.getFirstname();
+  String last=id.getLastname();
+  return first+" "+last;
+}
+    
+return createDisplayName(identity);
+  ]]></Source>
+</Rule>

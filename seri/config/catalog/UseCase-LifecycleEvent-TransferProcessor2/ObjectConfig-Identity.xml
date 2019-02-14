@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+	<ImportAction name='merge'>
+		<ObjectConfig name="Identity">
+		<ObjectAttribute displayName="att_manager" editMode="Permanent" groupFactory="true" name="manager" standard="true" type="sailpoint.object.Identity">
+    	 <AttributeSource name="mgrId">
+    	  <ApplicationRef>
+    	    <Reference class="sailpoint.object.Application" name="Human Resources"/>
+    	  </ApplicationRef>
+    	 </AttributeSource>
+  		</ObjectAttribute>
+ 		<ObjectAttribute displayName="Previous Manager" editMode="ReadOnly" name="transferManager" namedColumn="true" type="string">
+    		<AttributeSource name="GlobalRule:Rule - Set transferManager attribute">
+      			<RuleRef>
+        			<Reference class="sailpoint.object.Rule" name="Rule - Set transferManager attribute"/>
+      			</RuleRef>
+    		</AttributeSource>
+  		</ObjectAttribute>
+		</ObjectConfig>
+	</ImportAction>
+</sailpoint>

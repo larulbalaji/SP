@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Account Provisioning - Parse Application Reactivation Policies" type="Workflow">
+  <Description>Iterate over each link on the user. Look at the deprovisioning attributes assigned to that application definition for that link link. Then set the application deprovisioning map accordingly.</Description>
+  <Source><![CDATA[
+import sailpoint.object.*;
+
+// Expect: java.lang.String identityName
+
+Identity identity = context.getObjectByName(Identity.class,identityName);
+//iterate over each link on the user. Look at the deprovisioning attributes assigned to that
+//application definition for that link link.
+//then set the application deprovisioning map accordingly.
+
+Map accountReactivationMap = new HashMap();
+List links = identity.getLinks();
+for(Link aLink : links) {
+  Application applicationObject = aLink.getApplication();
+
+  if(applicationObject!= null) {
+    HashMap map = new HashMap();
+    map.put("enableOnReactivation",  applicationObject.getAttributeValue("enableOnReactivation")); 
+
+    map.put("accountReactivationLinkRule",  applicationObject.getAttributeValue("accountReactivationLinkRule"));
+    map.put("accountReactivationPlanRule",  applicationObject.getAttributeValue("accountReactivationPlanRule"));
+    map.put("accountReactivationPostProvRule",  applicationObject.getAttributeValue("accountReactivationPostProvRule"));
+
+    accountReactivationMap.put(applicationObject.getName(), map);
+  }
+}
+
+return accountReactivationMap;
+  ]]></Source>
+</Rule>

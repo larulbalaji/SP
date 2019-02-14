@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name='Bundle'>
+      <Attributes>
+		<Map>
+		  <entry key="roleTypeDefinitions">
+			<value>
+			  <List>
+			<RoleTypeDefinition displayName="Container" icon="folderIcon" name="container" noAssignmentSelector="true" noAutoAssignment="true" noDetection="true" noManualAssignment="true" noPermits="true" noProfiles="true" noRequirements="true" notPermittable="true" notRequired="true">
+			  <Description>
+	Defines a generic container for holding roles.
+			  </Description>
+			</RoleTypeDefinition>
+			  </List>
+			</value>
+		  </entry>
+		</Map>
+      </Attributes>
+		<ObjectAttribute categoryName="Legislative Relevance" displayName="NERC Relevant" editMode="Permanent" name="nercRelevant" type="boolean">
+			<DefaultValue>
+				<Boolean/>
+			</DefaultValue>
+			<Description>Indicates whether the role impacts NERC standards compliance</Description>
+		</ObjectAttribute>
+		<ObjectAttribute categoryName="Legislative Relevance" displayName="PCI-DSS Relevant" editMode="Permanent" name="pciRelevant" type="boolean">
+			<DefaultValue>
+				<Boolean/>
+			</DefaultValue>
+			<Description>Indicates whether the role impacts PCI-DSS standards compliance</Description>
+		</ObjectAttribute>
+		<ObjectAttribute categoryName="Legislative Relevance" displayName="SOX Relevant" editMode="Permanent" name="soxRelevant" type="boolean">
+			<DefaultValue>
+				<Boolean/>
+			</DefaultValue>
+			<Description>Indicates whether the role impacts Sarbanes-Oxley standards compliance</Description>
+		</ObjectAttribute>
+		<ObjectAttribute categoryName="Legislative Relevance" displayName="ISO27001 Relevant" editMode="Permanent" name="isoRelevant" type="boolean">
+			<DefaultValue>
+				<Boolean/>
+			</DefaultValue>
+			<Description>Indicates whether the role impacts ISO27001 standards compliance</Description>
+		</ObjectAttribute>
+		<ObjectAttribute displayName="Administrative Role" editMode="Permanent" name="adminRole" type="boolean">
+          <DefaultValue>
+            <Boolean></Boolean>
+          </DefaultValue>
+          <Description>Indicates whether entitlements from this role need to be applied to an administrative, rather than normal account</Description>
+  		</ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+  
+</sailpoint>

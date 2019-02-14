@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE DynamicScope PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<DynamicScope name="VendorAdmins">
+  <Selector>
+    <IdentitySelector>
+      <MatchExpression and="true">
+        <MatchTerm name="employeeType" value="Vendor Administrator" />
+      </MatchExpression>
+    </IdentitySelector>
+  </Selector>
+</DynamicScope>

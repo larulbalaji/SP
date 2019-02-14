@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+  <ImportAction name='include' value='ObjectConfig-Application-HandleAccountsWithNoEntitlements.xml'/>
+  <ImportAction name='include' value='Rule-HasNonAuthoritativeAppsWithNoEntitlemets.xml'/>
+  <ImportAction name='include' value='Rule-InitiateAccountsWithNoEntitlementsDeprovisioningWorkflows.xml'/> 
+  <ImportAction name='include' value='Workflow-LifecycleEvent-DeprovisionAccountsWithNotEntitlements.xml'/>
+  <ImportAction name='include' value='Rule-ParseApplicationsWithNoEntitlementsDeprovisioningPolicies.xml'/>
+  <ImportAction name='include' value='LifecycleEvent-DeprovisionAccountsWithNoEntitlements.xml'/>
+  <ImportAction name='include' value='../UseCase-DeprovisionScenarios/setup.xml'/>
+  
+</sailpoint>

@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name='Link'>
+<!--   <ObjectAttribute displayName="Break The Glass" editMode="ReadOnly" extendedNumber="5" name="breakTheGlass" type="string">
+    <AttributeSource name="AppRule: Link Attribute - EPIC Break The Glass EPIC">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="EPIC"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Link Attribute - EPIC Break The Glass"/>
+      </RuleRef>
+    </AttributeSource>
+  </ObjectAttribute> -->
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="services.standard.build.filelayout">
+
+   <target name="prepBinaries" depends="setArchiveLocations, -expandGAreleaseAndPatches"/>
+
+	<target name="setArchiveLocations">
+		<!-- Set GAZip to external location if it exists -->
+		<!-- otherwise set to base/ga -->
+		<if>
+            <isset property="GALocation"/>
+			<then>		
+				<property name="GAZip" value="${GALocation}/identityiq-${IIQVersion}.zip"/>
+			</then>
+			<else>
+				<property name="WARFile" value="${WARLocation}/identityiq.war"/>
+			</else>
+		</if>
+		<if>
+            <isset property="IIQPatchLevel"/>
+			<then>
+				<property name="PatchJar" value="${PatchLocation}/identityiq-${IIQVersion}${IIQPatchLevel}.jar"/>
+			</then>
+		</if>
+	</target>
+	
+    <target name="-expandGAreleaseAndPatches">
+		<if>
+            <not>
+				<or>
+	                <available file="${GAZip}"/>
+	                <available file="${WARFile}"/>
+				</or>
+            </not>
+            <then>
+                <property name="critical.failure"
+                          value="Could not find file (identityiq-${IIQVersion}.zip}) IIQ GA binaries or identityiq.war for the specified build version ${IIQVersion} in the external directory specified in GALocation or WARFile property. You can download these files from https://community.sailpoint.com "/>
+               <fail message="${critical.failure}"/>
+            </then>
+        </if>
+        <if>
+			<isset property="IIQPatchLevel"/>
+        	<then>
+		        <if>
+	                <not>
+						<available file="${PatchJar}"/>
+	                </not>
+		            <then>
+		                <property name="critical.failure"
+		                          value="Could not find file (identityiq-${IIQVersion}${IIQPatchLevel}.jar}) IIQ patch binaries for the specified build version ${IIQVersion}${IIQPatchLevel} in the PatchLocation directory.${line.separator}You can download these files from https://community.sailpoint.com${line.separator}If you do not require a patch please remove IIQPatchLevel from build.properties"/>
+		                <fail message="${critical.failure}"/>
+		            </then>
+		
+		            <else>
+		                <echo>Found IIQ binaries for ${IIQVersion}${IIQPatchLevel}. Building for this version.</echo>
+		            </else>
+		        </if>
+        	</then>
+        </if>
+    	
+        <if>
+            <not>
+                <available file="${build.iiqBinaryExtract}"/>
+            </not>
+            <then>
+                <trycatch property="critical.failure">
+                    <try>
+                        <if>
+                        	<isset property="GAZip"/>
+                        	<then>
+	                        	<echo>Extracting GA release binary...</echo>
+		                        <mkdir dir="${build.iiqBinaryExtract}"/>
+		                        <unzip dest="${build.iiqBinaryExtract}" src="${GAZip}"/>
+		                        <echo>Extracting WAR file...</echo>
+		                        <unzip dest="${build.iiqBinaryExtract}">
+		                            <fileset dir="${build.iiqBinaryExtract}">
+		                                <include name="identityiq.war"/>
+		                            </fileset>
+		                        </unzip>
+		                        <delete file="${build.iiqBinaryExtract}/identityiq.war"/>
+                        	</then>
+                        	<else>
+	                        	<echo>Extracting preexisting WAR file...</echo>
+		                        <mkdir dir="${build.iiqBinaryExtract}"/>
+		                        <unzip dest="${build.iiqBinaryExtract}" src="${WARFile}"/>
+                        	</else>
+                        </if>
+                    	<if>
+                    		<isset property="PatchJar"/>
+                    		<then>
+		                        <echo>Overlaying patch version ${IIQVersion}${IIQPatchLevel}</echo>
+		                        <unzip dest="${build.iiqBinaryExtract}" src="${PatchJar}"/>
+                    		</then>
+                    	</if>
+						<echo>Removing poi-2.5.1-final-20040804.jar since nothing needs it and it gets in the way</echo>
+						<delete file="${build.iiqBinaryExtract}/WEB-INF/lib/poi-2.5.1-final-20040804.jar"/>
+                    </try>
+                    <catch>
+                        <echo>Critical failure while extracting core binaries. Make sure required files exist and${line.separator}
+                            are not corrupted.${line.separator}
+                        </echo>
+                        <fail message="${critical.failure}"/>
+                    </catch>
+                </trycatch>
+            </then>
+            <else>
+                <echo>Binaries already extracted. Use clean to force a expansion</echo>
+            </else>
+        </if>
+    </target>
+
+    <target name="-laydownWebDirectoryOverrides" unless="overrides.uptodate">
+        <copy todir="${build.iiqBinaryExtract}" overwrite="true">
+            <fileset dir="web">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+    	
+    	<!-- Added 2012-02-14 for automating branded IIQ splash screens.           -->
+    	<!-- Copy in the appropriate branding screen based TARGET environment or   -->
+    	<!-- copy in the appropriate branding screen based on what host we run on. -->
+	    <!-- If you want to setup IIQ from this build w/ correct branding add your -->
+    	<!-- login.gif.TARGETNAME to the web/images directory or  -->
+    	<!-- login.gif.HOSTNAME to the web/images directory. -->
+    	<if>
+    	  <available file="web/images/login-${seri.branding}.gif"/>
+    	  <then>
+    	  	<copy file="web/images/login-${seri.branding}.gif"              tofile="${build.iiqBinaryExtract}/images/login.gif"        overwrite="true" failonerror="false"/>
+    	  </then>
+    	</if>    	
+    	<if>
+    	  <available file="web/images/headerSPLogo-${seri.branding}.jpg"/>
+    	  <then>
+    	  	<copy file="web/images/headerSPLogo-${seri.branding}.jpg"       tofile="${build.iiqBinaryExtract}/images/headerSPLogo.jpg" overwrite="true" failonerror="false"/>
+    	  </then>
+    	</if>
+    	<!-- end support for automated branding images. -->
+
+        <!-- add branding for 7.0 files  -->
+        <!-- 2016/06/20 ar -->
+        <if>
+          <available file="web/images/loginLogo-${seri.branding}.png"/>
+          <then>
+                <copy file="web/images/loginLogo-${seri.branding}.png"              tofile="${build.iiqBinaryExtract}/ui/images/loginLogo.png"        overwrite="true" failonerror="false"/>
+          </then>
+        </if>
+
+        <if>
+          <available file="web/images/TopLogo1-${seri.branding}.png"/>
+          <then>
+                <copy file="web/images/TopLogo1-${seri.branding}.png"              tofile="${build.iiqBinaryExtract}/ui/images/TopLogo1.png"        overwrite="true" failonerror="false"/>
+          </then>
+        </if>
+
+        <if>
+          <available file="web/images/watermark-${seri.branding}.png"/>
+          <then>
+                <copy file="web/images/watermark-${seri.branding}.png"              tofile="${build.iiqBinaryExtract}/ui/images/watermark.png"        overwrite="true" failonerror="false"/>
+          </then>
+        </if>
+
+        <if>
+          <available file="web/images/mobilelogo-${seri.branding}.png"/>
+          <then>
+                <copy file="web/images/mobilelogo-${seri.branding}.png"              tofile="${build.iiqBinaryExtract}/ui/images/mobilelogo.png"        overwrite="true" failonerror="false"/>
+          </then>
+        </if>
+        <!-- end support for automated branding images. -->
+
+        <!-- added automated adding of css files -->
+        <!-- web/ui/css/ui-custom-xxx.css is copied to web/ui/css/ui-custom.css -->
+        <if>
+          <available file="web/ui/css/ui-custom-${seri.branding}.css"/>
+          <then>
+                <copy file="web/ui/css/ui-custom-${seri.branding}.css"       tofile="${build.iiqBinaryExtract}/ui/css/ui-custom.css" overwrite="true" failonerror="false"/>
+          </then>
+        </if>
+        <!-- web/css/iiq-custom-xxx.css is copied to web/css/iiq-custom.css -->
+        <if>
+          <available file="web/css/iiq-custom-${seri.branding}.css"/>
+          <then>
+                <copy file="web/css/iiq-custom-${seri.branding}.css"       tofile="${build.iiqBinaryExtract}/css/iiq-custom.css" overwrite="true" failonerror="false"/>
+          </then>
+        </if>
+        <!-- end automated adding of css files -->
+
+    	
+    	<!-- Added 2012-02-14 for automating re-naming of license.bea files.  -->
+    	<!-- This is necessary to support communicating with the CTSA PIM     -->
+    	<!-- when the CTSA PIM is hosted on WebLogic.  This takes files like  -->
+    	<!-- dev-license.bea and re-names them to license.bea where           -->
+    	<!-- appropriate.  -->
+    	<if>
+    	  <available file="web/WEB-INF/classes/${seri.branding}-license.bea"/>
+    	  <then>
+    	  	<copy file="web/WEB-INF/classes/${seri.branding}-license.bea" tofile="${build.iiqBinaryExtract}/WEB-INF/classes/license.bea" overwrite="true" failonerror="false"/>
+    	  </then>
+    	</if>
+    	
+    </target>
+
+    <target name="dist" depends="init-properties" description="Take the finished iiq build and copy it to the application server directory">
+        <mkdir dir="${IIQHome}"/>
+        <copy todir="${IIQHome}">
+            <fileset dir="${build.iiqBinaryExtract}">
+                <include name="**/*"/>
+            </fileset>
+        </copy>
+    </target>
+
+</project>

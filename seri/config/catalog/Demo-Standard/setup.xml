@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+  <!-- Pull in standard SERI GroupFactory objects -->
+  <ImportAction name='include' value='/seri/xml/GroupFactory/GroupFactory-SERI.xml'/>
+  
+  <!--  Import the pretty HTML email templates shipped with product -->
+  <ImportAction name='include' value='/emailtemplatesSample.xml'/>
+  
+  <!-- Pull in 'prettier' email templates -->
+  <ImportAction name='include' value='../../xml/EmailTemplate/setup.xml'/>
+  
+  <!-- Pull in AllowedValues rule for various form fields to query existing values -->
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-AllowedValues-QueryIdentityAttribute.xml'/>
+
+  <!-- Pull in HelpDesk Fulfillment from SERI catalog -->
+  <ImportAction name='include' value='../HelpDeskFulfillment/setup.xml'/>
+ 
+  <!-- Load RoleImporter task for seeding demo roles -->
+  <ImportAction name='include' value='TaskDefinition-RoleImporter-LoadDemoRoles.xml'/>
+  <ImportAction name='include' value='ObjectConfig-Bundle.xml'/>
+
+  <!-- Load the tasks that automate the demo setup -->
+  <ImportAction name='include' value='Rule-Exclusion-ExcludeBaseRoles.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoSetup.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoCertificationSetup.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoCertificationSignoffSetup.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoDashboardSetup.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoTrendingSetup.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DemoRequestSetup.xml'/>
+  <ImportAction name='include' value='TaskDefinition-SetupDemo.xml'/>
+  <ImportAction name='include' value='TaskDefinition-ImportDemoUserResponses.xml'/>
+  <ImportAction name='include' value='TaskDefinition-IdentityRefresh-EntitlementConnections.xml'/>
+  <ImportAction name='include' value='TaskDefinition-EffectiveAccessIndexRefresh.xml'/>
+
+  <!-- Load SoDImporter task for seeding demo SoD policies -->
+  <ImportAction name='include' value='TaskDefinition-SODImporter-LoadDemoPolicies.xml'/>
+
+  <!-- Load Contractor Finance SoD -->
+  <ImportAction name='include' value='Policy-EntitlementSoD-ContractorFinance.xml'/>
+
+  <!-- Load Import of account extended attributes -->
+  <ImportAction name='include' value='Configuration-PrivilegedActiveDirectoryGroups.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-RACFInactive.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-SIQAccountName.xml'/>
+  <ImportAction name='include' value='ObjectConfig-Link.xml'/>
+  <ImportAction name='include' value='ObjectConfig-LinkSIQ.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-ActiveDirectory-Inactive.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-EnterpriseDirectory-Inactive.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-HR-Inactive.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-ActiveDirectory-Privileged.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-Global-LastLoginDate.xml'/>
+
+  
+  
+  <!--  Merge in demo-specific System Config to turn on AD pass-thru, Self-Reg, Full Text Indexing -->
+  <ImportAction name='include' value='Configuration-SystemConfig.xml'/>
+
+  <!--  Merge in UIConfig settings for account tagging icons -->
+  <ImportAction name='include' value='UIConfig-SERI.xml'/>
+
+  <!-- Load SoD Policy Scan Task -->
+  <ImportAction name='include' value='TaskDefinition-DetectPolicyViolations.xml'/>
+  
+  <!--  Rule to set spadmin-specific things -->
+  <ImportAction name='include' value='Rule-SetupSpadmin.xml'/>
+
+  <!--  Rule to generate password from policy-->
+  <ImportAction name='include' value='Rule-GeneratePasswordFromPolicy.xml'/>
+
+  <!-- Rule to assign birthright roles -->
+  <ImportAction name='include' value='Rule-ActiveAndNonOrphanedUsers.xml'/>
+
+  <!-- Demo-wise Workgroups and Dynamic Scopes -->
+  <ImportAction name='include' value='Workgroup.xml'/>
+  <ImportAction name='include' value='DynamicScope.xml'/>
+
+  <!-- Add the termination functionality from the DeprovisionScenarios use case -->
+  <ImportAction name='include' value='../UseCase-DeprovisionScenarios/setup.xml'/>
+  
+  <!-- Group Management for Business Users -->
+  <ImportAction name='include' value='../UseCase-EndUserGroupManagement/setup.xml'/>
+
+  <!-- Removing Joiner event for demo setup -->
+  <ImportAction name='include' value='../Utility-RemoveJoinerEvent/setup.xml'/>
+  
+  <!-- Risk configuration and demo artifacts -->
+  <ImportAction name='include' value='../UseCase-RiskDemo/setup.xml'/>
+
+  <!-- Joiner Lifecycle Event; notification email contains deep links -->
+  <ImportAction name='include' value='../UseCase-LifecycleEvent-Joiner/setup.xml'/>
+
+  <!-- Custom Create Identity form -->
+  <ImportAction name='include' value='../UseCase-CustomCreateIdentityForm/setup.xml'/>
+
+  <!-- Workflow to be triggered from OrangeHRM -->
+  <ImportAction name='include' value='Workflow-TriggerHRProcessing.xml'/>
+
+  <!-- Account Selector Rule for AD Admin Roles -->
+  <ImportAction name='include' value='Rule-AccountSelector-ADAdminAccountSelector.xml'/>
+
+  <!-- Task/Rule to generate simple rules for returning identity values to Provisioning Policies -->
+  <ImportAction name='include' value='../Utility-AttrDropdowns/setup.xml'/>
+  
+   <!-- Lifecycle Event executed when identity's location is changed -->
+  <ImportAction name='include' value='../UseCase-LifecycleEvent-LocationChange/setup.xml'/>
+  
+   <!-- Lifecycle Event executed when identity's last name is changed -->
+  <ImportAction name='include' value='../UseCase-LifecycleEvent-NameChange/setup.xml'/>
+  
+
+  <!-- SIQ Sensitive Data SOD task-->
+  <ImportAction name='include' value='../UseCase-SIQSensitiveDataSOD/setup.xml'/>
+  
+  <!-- Lifecycle Event executed when an identity's manager and job title are changed -->
+  <ImportAction name='include' value='../UseCase-LifecycleEvent-TransferProcessor3/setup.xml'/>
+  
+  <!-- SIQ Alerts -->
+  <ImportAction name='include' value='../UseCase-SIQ-AlertWorkflows/setup.xml' />
+ 
+  <!-- SERI-specific Perform Maintenance task and schedule for processing inbound HR events -->
+  <!-- <ImportAction name='include' value='TaskDefinition-PerformMaintenance-HRTriggerProcessing.xml'/> -->
+  <!-- <ImportAction name='include' value='TaskSchedule-PerformMaintenance-ProcessHREvents.xml'/> -->
+
+</sailpoint>

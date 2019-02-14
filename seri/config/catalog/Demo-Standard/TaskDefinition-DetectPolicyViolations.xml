@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition   name="Detect Policy Violations" resultAction="Delete" type="Identity">
+  <Attributes>
+    <Map>
+      <entry key="checkPolicies" value="true"/>
+      <entry key="correlateEntitlements" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>Examine SoD model against current identities and detect violations</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Policy Scan"/>
+  </Parent>
+</TaskDefinition>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <ObjectConfig name="Bundle">
+      <ObjectAttribute categoryName="Approvals"
+        displayName="Manager Approval?" editMode="Permanent" name="managerApproval"
+        type="boolean">
+        <DefaultValue>
+          <Boolean></Boolean>
+        </DefaultValue>
+        <Description>Determines if manager approval is required for this
+          role</Description>
+      </ObjectAttribute>
+      <ObjectAttribute categoryName="Approvals"
+        displayName="Owner Approval?" editMode="Permanent" name="ownerApproval"
+        type="boolean">
+        <DefaultValue>
+          <Boolean></Boolean>
+        </DefaultValue>
+        <Description>Determines if Role Owner approval is required for
+          this
+          role</Description>
+      </ObjectAttribute>
+      <ObjectAttribute categoryName="Approvals"
+        displayName="Addl Approval?" editMode="Permanent" name="addlApproval"
+        type="sailpoint.object.Identity">
+        <Description>Determines if additional approval is required for
+          this
+          role</Description>
+      </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

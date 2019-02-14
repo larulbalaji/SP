@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Manage CSS" type="">
+  <Variable name="cssMap"/>
+  <Variable name="requestor"/>
+  <Variable name="cssFileName"/>
+  <Variable initializer="true" name="transient"/>
+  <Variable name="formName"/>
+  <Variable initializer="iiq-custom" name="configurationFileName"/>
+  <Variable initializer="script:return new HashMap();" name="fieldMap"/>
+  <Variable name="cssFolderLocation"/>
+  <Variable name="saveAsConfigurationFileName"/>
+  <Variable initializer="script:return false;" name="saveAndExit"/>
+  <Variable initializer="script:return false;" name="save"/>
+  <Variable initializer="script:return false;" name="test"/>
+  <Step icon="Start" name="Start" posX="12" posY="50">
+    <Transition to="Get Css Folder Location"/>
+  </Step>
+  <Step icon="Default" name="Get CSS Name" posX="130" posY="48">
+    <Approval name="Get CSS Name" owner="ref:requestor" return="saveAsConfigurationFileName,cssFileName,cssFolderLocation,configurationFileName" send="saveAsConfigurationFileName,cssFileName,cssFolderLocation,configurationFileName">
+      <Arg name="workItemDescription" value="Choose CSS Form To Modify"/>
+      <Arg name="workItemType" value="Form"/>
+      <Arg name="workItemForm" value="Create CSS File Name"/>
+    </Approval>
+    <Transition to="Set Css File Location"/>
+  </Step>
+  <Step icon="Default" name="Set Css File Location" posX="260" posY="49" resultVariable="cssMap">
+    <Description>Parses the CSS file into a configuration file and persists that configuration into the repository. This way you can actually manage multiple versions if you want.</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Configuration;
+serilog = org.apache.commons.logging.LogFactory.getLog("SERI.Workflow-Workflow-ManageCss");
+
+
+try {
+
+    Configuration seriConfig=  context.getObjectByName(Configuration.class, "SERI Configuration");                    
+
+
+    if (null == seriConfig) 
+    {
+
+        seriConfig = new Configuration();
+        seriConfig.setId(null);
+        seriConfig.setName("SERI Configuration");
+    }
+
+    seriConfig.put("cssFolderLocation",cssFolderLocation);
+
+    context.saveObject(seriConfig);
+    context.commitTransaction();
+
+} catch (GeneralException ex) 
+{
+    serilog.debug("CRAZY ERROR HERE:  "+ ex);
+    return null;
+}
+]]></Source>
+    </Script>
+    <Transition to="Get CSS Map"/>
+  </Step>
+  <Step action="rule:Generate Css Form" icon="Default" name="Build User Form" posX="442" posY="49">
+    <Transition to="Present CSS Configuration Form"/>
+  </Step>
+  <Step icon="Default" name="Present CSS Configuration Form" posX="556" posY="48">
+    <Approval name="Present Form" owner="spadmin" return="cssMap,save,saveAndExit,test" send="cssMap">
+      <Arg name="workItemDescription" value="Set the CSS Fields Form"/>
+      <Arg name="workItemFormBasePath" value="cssMap"/>
+      <Arg name="workItemForm" value="ref:formName"/>
+      <Arg name="workItemType" value="Form"/>
+    </Approval>
+    <Transition to="Build CSS">
+      <Script>
+        <Source><![CDATA[
+if(test!= null)
+    return true;
+else if( save!= null)
+    return true;
+else if( saveAndExit!= null)
+    return true;
+]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="894" posY="214"/>
+  <Step icon="Default" monitored="true" name="Build CSS" posX="650" posY="165">
+    <Script>
+      <Source><![CDATA[
+ import java.io.PrintWriter;
+
+serilog = org.apache.commons.logging.LogFactory.getLog("SERI.Workflow-Workflow-ManageCss");
+
+String mode = (String)cssMap.get("mode");
+serilog.debug("mode is: "+ mode);
+//  if(mode.equalsIgnoreCase("Advanced"))
+//  {
+try
+{
+    PrintWriter writer = new PrintWriter(cssFolderLocation+"iiq-custom.css", "UTF-8");
+    //set the login field sections
+    Iterator it = ((Map)cssMap.get("basic")).entrySet().iterator();
+
+    Map tags = new HashMap();
+    while (it.hasNext()) 
+    {
+        Map.Entry pairs = (Map.Entry)it.next();
+        //get the type
+        String styleName = (String)pairs.getKey();   
+
+        if(styleName.equalsIgnoreCase("view") == false)
+        {
+            Map tagCssMap = (Map)pairs.getValue();
+
+            String tag= (String)tagCssMap.get("tag");
+            String css= (String)tagCssMap.get("css");
+
+
+            if(tags.get(tag) == null)
+            {
+                List cssList = new ArrayList();
+                cssList.add(css);
+                tags.put(tag, cssList);
+
+            }
+            else
+            {
+                ((List)tags.get(tag)).add(css);
+
+            }
+
+        }
+    }
+
+    Iterator tagIterator = tags.entrySet().iterator();
+    while (tagIterator.hasNext()) 
+    {
+        Map.Entry pairs = (Map.Entry)tagIterator.next();
+        String tag = (String)pairs.getKey();   
+        List css = (List)pairs.getValue();
+
+
+
+        writer.println(tag+"{");
+
+        for(int x=0;x<css.size(); x++)
+        {    
+            writer.println((String)css.get(x));
+        }
+        writer.println("}");
+        writer.println("");
+    }
+
+    writer.close();
+}
+catch(Exception e)
+{
+    serilog.debug("An exception has been thrown:  "+e);
+}
+			
+	  ]]></Source>
+    </Script>
+    <Transition to="Save Config File">
+      <Script>
+        <Source><![CDATA[
+if(saveAndExit!= null)
+    return true;
+else if( save!= null)
+    return true;
+        ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Build User Form" when="return test;"/>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Default" name="Get CSS Map" posX="322" posY="147" resultVariable="cssMap">
+    <Script>
+      <Source><![CDATA[
+      
+import sailpoint.object.Custom;
+
+serilog = org.apache.commons.logging.LogFactory.getLog("SERI.Workflow-Workflow-ManageCss");
+
+Map cssMap=null;
+try {
+    Custom seriConfig=null;
+
+    seriConfig  = context.getObjectByName(Custom.class, configurationFileName);                   
+
+
+    if (null == seriConfig) 
+    {
+        serilog.debug("My SERI Custom object is missing!");
+        return null;
+    }
+
+
+    cssMap = (Map)seriConfig.get("CSS");
+
+    if (null == cssMap) 
+    {
+        return null;
+    }
+
+} catch (GeneralException ex) 
+{
+    return null;
+}
+
+return cssMap;
+      ]]></Source>
+    </Script>
+    <Transition to="Build User Form"/>
+  </Step>
+  <Step icon="Default" monitored="true" name="Save Config File" posX="745" posY="313">
+    <Script>
+      <Source><![CDATA[ 
+import sailpoint.object.Custom;
+import sailpoint.object.Configuration;
+
+try {
+    Custom seriConfig= null;
+
+
+
+    if(saveAsConfigurationFileName== null)
+    {
+        saveAsConfigurationFileName = configurationFileName;
+        workflow.put("saveAsConfigurationFileName", configurationFileName);
+    }
+
+    seriConfig  = context.getObjectByName(Custom.class, saveAsConfigurationFileName);                     
+
+    if (null == seriConfig) 
+    {
+        seriConfig = new Custom();
+        seriConfig.setId(null);
+        seriConfig.setName(saveAsConfigurationFileName);
+    }
+
+    seriConfig.put("CSS", cssMap);
+    context.saveObject(seriConfig);
+    context.commitTransaction();
+
+} catch (GeneralException ex) 
+{
+    return null;
+}
+
+workflow.put("configurationFileName", saveAsConfigurationFileName);
+
+
+try {
+    Configuration seriConfig=  context.getObjectByName(Configuration.class, "SERI Configuration");                    
+
+
+    if (null == seriConfig) 
+    {
+        seriConfig = new Configuration();
+        seriConfig.setId(null);
+        seriConfig.setName("SERI Configuration");
+    }
+
+    seriConfig.put("saveAsConfigurationFileName",saveAsConfigurationFileName);
+    context.saveObject(seriConfig);
+    context.commitTransaction();
+
+} catch (GeneralException ex) 
+{
+    return null;
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Get CSS Map">
+      <Script>
+        <Source><![CDATA[
+return save;
+          ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Default" monitored="true" name="Get Css Folder Location" posX="106" posY="220">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Configuration;
+
+try {
+
+    Configuration seriConfig = context.getObjectByName(Configuration.class, "SERI Configuration");                    
+
+    if (null != seriConfig) 
+    {
+
+        if(seriConfig.get("cssFolderLocation") != null)
+        {
+            workflow.put("cssFolderLocation", seriConfig.get("cssFolderLocation"));
+            workflow.put("configurationFileName", seriConfig.get("saveAsConfigurationFileName"));
+        }
+    }
+
+
+} catch (GeneralException ex) 
+{
+    return null;
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Get CSS Name"/>
+  </Step>
+</Workflow>

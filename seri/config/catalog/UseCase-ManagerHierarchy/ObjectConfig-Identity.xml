@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <ObjectConfig name="Identity">
+	  <ObjectAttribute displayName="Manager Hierarchy" editMode="ReadOnly" name="managerHierarchy" type="string">
+		 <RuleRef>
+		  <Reference class="sailpoint.object.Rule" name="Set Manager Hierarchy"/>
+		</RuleRef>
+	  </ObjectAttribute>
+	</ObjectConfig>
+  </ImportAction>
+</sailpoint>

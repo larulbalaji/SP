@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.seri.task.RoleChangeEvaluator" name="Propagate Role Changes - Evaluate Impacts" progressInterval="5000" progressMode="String" subType="task_item_type_identity" template="true" type="Identity">
+  <Description>
+            Template for role propagation impacts evaluation.
+        </Description>
+  <Signature>
+    <Inputs/>
+    <Returns>
+      <Argument name="eventsProcessed" type="int">
+        <Prompt>Number of events processed</Prompt>
+      </Argument>
+      <Argument name="impacts" type="string">
+        <Prompt>Impacts:</Prompt>
+      </Argument>
+      
+    </Returns>
+  </Signature>
+</TaskDefinition>

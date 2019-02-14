@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true"
+  handler="sailpoint.workflow.SERIWorkflowHandler" libraries="Identity"
+  name="TraceTest">
+  <!-- <Workflow explicitTransitions="true" handler="sailpoint.workflow.SERIWorkflowHandler" 
+    libraries="Identity" name="WorkflowDebugTest"> -->
+  <Variable input="true" name="project" />
+  <Variable initializer="string:Send Manager Password" name="passwordNotifyTemplate" />
+
+
+  <!-- Use these variables to provide workflow wide settings -->
+  <!-- Each variable can be overridden by setting the same arg name at the 
+    step level -->
+
+  <!-- set the traceStep variable value="string:true" to turn on step tracing 
+    workflow wide. -->
+  <Variable name="traceStep" initializer="string:true" />
+
+  <!-- set the traceStepVariablesStart variable value="string:true" to output 
+    variable values at the start of each step -->
+  <Variable name="traceStepVariablesStart" initializer="string:true" />
+
+  <!-- set the traceStepVariablesEnd variable value="string:true" to output 
+    variable values at the end of each step -->
+  <Variable name="traceStepVariablesEnd" initializer="string:true" />
+
+  <!-- set the traceStepVariableNames variable value="string:varA,varB,..." 
+    to limit which variables are output -->
+  <!-- when set only the variable names in this list will be output -->
+  <Variable name="traceStepVariableNames" initializer="string:account launcher" />
+
+  <!-- set the traceStepLog4j variable value="string:true" select a log4j 
+    output. If not present or false output goes to stdout -->
+  <!-- output will be routed to log4j.logger.SERI.Workflow.<your workflow 
+    name> -->
+  <!-- enter a value of log4j.logger.SERI.Workflow.WorkflowX=trace in the 
+    log4j.properties -->
+  <Variable name="traceStepLog4j" initializer="string:false" />
+
+  <Step icon="Task" name="Step1">
+    <Arg name="traceStep" value="false" />
+    <!-- <Arg name="traceStepVariablesStart" value="false"/> -->
+    <!-- <Arg name="traceStepVariablesEnd" value="true"/> -->
+    <Arg name="traceStepVariableNames" value="account" />
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ResourceObject;
+
+Map args = new HashMap();
+
+ResourceObject account = new ResourceObject();
+
+account.setAttribute("sAMAccountName", "SO_Adam.Kennedy");
+workflow.put("account", account);
+
+      ]]></Source>
+    </Script>
+    <Transition to="Step2" />
+  </Step>
+  <Step icon="Task" name="Step2">
+    <Arg name="traceStep" value="true" />
+    <Arg name="traceStepVariablesEnd" value="true" />
+    <Script>
+      <Source><![CDATA[
+System.out.println("Script executed for step 2");
+      ]]></Source>
+    </Script>
+  </Step>
+
+</Workflow>

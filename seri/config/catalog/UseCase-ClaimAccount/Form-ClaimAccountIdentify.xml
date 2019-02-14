@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Claim Account Identify" type="RegisterIdentity">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Identify Yourself"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Verify"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Description>This form is used to for self-service registration.</Description>
+  
+
+  <Section label="Birth Date" columns="2">
+     <Field displayName="Month" name="month" required="true" postBack="true" type="string" columnSpan="1">
+        <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+List myValues = new ArrayList();
+for (Integer x=1;x<=12;x++) {
+	myValues.add(x.toString());
+}
+return myValues;
+            ]]></Source>
+          </Script>
+        </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="Day" name="day" required="true" postBack="true" type="string" columnSpan="1">
+        <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+List myValues = new ArrayList();
+for (Integer x=1;x<=31;x++) {
+	myValues.add(x.toString());
+}
+return myValues;
+            ]]></Source>
+          </Script>
+        </AllowedValuesDefinition>
+    </Field>
+  </Section>
+
+  <Section>
+  
+    <Field displayName="ID" name="employeeId" postBack="true" required="true" type="string">
+    </Field>
+
+    <!-- The entire purpose of this form is to populate a valid identity name in this field. -->
+    <!-- It is hidden as it fills in the name in the model which is used to load the identity  -->
+    <Field displayName="Identity Name" name="name" postBack="false" required="false" type="string" hidden="true">
+      <Script>
+         <Source><![CDATA[     
+
+import sailpoint.obj.messages.MessageKeys;
+import sailpoint.tools.Message;
+import sailpoint.object.Identity;
+import sailpoint.object.*;
+import sailpoint.connector.*;
+import sailpoint.api.*;
+import sailpoint.tools.xml.*;  
+
+String employeeId =  null;
+if (form.getField("employeeId") != null) {
+	employeeId = (String) form.getField("employeeId").getValue();
+}
+
+String lastname = null;
+if (form.getField("lastname") !=  null) {
+	lastname = (String) form.getField("lastname").getValue();
+}
+
+String month = null;
+if (form.getField("month") !=  null) {
+	month = (String) form.getField("month").getValue();
+}
+
+String day = null;
+if (form.getField("day") !=  null) {
+	day = (String) form.getField("day").getValue();
+}
+
+//if any of the required fields are null then skip the query and return null
+if (day == null || month == null || lastname == null || employeeId == null) {
+	return null;
+}
+
+
+Map args = new HashMap();
+args.put("lastname",lastname);
+args.put("employeeId",employeeId);
+args.put("month", month);
+args.put("day", day);
+Rule rule = context.getObjectByName(Rule.class, "Load Claim Identity");
+if (rule != null) {
+	Identity id = context.runRule(rule, args);
+	if (id != null) {
+		return id.getName();
+	}
+}
+
+return null;
+
+           ]]></Source>
+      </Script>
+    
+    </Field>
+    
+    <!-- This is the last field on the form.  So here we insure that the entire form results in an identity -->
+    <!-- This field must postback or the script for the hidden name field will not fire -->
+    <Field displayName="Last Name" name="lastname" postBack="true" required="true" type="string">
+       <ValidationScript>
+         <Source><![CDATA[     
+
+         import sailpoint.obj.messages.MessageKeys;
+import sailpoint.tools.Message;
+import sailpoint.object.Identity;
+import sailpoint.object.*;
+import sailpoint.connector.*;
+import sailpoint.api.*;
+import sailpoint.tools.xml.*;  
+
+
+String employeeId =  null;
+if (form.getField("employeeId") != null) {
+	employeeId = (String) form.getField("employeeId").getValue();
+}
+
+String lastname = null;
+if (form.getField("lastname") !=  null) {
+	lastname = (String) form.getField("lastname").getValue();
+}
+
+
+String month = null;
+if (form.getField("month") !=  null) {
+	month = (String) form.getField("month").getValue();
+}
+
+String day = null;
+if (form.getField("day") !=  null) {
+	day = (String) form.getField("day").getValue();
+}
+
+//if any of the required fields are null then skip the query and return null
+if (day == null || month == null || lastname == null || employeeId == null) {
+	return null;
+}
+
+Map args = new HashMap();
+args.put("lastname",lastname);
+args.put("employeeId",employeeId);
+args.put("month", month);
+args.put("day", day);
+Rule rule = context.getObjectByName(Rule.class, "Load Claim Identity");
+if (rule != null) {
+	Identity id = context.runRule(rule, args);
+	if (id != null) {
+		//this value will only be set if the claimOnce variable is set to true in the workflow
+		if ( "true".equalsIgnoreCase((String) id.getAttribute("accountsClaimed"))) {
+			return "Accounts have already been claimed for this identity.";
+		}
+
+		return null;
+	} else {
+		return "We are unable to identify you with the information you have provided";
+	}
+}
+
+return null;
+            
+           ]]></Source>
+      </ValidationScript>
+    </Field>
+  </Section>
+
+</Form>
+

@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='include' value='ObjectConfig-Bundle.xml'/>
+  <ImportAction name='include' value='Bundle-Corporateroles.xml'/>
+  <ImportAction name='include' value='Bundle-Locationproject.xml'/>
+  <ImportAction name='include' value='Bundle-Timewriting.xml'/>
+  <ImportAction name='include' value='Bundle-Training.xml'/>
+  <ImportAction name='include' value='RuleLibrary-SubRoleSearch.xml'/>
+  <ImportAction name='include' value='Rule-DepartmentRoles.xml'/>
+  <ImportAction name='include' value='Rule-EmployeeRoles.xml'/>
+  <ImportAction name='include' value='DynamicScope-Manager.xml'/>
+  <ImportAction name='include' value='DynamicScope-SelfService.xml'/>
+  <ImportAction name='include' value='QuickLinkOptions-Manager_AccessRequest.xml'/>
+  <ImportAction name='include' value='QuickLinkOptions-SelfService_AccessRequest.xml'/>
+</sailpoint>
+

@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ManagedAttribute attribute="memberOf"  displayName="RegionDirector" requestable="false" type="group" value="CN=RegionDirector_%scope%,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="RegionDirector_%scope%"/>
+        <entry key="msDS-PrincipalName" value="SERI\RegionDirector_%scope%"/>
+        <entry key="sAMAccountName" value="RegionDirector_%scope%"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Regional Director access rights for the %scope% region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+    <ManagedAttribute attribute="memberOf"  displayName="RegionDirector EMEA" requestable="false" type="group" value="CN=RegionDirector_EMEA,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="RegionDirector_EMEA"/>
+        <entry key="msDS-PrincipalName" value="SERI\RegionDirector_EMEA"/>
+        <entry key="sAMAccountName" value="RegionDirector_EMEA"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>false</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Regional Director access rights for the EMEA region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+    <ManagedAttribute attribute="memberOf"  displayName="RegionDirector APAC" requestable="false" type="group" value="CN=RegionDirector_APAC,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="RegionDirector_APAC"/>
+        <entry key="msDS-PrincipalName" value="SERI\RegionDirector_APAC"/>
+        <entry key="sAMAccountName" value="RegionDirector_APAC"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>false</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Regional Director access rights for the APAC region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+    <ManagedAttribute attribute="memberOf"  displayName="RegionDirector AMS" requestable="false" type="group" value="CN=RegionDirector_AMS,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="RegionDirector_AMS"/>
+        <entry key="msDS-PrincipalName" value="SERI\RegionDirector_AMS"/>
+        <entry key="sAMAccountName" value="RegionDirector_AMS"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>false</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Regional Director access rights for the AMS region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+</sailpoint>

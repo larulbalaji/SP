@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Correlation - EmployeeID" type="Correlation">
+  <Source>
+      <![CDATA[
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.IdentityCorrelation.empid");
+
+Map returnMap = new HashMap();
+
+String empID = account.getStringAttribute("empid");
+serilog.debug("Employee ID from OrangeHRM is: " + empID);
+
+if (empID == null) {
+  serilog.debug("no Employee ID: skipping rule");
+  return null;
+} else {
+  serilog.debug("EmployeeID "+empID);
+}
+
+returnMap.put("identityAttributeName", "employeeId");
+returnMap.put("identityAttributeValue", empID);
+
+return(returnMap);
+
+   ]]>
+  </Source>
+</Rule>
+   

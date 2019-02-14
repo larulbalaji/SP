@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Artifact Importer" type="SERI">
+  <Variable name="attrModel" type="java.util.Map"/>
+  <Variable initializer="string:true" name="transient"/>
+  <Step icon="Start" name="Start" posX="34" posY="26">
+    <Transition to="Build Artifact List"/>
+  </Step>
+  <Step icon="Default" name="Build Artifact List" posX="298" posY="89" resultVariable="attrForm">
+    <Script>
+      <Source><![CDATA[ 
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+
+/****************************************************
+   Build a form to represent all the SERI Artifacts.
+   Also build a model (HashMap) of them and  whether they are currently
+   enabled or not. Since we can only pass one resultVariable back (in this case, we are
+   returning the generated form), we have to manually set the other return value (the
+   attrModel map) with 'workflow.put(key, value)'
+****************************************************/
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.SERIImporter.BuildArtifactList");
+
+Form frm=new Form();
+frm.put("pageTitle", "Select Artifacts to import");
+
+attrModel=new HashMap();
+
+List buttons=new ArrayList();
+buttons.add(new Button("Import", "next"));
+
+
+buttons.add(new Button("Cancel", "cancel"));
+frm.setButtons(buttons);
+
+Section sect=new Section();
+
+URL dirURL = this.getClass().getClassLoader().getResource("/");
+
+serilog.debug("dirURL="+dirURL.toString());
+
+File f=null;
+try {
+  f=new File(dirURL.toURI()).getParentFile();
+} catch (URISyntaxException e) {
+  serilog.error("invalid URI "+dirURL);
+  return null;
+}
+File artDir=new File(f, "config/seri/catalog");
+
+serilog.debug("artDir="+artDir.toString());
+
+File[] artsA=artDir.listFiles();
+serilog.debug("artsA length="+artsA.length);
+Arrays.sort(artsA);
+serilog.debug("sorted");
+
+/*
+    Put all the Identity attributes on the form and in the model.
+    Set the variable to 'true' in the model if it is currently in the
+    'identityViewAttributes' list in the UIConfig object.
+*/
+
+for ( File artif : artsA ) {
+  if(artif.isDirectory() && new File(artif, "setup.xml").exists()) {
+    Field fld=new Field();
+    fld.setType("boolean");
+    fld.setName(artif.getName());
+    fld.setDisplayName(artif.getName());
+    fld.setValue(Boolean.FALSE);
+
+    attrModel.put(artif.getName(), Boolean.FALSE);
+
+/*
+    for(i=0;i&lt;viewAttrs.length;i++) {
+      if(viewAttrs[i].equals(attr.getName())) {
+        fld.setValue(Boolean.TRUE);
+        attrModel.put(attr.getName(), Boolean.TRUE);
+      }
+    }
+*/
+    sect.add(fld);
+  }
+
+}
+
+workflow.put("attrModel", attrModel);
+frm.add(sect);
+return frm;
+      ]]></Source>
+    </Script>
+    <Transition to="Print AttrModel"/>
+  </Step>
+  <Step icon="Default" name="Print AttrModel" posX="528" posY="192">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ApprovalSet;
+import sailpoint.object.ApprovalItem;
+import sailpoint.object.Attributes;
+import sailpoint.object.ObjectAttribute;
+import sailpoint.object.ObjectConfig;
+import sailpoint.object.UIConfig;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.SERIImporter.PrintModel");
+for(String item: attrModel.keySet()) {
+  Object value=attrModel.get(item);
+  serilog.trace(item+"="+value);
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Select Artifacts"/>
+  </Step>
+  <Step icon="Approval" name="Select Artifacts" posX="373" posY="186">
+    <Approval name="Select Artifacts" owner="string:spadmin" return="attrModel">
+      <Arg name="workItemRequester" value="string:$(launcher)"/>
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Select SERI artifacts"/>
+      <Arg name="workItemForm" value="ref:attrForm"/>
+      <Arg name="workItemFormBasePath" value="string:attrModel"/>
+    </Approval>
+    <Description>Display the available SERI artifacts and select which ones to import </Description>
+    <Transition to="Import Artifacts"/>
+  </Step>
+  <Step icon="Default" name="Import Artifacts" posX="528" posY="192">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.server.Importer;
+
+/*
+    Call the importer for each setup.xml
+*/
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.SERIImporter.ImportArtifacts");
+
+URL dirURL = this.getClass().getClassLoader().getResource("/");
+
+serilog.debug("dirURL="+dirURL.toString());
+
+File f=new File(dirURL.toURI()).getParentFile();
+File artDir=new File(f, "config/seri/catalog");
+
+Importer imp=new Importer(context);
+
+for(String item: attrModel.keySet()) {
+  Object value=attrModel.get(item);
+  if(value) {
+    serilog.debug("importing "+value);
+    File setup=new File(artDir, item+"/setup.xml");
+    StringBuilder file=new StringBuilder();
+
+    BufferedReader br = new BufferedReader(new FileReader(setup));
+    StringBuilder sb = new StringBuilder();
+    try {
+        String line = br.readLine();
+
+        while (line != null) {
+            sb.append(line);
+            sb.append(System.getProperty("line.separator"));
+            line = br.readLine();
+        }
+        String everything = sb.toString();
+    } finally {
+        br.close();
+    }
+    serilog.debug("Got file");
+    imp.importXml(sb.toString());
+    serilog.debug("Imported");
+  }
+}
+
+      ]]></Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="648" posY="267"/>
+</Workflow>

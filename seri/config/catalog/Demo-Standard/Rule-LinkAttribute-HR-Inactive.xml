@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Link Attribute - HR Inactive" type="LinkAttribute">
+  <Source><![CDATA[
+    
+
+boolean inactive = false;
+
+// Disabled accounts are indicated by the 'term' attribute being 'TRUE'
+return link.getAttributes().getBoolean("term");
+]]>
+ </Source>
+</Rule>

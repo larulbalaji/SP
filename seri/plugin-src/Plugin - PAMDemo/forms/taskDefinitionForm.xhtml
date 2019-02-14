@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<!-- not supported in 7.1 plugin framework yet -->
+<!--<sp:loadBundle basename="sailpoint.plugin.launcher.messages.pluginMessages" var="pluginMsgs"/>-->
+
+<ui:composition>
+
+    <sp:script>
+        <src>#{base.requestContextPath}/scripts/sailpoint/Suggest.js?#{debug.revision}</src>
+        <src>#{base.requestContextPath}/scripts/sailpoint/MultiSuggest.js?#{debug.revision}</src>
+    </sp:script>
+
+
+    <script type="text/javascript">
+        <!--//-->
+        <![CDATA[//><!--
+
+        if (!Page.renderSuggests) {
+            Page.renderSuggests = true;
+            Ext.onReady(function () {
+                SailPoint.Suggest.renderSuggests();
+            });
+        }
+
+        //--><!
+        ]]>
+    </script>
+
+    <ui:fragment render='#{taskDefinition.argValues != null}'>
+        <div class="spContent">
+            <table id="ssoSyncOptTable" class="argumentTbl argumentTblWithHelp customWidth paddedTbl" cellspacing="0">
+                <tr>
+                    <th>
+                        <h:outputText styleClass="spContentTitle" value="SSO Integration Options"/>
+                    </th>
+                </tr>
+                <tr>
+                    <td>
+                        <sp:outputText value="#{taskDefinition.argMap['application'].argument.prompt}"/></td>
+                    <td>
+
+                        <h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['application'].argument.name}"
+                                        rendered="#{taskDefinition.argMap['application'].argument.helpKey != null}"
+                                        styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                        alt="#{help[taskDefinition.argMap['application'].argument.helpKey]}"/>
+
+                        <ui:include src="/monitor/tasks/argTemplates/appSelect.xhtml">
+                            <ui:param name="argVal" value="#{taskDefinition.argMap['application']}"/>
+                            <ui:param name="taskDefinition" value="#{taskDefinition}"/>
+                        </ui:include>
+                    </td>
+                </tr>
+                <tr>
+                    <td><sp:outputText value="#{taskDefinition.argMap['ssoProviderClassname'].argument.prompt}"/></td>
+                    <td><h:graphicImage id="imgHlpTaskDef#{taskDefinition.argMap['ssoProviderClassname'].argument.name}"
+                                        rendered="#{taskDefinition.argMap['ssoProviderClassname'].argument.helpKey != null}"
+                                        styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                        alt="#{help[taskDefinition.argMap['ssoProviderClassname'].argument.helpKey]}"/>
+                        <h:inputText size="15" value="#{taskDefinition.argMap['ssoProviderClassname'].value}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><sp:outputText value="#{taskDefinition.argMap['createSingleLauncherGroup'].argument.prompt}"/>
+                    </td>
+                    <td>
+                        <h:selectBooleanCheckbox id="checkCreateSingleLauncherGroup"
+                                                 value="#{taskDefinition.argMap['createSingleLauncherGroup'].booleanValue}"/>
+                        <h:graphicImage
+                                id="imgHlpTaskDef#{taskDefinition.argMap['createSingleLauncherGroup'].argument.name}"
+                                rendered="#{taskDefinition.argMap['createSingleLauncherGroup'].argument.helpKey != null}"
+                                styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{help[taskDefinition.argMap['createSingleLauncherGroup'].argument.helpKey]}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td><sp:outputText
+                            value="#{taskDefinition.argMap['moveUsersToSingleLauncherGroup'].argument.prompt}"/></td>
+                    <td>
+                        <h:selectBooleanCheckbox id="checkMoveUsersToSingleLauncherGroup"
+                                                 value="#{taskDefinition.argMap['moveUsersToSingleLauncherGroup'].booleanValue}"/>
+                        <h:graphicImage
+                                id="imgHlpTaskDef#{taskDefinition.argMap['moveUsersToSingleLauncherGroup'].argument.name}"
+                                rendered="#{taskDefinition.argMap['moveUsersToSingleLauncherGroup'].argument.helpKey != null}"
+                                styleClass="helpIcon" url="/images/icons/dashboard_help_16.png"
+                                alt="#{help[taskDefinition.argMap['moveUsersToSingleLauncherGroup'].argument.helpKey]}"/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <script type="application/javascript" defer="defer">
+            makeTableMulticolored(Ext.getDom('ssoSyncOptTable'), true, false, "even", "odd");
+        </script>
+    </ui:fragment>
+</ui:composition>
+
+</body>
+</html>

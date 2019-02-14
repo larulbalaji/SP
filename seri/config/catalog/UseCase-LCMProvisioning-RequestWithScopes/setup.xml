@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="Configuration-SystemConfig.xml"/>
+  <ImportAction name="include" value="ObjectConfig-Bundle.xml"/>
+  <ImportAction name="include" value="ObjectConfig-Managedattribute.xml"/>
+  <ImportAction name="include" value="Workflow-LcmProvisioning-Scopes.xml"/>
+  <ImportAction name="include" value="./data/Bundle-Sales.xml"/>
+  <ImportAction name="include" value="./data/Bundle-RegiondirectorAccess-Template.xml"/>
+  <ImportAction name="include" value="./data/Bundle-RegionalDirector-Template.xml"/>
+  <ImportAction name="include" value="./data/Bundle-SalesEngineerAccess-Template.xml"/>
+  <ImportAction name="include" value="./data/Bundle-SalesEngineer-Template.xml"/>
+
+  <ImportAction name="include" value="./data/ManagedAttribute-RegionDirector.xml"/>
+  <ImportAction name="include" value="./data/ManagedAttribute-SalesEngineer.xml"/>
+  
+  <ImportAction name="include" value="./data/Scope-Regions.xml"/>
+</sailpoint>

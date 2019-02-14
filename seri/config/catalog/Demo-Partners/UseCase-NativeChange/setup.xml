@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="NativeChangePopulation.xml"/>
+    <ImportAction name="include" value="NativeChangeforCatherine.xml"/>
+    <ImportAction name="include" value="NativeChangeRefresh.xml"/>
+    <ImportAction name="include" value="NativeChangeSequential.xml"/>
+</sailpoint>

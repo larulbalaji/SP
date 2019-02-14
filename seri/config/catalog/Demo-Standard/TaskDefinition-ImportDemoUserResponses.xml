@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Import Demo User Responses" resultAction="Delete" type="Generic">
+	<Attributes>
+		<Map>
+			<entry value="WEB-INF/config/demo/data/challengeAnswers.csv" key="filename"></entry>
+		</Map>
+	</Attributes>
+	<Description>Read in the challenge-response answers for common demo users</Description>
+	<Owner>
+		<Reference name="spadmin" class="sailpoint.object.Identity"></Reference>
+	</Owner>
+	<Parent>
+		<Reference name="Challenge Answer Importer" class="sailpoint.object.TaskDefinition"></Reference>
+	</Parent>
+</TaskDefinition>

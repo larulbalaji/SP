@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  handler="sailpoint.api.StandardWorkflowHandler"  name="Retained Access Reapproval" workItemRenderer="workflow.xhtml">
+  <Variable initializer="true" name="trace"/>
+  <Variable input="true" name="identityName">
+    <Description>Name of Identity Cube that has retained access (e.g., during a previous transfer event)</Description>
+  </Variable>
+  <Variable input="true" name="identityFullname">
+    <Description>Full name associated with passed 'identityName' object</Description>
+  </Variable>
+  <Variable input="true" name="sponsor">
+    <Description>Managerial person who authorized retention of access during transfer event</Description>
+  </Variable>
+  <Variable input="true" name="reason">
+    <Description>Comments sponsor provided when deciding to retain access for transferring person</Description>
+  </Variable>
+  <Variable name="identity">
+    <Description>Resolved sailpoint.object.Identity</Description>
+  </Variable>
+  <Variable name="request" type="sailpoint.object.Request">
+    <Description>Resolved Request object</Description>
+  </Variable>
+  <Variable name="approved">
+    <Description>
+  Internal variable automatically set logically true an Approval
+  process completes with no rejects.
+      </Description>
+  </Variable>
+  <Step icon="Start" name="Start" posX="20" posY="16">
+    <Transition to="Print Debug Details"/>
+  </Step>
+  <Step action="call:print" icon="Message" name="Print Debug Details" posX="117" posY="14">
+    <Arg name="message" value="Starting Retained Access Reapproval WF..."/>
+    <Transition to="Load Identity"/>
+  </Step>
+  <Step icon="Task" name="Load Identity" posX="196" posY="19" resultVariable="identity">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+Identity ident = null;
+if (identityName == null) {
+  log.error("Missing identity name");
+} else {
+  ident = context.getObject(Identity.class, identityName);
+  if (ident == null) {
+    log.error("Invalid identity: " + identityName);
+  }
+}
+// don't need to resolve the role, just this
+return ident;
+
+      ]]></Source>
+    </Script>
+    <Transition to="Send Notification" when="identity != null"/>
+    <Transition to="End"/>
+  </Step>
+  <Step icon="Audit" name="Find Request" posX="180" posY="228" resultVariable="request">
+    <Script>
+      <Source><![CDATA[
+import java.util.Iterator;
+import sailpoint.object.Filter;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+
+// Expect: java.lang.String roleName
+
+Request found = null;
+
+Filter f = Filter.eq("owner", identity);
+List filters = new ArrayList();
+filters.add(f);
+QueryOptions ops = new QueryOptions();
+ops.setRestrictions(filters);
+
+Iterator result = context.search(Request.class, ops);
+if (result == null || !result.hasNext()) {
+  println("No requests scheduled");
+} else {
+  while (result.hasNext()) {
+    Request req = (Request)result.next();
+    // debugging
+    // println(req.toXml());
+    String wfname = req.getString("workflow");
+
+    // here you should technically check for a particular workflow,
+    // the one you use to perform the deprovisioning, but for now
+    // assume that this can be the only kind of workflow event
+    if (wfname != null) {
+
+      // there can be more than one role being sunsetted,
+      // be sure to find the right request
+      String reqRole = req.getString("roleName");
+      if (reqRole != null && reqRole.equals(roleName)) {
+        // found it
+        println("Found request: " + req.getName());
+        found = req;
+        break;
+      }
+    }
+  }
+}
+
+if (found == null) {
+    log.error("Unable to locate request to sunset role: " + roleName);
+}
+return found;
+      ]]></Source>
+    </Script>
+    <Transition to="Send Notification" when="request != null"/>
+    <Transition to="End"/>
+  </Step>
+  <Step action="sendEmail" icon="Email" name="Send Notification" posX="261" posY="121">
+    <Arg name="template" value="Reapplication Notification"/>
+    <Arg name="to" value="admin@sailpointdemo.com"/>
+    <Arg name="from" value="iiq-noreply@sailpointdemo.com"/>
+    <Transition to="End"/>
+  </Step>
+  <Step icon="Undo" name="Reapply" posX="594" posY="132">
+    <Approval description="Reapplication for Limited Time Resource: $(roleName)" owner="ref:identityName" renderer="reapplication.xhtml"/>
+    <Description>
+      </Description>
+    <Transition to="Update Sunset" when="approved"/>
+    <Transition to="End"/>
+  </Step>
+  <Step icon="Task" name="Update Sunset" posX="782" posY="149">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Request;
+import sailpoint.tools.Util;
+
+if (request == null) {
+    // should still be in our variable
+    log.error("Request was lost!");
+} else {
+  // fetch it again to make sure we have the latest one
+  request = context.getObjectById(Request.class, request.getId());
+  if (request == null) {
+    // too late, it was already processed or canceled
+    log.warn("Request is gone!");
+  } else {
+    println("Rescheduling request: " + request.getName());
+    Date d = request.getNextLaunch();
+    if (d == null) {
+        log.error("Request had no launch date");
+    } else {
+      println("Original launch date: " + Util.dateToString(d));
+      long utime = d.getTime();
+      utime += (1000 * 60 * 60 * 24 * 7);
+      d = new Date(utime);
+      println("New launch date: " + Util.dateToString(d));
+      request.setNextLaunch(d);
+      context.saveObject(request);
+      context.commitTransaction();
+    }
+  }
+}
+      ]]></Source>
+    </Script>
+    <Transition to="End"/>
+  </Step>
+  <Step icon="Stop" name="End" posX="772" posY="47"/>
+</Workflow>

@@ -1,0 +1,255 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <DynamicScope name="dynamicScope-AccessReviews">
+    <Selector>
+      <IdentitySelector>
+        <Script>
+          <Source><![CDATA[
+            //Re-use the script that displays the number of items waiting.
+            import sailpoint.object.Certification;
+            import sailpoint.object.QueryOptions;
+            import sailpoint.object.Filter;
+            import sailpoint.object.Identity;
+
+            import sailpoint.object.*;
+
+            QueryOptions qo = new QueryOptions();
+            List names = new ArrayList();
+
+            // We do not have currentUser, so need to use identity object
+            names.add(identity.getName());
+
+            qo.addFilter(Filter.containsAll("certifiers", names));
+            qo.addFilter(Filter.ne("phase", Certification.Phase.Staged));
+            qo.addFilter(Filter.isnull("signed"));
+            //System.out.println("xxx qo AccessCert is now = " + qo);
+
+
+            int count = context.countObjects(Certification.class,qo);
+            //System.out.println("count for AccessReview = " + count);
+
+            // Do not do return count;
+            // Return true or false instead based on the count value being > 0
+
+            if(count != 0 ){
+            return true;
+            }else{
+            return false;
+            }
+          ]]></Source>
+        </Script>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+
+
+
+  <DynamicScope name="dynamicScope-PolicyViolations">
+    <Selector>
+      <IdentitySelector>
+        <Script>
+          <Source><![CDATA[
+
+            //Policy: Re-use the script that displays the number of items waiting.
+            import sailpoint.object.PolicyViolation;
+            import sailpoint.object.QueryOptions;
+            import sailpoint.object.Filter;
+
+            // We do not have currentUser, so need to use identity object, which is the same.
+            // Output for originally user currentUser is:
+            // sailpoint.object.Identity@50a4f73c[id=2c90c28a4565bc7e014565bd73890079,name=Amanda.Ross]
+            // output for identity is identical.....:
+            // sailpoint.object.Identity@7256a6ea[id=2c90c28a4565bc7e014565bd73890079,name=Amanda.Ross]
+
+            QueryOptions qo = new QueryOptions();
+
+            // Reference identity instead of currentUser
+            qo.addFilter(Filter.eq("owner",identity));
+            qo.addFilter(Filter.eq("status",PolicyViolation.Status.Open));
+            int count = context.countObjects(PolicyViolation.class,qo);
+            //System.out.println("count for PolicyViolation = " + count);
+            // Do not do return count;
+            // Return true or false instead based on the count value being > 0
+
+
+            if(count != 0 ){
+            return true;
+            }else{
+            return false;
+            }
+
+          ]]></Source>
+        </Script>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+
+  <DynamicScope name="dynamicScope-Approvals">
+    <Selector>
+      <IdentitySelector>
+        <Script>
+          <Source><![CDATA[
+            //Approvals: Re-use the script that displays the number of items waiting.
+            import sailpoint.object.WorkItem;
+            import sailpoint.object.QueryOptions;
+            import sailpoint.object.Filter;
+            import java.util.List;
+            import java.util.ArrayList;
+
+            QueryOptions qo = new QueryOptions();
+            List filters = new ArrayList();
+
+            // We do not have currentUser, so need to use identity object, which is the same.
+            // Replaced all instances of currentUser with identity
+            filters.add(Filter.eq("owner", identity));
+
+            if (identity.getWorkgroups() != null && !identity.getWorkgroups().isEmpty())
+            {
+            filters.add(Filter.in("owner", identity.getWorkgroups()));
+            }
+
+            qo.addFilter(Filter.eq("type", "Approval"));
+            qo.addFilter(Filter.or(filters));
+
+            int count = context.countObjects(WorkItem.class, qo);
+
+            if(count != 0 ){
+            return true;
+            }else{
+            return false;
+            }
+  ]]>        </Source>
+        </Script>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+
+  <DynamicScope name="dynamicScope-signoffs">
+    <Selector>
+      <IdentitySelector>
+        <Script>
+          <Source><![CDATA[
+            //Sign-off: Re-use the script that displays the number of items waiting.
+            import sailpoint.object.WorkItem;
+            import sailpoint.object.QueryOptions;
+            import sailpoint.object.Filter;
+            import java.util.List;
+            import java.util.ArrayList;
+
+            QueryOptions qo = new QueryOptions();
+            List filters = new ArrayList();
+
+            // We do not have currentUser, so need to use identity object, which is the same.
+            // Replaced all instances of currentUser with identity
+            filters.add(Filter.eq("owner", identity));
+
+            if (identity.getWorkgroups() != null && !identity.getWorkgroups().isEmpty())
+            {
+            filters.add(Filter.in("owner", identity.getWorkgroups()));
+            }
+
+            qo.addFilter(Filter.eq("type", "Signoff"));
+            qo.addFilter(Filter.or(filters));
+
+            int count = context.countObjects(WorkItem.class, qo);
+
+            if(count != 0 ){
+            return true;
+            }else{
+            return false;
+            }
+  ]]>        </Source>
+        </Script>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+
+  <DynamicScope name="dynamicScope-workItems">
+    <Selector>
+      <IdentitySelector>
+        <Script>
+          <Source><![CDATA[
+            //Work Items: Re-use the script that displays the number of items waiting.
+            import sailpoint.object.WorkItem;
+            import sailpoint.object.QueryOptions;
+            import sailpoint.object.Filter;
+            import java.util.List;
+            import java.util.ArrayList;
+
+            QueryOptions qo = new QueryOptions();
+            List filters = new ArrayList();
+
+            // We do not have currentUser, so need to use identity object, which is the same.
+            // Replaced all instances of currentUser with identity
+
+            filters.add(Filter.eq("owner", identity));
+
+            if (identity.getWorkgroups() != null && !identity.getWorkgroups().isEmpty())
+            {
+            filters.add(Filter.in("owner", identity.getWorkgroups()));
+            }
+
+            qo.addFilter(Filter.or(filters));
+
+            int count = context.countObjects(WorkItem.class, qo);
+
+
+            if(count != 0 ){
+            return true;
+            }else{
+            return false;
+            }
+  ]]>        </Source>
+        </Script>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>  
+
+<!--  
+You can use a workgroup for the Dynamic Scope reference
+
+  <Identity name="BU Service Management Team" workgroup="true">
+    <Capabilities>
+      <Reference class="sailpoint.object.Capability" name="WorkItemAdministrator"/>
+    </Capabilities>
+    <Description>Responsible for managing services provided to the BU via corporate IT</Description>
+  </Identity>
+ 
+And reference the workgroup in the Dynamic Scope using the identityselector used in Role assignment rules
+
+  <DynamicScope name="BU Service Management">
+    <Selector>
+      <IdentitySelector>
+    <MatchExpression and="true">
+      <MatchTerm name='workgroups' value='BU Service Management Team'/>
+    </MatchExpression>
+      </IdentitySelector>
+    </Selector>
+  </DynamicScope>
+ 
+ Other IdentitySelector options:
+  MatchExpression
+  CompoundFilter
+  Rule
+  Script
+  PopulationRef
+  
+  For example:
+    <IdentitySelector>
+      <PopulationRef>
+        <Reference class="sailpoint.object.GroupDefinition" name="dynamicScopePopulation1"/>
+      </PopulationRef>
+    </IdentitySelector>
+    
+Or reference an actual Group object
+    
+ <DynamicScope name="Compliance">
+    <Inclusions>
+        <Reference class="sailpoint.object.GroupDefinition" name="test1"/>
+    </Inclusions>
+  </DynamicScope>
+
+ -->
+</sailpoint>

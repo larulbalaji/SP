@@ -1,0 +1,95 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Form - EditAccountAttributes">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Select Application Link"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Edit Account"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Description>This form is used to select the account to edit for the user.</Description>
+  <Section type="text">
+    <Attributes>
+      <Map>
+        <entry key="subtitle" value="Select the Application Link you wish to Edit. To submit your request , click &apos;Edit Account&apos;. To cancel this request, click &apos;Cancel&apos;."/>
+      </Map>
+    </Attributes>
+    <Field value=" "/>
+  </Section>
+  <Section>
+    <Field displayName="Select Application" name="selectedApp" type="String" postBack="true" displayType="combobox" helpKey="This list will only display applications that the selected user has">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Application;
+import sailpoint.object.Link;
+import java.util.List;
+import java.util.ArrayList;
+
+// Expect: java.lang.String identityName
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EditAccountAttributes.SelectApplication");
+Identity user = context.getObjectByName(Identity.class,identityName);
+boolean hasMultipleAccounts = false;
+List links = user.getLinks();
+serilog.debug("Form :: selectedApp :: gotLinks " + links);
+List allowedValues = new ArrayList();
+serilog.debug("Form :: selectedApp :: links.size = " + links.size());
+
+// Loop through the list of accounts, remove any duplicates for users with mutiple accounts on the same application
+if  ( (links != null) && (links.size() != 0) ){
+   serilog.debug("Form :: selectedApp :: Found Accounts");
+   for (Link link : links) {
+      String appName = link.getApplicationName();
+      if (!allowedValues.contains(appName)) {
+      allowedValues.add(link.getApplicationName());
+      }  else {
+        hasMultipleAccounts = true;
+        serilog.debug("Form :: selectedApp :: Skipping duplicate account " + link.getDisplayName() + " on " + appName);
+      }
+   }
+} else {
+   serilog.debug("Form :: selectedApp :: No Accounts");
+   allowedValues.add("No Accounts...");
+}
+serilog.debug("Form :: selectedApp :: allowedValues = " + allowedValues);
+return allowedValues;
+
+            ]]></Source>
+          </Script>
+        </AllowedValuesDefinition>
+      </Field>
+<Field displayName="Select Account" name="selectedLink" type="String" dynamic="true" dependencies="selectedApp" displayType="combobox">
+  <AllowedValuesDefinition>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Application;
+import sailpoint.object.Link;
+import sailpoint.api.IdentityService;
+
+// Expect: java.lang.String identityName
+// Expect: java.lang.String selectedApp
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EditAccountAttributes.SelectApplicationLink");
+IdentityService identityService = new IdentityService(context);
+
+Identity user = context.getObjectByName(Identity.class,identityName);
+Application app = context.getObjectByName(Application.class,selectedApp);
+serilog.debug("Form :: selectedLink :: using user = " + user.getName() + " and app = " + selectedApp);
+List links = identityService.getLinks(user,app);
+serilog.debug("Form :: selectedLink :: Got List of links " + links.size());
+List allowedValues = new ArrayList();
+for (Link link : links) {
+   allowedValues.add(link.getDisplayName());
+   serilog.debug("Form :: selectedLink :: Added " + link.getDisplayName());
+}
+return allowedValues;
+          ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+    </Field>
+  </Section>
+</Form>

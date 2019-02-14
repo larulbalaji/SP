@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="Link Attribute - Active Directory Inactive" type="LinkAttribute">
+  <Source><![CDATA[
+    
+
+boolean inactive = false;
+
+// Disabled accounts are indicated by the ACCOUNTDISABLE flag (0x2) stored in the userAccountControl
+// attribute.
+int options = link.getAttributes().getInt("userAccountControl");
+
+if((options & 0x2) == 0x2)
+	inactive = true;
+
+return(inactive);
+
+   ]]>    
+ </Source>
+</Rule>

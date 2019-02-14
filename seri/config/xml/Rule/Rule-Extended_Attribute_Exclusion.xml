@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+
+<Rule language="beanshell" name="Managed Attribute Meta Data - Exclusion Rule" type="CertificationExclusion">
+  <Signature>
+  </Signature>
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule"  name="Exclusion Lookaside Library"/>
+  </ReferencedRules>
+  <Source>
+    <![CDATA[
+      import sailpoint.object.*;
+      /* 
+       * if you want to opt-out based on an ManagedAttribute extended data such as 'sensitive'
+       * call this routine. All entitlements will be excluded except for those who have a corresponding  
+       * 'sensitive' attribute 
+       *
+      */
+      
+      System.out.println ( "Before exclusions are taken into consideration there are: " + items.size() + 
+                          " decisions which need to be made for:  " + identity.getDisplayableName() );
+                          
+      List excludeList= nonSensitveExclusionList("sensitive");
+      for(int i=0;i<excludeList.size();i++) {
+
+         items.remove(excludeList.get(i));
+      }
+      itemsToExclude.addAll(excludeList);
+
+      System.out.println ( "     There are now: " + items.size() + " decisions after exclusions of non SENSITIVE accountGroups. " );
+
+
+      // This explanation is included in the report (when you configure certification to includes excluded items) 
+      return ("Only Sensitive Data being reviewed in this certification campaign");
+
+
+   
+    ]]>
+  </Source>
+</Rule>
+

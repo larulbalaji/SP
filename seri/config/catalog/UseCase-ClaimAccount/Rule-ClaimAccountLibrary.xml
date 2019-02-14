@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Claim Account Library">
+  <Source><![CDATA[
+    
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.QueryOptions;
+import sailpoint.tools.Util;
+
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+import sailpoint.object.Application; 
+import sailpoint.object.QueryOptions;  
+import sailpoint.object.Filter;
+import sailpoint.object.Rule;
+
+import sailpoint.object.AuthenticationAnswer;
+import sailpoint.object.AuthenticationQuestion;
+import sailpoint.tools.Internationalizer;
+import java.util.Locale;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ClaimAccountLibrary");
+
+/*
+      <ProvisioningPlan>
+        <AccountRequest application="Active Directory" nativeIdentity="CN=Willie Gomez,OU=Munich,OU=Europe,OU=Demo,DC=seri,DC=sailpointdemo,DC=com" op="Modify">
+          <Attributes>
+            <Map>
+              <entry key="flow" value="PasswordsRequest"/>
+              <entry key="interface" value="LCM"/>
+              <entry key="operation" value="PasswordChange"/>
+              <entry key="provisioningPolicies">
+                <value>
+                  <List>
+                    <String>ChangePassword</String>
+                  </List>
+                </value>
+              </entry>
+            </Map>
+          </Attributes>
+          <AttributeRequest name="password" op="Set">
+            <Attributes>
+              <Map>
+                <entry key="preExpire">
+                  <value>
+                    <Boolean>true</Boolean>
+                  </value>
+                </entry>
+              </Map>
+            </Attributes>
+          </AttributeRequest>
+        </AccountRequest>
+        <Attributes>
+          <Map>
+            <entry key="identityRequestId" value="0000000001"/>
+            <entry key="requester" value="spadmin"/>
+            <entry key="source" value="LCM"/>
+          </Map>
+        </Attributes>
+      </ProvisioningPlan>
+ */
+
+
+public ProvisioningPlan getSetPasswordPlan(String idName, String appName, String password) {
+
+	ProvisioningPlan plan = new ProvisioningPlan();
+
+	Identity id = context.getObjectByName(Identity.class, idName);  
+	if (null == id) {  
+		serilog.debug("Could not find an Identity named: " + idName);  
+		return null;  
+	}
+
+	QueryOptions qo = new QueryOptions();  
+	qo.addFilter(Filter.eq("identity", id));  
+
+	Link targetLink = null;
+
+	Iterator it = context.search(Link.class, qo);  
+	while (it.hasNext()) {  
+		Link link = (Link) it.next();  
+		if ( link.getApplication().getName().equalsIgnoreCase(appName) ) {  
+			targetLink = link;
+		}
+	}  
+
+	sailpoint.tools.Util.flushIterator(it);
+
+	plan.setIdentity(id);
+
+	if (targetLink != null) {
+		Application app = targetLink.getApplication();
+
+		AccountRequest req = new AccountRequest();
+		plan.add(req);
+		req.setApplication(app.getName());
+		req.setNativeIdentity(targetLink.getNativeIdentity());
+		req.setInstance(targetLink.getInstance());
+
+		AttributeRequest areq = new AttributeRequest();
+		req.add(areq);
+		// TODO: can we assume the name will always be this?
+				areq.setName("password");
+		areq.setOperation(ProvisioningPlan.Operation.Set);
+		areq.setValue(password);
+	}
+
+	return plan;
+
+}
+
+public void setAuthenticationQuestions(String identity, String question, String answer){
+
+	Locale locale=Locale.ENGLISH;
+
+	Identity targetIdentity=context.getObjectByName(Identity.class, identity);
+	if(targetIdentity==null) {
+		return;
+	}
+
+	// ok, so here we need to iterate through the questions, and find the right one
+	// the ootb questions are i18n'ed, so they are stored as e.g. auth_question_mothers_maiden_name
+	// I guess we need to check for both, so use the Internationalizer
+	List<AuthenticationQuestion> questions=context.getObjects(AuthenticationQuestion.class);
+	boolean found=false;
+	for(AuthenticationQuestion q: questions) {
+		if( question.equals(q.getQuestion()) ) {
+			found=true;
+		} else {
+			String intlQuestion =Internationalizer.getMessage(q.getQuestion(), locale);
+			if( question.equals(intlQuestion) ) {
+				found=true;
+			}
+		}
+		if(found) {
+			List<AuthenticationAnswer> answers=targetIdentity.getAuthenticationAnswers();
+			if(answers==null) answers=new ArrayList<AuthenticationAnswer>();
+			for(AuthenticationAnswer aAnswer: answers) {
+				// if we find it, take it out and exit the for loop
+				if( aAnswer.getQuestion().getId().equals(q.getId()) ) {
+					answers.remove(aAnswer);
+					break; // out of the for loop
+				}
+			}
+			// make a new entry with this answer
+			AuthenticationAnswer ans=new AuthenticationAnswer();
+			ans.setQuestion(q);
+			ans.setAnswer(answer);
+			answers.add(ans);
+			targetIdentity.assignAuthenticationAnswers(answers);
+			context.saveObject(targetIdentity);
+			context.commitTransaction();
+
+			break; // out of the for loop for questions
+		}               
+	}
+}
+
+
+//getSetPasswordPlan("Dennis.Barnes", "Active Directory", "xyzzy");
+
+
+/*
+Map args = new HashMap();
+args.put("lastname","nichols");
+args.put("last4SSN","1111");
+args.put("userName","Aaron.Nichols");
+args.put("month","1");
+args.put("day","1");
+Rule rule = context.getObjectByName(Rule.class, "Load Claim Identity");
+if (rule != null) {
+    Identity id = context.runRule(rule, args);
+    if (id != null) {
+        serilog.debug("identityName:" + id.getName());
+    } else {
+        serilog.debug("id is null");
+    }
+}
+ */
+
+  ]]></Source>
+</Rule>

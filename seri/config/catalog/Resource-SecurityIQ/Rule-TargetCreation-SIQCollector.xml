@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Windows FileServer Target Creation" type="TargetCreation">
+  <Description>This rule is called when a Target is created.</Description>
+  <Signature returnType="Target">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>
+          The Application which owns the Target.
+        </Description>
+      </Argument>
+      <Argument name="target">
+        <Description>
+          The Target being created.
+        </Description>
+      </Argument>
+      <Argument name="targetSource">
+        <Description>
+          The source of the configuration for the collector.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="target">
+        <Description>
+          The Target being created.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+    <![CDATA[
+target.setDisplayName(target.getFullPath());
+return target;
+    ]]>
+</Source>
+</Rule>

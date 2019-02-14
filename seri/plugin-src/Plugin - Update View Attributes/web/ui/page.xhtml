@@ -1,0 +1,72 @@
+﻿<!DOCTYPE html PUBLIC
+        "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2016 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:sp="http://sailpoint.com/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:t="http://myfaces.apache.org/tomahawk">
+<head>
+  <link rel="stylesheet" type="text/css" href="#{base.requestContextPath}/ui/css/ng-sortable.css"/>
+  <link rel="stylesheet" type="text/css" href="#{base.requestContextPath}/plugin/updateViewAttributes/ui/css/updateViewAttributes.css"/>
+</head>
+<body>
+	<ui:composition>
+    <sp:script enabled="false" serveOffset="#{base.requestContextPath}/plugin/#{plugins.pluginName}/ui/js">
+			<src>lib/angular.js?#{debug.revision}</src>
+			<src>lib/CsrfModule.js?#{debug.revision}</src>
+			<src>lib/CsrfCookieInitializerService.js?#{debug.revision}</src>
+			<src>lib/ng-sortable.js?#{debug.revision}</src>
+      <src>app.js?#{debug.revision}</src>
+			<src>SortableCTRL.js?#{debug.revision}</src>
+		</sp:script>
+
+		<div class="panel system-setup-panel"
+			ng-app="sailpoint.plugin.updateViewAttributesPlugin"
+			ng-controller="SortableCTRL">
+			<div class="buttonRow" align="right">
+				<button type="input" ng-click="cancelEdit()"
+					ng-disabled="isSaving()" class="secondaryBtn">Cancel</button>
+				<button role="button" type="button" ng-click="saveEdit()"
+					ng-disabled="isSaving()" class="primaryBtn">Save</button>
+			</div>
+			<div class="panel-body">
+				<ul id="currentAttrs" data-as-sortable="dragControlCurrentListeners"
+					data-ng-model="currentItems"
+					class="list-group list-group-half b-l b-r b-t b-b"
+					style="overflow: hidden; overflow-y: scroll;">
+					<li ng-repeat="item in currentItems" as-sortable-item=""
+						class="as-sortable-item list-group-item">
+						<div as-sortable-item-handle="" class="as-sortable-item-handle">
+							<b data-ng-bind="item.displayName" /> <br /> <span
+								class="text-muted small" data-ng-bind="item.name" />
+						</div>
+					</li>
+				</ul>
+				<ul id="availableAttrs"
+					data-as-sortable="dragControlCurrentListeners"
+					data-ng-model="availableItems"
+					class="list-group list-group-half b-l b-r b-t b-b"
+					style="overflow: hidden; overflow-y: scroll;">
+					<li ng-repeat="item in availableItems" as-sortable-item=""
+						class="as-sortable-item list-group-item">
+						<div as-sortable-item-handle="" class="as-sortable-item-handle">
+							<b data-ng-bind="item.displayName" /> <br /> <span
+								class="text-muted small" data-ng-bind="item.name" />
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+
+
+	</ui:composition>
+
+</body>
+</html>
+

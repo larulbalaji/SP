@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<Rule language='beanshell' name='RuleLibrary-SecurityIQConfiguration'>
+  <Source><![CDATA[
+import sailpoint.object.Configuration;
+import sailpoint.object.Application;
+import sailpoint.object.Schema;
+import sailpoint.object.AttributeDefinition;
+import sailpoint.tools.GeneralException;
+
+
+HashMap getSIQConnectionInformation(String appName) {
+   HashMap siqRepo = new HashMap();
+   Application siqApp = context.getObjectByName(Application.class,appName);
+   if (siqApp == null) {
+      throw new GeneralException("No SecurityIQ application defined named " + appName);
+   }
+   List schemas = siqApp.getSchemas();
+   for (Schema schema : schemas) {
+      String unstructuredSchema =  schema.getObjectType();
+      if ("unstructured".equals(unstructuredSchema)) {
+           String url = schema.getStringAttributeValue("url");
+           String dbToken = "databaseName=";
+           
+           siqRepo.put("url",url);
+           siqRepo.put("user",schema.getStringAttributeValue("user"));
+           siqRepo.put("password",schema.getStringAttributeValue("password"));
+           siqRepo.put("driverClass",schema.getStringAttributeValue("driverClass"));
+           siqRepo.put("schemaName",schema.getStringAttributeValue("schemaName"));
+ 
+           String dnName = "";
+           int startIndex = url.indexOf(dbToken) + dbToken.length();
+           String dbName =  url.substring(startIndex);
+           if (dbName.contains("&")) {
+              dbName = dbName.substring(0,dbName.indexOf("&"));
+           }
+           siqRepo.put("databaseName",dbName);
+ 
+           
+           //Don't expect more than one schema defintion for unstructured
+           break;
+      }
+   }
+   serilog.debug("RuleLibrary::SecurityIQConfiguration - getSIQConnectionInformation = " + siqRepo);
+   return siqRepo;
+}
+
+String getSIQClassificationQuery(String objectSID) {
+
+ // Old and busted SIQ 5.0.1 query
+ //String sql = "select distinct dcc.Name " + 
+ //      "from whiteops.data_classification_result dcr, whiteops.data_classification_category dcc, whiteops.ra_entitlements_roles_view rer, whiteops.ra_role rr " +
+ //      "where rr.role_uid='"+objectSID+"' " +
+ //      "AND dcr.br_id=rer.br_id and dcc.Id=dcr.CategoryId and rer.role_id = rr.id";
+
+// New SIQ 5.1 hotness
+String sql = "select distinct dcc.Name from SecurityIQDB_SERI.whiteops.data_classification_result dcr with (nolock)," +
+             "SecurityIQDB_SERI.whiteops.dc_policy_rule r with (nolock)," +
+             "SecurityIQDB_SERI.whiteops.dc_policy_rule_category rc with (nolock)," + 
+             "SecurityIQDB_SERI.whiteops.data_classification_category dcc with (nolock)," + 
+             "SecurityIQDB_SERI.whiteops.ra_entitlements_roles_view rer with (nolock)," + 
+             "SecurityIQDB_SERI.whiteops.ra_role rr with (nolock) " + 
+             "where rr.role_uid = '"+objectSID+"' " +
+             "AND dcr.br_id = rer.br_id AND dcr.rule_id = r.id AND r.id = rc.dc_policy_rule_id " + 
+             "AND rc.category_id = dcc.Id AND rer.role_id = rr.id";
+              
+
+ HashMap siqrepo = getSIQConnectionInformation();
+
+
+ String schema = siqrepo.get("schemaName");
+ String dbName = siqrepo.get("databaseName");
+ serilog.debug("RuleLibrary::SecurityIQConfiguration - getSIQClassificationQuery - Replacing dbname and schema names");
+ 
+ if (!"whiteops".equals(schema)) {
+    sql = sql.replace("whiteops",schema);
+ }
+ 
+ if ((!"SecurityIQDB_SERI".equals(dbName)) && (dbName != null) && (dbName.length() > 0) ) {
+    sql = sql.replace("SecurityIQDB_SERI",dbName);
+ }
+ 
+ 
+ 
+  serilog.debug("RuleLibrary::SecurityIQConfiguration - ClassificationQueryString = " + sql);
+  return sql;
+}
+   
+String getSIQMoverQuery(String email) {
+ if (email == null) {
+    throw new GeneralException("Email for SIQ Mover Query is null");
+ }
+ String movesql = "merge into SECURITYIQDB_SERI.whiteops.business_service_owner lnk "+
+              "using SECURITYIQDB_SERI.whiteops.ra_user usr "+
+              "on lnk.business_service_id=? "+
+              "and usr.user_principal_name='"+email+"' "+
+              "when matched then "+
+              "update set lnk.ra_user_id=usr.id;";
+
+ HashMap siqrepo = getSIQConnectionInformation();
+ String schema = siqrepo.get("schemaName");
+ if (!"whiteops".equals(schema)) {
+    movesql = movesql.replace("whiteops",schema);
+ }
+ 
+ String dbName = siqrepo.get("databaseName");
+ if ((!"SecurityIQDB_SERI".equals(dbName)) && (dbName != null) && (dbName.length() > 0) ) {
+    sql = sql.replace("SecurityIQDB_SERI",dbName);
+ }
+       serilog.debug("RuleLibrary::SecurityIQConfiguration - getSIQMoverQuery = " + movesql);
+  return movesql;
+}
+
+String getSIQOwnershipQuery(String email) {
+ if (email == null) {
+    throw new GeneralException("Email for SIQ Mover Query is null");
+ }
+ String movesql = "select res.full_path as path, res.id as res_id, res.type_enum_id as type, usr.user_display_name as username "+ 
+               "from SECURITYIQDB_SERI.whiteops.business_service_owner as lnk "+
+               "inner join SECURITYIQDB_SERI.whiteops.business_service as res on res.id=lnk.business_service_id "+
+               "inner join SECURITYIQDB_SERI.whiteops.ra_user as usr on usr.id=lnk.ra_user_id "+
+               "where usr.user_principal_name = '"+email+"';";  
+
+ HashMap siqrepo = getSIQConnectionInformation();
+ String schema = siqrepo.get("schemaName");
+ if (!"whiteops".equals(schema)) {
+    movesql = movesql.replace("whiteops",schema);
+ }
+ 
+ String dbName = siqrepo.get("databaseName");
+ if ((!"SecurityIQDB_SERI".equals(dbName)) && (dbName != null) && (dbName.length() > 0) ) {
+    movesql = movesql.replace("SecurityIQDB_SERI",dbName);
+ }
+  serilog.debug("RuleLibrary::SecurityIQConfiguration - getSIQOwnershipQuery = " + movesql);
+  return movesql;
+}
+
+
+
+
+HashMap getSIQConnectionInformation() {
+   String appName = "SecurityIQ";
+   HashMap siqRepoMap = getSIQConnectionInformation(appName);
+   return siqRepoMap;
+   
+}
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.RuleLibrary.SecurityIQConfiguration");
+
+
+  ]]></Source></Rule>

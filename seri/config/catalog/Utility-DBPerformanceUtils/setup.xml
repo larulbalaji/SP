@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="Rule-Standalone-IIQDB-Performance-Test.xml"/>
+  <ImportAction name="include" value="Rule-Standalone-Periodic-Oracle-Maintenance.xml"/>
+  <ImportAction name="include" value="TaskDefinition-Periodic-Oracle-Maintenance.xml"/>
+</sailpoint>

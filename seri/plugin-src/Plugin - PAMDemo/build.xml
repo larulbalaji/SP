@@ -1,0 +1,156 @@
+<project name="pamDemoPlugin" default="build-plugin" basedir=".">
+    <description>
+        Build the PAM Demo Plugin
+    </description>
+
+    <property name="pluginName" value="pamDemo"/>
+    <property name="iiqHome" value="../../build"/>
+    <property name="iiqLib" value="${iiqHome}/../lib"/>
+    <property name="iiqScim" value="${iiqHome}/../scim"/>
+    <property name="test" location="test"/>
+    <property name="src" location="src"/>
+    <property name="build" location="build"/>
+    <property name="classes" location="${build}/classes"/>
+    <property name="testClasses" location="${build}/test/classes"/>
+    <property name="buildLib" location="${build}/lib"/>
+    <property name="contents" location="${build}/contents"/>
+
+    <property name="javaVersion" value="1.7"/>
+    <property name="ant.build.javac.source" value="${javaVersion}"/>
+    <property name="ant.build.javac.target" value="${javaVersion}"/>
+
+    <!-- Clean out old build files -->
+    <target name="clean">
+        <delete dir="${build}"/>
+        <delete>
+            <fileset dir=".">
+                <include name="*.zip"/>
+                <include name="*.jar"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="init" depends="clean">
+        <mkdir dir="${classes}"/>
+        <mkdir dir="${contents}"/>
+    </target>
+
+    <!-- Classpath used for compiling the core code -->
+    <path id="compile.cp">
+        <pathelement path="${iiqHome}/WEB-INF/classes"/>
+        <pathelement path="${iiqScim}/common/build/classes"/>
+        <pathelement path="${iiqScim}/server/build/classes"/>
+        <fileset dir="${iiqLib}">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Classpath used for compiling the testng tests -->
+    <path id="testng.compile.cp">
+        <path refid="compile.cp"/>
+        <pathelement path="${classes}"/>
+        <pathelement path="${iiqHome}/test/"/>
+    </path>
+
+    <!-- Classpath used for running the testng tests -->
+    <path id="testng.run.cp">
+        <path refid="testng.compile.cp"/>
+        <pathelement path="${testClasses}"/>
+    </path>
+
+    <target name="compile-src" depends="clean, init">
+        <javac srcdir="${src}" destdir="${classes}"
+               includeantruntime="false"
+               debug="true"
+               classpathref="compile.cp">
+            <compilerarg value="-Xlint:deprecation"/>
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>
+
+    <target name="compile-test" depends="clean, init, compile-src">
+        <mkdir dir="${testClasses}" />
+
+        <javac srcdir="${test}" destdir="${testClasses}"
+               includeantruntime="false"
+               debug="true"
+               classpathref="testng.compile.cp">
+            <compilerarg value="-Xlint:deprecation"/>
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>
+
+    <!-- There are some JSON files that have SCIM data for our server.  Copy them to the classes directory. -->
+    <target name="copy-json-files">
+      <copy todir="${classes}">
+        <fileset dir="${src}">
+          <include name="**/*.json"/>
+        </fileset>
+      </copy>
+    </target>
+
+    <!-- For building while developing -->
+    <target name="dev-build-plugin" depends="clean, init, build-plugin">
+        <!-- Windows Only -->
+        <exec executable="pluginInstall.bat" dir="." osfamily="windows"></exec>
+    </target>
+
+    <!-- For building the actual plugin zip file -->
+    <target name="build-plugin" depends="clean, init, compile-src, copy-json-files">
+        <!-- Build the jar file with the plugin classes -->
+        <mkdir dir="${buildLib}" />
+
+        <jar destfile="${buildLib}/${pluginName}.jar">
+            <fileset dir="${classes}">
+                <include name="**/*" />
+            </fileset>
+        </jar>
+
+        <copy todir="${contents}">
+            <fileset dir=".">
+                <include name="manifest.xml"/>
+                <include name="db/**"/>
+                <include name="import/**"/>
+                <include name="lib/*.jar"/>
+                <include name="ui/**"/>
+            </fileset>
+            <fileset dir="${build}">
+                <include name="lib/*.jar"/>
+            </fileset>
+        </copy>
+
+        <zip encoding="UTF-8" baseDir="${contents}" destfile="${pluginName}.zip"></zip>
+    </target>
+
+    <!-- Unit tests -->
+    <property name="testngFile" value="test/testng.xml"/>
+    <property name="testngRunFile" value="${build}/test/testngRun.xml"/>
+    <property name="test.output" value="${build}/test/test-output" />
+
+    <target name="testng" depends="compile-test, copy-json-files">
+        <echo>TestNG HTML report available at ${test.output}/index.html</echo>
+        <mkdir dir="${build}/test" />
+        <mkdir dir="${test.output}" />
+
+        <java fork="yes"
+              classpathref="testng.run.cp"
+              classname="com.beust.testng.TestNG"
+              resultproperty="testng.result">
+          <arg value="-d" />
+          <arg value="${test.output}" />
+          <arg value="-listener" />
+          <arg value="sailpoint.testng.SailPointTestListener" />
+          <arg value="${testngFile}" />
+          <jvmarg value="-ea" />
+          <jvmarg value="-Dsailpoint.spring=unittestBeans.xml" />
+          <jvmarg value="-Xmx512m"/>
+          <jvmarg value="-XX:MaxPermSize=256m"/>
+        </java>
+
+        <condition property="testng.failed">
+            <not><equals arg1="${testng.result}" arg2="0" /></not>
+        </condition>
+        <fail message="One or more TestNG tests failed." if="testng.failed" />
+    </target>
+
+</project>

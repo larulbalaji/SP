@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition formPath="/monitor/tasks/accountAggregationTask.xhtml"
+  name="Aggregate TRAKK" resultAction="Delete" type="AccountAggregation">
+  <Attributes>
+    <Map>
+      <entry key="applications" value="TRAKK" />
+      <entry key="checkDeleted" value="true" />
+      <entry key="noOptimizeReaggregation" value="true" />
+      <entry key="promoteManagedAttributes" value="true" />
+    </Map>
+  </Attributes>
+  <Description>
+    Task to aggregate accounts from the TRAKK application
+  </Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin" />
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Account Aggregation" />
+  </Parent>
+</TaskDefinition>

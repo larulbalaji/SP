@@ -1,0 +1,125 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Leave date change rule with notifications" type="Listener">
+  <Description>When the leave date changes, change the future event to deprivision accounts, or schedule one</Description>
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="Scheduling Library"/>
+  </ReferencedRules>
+  <Source><![CDATA[
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import sailpoint.object.Configuration;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+import sailpoint.object.Workflow;
+// Fire this when the leave date changes
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.LeaveDateChange");
+serilog.debug("----");
+// Specify what format the date is entered into the leaveDate attribute
+// see http://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html for details
+
+String leaveDateFormat="dd/MM/yyyy"; // e.g 01/07/2015 = 1 July 2015
+SimpleDateFormat sdf=new SimpleDateFormat(leaveDateFormat);
+
+
+// The workflow to schedule - this is the same as the one fired when inactive->true
+String workflowName="Lifecycle Event - Deprovision Accounts";
+String identityName=identity.getName();
+
+Date when=null;
+
+Map args=new HashMap();
+args.put("identityName", identityName);
+
+
+if (newValue instanceof Date) {
+  when=(Date)newValue;
+} else {
+  try {
+    when=sdf.parse(newValue);
+  } catch (ParseException pe) {
+    serilog.error("Can't schedule workflow for "+identity.getDisplayName()+" - can't parse date "+newValue+" with format "+leaveDateFormat);
+    return;
+  }
+}  
+
+List requests=context.getObjects(Request.class);
+
+int numResults=0;
+
+for(Request req: requests) {
+
+  serilog.trace("Got Request");
+  String reqWorkflowName=req.getAttribute("workflow");
+  serilog.trace("workflowName="+reqWorkflowName);
+  String reqIdentityName=req.getAttribute("identityName");
+  serilog.trace("identityName="+reqIdentityName);
+
+  if( workflowName.equals(reqWorkflowName) && identityName.equals(reqIdentityName) ) {
+    serilog.debug("Found a match");
+    try {
+      req.setNextLaunch(when);
+      context.saveObject(req);
+    } catch (ParseException pe) {
+      serilog.error("Can't reschedule workflow for "+identity.getDisplayName()+" - can't parse date "+newValue+" with format "+leaveDateFormat);
+    }
+    numResults++;
+  } else if( workflowName.equals("Pending Leaver Notification") && identityName.equals(reqIdentityName) ) {
+    // Remove previous pending notifications - there may be more than one and it's too complicated to replace the
+    // dates
+    context.removeObject(req);
+    numResults++;
+  }
+}
+
+serilog.debug("NumResults: "+numResults);
+if(numResults>0) {
+  context.commitTransaction();
+} else if(numResults==0) {
+  serilog.debug("No results found - scheduling a new workflow");
+  scheduleWorkflow(identityName, newValue, workflowName, null, "Deprovision accounts for "+identity.getDisplayName());  
+}
+
+// Now.. Do we need any notifications?
+// These are stored in the "SERI Configuration" object in the "leaverNotification" entry as a CSV of numbers (days before termination)
+Configuration conf=context.getObjectByName(Configuration.class, "SERI Configuration");
+if(conf==null) {
+  serilog.debug("SERI Configuration object not found - skipping notifications");
+} else {
+  String notifications=conf.get("leaverNotifications");
+  if(notifications==null) {
+    serilog.debug("Leaver notification value not found - skipping notifications");
+    return;
+  }
+  String[] daysList=notifications.split(",");
+  
+  Map args=new HashMap();
+  args.put("identityName", identityName);
+    
+  args.put("firstName", identity.getFirstname());
+  args.put("lastName", identity.getLastname());
+  args.put("identityDisplayName", identity.getDisplayName());
+  Identity mgr=identity.getManager();
+  if(mgr!=null) {
+    args.put("manager", mgr.getName());
+  }
+  
+  for(String daysBefore: daysList) {
+    try {
+      args.put("daysUntilLeave", daysBefore);
+      int numDays=Integer.parseInt(daysBefore);
+      GregorianCalendar gc=new GregorianCalendar();
+      gc.setTime(when);
+      gc.add(Calendar.DAY_OF_MONTH, -numDays);
+      scheduleWorkflow(identityName, gc.getTime(), "Pending Leaver Notification", args, "Notify manager: leaving in "+daysBefore+" days");
+    } catch (NumberFormatException nfe) {
+      serilog.error("Non-number ("+daysBefore+") found in leaver notification list");
+    }
+  }
+}
+
+  ]]></Source>
+</Rule>

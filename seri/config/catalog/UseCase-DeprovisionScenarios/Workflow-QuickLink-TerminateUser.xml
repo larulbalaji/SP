@@ -1,0 +1,150 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true" name="QuickLink - Terminate User" type="">
+    <Variable name='trace' initializer='true'/>
+    <Variable name="identityModel" type="java.util.Map"/>
+  <Variable name='basePath' initializer='identityModel'>
+     <Description>The formpath to the link we are interested in editing.</Description>
+  </Variable>
+  <Variable initializer="string:true" name="transient">
+    <Description>Set to false to cause workflow-related objects, such as approval
+    work items, to be saved in the database even if they are only
+    viewed by the person registering.</Description>
+  </Variable>
+  <Variable initializer="string:TerminateUser" name="flow">
+    <Description>The name of the LCM flow that launched this workflow.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Variable initializer="script:return new ArrayList();" input="true" name="identityNames" type="java.util.List">
+    <Description>The names of the identities we're terminating.</Description>
+  </Variable>
+  <Variable input="true" name="requester"/>
+  <Variable initializer="script:return 0;" name="incrementor"/>
+  <Variable name="terminationDate"/>
+  <Step icon="Start" name="Start" posX="9" posY="25">
+    <Transition to="Create User List"/>
+  </Step>
+
+
+  <Step name='Build Identity Model' icon='Task' resultVariable='identityModel' action='call:getIdentityModel'>
+    <Description>
+       For now, build a map of the data. Eventually this will use the Identity
+       transformer to build a Map based on an existing identityName, or 
+       Identity object.
+    </Description>
+    <Arg name='identityName' value="ref:identityName"/> 
+    <Arg name='expandLinks' value='true'/>     
+    <Arg name='expandIdentity' value='true'/>     
+    
+    <Transition to="Add Users To Model"/>
+
+  </Step>
+
+  <Step icon="Default" name="Create User List" posX="109" posY="25">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+import sailpoint.provisioning.PlanCompiler;
+import sailpoint.api.Provisioner;
+import sailpoint.transformer.IdentityTransformer;
+
+// Expect: java.util.List quickLinkIdentityIds
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TerminateUser.CreateUserList");
+serilog.debug("----");
+
+for(String qlId: quickLinkIdentityIds) {
+  Identity aUser = context.getObjectById(Identity.class, qlId);
+  serilog.debug("A USER:  "+ aUser);
+  serilog.debug("A USER IS:  "+ aUser.getName());
+  identityNames.add(aUser.getName());
+
+  workflow.put("identityName", aUser.getName());      
+ 
+}
+workflow.put("identityNames",identityNames);
+      ]]></Source>
+    </Script>
+
+    <Transition to="Build Identity Model"/>
+
+  </Step>
+
+
+  <Step icon="Default" name="Add Users To Model" posX="109" posY="25">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+import sailpoint.provisioning.PlanCompiler;
+import sailpoint.api.Provisioner;
+import sailpoint.transformer.IdentityTransformer;
+
+identityModel.put("identityNames",identityNames);
+
+      ]]></Source>
+    </Script>
+
+    <Transition to="Confirm Selected Users"/>
+  </Step>
+
+  <Step icon="Default" name="Confirm Selected Users" posX="227" posY="25">
+    <Approval name="Confirm Selected Users" owner="ref:requester" return="terminationDate">
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Confirm Terminated Account(s) Form"/>
+      <Arg name="workItemForm" value="string:Terminate User Confirmation"/>
+      <Arg name='workItemFormBasePath' value='identityModel'/>
+    </Approval>
+    <Transition to="Set Values"/>
+  </Step>
+  <Step icon="Default" name="Set Values" posX="291" posY="284">
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TerminateUser.SetValues");
+serilog.debug("----");
+serilog.debug("terminationDate="+terminationDate);
+serilog.debug("terminationDate="+identityModel.get("terminationDate"));
+String identityName =(String)identityNames.get(incrementor);
+incrementor = incrementor +1;
+
+serilog.debug("incrementor:  " + incrementor);
+serilog.debug("identityName:  "+ identityName);
+      ]]></Source>
+    </Script>
+    <Transition to="Schedule Terminate"/>
+  </Step>
+
+  <Step action="call:scheduleWorkflowEvent" icon="Task" name="Schedule Terminate" posX="486" posY="176">
+    <Arg name="workflow">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Configuration;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TerminateUser.ScheduleTerminate.arg.workflow");
+
+String wfName=null;
+
+Configuration conf=context.getObjectByName(Configuration.class, "Deprovisioning Configuration");
+if(conf!=null){
+  wfName=conf.get("DeprovisioningUpdateWorkflow");
+} else {
+  serilog.error("Cannot find configuration object 'Deprovisioning Configuration'");
+}
+serilog.debug("Scheduling Terminate with workflow '"+wfName+"'");
+return wfName;
+      ]]></Source>
+    </Script>
+  </Arg>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="eventName" value="string:Terminate User"/>
+    <Arg name="scheduleDate" value="ref:identityModel.terminationDate"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+    <Transition to="Stop" when="script:identityNames.size()>= incrementor;"/>
+    <Transition to="Set Values"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="753" posY="27"/>
+</Workflow>

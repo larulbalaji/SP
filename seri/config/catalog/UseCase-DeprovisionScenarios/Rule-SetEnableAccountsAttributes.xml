@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="DeReProvisioning - Enable all Links" type="Workflow">
+  <Description>Iterates through all links on a cube and sets IIQDisabled=false</Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="wfcontext">
+        <Description>
+          The current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="handler">
+        <Description>
+          The workflow handler associated with the current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="workflow">
+        <Description>
+          The current Workflow definition.
+        </Description>
+      </Argument>
+      <Argument name="step">
+        <Description>
+          The current Step.
+        </Description>
+      </Argument>
+      <Argument name="approval">
+        <Description>
+          The current Approval.
+        </Description>
+      </Argument>
+      <Argument name="item">
+        <Description>
+          The WorkItem being processed.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="Object">
+        <Description>
+          The result of the workflow rule; dependent on the rule itself.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[ 
+  	// Expect: java.lang.String applicationName
+	// Expect: java.util.Map identityModel
+	// Expect: java.lang.String nativeIdentity
+  
+        List links = (List)identityModel.get("links");
+        for(Map aLink : links) {
+			 if(((String)aLink.get("sysName")).equals(applicationName) &&
+                ((String)((Map)aLink.get("sys")).get("nativeIdentity")).equals(nativeIdentity))
+			 {            
+			   ((Map)aLink.get("sys")).put("IIQDisabled", false);
+			    aLink.put("IIQDisabled", false);
+			 }                    
+		}
+	return identityModel;
+     ]]>
+    </Source> 
+</Rule>

@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Capability displayName="capability_manager" name="Manager">
+  <Description>capability_desc_manager</Description>
+  <RightRefs>
+    <Reference class="sailpoint.object.SPRight" name="CreateContractor"/>
+    <Reference class="sailpoint.object.SPRight" name="ViewHomeAddress"/>
+    <Reference class="sailpoint.object.SPRight" name="ViewStartDate"/>
+    <Reference class="sailpoint.object.SPRight" name="ViewCompany"/>
+    <Reference class="sailpoint.object.SPRight" name="EditExpirationDate"/>
+    <Reference class="sailpoint.object.SPRight" name="EditOfficeAddress"/>
+    <Reference class="sailpoint.object.SPRight" name="EditDepartment"/>
+    <Reference class="sailpoint.object.SPRight" name="EditSponsor"/>
+    <Reference class="sailpoint.object.SPRight" name="EditManager"/>
+    <Reference class="sailpoint.object.SPRight" name="ViewSponsor"/>
+    <Reference class="sailpoint.object.SPRight" name="ViewManager"/>
+    <Reference class="sailpoint.object.SPRight" name="ViewCompany"/>
+  </RightRefs>
+</Capability>
+</sailpoint>
+

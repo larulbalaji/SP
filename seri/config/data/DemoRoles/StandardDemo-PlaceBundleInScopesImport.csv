@@ -1,0 +1,132 @@
+# Setup Scope Hierarchy
+Add Scope,All,
+Add Scope,Finance & Accounting,All
+Add Scope,HR,All
+Add Scope,IT,All
+
+# Org Structure
+Add ScopeAssignment,Finance & Accounting,Finance & Accounting
+Add ScopeAssignment,Finance Technical Roles,Finance & Accounting
+Add ScopeAssignment,Information Technology,IT
+Add ScopeAssignment,IT Technical Roles,IT
+Add ScopeAssignment,Human Resources,HR
+Add ScopeAssignment,Human Resources Technical Roles,HR
+Add ScopeAssignment,Compliance Processes,All
+Add ScopeAssignment,Compliance Processes Technical Roles,All
+
+# Global Roles, don't scope
+#Add ScopeAssignment,User Basic,
+#Add ScopeAssignment,All Users,
+#Add ScopeAssignment,Role Mining,
+
+
+# IT Roles
+Add ScopeAssignment,VPN User Access,IT
+Add ScopeAssignment,VPN User,IT
+Add ScopeAssignment,Network Systems Administrator Access,IT
+Add ScopeAssignment,Data Communications Analyst Access,IT
+Add ScopeAssignment,Network Systems Administrator,IT
+Add ScopeAssignment,Telecommunications and Network Manager Access,IT
+Add ScopeAssignment,Windows Administrator Access,IT
+Add ScopeAssignment,DNS Administrator Access,IT
+Add ScopeAssignment,DNS Manager,IT
+Add ScopeAssignment,Unix Administrator Access,IT
+Add ScopeAssignment,IT Distributed Systems Manager Access,IT
+Add ScopeAssignment,Oracle Administrator Access,IT
+Add ScopeAssignment,IT Database Manager Access,IT
+Add ScopeAssignment,Helpdesk Associate Access,IT
+Add ScopeAssignment,Helpdesk Manager Access,IT
+Add ScopeAssignment,Global Infrastructure Manager Access,IT
+Add ScopeAssignment,Security Analyst Access I,IT
+Add ScopeAssignment,Security Architect Access,IT
+Add ScopeAssignment,RACF Security Priv Access,IT
+Add ScopeAssignment,Information Security Manager Access,IT
+Add ScopeAssignment,Data Analyst Access,IT
+Add ScopeAssignment,Data Communications Analyst,IT
+Add ScopeAssignment,Telecommunications and Network Manager,IT
+Add ScopeAssignment,Windows Administrator,IT
+Add ScopeAssignment,Unix Administrator,IT
+Add ScopeAssignment,IT Distributed Systems Manager,IT
+Add ScopeAssignment,Oracle Administrator,IT
+Add ScopeAssignment,IT Database Manager,IT
+Add ScopeAssignment,Helpdesk Associate,IT
+Add ScopeAssignment,Helpdesk Manager,IT
+Add ScopeAssignment,Global Infrastructure Manager,IT
+Add ScopeAssignment,Security Architect,IT
+Add ScopeAssignment,RACF Security Administrator,IT
+Add ScopeAssignment,Information Security Manager,IT
+
+
+# Finance & Accounting
+Add ScopeAssignment,Accounting General Access,Finance & Accounting
+Add ScopeAssignment,Internal Auditor Access,Finance & Accounting
+Add ScopeAssignment,Recruiter Access,Finance & Accounting
+Add ScopeAssignment,Benefits Clerk Access,Finance & Accounting
+Add ScopeAssignment,Compensation Access,Finance & Accounting
+Add ScopeAssignment,Procurement Analyst Access,Finance & Accounting
+Add ScopeAssignment,Cost Savings Analyst Access,Finance & Accounting
+Add ScopeAssignment,Inventory Analyst Access,Finance & Accounting
+Add ScopeAssignment,Accounts Payable Access,Finance & Accounting
+Add ScopeAssignment,Accounts Receivable Access,Finance & Accounting
+Add ScopeAssignment,Payroll General Access,Finance & Accounting
+Add ScopeAssignment,General Tax Accountant Access,Finance & Accounting
+Add ScopeAssignment,Tax Reviewer Access,Finance & Accounting
+Add ScopeAssignment,Tax Approver Access,Finance & Accounting
+Add ScopeAssignment,Financial Planning Analyst Access,Finance & Accounting
+Add ScopeAssignment,Internal Audit Manager Access,Finance & Accounting
+Add ScopeAssignment,Payroll Approver/Submitter Access,Finance & Accounting
+Add ScopeAssignment,Payroll Manager Access,Finance & Accounting
+Add ScopeAssignment,Financial Analyst Access,Finance & Accounting
+Add ScopeAssignment,Financial Reporting Review and Approval Access,Finance & Accounting
+Add ScopeAssignment,Financial Systems Analyst Access,Finance & Accounting
+Add ScopeAssignment,Financial Systems Manager Access,Finance & Accounting
+Add ScopeAssignment,Accounts Payable Accountant,Finance & Accounting
+Add ScopeAssignment,Procurement Analyst,Finance & Accounting
+Add ScopeAssignment,Accounts Payable Approver,Finance & Accounting
+Add ScopeAssignment,Accounts Receivable Accountant,Finance & Accounting
+Add ScopeAssignment,Payroll Analyst,Finance & Accounting
+Add ScopeAssignment,Payroll Approver,Finance & Accounting
+Add ScopeAssignment,Internal Auditor,Finance & Accounting
+Add ScopeAssignment,Tax Accountant,Finance & Accounting
+Add ScopeAssignment,Tax Manager,Finance & Accounting
+Add ScopeAssignment,Tax Director,Finance & Accounting
+Add ScopeAssignment,Financial Analyst,Finance & Accounting
+Add ScopeAssignment,Financial Reporting Manager,Finance & Accounting
+Add ScopeAssignment,Financial Systems Analyst,Finance & Accounting
+Add ScopeAssignment,Financial Systems Manager,Finance & Accounting
+Add ScopeAssignment,Financial Planning Analyst,Finance & Accounting
+Add ScopeAssignment,Data Analyst,Finance & Accounting
+Add ScopeAssignment,Financial Planning & Analysis Manager,Finance & Accounting
+Add ScopeAssignment,Inventory Analyst Access,Finance & Accounting
+Add ScopeAssignment,Receiving Analyst Access,Finance & Accounting
+Add ScopeAssignment,Procurement Buyer Access,Finance & Accounting
+Add ScopeAssignment,Inventory Analyst,Finance & Accounting
+Add ScopeAssignment,Treasury Analyst Access,Finance & Accounting
+Add ScopeAssignment,Treasury Analyst,Finance & Accounting
+
+# HR
+Add ScopeAssignment,Training & Development Specialist Access,HR
+Add ScopeAssignment,HR Manager Access,HR
+Add ScopeAssignment,Benefits Clerk,HR
+Add ScopeAssignment,Benefits Manager Access,HR
+Add ScopeAssignment,Compensation & Benefits Manager Access,HR
+Add ScopeAssignment,Employee Relations Manager Access,HR
+Add ScopeAssignment,Employment Manager Access,HR
+Add ScopeAssignment,Recruiter,HR
+Add ScopeAssignment,Training & Development Specialist,HR
+Add ScopeAssignment,HR Manager,HR
+Add ScopeAssignment,Benefits Manager,HR
+Add ScopeAssignment,Compensation,HR
+Add ScopeAssignment,Compensation & Benefits Manager,HR
+Add ScopeAssignment,Employee Relations Manager,HR
+Add ScopeAssignment,Employment Manager,HR
+
+
+# All
+Add ScopeAssignment,SOX Certifier Access,All
+Add ScopeAssignment,SOX Controls and Policy Access,All
+Add ScopeAssignment,All Org Controls and Policy Access,All
+Add ScopeAssignment,Internal Audit Manager,All
+Add ScopeAssignment,SOX Access Reviewer,All
+Add ScopeAssignment,SOX Controls Manager,All
+Add ScopeAssignment,Organizational IT Controls Coordinator,All

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="SQL Query Executor Report Form">
+  <Section columns="1" label="Customisation" name="customProperties">
+    <Field displayName="Errors" name="errorArea" displayType="textarea" type="String" readOnly="true" value="">
+        <Attributes>
+        <Map>
+          <entry key="height" value="250"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="SQL Query" displayType="textarea" name="query" postBack="true" type="String" value="ref:query">
+      <Attributes>
+        <Map>
+          <entry key="height" value="250"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field dependencies="query" displayName="Normalised SQL Query" displayType="textarea" dynamic="true" name="normalisedQuery" type="String" value="ref:normalisedQuery">
+      <Attributes>
+        <Map>
+          <entry key="height" value="250"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[
+                if (query != null) {
+                    String newQuery = query.replaceAll(System.getProperty("line.separator"), " ");
+                    return newQuery;
+                }
+            ]]></Source>
+      </Script>
+    </Field>
+  </Section>
+</Form>

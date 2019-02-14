@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="Sales Engineer" name="Sales Engineer" type="business">
+  <Attributes>
+    <Map>
+      <entry key="accountSelectorRules"/>
+      <entry key="adminRole">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="isoRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeTemplates" value="false"/>
+      <entry key="nercRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="pciRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="scopeMulti">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="scopeRequired">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="soxRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="This role grants required access rights to Sales Engineers. A region must be specified when this role is requested"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Inheritance>
+    <Reference class="sailpoint.object.Bundle" name="Sales"/>
+  </Inheritance>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Requirements>
+    <Reference class="sailpoint.object.Bundle" name="Sales Engineer Access"/>
+  </Requirements>
+</Bundle>

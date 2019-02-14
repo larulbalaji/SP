@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE QuickLinkOptions PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLinkOptions allowSelf="true">
+  <DynamicScopeRef>
+    <Reference class="sailpoint.object.DynamicScope" name="Self Service"/>
+  </DynamicScopeRef>
+  <Attributes>
+    <Map>
+      <entry key="allowRequestEntitlements">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestEntitlementsAdditionalAccountRequests">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestEntitlementsRemove">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestEntitlementsShowPopulation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestRoles">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestRolesAdditionalAccountRequests">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestRolesRemove">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="allowRequestRolesShowPopulation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <QuickLinkRef>
+    <Reference class="sailpoint.object.QuickLink" name="Request Access"/>
+  </QuickLinkRef>
+</QuickLinkOptions>

@@ -1,0 +1,430 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  handler="sailpoint.api.StandardWorkflowHandler"  name="Lifecycle Event - Transfer Processor" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event" type="sailpoint.object.IdentityChangeEvent">
+    <Description>The IdentityChangeEvent</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="true" name="trace"/>
+  <Variable initializer="script: event.getIdentityFullName()" name="identityFullname"/>
+  <Variable name="oldManagerName"/>
+  <Variable name="newManagerName"/>
+  <Variable name="decision"/>
+  <Variable name="retentionExpiry"/>
+  <Variable initializer="spadmin" name="sponsor"/>
+  <Variable name="ownedApps"/>
+  <Variable name="reason"/>
+  <Variable name="launcher"/>
+  <Variable name="workgroups"/>
+  <RuleLibraries> 
+    <Reference class="sailpoint.object.Rule"  name="Demo - Workflow RuleLibrary"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start">
+    <Transition to="Prepare"/>
+  </Step>
+  <Step icon="Message" name="Prepare">
+    <Description>Process an identity that has transfered managers</Description>
+    <Script>
+      <Source><![CDATA[
+import java.util.Iterator; 
+
+import sailpoint.object.Filter;
+import sailpoint.object.QueryOptions;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.Prepare");
+
+// Pull some essential context out of the passed event object
+//  
+Identity oldManager = (null != event.getOldObject()) ? event.getOldObject().getManager() : null;
+Identity newManager = (null != event.getObject()) ? event.getObject().getManager() : null;
+String oldManagerName = (null != oldManager) ? oldManager.getDisplayableName() : null;
+String newManagerName = (null != newManager) ? newManager.getDisplayableName() : null;
+workflow.put("oldManagerName", oldManagerName);
+workflow.put("newManagerName", newManagerName);
+
+Identity cube = (null != event.getNewObject()) ? event.getNewObject() : null;
+List currentApps = new ArrayList();
+for (Link link : cube.getLinks()) {
+  Application app = link.getApplication();
+  if (!app.isAuthoritative()) {
+    currentApps.add(app.getName());
+  }
+}
+workflow.put("currentApps", Util.listToCsv(currentApps));          
+workflow.put("currentRiskScore", cube.getScore());
+
+String detectedRoles = cube.getBundleSummary();
+String assignedRoles = cube.getAssignedRoleSummary();
+if ((null == detectedRoles) && (null == assignedRoles)) {
+  workflow.put("currentRoles", " none ");
+} else {
+  if (null == assignedRoles) {
+    workflow.put("currentRoles", detectedRoles);
+  } else {
+    workflow.put("currentRoles", assignedRoles + ", " + detectedRoles);
+  }  
+}
+
+serilog.debug(identityName + " changed managers from " + oldManagerName + " to " + newManagerName);
+
+// Sponsor processing...
+// 
+// Use the old manager as the 'sponsor'; could do DB lookup or other cool stuff here
+//
+workflow.put("sponsor", oldManager.getName());
+
+// Find out if this transferee is an owner of any apps or a
+// member of any workgroups
+//
+//   - Easily extensible to roles, managed attributes, etc
+//
+String ownedApps = getListOfOwnedApplications(identityName); 
+String workgroups = getWorkgroupMembership(identityName);
+workflow.put("ownedApps", ownedApps);
+workflow.put("workgroups", workgroups);
+  ]]></Source>
+    </Script>
+    <Transition to="Transfer Notification"/>
+  </Step>
+  <Step action="sendEmail" name="Transfer Notification">
+    <Arg name="template" value="User Transfer Notification"/> 
+    <Arg name="to" value="admin@sailpointdemo.com"/>
+    <Arg name="from" value="iiq-noreply@sailpointdemo.com"/>
+    <Transition to="Identity Administrator Notification" when="ownedApps != null || workgroups.length() > 0"/>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step action="sendEmail" name="Identity Administrator Notification">
+    <Arg name="template" value="Identity Administrator Transfer Alert"/>
+    <Arg name="to" value="admin@sailpointdemo.com"/>
+    <Arg name="from" value="iiq-noreply@sailpointdemo.com"/>
+    <Arg name="ownedApps" value="ref:ownedApps"/>
+    <Transition to="Identity Administrator Alert"/>
+  </Step>
+  <Step name="Identity Administrator Alert">
+    <Approval description="Transfer : $(identityFullname) : Identity Administrator Alert" owner="ref:sponsor" send="identityFullname, ownedApps, workgroups">
+      <Arg name="workItemType" value="Form"/>
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Identity Administrator Alert"/>
+          </Map>
+        </Attributes>
+        <Button action="cancel" label="Cancel"/>
+        <Button action="next" label="Continue"/>
+        <Section type="text">
+          <Field value="&#xA;                  It has been detected that this transfer may affect the following objects due to &#xA;                  the transferee being an application owner and/or workgroup member.&#xA;                  An automatic notification has been sent to the IdentityIQ Admin Team.  &#xA;                  Click Continue to proceed with transfer processing.&#xA;&#x9;&#x9;"/>
+        </Section>
+        <Section>
+          <Field displayName="Transferee" name="identityFullname" readOnly="true" type="string"/>
+          <Field displayName="Application Ownership" name="ownedApps" readOnly="true" type="string"/>
+          <Field displayName="Workgroup Membership" name="workgroups" readOnly="true" type="string"/>
+        </Section>
+      </Form>
+    </Approval>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step hidden="true" name="Decache">
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor2.Decache");
+serilog.debug("...Decaching!");
+context.decache();
+      ]]></Source>
+    </Script>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step name="Sponsor Decision">
+    <Approval description="Transfer : $(identityFullname) : Retain / Revoke" owner="ref:sponsor" return="decision, reason" send="identityFullname, oldManagerName, newManagerName, decision, currentApps, currentRiskScore, currentRoles">
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Retain / Revoke Decision"/>
+          </Map>
+        </Attributes>
+        <Button action="next" label="Next"/>
+        <Button action="cancel" label="Cancel"/>
+        <Section type="text">
+          <Field value="&#xA;&#x9;&#x9;  Per corporate policy, your input is required regarding the transfer&#xA;                  of the following employee.  Please choose whether their current &#xA;                  access should be retained or revoked.  By choosing Revoke, an access&#xA;                  review will be generated to facilitate revocation.  By &#xA;                  choosing Retain, the individual&apos;s current access will be maintained &#xA;                  for a period of time specified by you.                  &#xA;&#x9;&#x9;"/>
+        </Section>
+        <Section label="Transfer Details" type="datatable">
+          <Field displayName="Person" name="identityFullname"/>
+          <Field displayName="Old Manager" name="oldManagerName"/>
+          <Field displayName="New Manager" name="newManagerName"/>
+        </Section>
+        <Section label="Summary of Current Access" type="datatable">
+          <Attributes>
+            <Map>
+              <entry key="hideNulls" value="true"/>
+            </Map>
+          </Attributes>
+          <Field displayName="Applications" multi="true" name="currentApps"/>
+          <Field displayName="Roles" multi="true" name="currentRoles"/>
+          <Field displayName="Risk Score" name="currentRiskScore"/>
+        </Section>
+        <Section label="Decision">
+          <Field displayName="Decision" name="decision" type="string">
+            <AllowedValues>
+              <String>Retain</String>
+              <String>Revoke</String>
+            </AllowedValues>
+          </Field>
+          <Field displayName="Comments/Reason" multi="false" name="reason" type="string"/>
+        </Section>
+      </Form>
+      <ValidationScript>
+        <Source><![CDATA[
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ExpireContract.SponsorDecision.Validation");
+
+String error = null;
+
+// make sure they've made a decision and provided justification
+//
+String decision = (String) item.getAttribute("decision"); 
+Object reason = item.getAttribute("reason");
+
+if ((decision == null) || (decision.length() == 0)) {
+  error = "Please make a decision";
+} else if (reason == null) {
+  error = "Please provide comments/reason for your decision";
+}
+
+
+// HRV //
+//Use case: Old Manager and New manager should both "see" the user for requests and revokes....
+
+import sailpoint.object.*;
+
+// Set the old manager name on the Identity to be able to show up in the request list
+// Could also do this with scoping?
+
+if (decision.equals("Retain")) {     
+  // identityName is er al      
+  Identity identity = context.getObjectByName(Identity.class, identityName);
+
+  //Identity identity = event.getIdentityName();
+  identity.setAttribute("transferManager", oldManagerName);
+  serilog.debug("Identity is: " + identity);
+  serilog.debug("OldManager is: " + oldManagerName);
+  context.saveObject(identity);
+  context.commitTransaction();
+
+  String identityFullname = event.getIdentityFullName();
+  Identity oldManager = (null != event.getOldObject()) ? event.getOldObject().getManager() : null;
+  String oldManagerName = (null != oldManager) ? oldManager.getDisplayableName() : null;
+
+  oldManager.setAttribute("transferManager", oldManagerName);
+  context.saveObject(oldManager);
+  context.commitTransaction();
+}  
+
+if (decision.equals("Revoke")) {     
+  Identity identity = context.getObjectByName(Identity.class, identityName);
+
+  identity.removeAttribute("transferManager");
+  context.saveObject(identity);
+  context.commitTransaction();    
+}  
+
+// END HRV //
+
+return error;
+        ]]></Source>
+      </ValidationScript>
+    </Approval>
+    <Transition to="Specify Retention Expiry">
+      <Script>
+        <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ExpireContract.Tx.SpecifyRetentionExpiry");
+serilog.debug("decision = " + decision);
+return (approved && decision.equals("Retain"));
+    ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Review"/>
+  </Step>
+  <Step name="Specify Retention Expiry">
+    <Approval description="Transfer : $(identityFullname) : Specify Retention Expiry" owner="ref:sessionOwner" return="retentionExpiry" send="retentionExpiry">
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Specify Retention Expiration"/>
+          </Map>
+        </Attributes>
+        <Button action="back" label="Back"/>
+        <Button action="next" label="Next"/>
+        <Button action="cancel" label="Cancel"/>
+        <Section>
+          <Field displayName="Select:" name="retentionExpiry" type="date"/>
+        </Section>
+      </Form>
+      <ValidationScript>
+        <Source><![CDATA[
+String error = null;
+
+// Only do validation if the user is trying to advance wizard
+//
+if (WorkItem.State.Finished.equals(item.getState())) {
+
+  // make sure they've selected a date
+  Date expiration = item.getDate("retentionExpiry");
+  if (expiration == null) {
+    error = "Please select an expiration date";
+  } else {
+    Date now = new Date();
+    if (expiration.before(now)) {
+      error = "Please select a future date";
+    }
+  }
+}
+
+return error;]]>
+  </Source>
+      </ValidationScript>
+    </Approval>
+    <Transition to="Review" when="approved"/>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step name="Review">
+    <Approval description="Transfer : $(identityFullname) : Review" owner="ref:sessionOwner" return="retentionExpiry, reason" send="identityFullname, decision, retentionExpiry, reason">
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Review"/>
+          </Map>
+        </Attributes>
+        <Button action="back" label="Back"/>
+        <Button action="next" label="Submit"/>
+        <Section type="text">
+          <Field value="&#xA;&#x9;&#x9;  You have chosen to revoke the existing access, an access review will be generated to facilitate revocation.      &#xA;&#x9;&#x9;"/>
+        </Section>
+        <Section type="datatable">
+          <Attributes>
+            <Map>
+              <entry key="hideNulls" value="true"/>
+            </Map>
+          </Attributes>
+          <Field displayName="Employee" name="identityFullname" readOnly="true" type="string"/>
+          <Field displayName="Access Decision" name="decision" readOnly="true" type="string"/>
+          <Field displayName="Retention Expiry" name="retentionExpiry" readOnly="true" type="date"/>
+          <Field displayName="Comments" multi="true" name="reason" readOnly="true" type="string"/>
+        </Section>
+      </Form>
+    </Approval>
+    <Transition to="Generate Certification">
+      <Script>
+        <Source>
+      return (approved  &amp;&amp; decision.equals("Revoke"));
+    </Source>
+      </Script>
+    </Transition>
+    <Transition to="Schedule Retain Decision">
+      <Script>
+        <Source>
+      return (approved &amp;&amp; decision.equals("Retain"));
+    </Source>
+      </Script>
+    </Transition>
+    <Transition to="Sponsor Decision">
+      <Script>
+        <Source>
+      return (decision.equals("Revoke"));
+    </Source>
+      </Script>
+    </Transition>
+    <Transition to="Specify Retention Expiry">
+      <Script>
+        <Source>
+      return (decision.equals("Retain"));
+    </Source>
+      </Script>
+    </Transition>
+  </Step>
+  <Step name="Generate Certification">
+    <Description>Generate a certification for the new manager</Description>
+    <Script>
+      <Source><![CDATA[
+import java.util.ArrayList;
+import java.util.List;
+
+import sailpoint.api.CertificationScheduler;
+import sailpoint.object.Certification;
+import sailpoint.object.CertificationDefinition;
+import sailpoint.object.Identity;
+import sailpoint.object.TaskSchedule;
+import sailpoint.web.certification.CertificationScheduleDTO;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ExpireContract.GenerateCertification");
+
+Identity requestor = context.getObject(Identity.class, launcher);    
+Identity identity = context.getObject(Identity.class, event.getIdentityName());
+
+serilog.debug("Building certification for " + identity.getName());
+
+// Certifier is the sponsor...
+//
+Identity certifier = context.getObject(Identity.class, sponsor);
+serilog.debug("Certification will be done by " + certifier.getName());
+
+CertificationScheduler scheduler = new CertificationScheduler(context);
+
+CertificationSchedule schedule = scheduler.initializeScheduleBean(requestor, Certification.Type.Identity);
+schedule.setRunNow(true);
+
+CertificationDefinition definition = schedule.getDefinition();
+definition.setCertifierSelectionType(CertificationDefinition.CertifierSelectionType.Manual);
+definition.setProcessRevokesImmediately(true);
+
+definition.setNameTemplate("Transfer Access Review of " + identity.getDisplayName() + " for " + certifier.getDisplayName());
+definition.setShortNameTemplate("Transfer Access Review of " + identity.getDisplayName());
+definition.setName("Transfer Access Review : " + identity.getDisplayName() + " [" + new Date().toString() + "]");
+
+List identities = new ArrayList();
+identities.add(identity.getName());
+definition.setIdentitiesToCertify(identities);
+definition.setCertifierName(certifier.getName());
+
+Identity certGroupOwner = context.getObjectByName(Identity.class, "IT Security");
+if (null == certGroupOwner) {
+  certGroupOwner = context.getObjectByName(Identity.class, "spadmin");
+}
+
+definition.setCertificationOwner(certGroupOwner);
+definition.setCertificationNameTemplate("Transfer-Initiated Access Review : " + identity.getDisplayName());
+
+TaskSchedule taskSchedule = scheduler.saveSchedule(schedule, false);
+
+  ]]></Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+  <Step action="call:scheduleWorkflowEvent" name="Schedule Retain Decision">
+    <Arg name="workflow" value="Lifecycle Event - Transfer Processor"/>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="requestName" value="Access Retention Expiration"/>
+    <Arg name="scheduleDate" value="script:retentionExpiry"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="identityFullname" value="ref:identityFullname"/>
+    <Arg name="sponsor" value="ref:sponsor"/>
+    <Arg name="reason" value="ref:reason"/>
+    <Arg name="futureDate" value="ref:retentionExpiry"/>
+    <Arg name="oldManagerName" value="ref:oldManagerName"/>
+    <Arg name="newManagerName" value="ref:newManagerName"/>
+    <Arg name="event" value="ref:event"/>
+    <Arg name="ownedApps" value="ref:ownedApps"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+    
+    <Transition to="end"/>
+  </Step>
+  <Step name="end"/>
+</Workflow>

@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name="Identity">
+      <ObjectAttribute displayName="Department" editMode="ReadOnly" groupFactory="true" name="department" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="Cost Center" editMode="ReadOnly" groupFactory="true" name="costCenter" multi="true" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="Region" editMode="ReadOnly" groupFactory="true" name="region" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="Job Title" editMode="ReadOnly" name="jobTitle" groupFactory="true" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="Location" editMode="ReadOnly" groupFactory="true" name="location" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="Employee ID" editMode="ReadOnly" name="employeeId" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="User Type" editMode="ReadOnly" name="employeeType" type="string" namedColumn="true"/>
+      <ObjectAttribute displayName="Termination Date" editMode="ReadOnly" name="terminationDate" type="string" namedColumn="true"/>
+	  <ObjectAttribute displayName="Previous Job Title" editMode="ReadOnly" name="oldJobTitle" type="string" namedColumn="true"/>
+	  <ObjectAttribute displayName="Previous Manager" editMode="ReadOnly" name="transferManager" type="string" namedColumn="true"/>         
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>
+

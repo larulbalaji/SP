@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Edit Objects">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Edit Object"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Save"/>
+  <Button action="cancel" label="Cancel"/>
+  <Section label="General Information">
+    <Field displayName="Object Type" name="type" required="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="readOnly" value="true"/>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Object Name" name="name" required="true" type="string"/>
+    <Field displayName="Description" name="description" type="string"/>
+    <Field displayName="Display Name" name="displayName" required="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.DisplayName");
+serilog.debug(form.getField("type").getValue());  
+
+serilog.debug("MY SCOPE IS:  "+ form.getField("rights").getValue() );
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Capability") == false && form.getField("type").getValue().equals("Rule") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+  <Section label="Email Template Information">
+    <Field displayName="To" name="to" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		  
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.To");      
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Email Template") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="From" name="from" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		  
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.From");      
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Email Template") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="CC" name="cc" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		  
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.CC");      
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Email Template") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="BCC" name="bcc" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		  
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.BCC");      
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Email Template") == false) {
+  return true;
+}
+return false;
+    ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Subject" name="subject" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		  
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.Subject");      
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Email Template") == false) {
+  return true;
+}
+return false;
+
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Message Body" displayType="textarea" name="body" required="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="height" value="400"/>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		    
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Email Template") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+          <entry key="width" value="300"/>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[import sailpoint.object.EmailTemplate;
+import org.apache.commons.lang.StringEscapeUtils;
+
+if(body == null) return "";
+return StringEscapeUtils.unescapeHtml(form.getField("body").getValue());]]></Source>
+      </Script>
+    </Field>
+  </Section>
+  <Section label="Quick Link Information">
+    <Field displayName="Action" name="action" required="true" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.WorkflowName.AllowedValues");    
+List items = new ArrayList();
+items.add("workflow");
+items.add("external");
+items.add("viewCertfications");
+items.add("editApplication");
+return items;
+    
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.Action");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Category" name="category" required="true" type="string">
+         <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+   import sailpoint.object.*;
+ 
+   List links = new ArrayList();
+    List mylist = new ArrayList();
+Configuration conf=context.getObjectByName(Configuration.class, "SystemConfiguration");
+
+if(conf!=null){
+  List links = conf.get("quickLinkCategories");
+  for(int x=0; x<links.size(); x++)
+  {
+  System.out.println(links.get(x));
+      
+     QuickLinkCategory aCat = (QuickLinkCategory)links.get(x);
+      mylist.add(aCat.getName());
+  }
+}
+return mylist;
+    
+    
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+    
+
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.Category");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Message Key" name="messageKey" required="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.MessageKey");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Ordering" name="ordering" required="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.Ordering");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Hidden" name="isHidden" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.Hidden");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Bulk" name="isBulk" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.Bulk");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Force Allow Others" name="isForceAllowOthers" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.ForceAllowOthers");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Hide Allow Others" name="isHideAllowOthers" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.HideAllowOthers");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Force Allow Self" name="isForceAllowSelf" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.ForceAllowSelf");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+  return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Hide Allow Self" name="isHideAllowSelf" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.HideAllowSelf");
+serilog.debug(form.getField("type").getValue());  
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Dynamic Scopes" multi="true" name="dynamicScopes" required="true" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.*;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.DynamicScopes.AllowedValues");
+
+List scopes= context.getObjects(DynamicScope.class);
+List items = new ArrayList();
+serilog.debug("IT IS:  "+ scopes.size());
+for(Object scope: scopes) {
+  
+  if(scope instanceof java.util.List) {
+    List item=new ArrayList();
+    items.add("0,Admin");
+  } else {  
+    String name=scope.getName();
+    List item=new ArrayList();
+    items.add(name);
+    serilog.debug("Out:  ");
+  }  
+}
+
+return items;   
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.DynamicScopes");
+serilog.debug(form.getField("type").getValue());  
+
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="workflow" name="workflowName" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.WorkflowName.AllowedValues");    
+import sailpoint.object.Workflow;
+  
+List workflows= context.getObjects(Workflow.class);
+List items = new ArrayList();
+serilog.debug("IT IS:  "+ workflows.size());
+for(Workflow wf: workflows) {
+  String name=wf.getName();
+  List item=new ArrayList();
+  items.add(name);
+}
+return items;
+    
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Workflow Success Message" name="workflowSuccess" type="string">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Quick Link") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+  <Section label="Capability Information">
+    <Field displayName="Assigned Rights" multi="true" name="rights" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[    
+import sailpoint.object.SPRight;
+
+List rights= context.getObjects(SPRight.class);
+List items = new ArrayList();
+for(SPRight right: rights) {
+  
+  String name=right.getName();
+  List item=new ArrayList();
+
+  items.add(name);
+  
+}
+
+return items;
+    
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Form.EditObjects.AssignedRights");
+serilog.debug(form.getField("type").getValue());  
+      
+serilog.debug("MY SCOPE IS:  "+ form.getField("rights").getValue() );
+serilog.debug(form.getField("type"));  
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Capability") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Inherited Capabilities" multi="true" name="capabilities" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Capability;
+
+List capabilities= context.getObjects(Capability.class);
+List items = new ArrayList();
+for(Capability cap: capabilities) {  
+  String name=cap.getName();
+  List item=new ArrayList();
+  items.add(name);
+}
+
+return items;
+        ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Capability") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+  <Section label="Dynamic Scope Information">
+    <Field displayName="Allow All" name="isAllowAll" type="boolean">
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Dynamic Scope") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="andOr" name="andOr" required="true" type="String">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+List items = new ArrayList();
+items.add("And");
+items.add("Or");
+return items;
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Dynamic Scope") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+      <Script>
+        <Source><![CDATA[		
+            return "Or";
+        ]]></Source>
+      </Script>
+    </Field>
+    <Field displayName="Member of Workgroup" multi="true" name="containsWorkgroups" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[    
+import sailpoint.object.*;
+
+import sailpoint.api.*;
+import sailpoint.object.*;
+import sailpoint.tools.GeneralException;
+
+QueryOptions qo = new QueryOptions();
+
+Filter [] filters = new Filter[1];
+filters[0] = Filter.eq("workgroup", true);
+qo.add(filters);
+
+
+List items = new ArrayList();
+List workgroups = context.getObjects(Identity.class, qo);
+for (Identity wg: workgroups) {
+  items.add(wg.getName());      
+}
+    
+return items;
+    
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[		   
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Dynamic Scope") == false) {
+  return true;
+}
+return false;
+                ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Has Right" multi="true" name="containsRights" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.*;
+
+List rights= context.getObjects(SPRight.class);
+List items = new ArrayList();
+
+for(SPRight right: rights) {
+  String name=right.getName();
+  items.add(name);
+}
+return items;
+
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Dynamic Scope") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+    <Field displayName="Has Capability" multi="true" name="containsCapabilities" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.*;
+
+List capabilities= context.getObjects(Capability.class);
+List items = new ArrayList();
+
+for(Capability cap: capabilities)  {
+   String name=cap.getName();
+   items.add(name);  
+}
+return items;
+    
+    ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+      <Attributes>
+        <Map>
+          <entry key="hidden">
+            <value>
+              <Script>
+                <Source><![CDATA[
+if (form.getField("type").getValue()==null || form.getField("type").getValue().equals("Dynamic Scope") == false) {
+  return true;
+}
+return false;
+      ]]></Source>
+              </Script>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+</Form>

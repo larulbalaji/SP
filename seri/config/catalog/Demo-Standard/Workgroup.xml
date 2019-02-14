@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Identity name="IIQ Admins" workgroup="true">
+    <Attributes>
+      <Map>
+        <entry key="displayName" value="IIQ Admins"/>
+      </Map>
+    </Attributes>
+    <Description>Users responsible for the maintenance of the IdentityIQ environment itself</Description>
+    <Preferences>
+      <Map>
+        <entry key="workgroupNotificationOption">
+          <value>
+            <WorkgroupNotifationOption>MembersOnly</WorkgroupNotifationOption>
+          </value>
+        </entry>
+      </Map>
+    </Preferences>
+  </Identity>
+</sailpoint>

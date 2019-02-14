@@ -1,0 +1,3 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE LocalizedAttribute PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<LocalizedAttribute attribute="description"   locale="en_US"  name="Mainframe : description : en_US" targetClass="Application"  targetName="Mainframe" value="RACF accounts and access rights extracted from mainframe using the IRRDBU00 utility (RACF Database Unload Utility)&lt;br>"/>

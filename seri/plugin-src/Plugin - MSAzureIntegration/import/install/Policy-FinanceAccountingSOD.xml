@@ -1,0 +1,35 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Policy PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Policy certificationActions="Remediated,Mitigated,Delegated" configPage="sodpolicy.xhtml" executor="sailpoint.policy.SODPolicyExecutor" name="Finance and Accounting SOD Restriction" state="Active" type="SOD" typeKey="policy_type_sod" violationOwnerType="Manager">
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <Attributes>
+    <Map>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="Employees may not have access to both SAP (Finance) and EBS (Accounting) systems at the same time."/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="taskResultId" value="2c90d0e45aba7abe015ad83941a01ea2"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="Jerry.Bennett"/>
+  </Owner>
+  <SODConstraints>
+    <SODConstraint name="Oracle and SAP conflict rule" violationOwnerType="Manager" weight="200">
+      <Attributes>
+        <Map>
+          <entry key="taskResultId" value="2c90d0e45aba7abe015ad841fdf5247e"/>
+        </Map>
+      </Attributes>
+      <LeftBundles>
+        <Reference class="sailpoint.object.Bundle" name="Oracle EBS_SSOApplication_Default"/>
+      </LeftBundles>
+      <RightBundles>
+        <Reference class="sailpoint.object.Bundle" name="SAP_SSOApplication_Default"/>
+      </RightBundles>
+    </SODConstraint>
+  </SODConstraints>
+</Policy>

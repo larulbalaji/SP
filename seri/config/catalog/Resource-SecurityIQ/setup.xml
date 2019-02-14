@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-SecurityIQ.xml'/>
+  <ImportAction name='include' value='Rule-WindowsFileserverAccessCorrelation.xml'/>
+  <ImportAction name='include' value='RuleLibrary-SecurityIQConfiguration.xml'/>
+  <ImportAction name='include' value='Rule-TargetCreation-SIQCollector.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateWindowsFileserverAccess.xml'/> 
+  <ImportAction name='include' value='AlertDefinition-CreateFile.xml'/>
+  <ImportAction name='include' value='AlertDefinition-FileDeleted.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateSecurityiqAlerts.xml'/>
+  <ImportAction name='include' value='../Resource-ActiveDirectory/Rule-GroupRefresh-CreateUpdateManagedAttribute.xml'/>
+  <ImportAction name='include' value='../Demo-Standard/ObjectConfig-LinkSIQ.xml'/>
+  <ImportAction name='include' value='../UseCase-SIQ-AlertWorkflows/setup.xml'/>
+  <ImportAction name='include' value='../UseCase-SIQSensitiveDataSOD/setup.xml'/>
+</sailpoint>

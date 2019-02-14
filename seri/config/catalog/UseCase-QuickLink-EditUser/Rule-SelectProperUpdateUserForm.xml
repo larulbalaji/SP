@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Select Proper Update User Form" type="Workflow">
+  <Description>Decide which type of update user form to use.</Description>
+  <Signature returnType="Object"/>
+  <Source><![CDATA[
+if(((Map)workflow.get("identityModel")).get("workerType") == null || ((String)((Map)workflow.get("identityModel")).get("workerType")).equals("Employee"))
+{
+  return "Form - Update User";
+} else {
+  return "Form - Update Non Employee";
+}
+]]></Source> 
+</Rule>

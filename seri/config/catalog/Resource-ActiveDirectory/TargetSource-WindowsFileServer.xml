@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TargetSource PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TargetSource collector="sailpoint.unstructured.SecurityIQTargetCollector" name="Windows FileServer">
+  <Attributes>
+    <Map>
+      <entry key="aggregateInherited">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="appType" value="Active Directory - Direct"/>
+      <entry key="disableProvisioning">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="driverClass" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <entry key="password" value="1:PRYxEtkZL2NkjofXmBp2/A=="/>
+      <entry key="provisioningOverridden">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="schemaName" value="whiteops"/>
+      <entry key="searchAttrForAcct" value="msDS-PrincipalName"/>
+      <entry key="searchAttrForGrp" value="msDS-PrincipalName"/>
+      <entry key="targetCollector" value="Manual Work Item"/>
+      <entry key="targetHosts">
+        <value>
+          <List>
+            <TargetHostConfig hostId="2" hostName="SERI - Windows File Server"/>
+          </List>
+        </value>
+      </entry>
+      <entry key="type" value="SecurityIQ Collector"/>
+      <entry key="url" value="jdbc:sqlserver://seri.sailpointdemo.com:1433;databaseName=SecurityIQDB_SERI"/>
+      <entry key="user" value="SecurityIQ_User"/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="Windows FileServer Access Correlation"/>
+  </CorrelationRule>
+    <CreationRule>
+    <Reference class="sailpoint.object.Rule" name="Windows FileServer Target Creation"/>
+  </CreationRule>
+  <Description>Manage Windows fileshare access using SecurityIQ</Description>
+</TargetSource>

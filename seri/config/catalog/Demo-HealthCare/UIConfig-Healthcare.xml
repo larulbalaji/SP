@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <UIConfig name="UIConfig">
+      <Attributes>
+<!-- 	<Map>
+	  <entry key="accountIconConfig">
+	    <value>
+	      <List>
+			<AccountIconConfig attribute="breakTheGlass" source="/images/icons/BreakTheGlass.jpg" title="This practitioner is not required to explicitly follow 'Break The Glass' process to view a patient medical records without specific consent." value="true"/>
+	      </List>
+	    </value>
+	  </entry>
+	</Map> -->
+      </Attributes>
+    </UIConfig>
+  </ImportAction>
+</sailpoint>

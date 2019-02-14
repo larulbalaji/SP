@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition  formPath="/monitor/tasks/sequentialTask.xhtml"  name="7-spDemo-MiningDemo" resultAction="Delete" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="taskList" value="Aggregate AD Accounts, Refresh for Tax Accountants, Perform Maintenance, Perform Identity Request Maintenance"/>
+    </Map>
+  </Attributes>
+  <Description>Template for creating a task that runs multiple other tasks.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Sequential Task Launcher"/>
+  </Parent>
+</TaskDefinition>

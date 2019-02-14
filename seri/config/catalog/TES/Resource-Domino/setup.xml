@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+
+  <ImportAction name='include' value='Application-Domino.xml'/>
+  <ImportAction name='include' value='CorrelationConfig-LotusdominoCorrelation.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicy-DominoCertifierId.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicy-DominoFullname.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicy-DominoUseridFile.xml'/>
+</sailpoint>

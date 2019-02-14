@@ -1,0 +1,365 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <EmailTemplate name="Group Request Rejection Notification">
+    <Description>
+      Email Template for notifying IIQ user that their request to create a group got rejected
+    </Description>
+    <Body>
+      <![CDATA[
+      <html>
+        <br>
+        This is an automated notification from IdentityIQ.<br><br>
+        Your request to create the group, $groupName, was rejected.<br><br>
+        <b>Reason:</b>  $groupModel.sys.approverComments<br><br>
+        Sincerely,<br>
+        IT Oversight Team
+      </html>
+      ]]>
+    </Body>
+    <Subject>AD Group Request - Rejected</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Group Management - Create Request">
+    <Description>
+    </Description>
+    <Signature>
+      <Inputs>
+        <Argument name='workflow' type='Workflow'>
+          <Description>The Workflow object being executed.</Description>
+        </Argument>
+        <Argument name='item' type='WorkItem'>
+          <Description>The WorkItem representing the review.</Description>
+        </Argument>
+        <Argument name='launcher' type='string'>
+          <Description>The name of the Identity that launched the workflow.</Description>
+        </Argument>
+        <Argument name='groupModel' type='java.util.Map'>
+          <Description>The model for the group; populated via form binding</Description>
+        </Argument>
+      </Inputs>
+    </Signature>
+    <Subject>APPROVAL:  Create Group Request for $requesterDisplayName</Subject>
+    <Body>
+      <![CDATA[
+      <html>
+        <br>
+        You are a designated approver for this request.<br><br>
+        <b>Group Name:</b>  $groupModel.sys.displayName<br>
+        <b>Requester:</b>  $requesterDisplayName<br><br>
+        Please login to IdentityIQ and view your inbox to complete this approval at your earliest convenience.
+      </html>
+      ]]>
+     </Body>
+  </EmailTemplate>
+
+  <Workflow name='AD Group Management - Create' libraries="Identity,LCM,ManagedAttribute">
+  
+    <Description>    
+      A workflow for providing AD Group Management to the business user.
+    </Description>
+    
+    <Variable name='transient' initializer='true'>
+      <Description>
+        Set to false to cause workflow-related objects, such as approval
+        work items, to be saved in the database even if they are only
+        viewed by the person registering.
+      </Description>
+    </Variable>
+      
+    <Variable name='trace' initializer='true'>
+      <Description>enable this to see stuff spit out to stdout</Description>  
+    </Variable>
+
+    <Variable name='requesterDisplayName'/>
+        
+    <Variable name='groupDN' initializer="script: new String();">
+      <Description>The DN for the candidate group (based on DN template)</Description>
+    </Variable>
+
+    <Variable name='groupAttributeName' initializer="memberOf"/>
+
+    <Variable name='groupMembership'>
+      <Description>List of identities to be added to group</Description>
+    </Variable>
+
+    <Variable name='appId' type='string'>
+      <Description>The application id for the app we're creating groups on</Description>
+    </Variable>
+        
+    <Variable name='readOnlyForm'>
+      <Description>Read only form for confirmation dialog.</Description>
+    </Variable>
+    
+    <Variable initializer='Group Management - Request AD Group' name='formName'>
+       <Description>The name of the form used by this request process</Description>
+    </Variable>
+
+    <Variable initializer='Group Management - Request AD Group Approval' name='approvalFormName'>
+       <Description>The name of the approval form used by this request process</Description>
+    </Variable>
+    
+    <Variable initializer='groupModel' name='basePath'>
+       <Description>The form path to the group model we're filling in for create</Description>
+    </Variable>
+
+    <Variable name="dnTemplate" initializer="CN=#,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+      <Description>
+	The DN template we'll use for group creation in AD.
+      </Description>
+    </Variable>
+
+    <Variable initializer='serial' input='true' name='approvalMode'>
+      <Description>
+       A string that specifies how we should handle the approvals.  
+
+       By default this is serial since most of these request with
+       the exception of manager transfers will have only one approver.
+
+       parallel
+         Approvals are processed concurrently and there must be consensus,
+         we wait for all approvers to approve.  The first approver that
+         rejects terminates the entire approval.
+ 
+       parallelPoll 
+         Approvals are processed concurrently but consensus is not required.
+         All approvals will be process, we don't stop if there any
+         rejections.  
+
+       serial
+         Approvals are processed one at a time and there must be consensus.
+         The first approver that rejects terminates the entire approval.
+
+       serialPoll
+         Approvals are processed in order but consensus is not required.
+         All approvals will be processed, we don't stop if there are any
+         rejections.  In effect we are "taking a poll" of the approvers.
+
+       any
+        Approvals are processed concurrently, the first approver to 
+        respond makes the decision for the group.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='owner' input='true' name='approvalScheme'>
+      <Description>
+      A csv string that specifies how approvals should be generated for 
+      the incoming request.
+ 
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+  
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the  
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing 
+              with things like Unlock and other account level changes 
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.
+
+      </Description>
+    </Variable>    
+    
+    <Variable initializer='continue' input='true' name='policyScheme'>
+      <Description>
+        A String that specifies how policy checks effect the overall
+        process.
+
+        none - disabled policy checking
+
+        continue -  continue if policy violations are found
+
+        interactive -  allow requester to remove request items which are causing violations
+
+        fail -  this option will cause the workflow to terminate immediately if any policy violations are found.
+                Note that the requester will not be notified that the workflow has terminated.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='user,requester' input='true' name='notificationScheme'>
+      <Description>
+       A string that specifies who should be notified when the request has been complete.
+       The value can be null or a csv of one or more of the following options. 
+
+       none or null
+         disable notifications
+
+       user 
+         Identity that is being update will be notified.
+
+       manager
+         The manager of the Identity that is being updated will be notified.
+
+       requester
+         The person that has requested the update will be notified.
+      </Description>
+    </Variable>
+        
+    <Variable name='doRefresh' editable='true'>
+      <Description>
+        Set to true to cause an identity refresh after the changes in the plan
+        have been provisioned.  This is normally off, you might want this on
+        if you want modification of identity or link attributes to result in
+        an immediate re-evaluation of assigned and detected roles.
+      </Description>
+    </Variable>
+    
+    <Variable name="exitWorkflow">
+       <Description>
+         Value posted by the "Exit Workflow" form button, to indicate the workflow should end.
+         This is somethign handled in transitions on Approvals that have forms and gives
+         a way for customers to exit the workflow.
+       </Description>    
+    </Variable>
+
+    <Variable name="groupModel"/>
+    <Variable name="plans"/>
+    
+    <Step icon="Start" name="start" resultVariable='appId'>
+      <Script>
+        <Source><![CDATA[ 
+            import sailpoint.object.Application;
+            
+            Application app = context.getObjectByName(Application.class, "Active Directory");
+            if ( app == null ) {
+                throw new Exception("This example workflow requires an Active Directory application named 'Active Directory', which could not be found.");
+            }
+
+            // populate requesterDisplayName as well
+            workflow.put("requesterDisplayName", resolveDisplayName(launcher));
+
+            return app.getId();
+]]>	</Source>
+      </Script>
+      <Transition to='Build Group Model'/>
+    </Step>
+
+    <Step name='Build Group Model' icon='Task' resultVariable='groupModel' action='call:getManagedAttributeModel'>
+      <Arg name='name' value='ref:groupAttributeName'/>
+      <Arg name='appId' value='ref:appId'/>
+      <Arg name='value' value='ref:groupDN'/>
+      <Transition to='Present Create Form'/>
+    </Step>
+
+    <Step name="Present Create Form" posX="88">
+      <Approval owner="ref:launcher" return="groupModel, exitWorkflow" send="launcher, groupModel">
+	<Arg name="dnTemplate" value="ref:dnTemplate"/>
+	<Arg name="appId" value="ref:appId"/>
+	<Arg name="workItemDescription" value="Request AD Group - Input Group Details"/>
+	<Arg name="workItemFormBasePath" value="ref:basePath"/>
+        <Arg name='workItemForm' value='ref:formName'/>
+      </Approval>
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Prepare Model' when='approved'/>
+    </Step>
+
+    <Step name='Prepare Model' icon='Task' resultVariable='groupDN'>
+      <Script>
+	<Source>
+	  <![CDATA[ 
+           import sailpoint.tools.MapUtil;
+           import sailpoint.tools.xml.*;
+
+           MapUtil.put(groupModel, "sys.nativeIdentity", $(groupModel.distinguishedName));
+           MapUtil.put(groupModel, "sys.attribute", groupAttributeName);
+           MapUtil.put(groupModel, "sys.type", "Entitlement");
+           
+           System.out.println("MODEL AFTER: \n" + XMLObjectFactory.getInstance().toXml(groupModel));
+
+           return $(groupModel.distinguishedName); 
+	  ]]> 
+	</Source>
+      </Script>
+      <Transition to='Prepare Approval'/>
+    </Step>
+    
+    <Step name='Prepare Approval' resultVariable='appOwner'>
+      <Script>
+	<Source>
+	  <![CDATA[
+            import sailpoint.object.Application;
+            
+            Application app = context.getObjectByName(Application.class, "Active Directory");
+            return app.getOwner();
+	  ]]>
+	</Source>
+      </Script>
+    </Step>
+
+    <Step name='Approve Request'>
+      <Approval owner="ref:appOwner" return="groupModel, requestRejected" send="launcher, groupModel">
+	<WorkItemConfig>
+	  <NotificationEmailTemplateRef> 
+	    <Reference class='EmailTemplate' name='Group Management - Create Request'/>
+	  </NotificationEmailTemplateRef> 
+	</WorkItemConfig>
+	<Arg name="dnTemplate" value="ref:dnTemplate"/>
+	<Arg name="appId" value="ref:appId"/>
+	<Arg name="workItemDescription" value="Request AD Group - Approval"/>
+	<Arg name="workItemFormBasePath" value="ref:basePath"/>
+        <Arg name='workItemForm' value='ref:approvalFormName'/>
+      </Approval>
+      <Transition to='Request Rejected' when='requestRejected'/>
+      <Transition to='Build Provisioning Plans' when='approved'/>
+    </Step>
+
+    <Step name='Build Provisioning Plans' icon='Task' resultVariable='plans' action='call:buildPlansFromManagedAttributeModel' posX='186' posY='10'>
+      <Description>
+        For now, build a map of the data. Eventually this will use the Identity
+        transformer to build a Map based on an existing identityName, or 
+        Identity object.
+      </Description>
+      <Arg name='maModel' value='ref:groupModel'/>  
+      <Transition to='Execute Plans'/>
+    </Step>
+
+    <Step name='Execute Plans' icon='Task' action='call:executeManageAttributePlans'>
+      <Arg name='plans' value='ref:plans'/>  
+      <!-- groupWorkflow and identityWorkflow can be specified here to override default workflows -->
+      <Arg name='flow' value='EntitlementRequest'/>  
+      <Arg name='approvalScheme' value='none'/>  
+      <Arg name='notificationScheme' value='none'/>  
+      <Arg name='doRefresh' value='true'/>  
+      <Arg name='policyScheme' value='none'/>  
+      <Arg name='trace' value='true'/>
+      <Transition to='end'/> 
+    </Step>
+
+    <Step action="call:sendEmail" icon="Email" name="Request Rejected" posX="98" posY="10">
+      <Arg name="template" value="Group Request Rejection Notification"/>
+      <Arg name="to">
+	<Script>
+	  <Source><![CDATA[
+	    import sailpoint.object.Identity;
+
+            Identity cube = context.getObjectByName(Identity.class, launcher);
+            return cube.getEmail();
+           
+	 ]]> </Source>
+	</Script>
+      </Arg>
+      <Arg name='from' value='iiq-noreply@sailpointdemo.com'/>
+      <Arg name='groupName' value='$(groupModel.sAMAccountName)'/>
+      <Transition to="end"/>
+    </Step>
+    
+    <Step name='end' icon='Stop' posX='1510' posY='10'/>
+    
+  </Workflow>
+
+</sailpoint>

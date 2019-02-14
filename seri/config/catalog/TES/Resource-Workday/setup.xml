@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-Workday.xml'/>
+  <ImportAction name='include' value='Rule-WorkdayIdentityCreationScript.xml'/>
+  <ImportAction name='include' value='Rule-WorkdayInactive.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateWorkdayAccounts.xml'/>
+  <ImportAction name='include' value='CorrelationConfig-Workday.xml'/>
+</sailpoint>

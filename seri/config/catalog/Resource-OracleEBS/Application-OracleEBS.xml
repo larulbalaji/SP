@@ -1,0 +1,210 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="Oracle EBS" profileClass="" type="Delimited File Parsing Connector">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="Oracle EBS Correlation"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="RESPONSIBILITY.columnNames"/>
+      <entry key="RESPONSIBILITY.commentCharacter"/>
+      <entry key="RESPONSIBILITY.delimiter" value=","/>
+      <entry key="RESPONSIBILITY.file" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-resps.csv"/>
+      <entry key="RESPONSIBILITY.fileEncoding"/>
+      <entry key="RESPONSIBILITY.filetransport" value="local"/>
+      <entry key="RESPONSIBILITY.filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="RESPONSIBILITY.filterString"/>
+      <entry key="RESPONSIBILITY.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="RESPONSIBILITY.indexColumn"/>
+      <entry key="RESPONSIBILITY.isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="RESPONSIBILITY.mergeColumns"/>
+      <entry key="RESPONSIBILITY.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="RESPONSIBILITY.numberOfLinesToSkip"/>
+      <entry key="RESPONSIBILITY.regularExpression"/>
+      <entry key="RESPONSIBILITY.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ROLE.columnNames"/>
+      <entry key="ROLE.commentCharacter"/>
+      <entry key="ROLE.delimiter" value=","/>
+      <entry key="ROLE.file" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-roles.csv"/>
+      <entry key="ROLE.fileEncoding"/>
+      <entry key="ROLE.filterEmptyRecords">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ROLE.filterString"/>
+      <entry key="ROLE.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="ROLE.indexColumn"/>
+      <entry key="ROLE.isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ROLE.mergeColumns"/>
+      <entry key="ROLE.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="ROLE.numberOfLinesToSkip"/>
+      <entry key="ROLE.regularExpression"/>
+      <entry key="ROLE.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="buildMapRule" value="Oracle EBS - Aggregation Handler"/>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="delimiter" value=","/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="file" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-accounts.csv"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="indexColumn" value="USER_NAME"/>
+      <entry key="isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeColumns">
+        <value>
+          <List>
+            <String>RESPONSIBILITIES</String>
+            <String>ROLES</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="parseType" value="delimited"/>
+      <entry key="respFile" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-perms.csv"/>
+      <entry key="stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="USER_NAME" groupAttribute="ROLES" identityAttribute="USER_NAME" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="USER_NAME" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPLOYEE_ID" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LAST_LOGIN" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="RESPONSIBILITIES" schemaObjectType="RESPONSIBILITY" type="string">
+        <Description> Responsibilities assigned to a user </Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="ROLES" schemaObjectType="ROLE" type="string">
+        <Description> Roles assigned to a user </Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="DISPLAY_NAME" identityAttribute="NAME" instanceAttribute="" nativeObjectType="ROLE" objectType="ROLE" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="NAME" type="string">
+        <Description> An internal name for the role </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DISPLAY_NAME" type="string">
+        <Description> The display name of the role </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DESCRIPTION" type="string">
+        <Description> Description </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="START_DATE" type="string">
+        <Description> The date at which the role becomes valid </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EXPIRATION_DATE" type="string">
+        <Description> The date at which the role is no longer valid in the directory service </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="APPLICATION_NAME" type="string">
+        <Description> Application that owns the information for the role </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="STATUS" type="string">
+        <Description> The availability of the Role to participate in a workflow process </Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" multi="true" name="SUBORDINATE_ROLES" schemaObjectType="ROLE" type="string">
+        <Description> Subordinate roles for a role </Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" multi="true" name="SUBORDINATE_RESPONSIBILITIES" schemaObjectType="RESPONSIBILITY" type="string">
+        <Description> Subordinate responsibilities for a role </Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="RESPONSIBILITY_NAME" identityAttribute="RESPONSIBILITY_NAME" instanceAttribute="" nativeObjectType="RESPONSIBILITY" objectType="RESPONSIBILITY" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="RESPONSIBILITY_NAME" type="string">
+        <Description> Name of the responsibility </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="APPLICATION_NAME" type="string">
+        <Description> Application that owns the information for the responsibility </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DESCRIPTION" type="string">
+        <Description> Description </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MENU_NAME" type="string">
+        <Description> Name of the menu </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DATA_GROUP_NAME" type="string">
+        <Description> Name of the Data Group </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REQUEST_GROUP_NAME" type="string">
+        <Description> Request group name </Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+</Application>

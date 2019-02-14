@@ -1,0 +1,128 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ManagedAttribute attribute="memberOf"  displayName="SalesEngineer" requestable="false" type="group" value="CN=SalesEngineer_%scope%,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="SalesEngineer_%scope%"/>
+        <entry key="msDS-PrincipalName" value="SERI\SalesEngineer_%scope%"/>
+        <entry key="sAMAccountName" value="SalesEngineer_%scope%"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>true</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Sales Engineer access rights for the %scope% region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+    <ManagedAttribute attribute="memberOf"  displayName="SalesEngineer EMEA" requestable="false" type="group" value="CN=SalesEngineer_EMEA,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="SalesEngineer_EMEA"/>
+        <entry key="msDS-PrincipalName" value="SERI\SalesEngineer_EMEA"/>
+        <entry key="sAMAccountName" value="SalesEngineer_EMEA"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>false</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Sales Engineer access rights for the EMEA region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+    <ManagedAttribute attribute="memberOf"  displayName="SalesEngineer APAC" requestable="false" type="group" value="CN=SalesEngineer_APAC,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="SalesEngineer_APAC"/>
+        <entry key="msDS-PrincipalName" value="SERI\SalesEngineer_APAC"/>
+        <entry key="sAMAccountName" value="SalesEngineer_APAC"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>false</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Sales Engineer access rights for the APAC region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+    <ManagedAttribute attribute="memberOf"  displayName="SalesEngineer AMS" requestable="false" type="group" value="CN=SalesEngineer_AMS,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+    <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Active Directory"/>
+    </ApplicationRef>
+    <Attributes>
+      <Map>
+        <entry key="GroupScope" value="Global"/>
+        <entry key="GroupType" value="Security"/>
+        <entry key="cn" value="SalesEngineer_AMS"/>
+        <entry key="msDS-PrincipalName" value="SERI\SalesEngineer_AMS"/>
+        <entry key="sAMAccountName" value="SalesEngineer_AMS"/>
+        <entry key="scopeMulti">
+          <value>
+            <Boolean></Boolean>
+          </value>
+        </entry>
+        <entry key="scopeRequired">
+          <value>
+            <Boolean>false</Boolean>
+          </value>
+        </entry>
+        <entry key="sysDescriptions">
+          <value>
+            <Map>
+              <entry key="en_US" value="This group grants Sales Engineer access rights for the AMS region"/>
+            </Map>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+  </ManagedAttribute>
+</sailpoint>

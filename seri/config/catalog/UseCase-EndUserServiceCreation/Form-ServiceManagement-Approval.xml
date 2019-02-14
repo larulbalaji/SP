@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <Form name='Form-ServiceManagement - Create Approval'>
+    <Attributes>
+      <Map>
+  <entry key="pageTitle" value="Create Service - Approval"/>
+  <entry key="title" value="Action Required!"/>
+  <entry key="labelAlign" value="top"/>
+      </Map>
+    </Attributes>
+    <Section>
+      <Field name='approvalLabel'>
+  <Attributes>
+    <Map>
+      <entry key='xtype' value='label'/>
+      <entry key='text'>
+        <value>
+    <Script>
+      <Source>
+        return "Upon approval this Service will be created:  " + $(groupModel.sys.nativeIdentity);
+      </Source>
+    </Script>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+      </Field>
+    </Section>
+    <Section label='Service Details' columns='2'>
+      <Field displayName="Service Name" name="groupName" readOnly="true" type="string">
+  <Attributes>
+    <Map>
+      <entry key="vtype" value="alphanum"/>
+    </Map>
+  </Attributes>
+      </Field>
+      <Field displayName="Service Owner" name="sys.owner" required="true" type="Identity" value="ref:launcher">
+  <Attributes>
+    <Map>
+      <entry key="valueProperty" value="id"/>
+    </Map>
+  </Attributes>
+      </Field>
+      <Field displayName="Service Description" columnSpan="2" name="description" displayType="textarea"/>
+      <Field displayName='Assign by' name='assignedBy' type='string' readOnly="true"/>
+      <Field displayName="Assign Service Now" name="assignService" type="boolean" />
+    </Section>
+    <Section label='Approval/Rejection Comments'>
+      <Field displayName="Comments" name="sys.approverComments" displayType="textarea" required="true"/>
+    </Section>
+    <Button label='Approve' action='next'/>
+    <Button label='Reject' action='next' parameter='requestRejected' value='true'/>
+  </Form>
+
+</sailpoint>

@@ -1,0 +1,1272 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint><Rule language="beanshell" name="UtilDynamicApproval" type="Workflow">
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+    
+    Note that an Attributes map of all variables from the current WorkflowContext,
+    merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+<Signature returnType="Object">
+<Inputs>
+<Argument type="wfcontext">
+<Description>
+The current WorkflowContext.
+</Description>
+</Argument><Argument type="handler">
+<Description>
+The workflow handler associated with the current WorkflowContext.
+</Description>
+</Argument><Argument type="workflow">
+<Description>
+The current Workflow definition.
+</Description>
+</Argument><Argument type="step">
+<Description>
+The current Step.
+</Description>
+</Argument><Argument type="approval">
+<Description>
+The current Approval.
+</Description>
+</Argument><Argument type="item">
+<Description>
+The WorkItem being processed.
+</Description>
+</Argument></Inputs>
+<Returns>
+<Argument type="Object">
+<Description>
+The result of the workflow rule; dependent on the rule itself.
+</Description>
+</Argument></Returns>
+</Signature>
+<!--<ReferencedRules>
+<Reference class="sailpoint.object.Rule" name="Dynamic LCM Workflow Library"/>
+<Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+</ReferencedRules> -->
+  <Source><![CDATA[
+import sailpoint.object.Rule;
+import sailpoint.api.Provisioner;
+import sailpoint.api.SailPointFactory;
+import sailpoint.object.QueryOptions;
+import sailpoint.api.SailPointContext;
+import sailpoint.object.ApprovalItem;
+import sailpoint.object.Bundle;
+import sailpoint.object.Comment;
+import sailpoint.object.Application;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.Identity;
+import sailpoint.object.ApprovalSet;
+import sailpoint.object.WorkItem;
+import sailpoint.object.WorkflowCase;
+import sailpoint.object.ScoreConfig;
+import sailpoint.object.ScoreDefinition;
+import sailpoint.object.TaskResult;
+import sailpoint.object.ApplicationEntitlementWeights;
+import sailpoint.object.EntitlementWeight;
+import sailpoint.object.Filter;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.WorkItem.OwnerHistory;
+import sailpoint.object.WorkflowSummary;
+import sailpoint.object.WorkflowSummary.ApprovalSummary;
+import sailpoint.server.Auditor;
+import sailpoint.tools.GeneralException;
+import sailpoint.tools.Util;
+import sailpoint.tools.xml.XMLObjectFactory;
+import sailpoint.workflow.IdentityLibrary;
+import sailpoint.workflow.WorkflowContext;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import sailpoint.object.WorkItem.State;
+
+import org.apache.commons.lang.ObjectUtils.Null;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import sailpoint.api.ManagedAttributer;
+import org.apache.log4j.Logger;
+
+	//logger
+	private static Logger logger = Logger.getLogger("seri.workflow.dynamicApprovals.utilDynamicApproval");
+	//logger helper function for null safe checks.
+	private String getString(Object obj) {
+		if(obj != null) {
+			return obj.toString();
+		}
+		return "null";
+	}	
+	
+    private String resolveManagerFromPlan(ProvisioningPlan plan )  {
+		logger.debug("Entering  resolveManagerFromPlan....");
+		logger.trace(">> plan: " + getString(plan));
+	    String managerName = null;
+        if ( plan != null ) {
+			logger.trace(">>plan XML: " + plan.toXml());
+            logger.trace("Getting IIQ Account Requests...");
+			AccountRequest iiq = plan.getIIQAccountRequest();
+			logger.trace(">>>> iiq requests: " + getString(iiq));
+			if ( iiq != null ) {
+				logger.trace(">>>> iiq requests XML: " + iiq.toXml());
+				AttributeRequest manager = iiq.getAttributeRequest("manager");
+                if ( manager != null ) {
+                    Object obj = manager.getValue();
+                    if ( obj != null ) {
+                        managerName = Util.getString(obj.toString());
+                    }
+                }
+            }
+        } 
+		logger.debug("Returning from resolveManagerFromPlan....managerName: " + getString(managerName));
+        return managerName;
+    }
+    
+    private String getManagedAttributeOwner(Application app, String name, String value ) 
+        throws GeneralException {
+ 	    logger.debug("Entering  getManagedAttributeOwner....");
+		logger.trace(">> app  : " + getString(app));
+        logger.trace(">> name : " + getString(name));
+        logger.trace(">> value: " + getString(value));
+        String owner = null;
+        ManagedAttribute ma = ManagedAttributer.get(wfcontext.getSailPointContext(), app.getId(), name, value);
+        if ( ma != null ) {
+            Identity maOwner = ma.getOwner();
+            if ( maOwner != null ) {
+                owner = maOwner.getName();
+            }
+                
+        }
+		logger.debug("Returning from getManagedAttributeOwner....owner: " + getString(owner));
+        return owner;
+    }
+
+     private String resolveProperty(Class clazz, String name, String property) 
+        throws GeneralException {
+        logger.debug("Entering  resolveProperty....");
+		logger.trace(">> clazz   : " + getString(clazz));
+        logger.trace(">> name    : " + getString(name));
+        logger.trace(">> property: " + getString(property));
+		
+        String approverName = null;
+        if ( name != null ) {
+            QueryOptions ops = new QueryOptions();
+            ops.add(Filter.eq("name", name));
+            Iterator rows = wfcontext.getSailPointContext().search(clazz, ops, property);
+            if ( rows != null ) {
+                int num = 0;
+                while ( rows.hasNext() ) {
+                    if ( num > 0 ) 
+                        throw new GeneralException("More then one row returned from owner qurey. Clazz"  + clazz + "'"+  name +"'");
+                    Object[] row = (Object[])rows.next();
+                    if ( row != null && row.length == 1) {
+                        approverName = (String)row[0];
+                        num++;
+                    } 
+                }
+            }
+        }
+        logger.debug("Returning from resolveProperty....owner: " + getString(approverName));
+        return approverName;
+    }
+    private String resolveRoleOwner(ApprovalItem item) 
+        throws GeneralException {
+        logger.debug("Entering  resolveRoleOwner....");
+		logger.trace(">> item : " + getString(item));
+        String approverName = null;
+		if( item != null) {
+			logger.trace(">> item xml : " + item.Xml());
+			List values = item.getValueList();
+			if ( Util.size(values) > 0 ) {			
+				if ( Util.size(values) != 1 ) 
+					throw new GeneralException("More then one value found in an approval item");
+				String roleName = (String)values.get(0);
+				approverName = resolveProperty(Bundle.class, roleName, "owner.name");
+			}
+		}
+		logger.trace("Exiting resolveRoleOwner....approverName: " + getString(approverName));
+        return approverName;
+    }
+
+    private String resolveApplicationOrEntitlementOwner(ApprovalItem item,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) 
+        throws GeneralException {
+        
+        String approverName = null;
+        
+        if ( item == null )
+            throw new GeneralException("ApprovalItem was null, could not compute owner.");
+
+        String appName = item.getApplication();
+        if ( appName == null ) {
+            return null;
+        }
+        
+        Application application = wfcontext.getSailPointContext().getObjectByName(Application.class, appName);
+        if ( application == null ) 
+            throw new GeneralException("Couldn't find application ["+appName+"]");
+
+        Identity owner = application.getOwner();
+        if ( owner != null ) {
+            approverName = owner.getName();
+        } else {
+            // unable to find owner for application foo...
+            System.out.println("Unable to find owner for application ["+appName+"]");
+        }
+
+        // Check the attributeName and value and check to see if we are dealing with 
+        // a ManagedAttribute if so see if can use the owner from the owner set ther
+        String attrName = item.getName();
+        List vals = item.getValueList();
+        if ( ( attrName != null ) && ( Util.size(vals) > 0 ) ) {
+            // there should just be one value in each record... 
+            // log something
+            String val = (String)vals.get(0);
+            String maOwner = getManagedAttributeOwner(application, attrName, val);
+            if ( maOwner == null) {
+                System.out.println("Managed Attribute owner not found.. falling back to app owner.");
+            } else {
+                approverName = maOwner;
+            }
+        }
+        return approverName;
+    }
+    
+    
+   private String resolveEntitlementOwner(ApprovalItem item) throws GeneralException 
+   {
+        
+        String approverName = null;
+        
+        if ( item == null )
+            throw new GeneralException("ApprovalItem was null, could not compute owner.");
+
+        String appName = item.getApplication();
+        if ( appName == null ) {
+            return null;
+        }
+        
+        Application application =  wfcontext.getSailPointContext().getObjectByName(Application.class, appName);
+        if ( application == null ) 
+            throw new GeneralException("Couldn't find application ["+appName+"]");
+
+        Identity owner = application.getOwner();
+        if ( owner != null ) {
+            approverName = owner.getName();
+        } else {
+            // unable to find owner for application foo...
+        	 System.out.println("Unable to find owner for application ["+appName+"]");
+        }
+
+        // Check the attributeName and value and check to see if we are dealing with 
+        // a ManagedAttribute if so see if can use the owner from the owner set ther
+        String attrName = item.getName();
+        List vals = item.getValueList();
+        if ( ( attrName != null ) && ( Util.size(vals) > 0 ) ) {
+            // there should just be one value in each record... 
+            // log something
+            String val = (String)vals.get(0);
+            String maOwner = getManagedAttributeOwner(application, attrName, val);
+            if ( maOwner == null) {
+            	 System.out.println("Managed Attribute owner not found.. falling back to app owner.");
+            } else {
+                return maOwner;
+            }
+        }
+        return null;
+    }
+    
+     
+    private String resolveApplicationOwner(ApprovalItem item) throws GeneralException 
+    {
+        
+        String approverName = null;
+        
+        if ( item == null )
+            throw new GeneralException("ApprovalItem was null, could not compute owner.");
+
+        String appName = item.getApplication();
+        if ( appName == null ) 
+        {
+            return null;
+        }
+        
+        Application application =  wfcontext.getSailPointContext().getObjectByName(Application.class, appName);
+        if ( application == null ) 
+            throw new GeneralException("Couldn't find application ["+appName+"]");
+
+        Identity owner = application.getOwner();
+        if ( owner != null ) {
+            approverName = owner.getName();
+        }
+        return approverName;
+    }
+
+    
+      private String getApplicationOwners(ApprovalItem item)
+        throws GeneralException { 
+        
+        if ( item == null )
+            return null;
+
+        List owners = new ArrayList();
+        String app = item.getApplication(); 
+        if ( ProvisioningPlan.APP_IIQ.compareTo(app) != 0 ) 
+        { 
+            
+            String owner = resolveApplicationOwner(item);
+            if ( owner != null ) 
+               return owner;
+        }
+        return null;
+    }
+    
+      private List getRoleOwners(ApprovalItem item)
+        throws GeneralException { 
+        
+        if ( item == null )
+            return null;
+
+        List owners = new ArrayList();
+        String app = item.getApplication(); 
+        if ( ProvisioningPlan.APP_IIQ.compareTo(app) == 0 ) { 
+            if ( ( ProvisioningPlan.ATT_IIQ_DETECTED_ROLES.equals(item.getName()) ) ||
+                 ( ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES.equals(item.getName()) ) ) {
+                String owner = resolveRoleOwner(item);
+                if ( owner != null ) 
+                    owners.add(owner);
+            } 
+        } 
+        return owners;
+    }
+    
+     private List getEntitlementOwners(ApprovalItem item)
+        throws GeneralException { 
+        
+        if ( item == null )
+            return null;
+
+        List owners = new ArrayList();
+        String app = item.getApplication(); 
+        if ( ProvisioningPlan.APP_IIQ.compareTo(app) != 0 ) { 
+           
+            String owner = resolveEntitlementOwner(item);
+            if ( owner != null ) 
+                owners.add(owner);
+        }
+        return owners;
+    }
+    
+    
+    private List getOwners(ApprovalItem item, String approvalOwner,  String approvalOwnerType,  String approvalOwnerRule,  String approvalOwnerAttribute,  String approvalOwnerRuleAttribute)
+        throws GeneralException { 
+        
+        if ( item == null )
+            return null;
+
+        List owners = new ArrayList();
+        String app = item.getApplication(); 
+        if ( ProvisioningPlan.APP_IIQ.compareTo(app) == 0 ) { 
+            if ( ( ProvisioningPlan.ATT_IIQ_DETECTED_ROLES.equals(item.getName()) ) ||
+                 ( ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES.equals(item.getName()) ) ) {
+                String owner = resolveRoleOwner(item);
+                if ( owner != null ) 
+                    owners.add(owner);
+            } 
+        } 
+        else {
+            String owner =  resolveApplicationOrEntitlementOwner( item, approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute) ;
+            
+            if ( owner != null ) 
+            {
+            	
+                owners.add(owner);
+            }
+        }
+        return owners;
+    }
+    
+    private List getObjectOwners(ApprovalItem item) throws GeneralException { 
+        
+        if ( item == null )
+            return null;
+
+        List owners = new ArrayList();
+        String app = item.getApplication(); 
+        if ( ProvisioningPlan.APP_IIQ.compareTo(app) == 0 ) { 
+            if ( ( ProvisioningPlan.ATT_IIQ_DETECTED_ROLES.equals(item.getName()) ) ||
+                 ( ProvisioningPlan.ATT_IIQ_ASSIGNED_ROLES.equals(item.getName()) ) ) {
+                String owner = resolveRoleOwner(item);
+                if ( owner != null ) 
+                    owners.add(owner);
+            } 
+        } 
+        else {
+            String owner = resolveEntitlementOwner(item);
+            if ( owner != null ) 
+                owners.add(owner);
+        }
+        return owners;
+    }
+    
+    public String getAutoApprovalOwner(ApprovalItem item, String approvalAttributeType, String identityName, String approvalOwner,  String approvalOwnerType,  String approvalOwnerRule,  String approvalOwnerAttribute,  String  approvalOwnerRuleAttribute) throws GeneralException
+    {
+		logger.debug("Entering getAutoApprovalOwner....");
+		logger.trace("Approval Owner: " + getString(approvalOwnerType) + " for identity: " + getString(identityName));
+		
+    	if(approvalOwnerType== null || approvalOwnerType.equals("Manager"))
+		{
+			logger.debug("Approval Owner was Manager. Grabbing the user's manager");
+			//IdentityLibrary il = new IdentityLibrary();
+			String manager =  resolveProperty(Identity.class, identityName, "manager.name");
+			logger.debug("Got the manager using manager.name: " + getString(manager) + " returning....");
+			return manager;
+		}
+		else if(approvalOwnerType.equals("Application Owner"))
+		{
+			logger.debug("Approval Owner is Application Owner. Grabbing that user.");
+			//IdentityLibrary il = new IdentityLibrary();
+			return (String)getApplicationOwners(item);
+		}
+		else if(approvalOwnerType.equals("Object Owner"))
+		{
+			logger.debug("Approval Owner is Object Owner. Grabbing that user.");
+			List owners =  getObjectOwners(item);
+			logger.debug("Owners List: " + getString(owners) + " returning the first in the list");
+			return (String)owners.get(1);
+		}
+		else if(approvalOwnerType.equals("Rule"))
+		{
+			logger.debug("Approval Owner was Rule. Need to run this rule.");
+			Map args = new HashMap();
+			args.put("context","context");
+			args.put("wfcontext",wfcontext);
+			args.put("item",item);
+			Rule rule = null;
+			
+			if(approvalOwnerRule!= null)
+			{
+				rule = wfcontext.getSailPointContext().getObjectByName(Rule.class, approvalOwnerRule);
+			} 
+			else 
+			{
+				logger.error("approvalOwnerRule was null. Cannot continue!!!");
+			}
+			
+			if (rule != null) {
+				logger.debug("Running Rule ["+getString(approvalOwnerRule)+"] and returning the result.");
+				return (String)wfcontext.getSailPointContext().runRule(rule, args);
+			} else {
+				logger.error("Wasn't able to grab the rule object for ["+getString(approvalOwnerRule)+"]. Returning null..");
+				return null;
+			}
+			
+		}
+		else if(approvalOwnerType.equals("Rule Attribute"))
+		{
+			logger.debug("Approval Owner was Rule Attribute. Need to grab this rule of the appropriate object. and then run the rule.");
+			String ruleName = null;
+			logger.trace("approvalAttributeType: " + getString(approvalAttributeType));
+			if(approvalAttributeType.equals("application"))
+			{
+				logger.debug("Grabbing Approval Rule off of application");
+				Application applicationObject = wfcontext.getSailPointContext().getObjectByName(Application.class, item.getApplication());
+				logger.error("Having a rule on the application object has not been implemented yet!");
+			}
+			else if (approvalAttributeType.equals("entitlement") || approvalAttributeType.equals("any"))
+			{
+				logger.debug("Approval attribute type was entitlement (or any)");
+				logger.warn("BEWARE, if this is a role i think it will fail..");
+				Application applicationObject = wfcontext.getSailPointContext().getObjectByName(Application.class, item.getApplication());
+				if(applicationObject != null) {
+					ManagedAttribute attributeObject = ManagedAttributer.get(wfcontext.getSailPointContext(), applicationObject, false, item.getName(), (String)((List)item.getValue()).get(0));
+					if(attributeObject != null) {
+						ruleName = (String)attributeObject.getAttribute(approvalOwnerRuleAttribute);
+						logger.debug("Got Rule: " + getString(ruleName));
+					} else {
+						logger.error("ManagedAttribute object was null!");
+					}
+				} else {
+					logger.error("Application object was null!");
+				}
+			}
+			else if (approvalAttributeType.equals("role") || approvalAttributeType.equals("any"))
+			{
+				logger.debug("Getting Rule off of the Bundle Object.");
+				Bundle aBund = wfcontext.getSailPointContext().getObjectByName(Bundle.class, (String)item.getValue());
+				ruleName = (String)aBund.getAttribute(approvalOwnerRuleAttribute);
+				logger.debug("Got Rule: " + getString(ruleName));
+			}
+			
+			
+			if(ruleName!= null)
+			{
+				logger.debug("Got Rule: " + getString(ruleName));
+				Map args = new HashMap();
+				args.put("context","context");
+				args.put("wfcontext",wfcontext);
+				args.put("item",item);
+				Rule rule = wfcontext.getSailPointContext().getObjectById(Rule.class, ruleName);
+								
+				if (rule != null) {
+					String myOwner = (String)wfcontext.getSailPointContext().runRule(rule, args);
+					logger.debug("Got Owner: " + getString(myOwner) + " returning...");
+					return myOwner;
+				} else {
+					logger.warn("Rule Name was still null! Defaulting to spadmin for now!");
+					return "spadmin";
+				}
+			}
+			else {
+				logger.warn("Rule Name was still null! Defaulting to spadmin for now!");
+				return "spadmin";
+			}
+			
+		}
+		else if(approvalOwnerType.equals("Attribute"))
+		{
+			logger.debug("Approval Owner was Attribute. Need to get it off the object itself.");
+			String theOwner = null;
+			
+			if(approvalAttributeType.equals("application"))
+			{
+			   	Application applicationObject = wfcontext.getSailPointContext().getObjectByName(Application.class, item.getApplication());
+			}
+			else if (approvalAttributeType.equals("entitlement") || approvalAttributeType.equals("any"))
+			{
+				logger.trace("Item App  : " + getString(item.getApplication()));
+				logger.trace("Item Name : " + getString(item.getName()));
+				logger.trace("Item Value: " + getString(item.getValue()));
+				logger.trace("Approval Owner Attribute: " + getString(approvalOwnerAttribute));
+				Application applicationObject = wfcontext.getSailPointContext().getObjectByName(Application.class, item.getApplication());
+				if(applicationObject != null) {
+					ManagedAttribute attributeObject = ManagedAttributer.get(wfcontext.getSailPointContext(), applicationObject, false, item.getName(), (String)((List)item.getValue()).get(0));
+					if(attributeObject != null) {
+						String ownerId = (String)attributeObject.getAttribute(approvalOwnerAttribute);
+						if(ownerId != null) {
+							Identity owner = wfcontext.getSailPointContext().getObjectById(Identity.class, ownerId);
+							if(owner != null) {
+								theOwner = owner.getName();
+								logger.debug("Whew... finally got the owner: " + getString(theOwner));
+							} else {
+								logger.warn("owner was null...");
+							}
+						} else {
+							logger.warn("ownerIdwas null...");
+						}
+					} else {
+						logger.warn("attributeObject was null...");
+					}
+				} else {
+					logger.warn("Application object was null...");
+				}
+			}
+			else if (approvalAttributeType.equals("role") || approvalAttributeType.equals("any"))
+			{
+				logger.debug("Grabbing owner from the role object.");
+				Bundle aBund = wfcontext.getSailPointContext().getObjectByName(Bundle.class, (String)item.getValue());
+				Identity owner = wfcontext.getSailPointContext().getObjectById(Identity.class,(String)aBund.getAttribute(approvalOwnerType));
+				theOwner = owner.getName();
+				logger.debug("got the owner: " + getString(theOwner));
+			}
+			
+			logger.debug("Returning the Owner: " + getString(theOwner));
+			return theOwner;
+			
+		}
+		else if(approvalOwnerType.equals("Specific User"))
+		{
+			logger.debug("Approval Owner was Specific User. Just need to return the approval owner: " + getString(approvalOwner));
+			return approvalOwner;
+		}
+
+		return "spadmin";
+}
+ 
+   
+      public void assimilateWorkItemApprovalSet(WorkflowContext wfcontext, ApprovalSet masterSet, ApprovalSet set) throws GeneralException{
+       //  if (item == null) {
+         //     // must not be a leaf approval...
+           //   return;
+         // }
+          // Assimilate all of the approvalItem changes into our gloval
+          // approval set
+          // 
+          // Also audit the comments and forwarding thats happend
+         // ApprovalSet set = (ApprovalSet)item.get("approvalSet");
+          if ( set != null ) {
+              // Global completion comments will apply to each of the items
+              // If there are completion comments append them
+              // to any other completion comments, but typically its 
+              // one or the other
+           //   String completionComments = item.getCompletionComments();
+             // String ownerName = null;
+             // Identity id = item.getOwner();
+            //  if ( id != null ) {
+             //     ownerName = id.getName();
+            //  }
+              masterSet.assimilate(set, "spadmin", "AutoApproved", true);
+          } else {
+              throw new GeneralException("ApprovalSet not found in the afterscript.");
+          }
+        //  auditWorkItemOwnerHistory(item);
+          //auditWorkItemComments(item);
+          wfcontext.getSailPointContext().commitTransaction();
+      }
+
+
+	
+	private int getEntitlementScore(SailPointContext context, String applicationName, String entitlementName) throws GeneralException
+	{
+		ScoreConfig aScrCfig= (ScoreConfig)context.getObjectByName(ScoreConfig.class,"ScoreConfig");
+		List identityScores = aScrCfig.getIdentityScores();
+		for(int x=0;x< identityScores.size(); x++){
+			ScoreDefinition aScrDef = (ScoreDefinition)identityScores.get(x);
+		    if(aScrDef.getName().equalsIgnoreCase("rawEntitlementScore")){
+			 List aAtrbte= (List) aScrDef.getArgument("applicationEntitlementWeights");
+			 for(int y=0; y<aAtrbte.size();y++){
+				 ApplicationEntitlementWeights aAppEntWeight = (ApplicationEntitlementWeights)aAtrbte.get(y);
+				 if(aAppEntWeight.getApplication().equals(applicationName)){
+					 List weights = aAppEntWeight.getWeights();
+					 for(int z=0; z<weights.size();z++){
+						 EntitlementWeight aEntWeight = (EntitlementWeight)weights.get(z);
+						 if(aEntWeight.getValue().equalsIgnoreCase(entitlementName)){
+							 return Integer.parseInt(aEntWeight.getWeight());
+						 }
+					 }
+				 }
+			 }
+		  }
+		}
+		return 0;
+	}
+	
+	private int getRoleScore(SailPointContext context, String roleName) throws GeneralException
+	{
+		Bundle aBundle= (Bundle)context.getObjectByName(Bundle.class,roleName);
+		if(aBundle != null){
+			return aBundle.getRiskScoreWeight();
+		}
+		else return 0;
+	}
+
+
+	private boolean checkEntitlementRiskThreshold(String riskThreshold, Application application, String entitlementName) throws GeneralException
+	{
+	
+	 	System.out.println("HERE:  "+ riskThreshold);
+   	
+			if(riskThreshold == null || Integer.parseInt(riskThreshold) == 0){
+			System.out.println("retruning true");
+			 return true;
+			}
+			else{
+					System.out.println("getting score");
+				int score = getEntitlementScore(wfcontext.getSailPointContext(), application.getName(), entitlementName);
+				
+				System.out.println("getting score:  "+ score);
+				if (score==0)
+					return false;
+				else if( score  >= Integer.parseInt(riskThreshold)){
+		        	return true; 
+		    	}
+			    else return false;
+			}
+			   
+	}
+
+	private boolean checkRoleRiskThreshold(String riskThreshold, String roleName) throws GeneralException
+	{
+			if(riskThreshold == null || Integer.parseInt(riskThreshold) == 0){
+			 	return true;
+			}
+			else if( getRoleScore(wfcontext.getSailPointContext(),roleName)  >= Integer.parseInt(riskThreshold)){
+		        return true; 
+		    }
+		    else return false;	
+	}
+
+ 	public Map getAutoApprovedMap(ApprovalSet masterSet, String ruleName, String identityName, String attributeName, ApprovalItem item, String application, String approvalAttributeType) throws GeneralException
+   	{
+
+
+   	 	Map args = new HashMap();
+		args.put("context",wfcontext.getSailPointContext());
+		args.put("identityName",identityName);
+		args.put("attributeName",attributeName);
+		args.put("item",item);
+		args.put("application",application);
+		args.put("approvalAttributeType",approvalAttributeType);
+		args.put("masterSet",masterSet);
+		
+		logger.debug("Trying to grab rule by name...");
+		
+		if(ruleName==null)
+		{
+		    autoApprovedMap.put("status","approvalRequired");
+			return autoApprovedMap; 
+		}
+		else if(ruleName != null && ruleName.equals("true") )
+		{
+			autoApprovedMap.put("status","approved");
+			return autoApprovedMap; 
+		}
+		else if(ruleName != null && ruleName.equals("false") )
+		{
+			autoApprovedMap.put("status","approvalRequired");
+			return autoApprovedMap; 
+		}
+		else if(ruleName != null && ruleName.equals("false") == false  && ruleName.equals("true") == false)
+		{
+			Rule rule = wfcontext.getSailPointContext().getObjectByName(Rule.class, ruleName);
+			if(rule == null)
+			{
+				logger.debug("Welp..that didnt work. Lets try grabbing it by the rule ID...");
+				rule = wfcontext.getSailPointContext().getObjectById(Rule.class, ruleName);
+			}
+			
+			if(rule != null) {
+				logger.debug("Running Rule...");
+				Map autoApprovedMap = (Map)wfcontext.getSailPointContext().runRule(rule, args);
+				logger.error("...Success! Got AutoApproved Map: ["+getString(autoApprovedMap)+"]");
+				
+				if(autoApprovedMap == null)
+				{
+				autoApprovedMap.put("status","approvalRequired");
+				}
+				
+				return autoApprovedMap; 
+			} else {
+				logger.error("Well crap. Rule was still null. Something must be up. We couldnt find Rule: ["+getString(ruleName)+"]");
+			}
+		}
+		
+		if(autoApprovedMap == null)
+		{
+			autoApprovedMap.put("status","approvalRequired");
+		}
+		
+		String isApproved =  (String) approvedMap.get("status");
+		return autoApprovedMap; 
+   	}
+	   	
+	   	public void auditAutoApprove(Map approvalMap, ApprovalItem item, String workItemDescription, String approvalAttributeType, String identityName,  String approvalOwner,  String approvalOwnerType,  String approvalOwnerRule,  String approvalOwnerAttribute,  String approvalOwnerRuleAttribute) throws GeneralException
+	   	{
+			logger.debug("Entering auditAutoApprove....");
+			Comment comm = null;
+			State state = null;
+			logger.debug("Getting Status from approval Map...");
+			String isApproved =  (String) approvalMap.get("status");
+			logger.debug("isApproved: " + getString(isApproved));
+			logger.debug("Seeing if a custom comment is in the approvalMap...");
+			comm  = (Comment) approvalMap.get("approvalcomment");
+			logger.debug("Comment: " + getString(comm));
+			
+			if(isApproved == null || isApproved.equals("approvalRequired"))
+			{
+				logger.warn("isApproved was null or an approval was required. We arent doing anything currently!");
+			}
+			else if(isApproved.equals("approved"))
+			{
+				logger.debug("isApproved = approved");
+				state = sailpoint.object.WorkItem.State.Finished;
+				logger.debug("approving item...");
+				item.approve();
+				
+				if(comm ==null)
+				{
+					logger.debug("No comment being set by rule. Adding Comment: [Auto-approved By rule]");
+					comm.setComment("Auto-approved By rule");
+				}
+
+			}
+			else if(isApproved.equals("rejected"))
+			{
+				logger.debug("isApproved = rejected");
+				state = sailpoint.object.WorkItem.State.Rejected;
+				logger.debug("rejecting item...");
+				item.reject();
+				//item.setApprover("spadmin");
+
+				if(comm ==null)
+				{
+					logger.debug("No comment being set by rule. Adding Comment: [Auto-approved By rule]");
+					comm.setComment("Auto-rejected By rule");
+				}
+			}
+
+			if(state == sailpoint.object.WorkItem.State.Finished || state == sailpoint.object.WorkItem.State.Rejected)
+			{
+				logger.debug("State is Finished or Rejected. We are able to continue. State: ["+getString(state)+"]");
+				TaskResult tr = wfcontext.getTaskResult();
+				if (tr != null) {
+					logger.debug("Got TaskResult from wfcontext: " + getString(tr));
+					logger.debug("Calling getAutoApprovalOwner...");
+					String autoApprovalOwner = getAutoApprovalOwner(item, approvalAttributeType, identityName,  approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);
+					logger.debug("Auto Approval Owner is: " + getString(autoApprovalOwner));
+					WorkflowSummary ws = null;
+					if (tr.getAttribute(WorkflowCase.RES_WORKFLOW_SUMMARY) == null) 
+					{
+						logger.debug("Workflow Summary was null. Adding a new one to the task result.");
+						ws = new WorkflowSummary();
+						tr.setAttribute(WorkflowCase.RES_WORKFLOW_SUMMARY, ws);
+						wfcontext.getSailPointContext().saveObject(tr);
+						wfcontext.getSailPointContext().commitTransaction();
+					}
+
+					tr = wfcontext.getTaskResult();
+					logger.debug("Getting Workflow Summary from task result.");
+					Object summary = tr.getAttribute(WorkflowCase.RES_WORKFLOW_SUMMARY);
+
+					ws = (WorkflowSummary) summary;
+					List interactions = ws.getInteractions();
+					logger.debug("Current Interactions: " + getString(interactions));
+
+					if(interactions == null) {
+						logger.debug("interactions was null.. setting it to an empty list.");
+						interactions = new ArrayList();
+					}
+
+					logger.debug("Creating an approval summary to add as an interaction.");
+					ApprovalSummary as = new ApprovalSummary();
+					as.setOwner((String)autoApprovalOwner);
+					as.setRequest(workItemDescription);
+					as.setWorkItemType(sailpoint.object.WorkItem.Type.Approval);
+					as.setState(state);
+					as.setStartDate(new Date());
+					as.setEndDate(new Date());
+					as.addComment(comm);
+					
+					logger.debug("Finished creating Approval Summary.");
+					
+					interactions.add(as);
+					ws.setInteractions(interactions);
+					logger.debug("Saving Task Result with new interactions...");
+					wfcontext.getSailPointContext().saveObject(tr);
+					wfcontext.getSailPointContext().commitTransaction();
+					logger.debug("...Finished!");
+				}
+			}
+	   	
+	   	}		   
+	   	
+   	public boolean handleAutoApprove(ApprovalSet masterSet, String workItemDescription, String attributeName, String application, String approvalAttributeType, ApprovalSet filtered, ApprovalItem item, String identityName, boolean disableAutoApprove, String autoApprovedRule, String autoApprovedRuleAttributeValue,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute)  throws GeneralException
+   	{
+		logger.debug("Entering handleAutoApprove....");
+		logger.trace(">>autoApprovedRuleAttributeValue: " + getString(autoApprovedRuleAttributeValue));
+   		logger.trace(">>autoApprovedRule: " + getString(autoApprovedRule));
+		if(disableAutoApprove)
+		{
+			logger.debug("disableAutoApprove is true. Returning false. We shouldn't auto approve!");
+			return false;
+		}
+		else{
+			if(autoApprovedRuleAttributeValue != null){
+				logger.debug("autoApprovedRuleAttributeValue had a value. Building out the approval Map.");
+				logger.debug("Calling getAutoApprovedMap....ruleName: " + getString(autoApprovedRuleAttributeValue));
+				Map approvedMap = getAutoApprovedMap(masterSet, autoApprovedRuleAttributeValue,  identityName,  attributeName,  item,  application,  approvalAttributeType);
+				String isApproved =  (String) approvedMap.get("status");
+				logger.debug("isApproved?: " + getString(isApproved));
+				if(isApproved == null || isApproved.equals("approvalRequired")){
+					logger.debug("Approval is still required. Shouldn't auto approve.");
+					return false;
+				}
+				 else {
+					logger.debug("Excellent! We are able to auto approve. Calling auditAutoApprove...");
+					auditAutoApprove( approvedMap,  item,  workItemDescription,  approvalAttributeType,  identityName,   approvalOwner,   approvalOwnerType,   approvalOwnerRule,   approvalOwnerAttribute,   approvalOwnerRuleAttribute);
+					return true;
+				} 
+			}
+			else if( autoApprovedRule!= null){ 	  
+				logger.debug("autoApprovedRule had a value. Building out the approval Map.");
+				logger.debug("Calling getAutoApprovedMap....ruleName: " + getString(autoApprovedRule));
+				Map approvedMap =  getAutoApprovedMap(masterSet, autoApprovedRule,  identityName,  attributeName,  item,  application,  approvalAttributeType);
+				String isApproved =  (String) approvedMap.get("status");
+			
+				if(isApproved ==null || isApproved.equals("approvalRequired")){
+					logger.debug("Approval is still required. Shouldn't auto approve.");
+					return false;
+				}
+				else{
+					logger.debug("Excellent! We are able to auto approve. Calling auditAutoApprove...");
+					auditAutoApprove( approvedMap,  item,  workItemDescription,  approvalAttributeType,  identityName,   approvalOwner,   approvalOwnerType,   approvalOwnerRule,   approvalOwnerAttribute,   approvalOwnerRuleAttribute);
+					return true;
+				}
+			}
+			else{
+				return false;
+			}
+		}
+   	}
+	   	
+	  	
+	   	public void evaluateApproval(ApprovalSet masterSet, ApprovalSet filtered, ApprovalItem item, String workItemDescription, boolean includeOnTrue, String identityName,  String attributeName, String application, String approvalAttributeType, boolean disableMetadataApproval, Object attributeObject, Object attributeObjectValue, String attributeValue,  boolean disableApprovalRequired, String approvalRequiredRule, String approvalRequiredAttributeRuleName, boolean disableAutoApprove, String autoApprovedRule, String autoApprovedAttributeRuleName,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) throws GeneralException
+	   	{
+			logger.debug("Entering evaluateApproval....");
+	   		boolean required = true;
+	   		boolean matchesFilter = false;
+	   		if(includeOnTrue == false){
+	   			matchesFilter= true;
+	   		}
+			boolean autoApproved = false;
+			logger.trace(">>matchesFilter: " + getString(matchesFilter));
+	   		logger.trace(">>required     : " + getString(required));
+	   		logger.trace(">>autoApproved : " + getString(autoApproved));
+	   		
+			logger.debug("Checking the attributeObject: " + getString(attributeObject));
+	     	if(attributeObject != null){
+	     		//handle is required
+				logger.trace("Trying to figure out if an approval is required. Below are the current params:");
+				logger.trace(">>identityName: " + getString(identityName));
+				logger.trace(">>approvalAttributeType: " + getString(approvalAttributeType));
+				
+	     		if(disableApprovalRequired == false){
+					logger.debug("disableApprovalRequired was false. Evaluating approval items.");
+	     			if(approvalRequiredRule != null){
+						logger.debug("Gathering all the info to run the approvalRequiredRule: " + getString(approvalRequiredRule));
+						Map args = new HashMap();
+						args.put("context",wfcontext.getSailPointContext());
+						args.put("identityName",identityName);
+						args.put("attributeName",attributeName);
+						args.put("item",item);
+						args.put("application",application);
+						args.put("approvalAttributeType",approvalAttributeType);
+						args.put("masterSet",masterSet);
+						
+						logger.trace("Getting Rule object from rule name");
+						Rule rule = wfcontext.getSailPointContext().getObjectByName(Rule.class, approvalRequiredRule);
+						
+						if (rule != null){
+							logger.debug("Running Rule with args....");
+							required = (boolean)wfcontext.getSailPointContext().runRule(rule, args);
+							logger.debug("Success! Rule returned. the required attribute = " + getString(required));
+						} else {
+							logger.error("Couldnt find rule with name/id of ["+getString(approvalRequiredRule)+"]");
+						}
+				    }
+				    else if(approvalRequiredAttributeRuleName!= null){
+						logger.debug("approvalRequiredAttributeRuleName has a value. Running this rule: " + getString(approvalRequiredAttributeRuleName));
+						Map args = new HashMap();
+						args.put("context",wfcontext.getSailPointContext());
+						args.put("identityName",identityName);
+						args.put("attributeName",attributeName);
+						args.put("item",item);
+						args.put("application",application);
+						args.put("approvalAttributeType",approvalAttributeType);
+						args.put("masterSet",masterSet);
+						
+						logger.trace("Getting Rule object from rule name");
+						Rule rule = wfcontext.getSailPointContext().getObjectByName(Rule.class, approvalRequiredAttributeRuleName);
+						if(rule== null){
+							rule = wfcontext.getSailPointContext().getObjectById(Rule.class, approvalRequiredAttributeRuleName);
+						}
+						
+						if (rule != null){
+							logger.debug("Running Rule with args....");
+							required = (boolean)wfcontext.getSailPointContext().runRule(rule, args) == true;
+							logger.debug("Success! Rule returned. the required attribute = " + getString(required));
+						} else {
+							logger.error("Couldnt find rule with name/id of ["+getString(approvalRequiredAttributeRuleName)+"]");
+						}
+		            }
+	     		}
+	     		//if its required, then see if its autoapproved. if autoapproved, get the owner and set the interaction. 
+	     		//if not autoapproved, then add it to the list of approvals.
+				if(required){
+					logger.debug("Approval is required! Updating the approval item!");
+					if(disableMetadataApproval){
+						logger.debug("disableMetadataApproval was true. Need to auto approve this item then..");
+						logger.debug("Calling handleAutoApprove....");
+						autoApproved = handleAutoApprove(masterSet, workItemDescription, attributeName, application, approvalAttributeType, filtered,item, identityName, disableAutoApprove, autoApprovedRule, autoApprovedAttributeRuleName,   approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);  			
+						logger.debug("autoApproved got set to : " + getString(autoApproved));
+						matchesFilter = true;
+				    }
+					else{
+						if(attributeValue != null && attributeObjectValue != null){	
+							logger.debug("Attribute Value: " + getString(attributeValue));
+							logger.debug("attributeObjectValue: " + getString(attributeObjectValue));
+							
+							if(attributeObjectValue instanceof Boolean){
+								logger.debug("attributeObjectValue is a boolean.");
+								logger.debug("includeOnTrue: " + getString(includeOnTrue));
+								if(includeOnTrue){
+									//TH - not sure what this is...that if logic is interesting
+									if(((Boolean)attributeObjectValue).booleanValue() == Boolean.valueOf(attributeValue)){
+										logger.debug("AttributeObjectValue == attributeValue. Calling handleAutoApprove.....");
+										autoApproved = handleAutoApprove(masterSet, workItemDescription, attributeName, application, approvalAttributeType, filtered,item, identityName, disableAutoApprove, autoApprovedRule, autoApprovedAttributeRuleName,   approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);  	
+										logger.debug("autoApproved got set to : " + getString(autoApproved));
+										matchesFilter = true;
+									}
+								}
+								else{
+									if(((Boolean)attributeObjectValue).booleanValue() != Boolean.valueOf(attributeValue)){
+										logger.debug("AttributeObjectValue != attributeValue. Calling handleAutoApprove.....");
+										autoApproved = handleAutoApprove(masterSet, workItemDescription, attributeName, application, approvalAttributeType, filtered, item, identityName, disableAutoApprove, autoApprovedRule, autoApprovedAttributeRuleName,   approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);   		
+										logger.debug("autoApproved got set to : " + getString(autoApproved));
+										matchesFilter = false;
+									}
+								} 
+				           	}
+				           	else if(attributeValue instanceof String){
+								logger.debug("attributeValue was an instance of a string. Comparing...");
+				           		if(includeOnTrue){
+				           			if(((String)attributeObjectValue).equals(attributeValue)){
+				              			logger.debug("AttributeObjectValue equals attributeValue. Calling handleAutoApprove.....");
+										autoApproved = handleAutoApprove(masterSet, workItemDescription, attributeName, application, approvalAttributeType, filtered, item, identityName, disableAutoApprove, autoApprovedRule, autoApprovedAttributeRuleName,   approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);    	
+				               			logger.debug("autoApproved got set to : " + getString(autoApproved));
+										matchesFilter = true;
+				               		}
+				                }
+				             	else {
+				             		if(((String)attributeObjectValue).equals(attributeValue) == false){
+										logger.debug("AttributeObjectValue does not equal attributeValue. Calling handleAutoApprove.....");
+										autoApproved = handleAutoApprove(masterSet, workItemDescription, attributeName, application, approvalAttributeType, filtered, item, identityName, disableAutoApprove, autoApprovedRule, autoApprovedAttributeRuleName,   approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);    	
+				               			logger.debug("autoApproved got set to : " + getString(autoApproved));
+										matchesFilter = false;
+				               		} 
+				             	}
+				            } 
+			            	else if(attributeObjectValue instanceof Rule){
+								logger.debug("attributeObjectValue was an instance of a Rule. Gathering info to run that rule....");
+								Map args = new HashMap();
+								args.put("context",wfcontext.getSailPointContext());
+								args.put("identityName",identityName);
+								args.put("attributeName",attributeName);
+								args.put("item",item);
+								args.put("application",application);
+								args.put("approvalAttributeType",approvalAttributeType);
+								args.put("masterSet",masterSet);
+								
+								logger.debug("Getting rule object: ["+getString(approvalRequiredAttributeRuleName)+"]");
+								Rule rule = wfcontext.getSailPointContext().getObjectById(Rule.class, approvalRequiredAttributeRuleName);
+								
+								logger.debug("Running Rule...");
+								if (rule != null && (boolean)wfcontext.getSailPointContext().runRule(rule, args) == true){
+									logger.debug("Success. Rule was ran successfully. and it returned TRUE. Continue!");
+									autoApproved =  handleAutoApprove(masterSet, workItemDescription, attributeName, application, approvalAttributeType, filtered, item, identityName, disableAutoApprove, autoApprovedRule, autoApprovedAttributeRuleName,   approvalOwner,  approvalOwnerType,  approvalOwnerRule,  approvalOwnerAttribute,  approvalOwnerRuleAttribute);    	
+									matchesFilter = true;
+								} else {
+									logger.debug("rule was null...or the rule return false. either way we dont need to do anything..");
+								}
+			           		}
+						} else {
+							logger.warn("Attribute ["+getString(attributeValue)+"] or AttributeObject ["+getString(attributeObjectValue)+"] had a null value.");
+						}
+					}
+				}
+				if(autoApproved == false &&  matchesFilter == true)
+				{
+					logger.info("Finished analysing the item. Auto Approve was false and it matches the current filter. Lets add it to the approval set!");
+					filtered.add(item);
+				}
+			} else {
+				logger.warn("attributeObject was null!");
+			}
+	   	}
+	   	
+   	public void handleRoleFilters(ApprovalSet masterSet, boolean includeOnTrue, String workItemDescription, String approvalAttributeType, ApprovalSet filtered, ApprovalItem item,  String identityName, String application, boolean disableMetadataApproval, String attributeName, String attributeValue, boolean disableAutoApprove, String autoApprovedRule,  String autoApprovedRuleAttribute, boolean disableApprovalRequired, String approvalRequiredRule, String approvalRequiredRuleAttribute, boolean disableApprovalRisk, String identityRiskThreshold, String entitlementRiskThreshold,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) throws GeneralException
+   	{
+   	
+   	
+   		String value;
+								
+		if(item.getValue().getClass().getName().equalsIgnoreCase("java.lang.String")){
+			value = (String)item.getValue();
+		}
+		else{
+			List attribute =  (List)item.getValue();
+			value = (String)attribute.get(0);
+		}
+		
+		Bundle theRequestedRole =wfcontext.getSailPointContext().getObject(Bundle.class, value);
+		if(disableApprovalRisk || checkRoleRiskThreshold(entitlementRiskThreshold,theRequestedRole.getName())){
+		
+			Object objectAttributeValue = theRequestedRole.getAttribute(attributeName);
+			String approveRequiredAttributeRuleName=  (String)theRequestedRole.getAttribute(approvalRequiredRuleAttribute);
+			String autoApprovedAttributeRuleName = (String)theRequestedRole.getAttribute(autoApprovedRuleAttribute);
+
+			evaluateApproval(masterSet, filtered, item, workItemDescription,includeOnTrue,identityName, attributeName, "IIQ", approvalAttributeType, disableMetadataApproval, (Object)theRequestedRole,  (Object)objectAttributeValue,  attributeValue,  disableApprovalRequired, approvalRequiredRule,  approveRequiredAttributeRuleName, disableAutoApprove, autoApprovedRule,  autoApprovedAttributeRuleName,  approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);
+			
+		   
+		}
+   	   	
+   	}
+	   	
+   	public void handleEntitlementFilters(ApprovalSet masterSet, boolean includeOnTrue, String workItemDescription, String approvalAttributeType, ApprovalSet filtered, ApprovalItem item, String identityName, String application, boolean disableMetadataApproval, String attributeName, String attributeValue, boolean disableAutoApprove, String autoApprovedRule, String autoApprovedRuleAttribute, boolean disableApprovalRequired, String approvalRequiredRule, String approvalRequiredRuleAttribute, boolean disableApprovalRisk, String identityRiskThreshold, String entitlementRiskThreshold,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) throws GeneralException
+   	{
+   	
+   		  	String key = (String)item.getName();
+			String value;
+
+			if(item.getValue().getClass().getName().equalsIgnoreCase("java.lang.String")){
+				value = (String)item.getValue();
+			}
+			else{
+				List attribute =  (List)item.getValue();
+				value = (String)attribute.get(0);
+			}
+
+
+			Application applicationObject =wfcontext.getSailPointContext().getObjectByName(Application.class, application);
+			ManagedAttribute attributeObject = ManagedAttributer.get(wfcontext.getSailPointContext(), applicationObject, false, key, value);
+			//add filter code here
+			
+			
+			if(disableApprovalRisk || checkEntitlementRiskThreshold(entitlementRiskThreshold, applicationObject, value)){
+				Object objectAttributeValue = attributeObject.getAttribute(attributeName);
+				String approveRequiredAttributeRuleName=  (String)attributeObject.getAttribute(approvalRequiredRuleAttribute);
+				String autoApprovedAttributeRuleName = (String)attributeObject.getAttribute(autoApprovedRuleAttribute);
+				evaluateApproval(masterSet, filtered, item, workItemDescription, includeOnTrue,  identityName, attributeName, application, approvalAttributeType, disableMetadataApproval, (Object)attributeObject,  (Object)objectAttributeValue, attributeValue, disableApprovalRequired, approvalRequiredRule,  approveRequiredAttributeRuleName,  disableAutoApprove, autoApprovedRule,  autoApprovedAttributeRuleName,  approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);	   
+			}	
+   	}
+   	
+   	
+   	public ApprovalSet filterApprovalSetByAttribute(ApprovalSet masterSet, String workItemDescription, boolean includeRejected, boolean forceDecision,  boolean disableMetadataApproval, String attributeName, String attributeValue, String approvalAttributeType, boolean includeOnTrue, String identityName, boolean disableApprovalRisk,String identityRiskThreshold, String entitlementRiskThreshold, boolean disableApprovalRequired, String approvalRequiredRuleAttribute, String approvalRequiredRule, boolean disableAutoApprove, String autoApprovedRule, String autoApprovedRuleAttribute,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) throws GeneralException
+   	{
+		logger.debug("Entering filterApprovalSetByAttribute....");
+		logger.trace("Not printing out parameters, as they should have already been printed out..");
+
+		ApprovalSet filtered = new ApprovalSet();
+						
+		if( masterSet != null ){
+			logger.debug("masterSet wasn't null. Master Set has " + Util.size(masterSet.getItems()) + " items in the approval set.");
+			logger.debug("Building filtered list of items. ");
+			List items = masterSet.getItems();
+			if( !includeRejected){
+				logger.trace("includedRejected was false. Need to remove all items that have been rejected already..");
+				items = new ArrayList();
+				for(ApprovalItem item : masterSet.getItems()){
+					if(!item.isRejected()){
+						logger.debug(">>Item " + getString(item) + " to items list. It was rejected.");
+						items.add(item);
+					}
+				}
+			}
+
+			logger.debug("items list has a total " + Util.size(items) + " items in it now.");
+			if(Util.size(items) > 0 ){
+				for (int x=0; x<items.size(); x++ ){          
+					ApprovalItem item  = (ApprovalItem)items.get(x);
+					logger.trace(">>Analysing Approval Item: " + getString(item));
+					if(forceDecision){ 
+						logger.debug(">>Setting State to null on Approval Item: " + getString(item));
+						item.setState(null);
+					}
+					
+					String application = item.getApplication();
+					if(application != null){
+						logger.debug(">>Approval item has an application of " + getString(application));
+						if(approvalAttributeType!= null && approvalAttributeType.equalsIgnoreCase("application")){
+							logger.debug(">>Getting Application Object for " + getString(application));
+							Application applicationObject = wfcontext.getSailPointContext().getObjectByName(Application.class, application);
+							if(applicationObject != null) {
+								logger.debug(">>Getting Attribute " + getString(attributeName) + " off of the application object.");
+								Object objectAttributeValue = applicationObject.getAttributeValue(attributeName);
+								logger.debug(">>objectAttributeValue: " + getString(objectAttributeValue));
+								logger.debug(">>Getting approvalRequiredRule Attribute " + getString(approvalRequiredRuleAttribute) + " off of the application object.");
+								String approveRequiredAttributeRuleName=  (String)applicationObject.getAttributeValue(approvalRequiredRuleAttribute);
+								logger.debug(">>approveRequiredAttributeRuleName: " + getString(approveRequiredAttributeRuleName));
+								logger.debug(">>Getting autoApprovedAttributeRuleName Attribute " + getString(autoApprovedRuleAttribute) + " off of the application object.");
+								String autoApprovedAttributeRuleName = (String)applicationObject.getAttributeValue(autoApprovedRuleAttribute);
+								logger.debug(">>autoApprovedAttributeRuleName: " + getString(autoApprovedAttributeRuleName));
+								logger.debug("Calling evaluateApproval from UtilDynamicApproval...");
+								evaluateApproval(masterSet, filtered, item, workItemDescription, includeOnTrue, identityName, attributeName, application, approvalAttributeType, disableMetadataApproval, (Object)applicationObject,  (Object)objectAttributeValue,   attributeValue, disableApprovalRequired, approvalRequiredRule,  approveRequiredAttributeRuleName, disableAutoApprove, autoApprovedRule,  autoApprovedAttributeRuleName,  approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);									
+							} else {
+								logger.warn("Couldnt get Application Object for " + getString(application) + " skipping this item...");
+							}
+						}
+						else{
+							//handle entitlement filter. then handle role filter.	
+							if((approvalAttributeType == null || approvalAttributeType.equalsIgnoreCase("entitlement") || approvalAttributeType.equalsIgnoreCase("any")) && application.equalsIgnoreCase("IIQ") == false && application.equalsIgnoreCase("IdentityIQ") == false){	
+								handleEntitlementFilters(masterSet,includeOnTrue, workItemDescription, approvalAttributeType, filtered,  item, identityName, application,  disableMetadataApproval, attributeName,  attributeValue,  disableAutoApprove, autoApprovedRule,  autoApprovedRuleAttribute,  disableApprovalRequired, approvalRequiredRule,  approvalRequiredRuleAttribute, disableApprovalRisk, identityRiskThreshold,  entitlementRiskThreshold,  approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);		
+								
+							}
+							else if((approvalAttributeType == null || approvalAttributeType.equalsIgnoreCase("role") || approvalAttributeType.equalsIgnoreCase("any"))  && (application.equalsIgnoreCase("IIQ") || application.equalsIgnoreCase("IdentityIQ"))){
+								handleRoleFilters(masterSet, includeOnTrue, workItemDescription, approvalAttributeType, filtered,  item, identityName, application, disableMetadataApproval, attributeName, attributeValue, disableAutoApprove, autoApprovedRule,  autoApprovedRuleAttribute,  disableApprovalRequired, approvalRequiredRule,  approvalRequiredRuleAttribute, disableApprovalRisk, identityRiskThreshold, entitlementRiskThreshold, approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute);	
+							}
+						}
+					} else {
+						logger.error("Couldn't get application from approval item....?");
+					}
+				}
+			} else {
+				logger.warn("No items left that need action..");
+			}
+		} else {
+			logger.warn("masterSet was null. Returning a blank approvalSet.");
+		}
+		
+
+		logger.debug("Filtered Approval Set: " + getString(filtered));
+		if(filtered != null){
+			logger.trace("Filtered Approval Set XML: " + filtered.toXml());
+		}
+		return filtered;
+	}
+	
+	public ApprovalSet filterApprovalSetByAttributeAndUserRiskThreshold( ApprovalSet masterSet, String workItemDescription, boolean includeRejected, boolean forceDecision, boolean disableMetadataApproval, String attributeName, String attributeValue, String approvalAttributeType, boolean includeOnTrue, boolean disableApprovalRisk, String identityRiskThreshold, String entitlementRiskThreshold, String identityName, boolean disableApprovalRequired, String approvalRequiredRuleAttribute, String approvalRequiredRule, boolean disableAutoApprove, String autoApprovedRule, String autoApprovedRuleAttribute,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) throws GeneralException 
+	{
+		logger.debug("Entering filterApprovalSetByAttributeAndUserRiskThreshold....");
+		logger.trace(">> masterSet: " + getString(masterSet));
+		logger.trace(">> workItemDescription : " + getString(workItemDescription ));
+		logger.trace(">> includeRejected : " + getString(includeRejected ));
+		logger.trace(">> forceDecision : " + getString(forceDecision ));
+		logger.trace(">> disableMetadataApproval : " + getString(disableMetadataApproval ));
+		logger.trace(">> attributeName : " + getString(attributeName ));
+		logger.trace(">> attributeValue : " + getString(attributeValue ));
+		logger.trace(">> approvalAttributeType : " + getString(approvalAttributeType ));
+		logger.trace(">> includeOnTrue : " + getString(includeOnTrue ));
+		logger.trace(">> disableApprovalRisk : " + getString(disableApprovalRisk ));
+		logger.trace(">> identityRiskThreshold : " + getString(identityRiskThreshold ));
+		logger.trace(">> entitlementRiskThreshold : " + getString(entitlementRiskThreshold ));
+		logger.trace(">> identityName : " + getString(identityName ));
+		logger.trace(">> disableApprovalRequired : " + getString(disableApprovalRequired ));
+		logger.trace(">> approvalRequiredRuleAttribute: " + getString(approvalRequiredRuleAttribute));
+		logger.trace(">> approvalRequiredRule : " + getString(approvalRequiredRule ));
+		logger.trace(">> disableAutoApprove : " + getString(disableAutoApprove ));
+		logger.trace(">> autoApprovedRule : " + getString(autoApprovedRule ));
+		logger.trace(">> autoApprovedRuleAttribute: " + getString(autoApprovedRuleAttribute));
+		logger.trace(">> approvalOwner : " + getString(approvalOwner ));
+		logger.trace(">> approvalOwnerType : " + getString(approvalOwnerType ));
+		logger.trace(">> approvalOwnerRule : " + getString(approvalOwnerRule ));
+		logger.trace(">> approvalOwnerAttribute : " + getString(approvalOwnerAttribute ));
+		logger.trace(">> approvalOwnerRuleAttribute: " + getString(approvalOwnerRuleAttribute));
+		
+		logger.debug("Getting IdentityID...");
+		Identity id = wfcontext.getSailPointContext().getObjectByName(Identity.class, identityName);
+		logger.trace("ID: " + getString(id));
+		
+		//TH - seems like overly complicated if statement logic. Not 100% sure what its for
+		if(disableApprovalRisk == false && id != null && identityRiskThreshold != null && (id.getScorecard()== null || id.getScorecard().getCompositeScore() < Integer.parseInt(identityRiskThreshold))){ 
+			logger.debug("Returning empty approval set.");
+			return new ApprovalSet();
+		}
+		else
+		{
+			logger.debug("Calling filterApprovalSetByAttribute....");
+			return filterApprovalSetByAttribute(masterSet, workItemDescription, includeRejected, forceDecision, disableMetadataApproval, attributeName, attributeValue, approvalAttributeType, includeOnTrue, identityName, disableApprovalRisk, identityRiskThreshold, entitlementRiskThreshold, disableApprovalRequired, approvalRequiredRuleAttribute, approvalRequiredRule,  disableAutoApprove, autoApprovedRule,  autoApprovedRuleAttribute, approvalOwner, approvalOwnerType, approvalOwnerRule, approvalOwnerAttribute, approvalOwnerRuleAttribute); 
+		}
+	}	
+	
+	public ApprovalSet approveNonResponded(ApprovalSet masterSet, String workItemDescription, boolean includeRejected, boolean forceDecision, boolean disableMetadataApproval, String attributeName, String attributeValue, String approvalAttributeType, boolean includeOnTrue, boolean disableApprovalRisk, String identityRiskThreshold, String entitlementRiskThreshold, String identityName, boolean disableApprovalRequired, String approvalRequiredRuleAttribute, String approvalRequiredRule, boolean disableAutoApprove, String autoApprovedRule, String autoApprovedRuleAttribute,  String approvalOwner, String approvalOwnerType, String approvalOwnerRule, String approvalOwnerAttribute, String approvalOwnerRuleAttribute) throws GeneralException 
+	{
+		List items = masterSet.getItems();
+		
+		for(int x=0; x< items.size(); x++)
+		{
+			ApprovalItem aItem = (ApprovalItem)items.get(x);
+		     if(aItem.isApproved() == false && aItem.isRejected() == false && aItem.getState() != State.Pending)
+		     {
+		    	 
+		    	 aItem.approve();
+		    	 aItem.setState(State.Finished);
+		     }
+			
+		}
+		
+		return masterSet;
+	}
+
+	
+  ]]></Source>
+</Rule>
+</sailpoint>

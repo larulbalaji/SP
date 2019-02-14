@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form hidden="true" name="Account Group Member Totals Report Form" type="Report">
+  <Section columns="2" label="Report Options" name="Report Options">
+    <Field columnSpan="1" displayName="Applications" helpKey="Selected Applications" multi="true" name="application" type="Application" value="ref:application"/>
+    <Field columnSpan="1" displayType="radio" defaultValue="All" displayName="Groups to include" helpKey="Groups to include in report" multi="false" name="grps2Incl" type="string">
+		<AllowedValuesDefinition>
+			<Value>
+				<List>
+					<List>
+						<String>All</String>
+						<String>Include all groups</String>
+					</List>
+					<List>
+						<String>NotEmptyOnly</String>
+						<String>Only groups with members</String>
+					</List>
+					<List>
+						<String>EmptyOnly</String>
+						<String>Only empty groups</String>
+					</List>
+				</List>
+			</Value>
+		</AllowedValuesDefinition>
+	</Field>
+	</Section>
+</Form>

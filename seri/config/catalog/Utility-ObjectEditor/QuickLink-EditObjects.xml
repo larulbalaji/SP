@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="workflow" category="ITServices" messageKey="Create/Edit Object(s)" name="Edit Objects">
+  <Attributes>
+    <Map>
+      <entry key="bulk">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="forceAllowOthers">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="forceAllowSelf">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="hidden">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="hideAllowOthers">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="hideAllowSelf">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="requester">
+        <value>
+          <Script>
+            <Source><![CDATA[
+                return currentUser.getName();
+              ]]></Source>
+          </Script>
+        </value>
+      </entry>
+      <entry key="workflowName" value="Edit Objects"/>
+      <entry key="workflowSuccess"/>
+    </Map>
+  </Attributes>
+  <DynamicScopes>
+    <Reference class="sailpoint.object.DynamicScope" name="Admins"/>
+  </DynamicScopes>
+</QuickLink>

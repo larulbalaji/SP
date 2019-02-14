@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="SystemConfiguration">
+     <Attributes>
+      <Map>
+        <entry key="workItemArchiveTypes" value="Certification, Remediation, Delegation, Approval, ViolationReview, Form, PolicyViolation, Challenge, ImpactAnalysis, Signoff, ManualAction"/>
+      </Map>
+     </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>
+       

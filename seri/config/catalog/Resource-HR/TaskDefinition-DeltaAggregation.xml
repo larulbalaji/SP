@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition formPath="/monitor/tasks/accountAggregationTask.xhtml" name="Process Human Resources updates" resultAction="Delete" type="AccountAggregation">
+  <Attributes>
+    <Map>
+      <entry key="applications" value="Human Resources"/>
+      <entry key="correlateEntitlements" value="true"/>
+      <entry key="deltaAggregation" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>Performs a delta aggregation from Human Resources,</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Account Aggregation"/>
+  </Parent>
+</TaskDefinition>

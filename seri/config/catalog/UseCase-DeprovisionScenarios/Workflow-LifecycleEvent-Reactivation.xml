@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"   name="Lifecycle Event - Reactivation" type="IdentityLifecyle">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="rule:Account Provisioning - Parse Application Reactivation Policies" name="accountReactivationMap"/>
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event">
+    <Description>The IdentityChangeEvent</Description>
+  </Variable>
+  <Variable name="userName">
+    <Description>The display name of the identity.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace"/>
+  <Variable name="project"/>
+  <Variable name="plan"/>
+  <Description>Reactivate all user accounts when an employee is rehired.  Send
+       email notifications to the person's Manager and to any Application Owners
+       of non-authoritative Applications.  In other words, there is no reason
+       to alert the HR team, since they triggered this event in the first place.</Description>
+  <Step icon="Start" name="Start">
+    <Transition to="Initiate Reactivation Tasks"/>
+  </Step>
+  <Step action="rule:Account Provisioning - Initiate Reactivation Workflows" icon="Default" name="Initiate Reactivation Tasks" posX="190" posY="20">
+    <Transition to="Refresh Identity"/>
+  </Step>
+  <Step action="call:refreshIdentity" condition="script:return false;" icon="Task" name="Refresh Identity" posX="943" posY="339">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="correlateEntitlements" value="string:true"/>
+    <Arg name="provision" value="string:true"/>
+    <Arg name="synchronizeAttributes" value="string:true"/>
+    <Description>Add arguments as necessary to enable refresh features.  Typically you only want this
+      to correlate roles and possibly provision if we notice new assigned roles.
+      Note that provisioning will be done in the Identity Refresh workflow so if there
+      are any provisioning forms to display we won't feed them directly to the 
+      current user, they'll have to return to the inbox.</Description>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="355" posY="19"/>
+</Workflow>

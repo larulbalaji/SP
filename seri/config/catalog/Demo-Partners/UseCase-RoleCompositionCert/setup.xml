@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="spDemo-RoleMiningTask.xml"/>
+    <ImportAction name="include" value="spDemo-TaxAccPopulation.xml"/>
+    <ImportAction name="include" value="spDemo-Refresh-TaxAccountants.xml"/>
+    <ImportAction name="include" value="spDemo-SequentialRefresh-TaxDemo.xml"/> 
+</sailpoint>	

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition name="Refresh Scopes" resultAction="Delete" subType="task_item_type_identity" type="Identity">
+  <Attributes>
+    <Map>
+      <entry key="correlateScope" value="true"/>
+      <entry key="markDormantScopes" value="false"/>
+      <entry key="noAutoCreateScopes" value="false"/>
+    </Map>
+  </Attributes>
+  <Description>Refresh and/or Create Scopes of all the identities.</Description>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Identity Refresh"/>
+  </Parent>
+</TaskDefinition>

@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="NativeChangeRulesDisable">
+  <Source><![CDATA[ 
+import sailpoint.tools.*;
+import sailpoint.api.*;
+import sailpoint.object.*;
+import sailpoint.workflow.*;
+
+/**
+ * Convert the NativeChangeDetections into a provisioning plan
+ * to reset the original value.
+ * 
+ * @param context
+ * @param changes
+ * @return
+ */
+private ProvisioningPlan changesToDisableProvisioningPlan(SailPointContext context, List changes) {
+
+  if ( Util.size(changes) == 0 ) return null;
+
+  ProvisioningPlan plan = new ProvisioningPlan();
+  for ( NativeChangeDetection change : changes ) {
+    List diffs = change.getDifferences();
+    if ( Util.size(diffs) > 0 ) {
+      AccountRequest acctReq = new AccountRequest();
+      acctReq.setNativeIdentity(change.getNativeIdentity());
+      acctReq.setApplication(change.getApplicationName());
+      acctReq.setInstance(change.getInstance());
+      acctReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Disable);
+
+      plan.add(acctReq);
+    }
+  }
+
+  return plan;
+}
+
+
+private ProvisioningPlan buildDisablePlanFromChanges(WorkflowContext wfc)
+    throws GeneralException {
+
+
+  Attributes args = wfc.getArguments();
+  IdentityChangeEvent event = (IdentityChangeEvent) Util.get(args, "event");        
+  ProvisioningPlan plan = null;
+  if ( event != null ) {
+    List changes = event.getNativeChanges();
+    if ( Util.size(changes) > 0 ) {
+      plan = changesToDisableProvisioningPlan(wfc.getSailPointContext(),changes);
+    }
+  }
+  System.out.println("buildDisablePlanFromChanges:" + plan);
+  return plan;
+}
+
+
+
+ ]]></Source>
+</Rule>

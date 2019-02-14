@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.SAPHANAConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, PASSWORD, ENABLE, UNLOCK, ACCOUNT_ONLY_REQUEST" icon="enterpriseIcon" name="SAP HANA" profileClass="" type="SAP HANA Database">
+  <Attributes>
+    <Map>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1489161318489</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1489161316294</Date>
+        </value>
+      </entry>
+      <entry key="chunkToFetch" value="1000"/>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="driverClass" value="com.sap.db.jdbc.Driver"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="encrypted" value="password"/>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="password" value="1:3wa+aAOwZZG+nKDPIoI+iA=="/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SAP HANA"/>
+      <entry key="url" value="jdbc:sap://10.0.4.8:30013/?databaseName=SYSTEMDB"/>
+      <entry key="user" value="sailpoint"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <ProvisioningForms>
+    <Form name="Create Account" objectType="account" type="Create">
+      <Attributes>
+        <Map>
+          <entry key="pageTitle" value="Create Account"/>
+        </Map>
+      </Attributes>
+      <Section label="Create Account" name="Section 1">
+        <Field displayName="con_prov_policy_user_create_sap_hana_username" helpKey="help_con_prov_policy_user_create_sap_hana_username" name="USER_NAME" required="true" type="string">
+          <Script>
+            <Source><![CDATA[return identity.getFirstname() + identity.getLastname();]]></Source>
+          </Script>
+        </Field>
+        <Field displayName="con_prov_policy_user_create_sap_hana_userpassword" helpKey="help_con_prov_policy_user_create_sap_hana_userpassword" name="password" required="true" type="secret" value="P@ssw0rd"/>
+        <Field displayName="con_prov_policy_user_create_sap_hana_pwdchange" helpKey="help_con_prov_policy_user_create_sap_hana_pwdchange" name="FORCE_PWD_CHG_ON_NEXT_LOGON" type="string" value="YES">
+          <AllowedValuesDefinition>
+            <Value>
+              <List>
+                <String>YES</String>
+                <String>NO</String>
+              </List>
+            </Value>
+          </AllowedValuesDefinition>
+        </Field>
+        <Field displayName="con_prov_policy_user_create_sap_hana_restricted" helpKey="help_con_prov_policy_user_create_sap_hana_restricted" name="IS_RESTRICTED" type="string" value="FALSE">
+          <AllowedValuesDefinition>
+            <Value>
+              <List>
+                <String>TRUE</String>
+                <String>FALSE</String>
+              </List>
+            </Value>
+          </AllowedValuesDefinition>
+        </Field>
+      </Section>
+    </Form>
+  </ProvisioningForms>
+  <Schemas>
+    <Schema displayAttribute="USER_NAME" identityAttribute="USER_ID" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="USER_ID" type="string">
+        <Description>ID of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="USER_NAME" type="string">
+        <Description>Name of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="USER_MODE" type="string">
+        <Description>Mode of the user: 'LOCAL', 'GLOBAL', 'EXTERNAL'</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATOR" type="string">
+        <Description>Creator of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="VALID_FROM" type="string">
+        <Description>Specify a date time from which the user account is valid.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="VALID_UNTIL" type="string">
+        <Description>Specify a date time until which the user account is valid.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="IS_RESTRICTED" type="string">
+        <Description>Specifies if the user is a restricted user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="IS_CLIENT_CONNECT_ENABLED" type="string">
+        <Description>Specifies if the user is able to connect to client</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="HAS_REMOTE_USERS" type="string">
+        <Description>Specifies if there is a database user in another tenant database as the remote identity of the database user.</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SESSION_CLIENT" type="string">
+        <Description>Specifies the client whose data can be accessed by user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMAIL_ADDRESS" type="string">
+        <Description>Email address of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TIME_ZONE" type="string">
+        <Description>Time zone of the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="AUTHENTICATION_TYPE" type="string">
+        <Description>Different Authentication methods supported by user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="SYSTEM_PRIVILEGES" type="string">
+        <Description>System Privileges assigned to the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="APPLICATION_PRIVILEGES" type="string">
+        <Description>Application Privileges assigned to the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="CATALOG_ROLES" schemaObjectType="CATALOG_ROLE" type="string">
+        <Description>Catalog Roles assigned to the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="REPOSITORY_ROLES" schemaObjectType="REPOSITORY_ROLE" type="string">
+        <Description>Repository Roles assigned to the user</Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="FORCE_PWD_CHG_ON_NEXT_LOGON" type="string">
+        <Description> If value is "YES", the password is set in initial mode else it is set in permanent mode </Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema aggregationType="group" displayAttribute="ROLE_NAME" identityAttribute="ROLE_ID" instanceAttribute="" nativeObjectType="REPOSITORY_ROLE" objectType="REPOSITORY_ROLE">
+      <AttributeDefinition name="ROLE_NAME" type="string">
+        <Description> Role name </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLE_ID" type="string">
+        <Description> Role ID </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLE_MODE" type="string">
+        <Description> Mode of the role: 'LOCAL' </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GLOBAL_IDENTITY" type="string">
+        <Description> Identity specified for role with ROLE_MODE GLOBAL </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATOR" type="string">
+        <Description> Name of the user who created the role </Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="GRANTED_ROLES" type="string">
+        <Description> The roles which are assigned to the current role </Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema aggregationType="group" displayAttribute="ROLE_NAME" identityAttribute="ROLE_ID" instanceAttribute="" nativeObjectType="CATALOG_ROLE" objectType="CATALOG_ROLE">
+      <AttributeDefinition name="ROLE_NAME" type="string">
+        <Description> Role name </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLE_ID" type="string">
+        <Description> Role ID </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLE_MODE" type="string">
+        <Description> Mode of the role: 'LOCAL' </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GLOBAL_IDENTITY" type="string">
+        <Description> Identity specified for role with ROLE_MODE GLOBAL </Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATOR" type="string">
+        <Description> Name of the user who created the role </Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="GRANTED_ROLES" type="string">
+        <Description> The roles which are assigned to the current role </Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

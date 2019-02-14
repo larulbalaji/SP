@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <TaskDefinition formPath="/monitor/tasks/sequentialTask.xhtml"
+    name="Approvals-ProvisioningTasks" resultAction="Delete" type="Generic">
+    <Attributes>
+      <Map>
+        <entry key="taskList"
+          value="Perform Identity Request Maintenance, Check Active Policies, Refresh Risk Scores" />
+        <entry key="trace" value="true" />
+      </Map>
+    </Attributes>
+    <Description>Template for creating a task that runs multiple other
+      tasks.</Description>
+    <Owner>
+      <Reference class="sailpoint.object.Identity" name="spadmin" />
+    </Owner>
+    <Parent>
+      <Reference class="sailpoint.object.TaskDefinition" name="Sequential Task Launcher" />
+    </Parent>
+  </TaskDefinition>
+</sailpoint>

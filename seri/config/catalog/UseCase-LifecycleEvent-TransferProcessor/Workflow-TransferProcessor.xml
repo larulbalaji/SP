@@ -1,0 +1,640 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  handler="sailpoint.api.StandardWorkflowHandler"  name="Lifecycle Event - Transfer Processor" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event" type="sailpoint.object.IdentityChangeEvent">
+    <Description>The IdentityChangeEvent</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="true" name="trace"/>
+  <Variable initializer="script: event.getIdentityFullName()" name="identityFullname"/>
+  <Variable name="oldManagerName"/>
+  <Variable name="newManagerName"/>
+  <Variable name="decision"/>
+  <Variable name="retentionExpiry"/>
+  <Variable initializer="spadmin" name="sponsor"/>
+  <Variable name="ownedApps"/>
+  <Variable name="reason"/>
+  <!-- SIQ Section -->
+  <Variable name="theForm"/>
+  <Variable name="retMap"/>
+  <Variable name="SIQEnabled" initializer="true"/>
+  <Variable name="SIQDBServer" initializer="seri.sailpointdemo.com"/>
+  <Variable name="SIQDBName" initializer="SecurityIQDB_SERI" />
+  <Variable name="SIQDBUser" initializer="sa"/>
+  <Variable name="SIQDBPassword" initializer="Sailp0!nt"/>
+  <Variable name="SIQResources">
+      <Description>Bucket for owned resources (once calculated)</Description>
+  </Variable>
+  <!-- End SIQ Section -->
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="Demo - Workflow RuleLibrary"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start">
+    <Transition to="Prepare"/>
+  </Step>
+  <Step icon="Message" name="Prepare">
+    <Description>Process an identity that has transfered managers</Description>
+    <Script>
+      <Source><![CDATA[
+import java.util.Iterator;
+import sailpoint.object.Application;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.Prepare");
+
+// Pull some essential context out of the passed event object
+//
+Identity oldManager = (null != event.getOldObject()) ? event.getOldObject().getManager() : null;
+Identity newManager = (null != event.getObject()) ? event.getObject().getManager() : null;
+String oldManagerName = (null != oldManager) ? oldManager.getDisplayableName() : null;
+String newManagerName = (null != newManager) ? newManager.getDisplayableName() : null;
+workflow.put("oldManagerName", oldManagerName);
+workflow.put("newManagerName", newManagerName);
+
+Identity cube = (null != event.getNewObject()) ? event.getNewObject() : null;
+List currentApps = new ArrayList();
+for (Link link : cube.getLinks()) {
+  Application app = link.getApplication();
+  if (!app.isAuthoritative()) {
+    currentApps.add(app.getName());
+  }
+}
+workflow.put("currentApps", Util.listToCsv(currentApps));          
+workflow.put("currentRiskScore", cube.getScore());
+
+String detectedRoles = cube.getBundleSummary();
+String assignedRoles = cube.getAssignedRoleSummary();
+if ((null == detectedRoles) && (null == assignedRoles)) {
+  workflow.put("currentRoles", " none ");
+} else {
+  if (null == assignedRoles) {
+    workflow.put("currentRoles", detectedRoles);
+  } else {
+    workflow.put("currentRoles", assignedRoles + ", " + detectedRoles);
+  } 
+}
+
+serilog.debug(identityName + " changed managers from " + oldManagerName + " to " + newManagerName);
+
+// Sponsor processing...
+// 
+// Use the old manager as the 'sponsor'; could do DB lookup or other cool stuff here
+//
+workflow.put("sponsor", oldManager.getName());
+
+// Find out if this transferee is an owner of any apps or a
+// member of any workgroups
+//
+//   - Easily extensible to roles, managed attributes, etc
+//
+String ownedApps = getListOfOwnedApplications(identityName);
+String workgroups = getWorkgroupMembership(identityName);
+workflow.put("ownedApps", ownedApps);
+workflow.put("workgroups", workgroups);
+
+   
+      ]]></Source>
+    </Script>
+    <Transition to="Transfer Notification"/>
+  </Step>
+  <Step action="sendEmail" name="Transfer Notification">
+    <Arg name="template" value="User Transfer Notification"/>
+    <Arg name="to" value="admin@sailpointdemo.com"/>
+    <Arg name="from" value="iiq-noreply@sailpointdemo.com"/>
+    <Transition to="Identity Administrator Notification" when="ownedApps != null || workgroups.length() > 0"/>
+    <Transition to="Calculate Ownerships" when="SIQEnabled"/>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step action="sendEmail" name="Identity Administrator Notification">
+    <Arg name="template" value="Identity Administrator Transfer Alert"/>
+    <Arg name="to" value="admin@sailpointdemo.com"/>
+    <Arg name="from" value="iiq-noreply@sailpointdemo.com"/>
+    <Arg name="ownedApps" value="ref:ownedApps"/>
+    <Transition to="Identity Administrator Alert"/>
+  </Step>
+  <Step name="Identity Administrator Alert">
+    <Approval description="Transfer : $(identityFullname) : Identity Administrator Alert" owner="ref:sponsor" send="identityFullname, ownedApps, workgroups">
+      <Arg name="workItemType" value="Form"/>
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Identity Administrator Alert"/>
+          </Map>
+        </Attributes>
+        <Button action="cancel" label="Cancel"/>
+        <Button action="next" label="Continue"/>
+        <Section type="text">
+          <Field value="&#xA;                  It has been detected that this transfer may affect the following objects due to &#xA;                  the transferee being an application owner and/or workgroup member.&#xA;                  An automatic notification has been sent to the IdentityIQ Admin Team.  &#xA;                  Click Continue to proceed with transfer processing.&#xA;&#x9;&#x9;"/>
+        </Section>
+        <Section>
+          <Field displayName="Transferee" name="identityFullname" readOnly="true" type="string"/>
+          <Field displayName="Application Ownership" name="ownedApps" readOnly="true" type="string"/>
+          <Field displayName="Workgroup Membership" name="workgroups" readOnly="true" type="string"/>
+        </Section>
+      </Form>
+    </Approval>
+    <Transition to="Calculate Ownerships" when="SIQEnabled"/>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step hidden="true" name="Decache">
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.Decache");
+serilog.debug("...Decaching!");context.decache();
+]]>
+</Source>
+    </Script>
+    <Transition to="Calculate Ownerships" when="SIQEnabled"/>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step name="Calculate Ownerships" resultVariable="SIQResources">
+    <Script>
+      <Source><![CDATA[
+import java.sql.*;
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.CalculateOwnerships");
+
+/* Go look at SIQ for resources the mover owns */
+/* We know that only MSSQL server would be user here; makes it simpler */
+String url="jdbc:sqlserver://"+SIQDBServer+";databaseName="+SIQDBName+";";
+serilog.debug("Obtaining connection..");
+try {
+  Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+  Connection conn = DriverManager.getConnection(url,SIQDBUser,SIQDBPassword);
+  serilog.debug("..done");
+  
+  Statement stmt = conn.createStatement();
+  ResultSet rs;
+  
+  Identity iden=context.getObjectByName(Identity.class, identityName);
+  
+  String query="select res.full_path as path, res.id as res_id, res.type_enum_id as type, usr.user_display_name as username "+ 
+               "from whiteops.business_service_owner as lnk "+
+               "inner join whiteops.business_service as res on res.id=lnk.business_service_id "+
+               "inner join whiteops.ra_user as usr on usr.id=lnk.ra_user_id "+
+               "where usr.user_email = '"+iden.getEmail()+"';";
+  
+  serilog.debug("Executing query..");
+  rs = stmt.executeQuery(query);
+  serilog.debug(".. done");
+  Map map=new HashMap();
+  Integer i=new Integer(0);
+  while ( rs.next() ) {
+      String path = rs.getString("path");
+      String type = rs.getString("type");
+      String user = rs.getString("username");
+      String resID = rs.getString("res_id");
+      serilog.debug("result: "+path+" "+type+" "+user);
+      Map res=new HashMap();
+      res.put("path", path);
+      res.put("id", resID);
+      map.put(i, res);    
+      i=i+1;
+  }
+  conn.close();
+  
+  return map;
+} catch (Exception e) {
+  serilog.error("Something went wrong contacting SIQ database: "+e);
+  return null;
+}
+
+          
+      ]]></Source>
+    </Script>
+    <Transition to="Generate Form"/>
+  </Step>
+  <Step name="Generate Form" resultVariable="theForm">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.DynamicValue;
+import sailpoint.object.Form;
+import sailpoint.object.Field;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Script;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.GenerateForm");
+
+
+Form frm=new Form();
+frm.put("pageTitle", "Transfer Process");
+frm.put("title", "Retain / Revoke Decision");
+
+//Default next and cancel buttons
+List buttons=new ArrayList();
+buttons.add(new Button("Next", "next"));
+buttons.add(new Button("Cancel", "cancel"));
+frm.setButtons(buttons);
+
+Section sect=new Section();
+sect.setType("text");
+
+Field f = new Field();
+f.setValue("\n\t\t  Per corporate policy, your input is required regarding the transfer\n                  of the following employee.  Please choose whether their current\n                  access should be retained or revoked.  By choosing Revoke, an access\n                  review will be generated to facilitate revocation.  By\n                  choosing Retain, the individual's current access will be maintained\n                  for a period of time specified by you.");
+
+sect.add(f);
+frm.add(sect);
+
+sect=new Section();
+sect.setType("datatable");
+sect.setLabel("Transfer Details");
+
+f=new Field();
+f.setDisplayName("Person");
+f.setName("identityFullname");
+sect.add(f);
+
+f=new Field();
+f.setDisplayName("Old Manager");
+f.setName("oldManagerName");
+sect.add(f);
+
+f=new Field();
+f.setDisplayName("New Manager");
+f.setName("newManagerName");
+sect.add(f);
+
+frm.add(sect);
+
+sect=new Section();
+sect.setType("datatable");
+sect.setLabel("Summary of Current Access");
+sect.put("hideNulls", "true");
+
+f=new Field();
+f.setDisplayName("Applications");
+f.setName("currentApps");
+f.setMultiValued(true);
+sect.add(f);
+
+f=new Field();
+f.setDisplayName("Roles");
+f.setName("currentRoles");
+f.setMultiValued(true);
+sect.add(f);
+
+f=new Field();
+f.setDisplayName("Risk Score");
+f.setName("currentRiskScore");
+sect.add(f);
+
+frm.add(sect);
+
+sect=new Section();
+sect.setLabel("Decision");
+
+f=new Field();
+f.setDisplayName("Decision");
+f.setName("decision");
+DynamicValue dv=new DynamicValue();
+List retrev=new ArrayList();
+retrev.add("Retain");
+retrev.add("Revoke");
+dv.setValue(retrev);
+f.setAllowedValuesDefinition(dv);
+
+Script scrp=new Script();
+scrp.setSource("if (value==null) return \"Please make a decision\"; else return null");
+f.setValidationScript(scrp);
+sect.add(f);
+
+f=new Field();
+f.setDisplayName("Comments/Reason");
+f.setName("reason");
+f.setMultiValued(true);
+scrp=new Script();
+scrp.setSource("if (value==null) return \"Please provide a reason\"; else return null");
+f.setValidationScript(scrp);
+sect.add(f);
+
+frm.add(sect);
+
+if ("true".equals(SIQEnabled) && (null!=SIQResources)) {
+  sect=new Section();
+  sect.setLabel("Owned Resources");
+  
+  sect.setSubtitle("Should the user keep ownership after the move?");
+  
+  for (Integer resourceName: SIQResources.keySet()) {
+    Map item=SIQResources.get(resourceName);
+    f=new Field();
+    f.setDisplayName(item.get("path"));
+    f.setName("decision:"+item.get("id"));
+    DynamicValue dv=new DynamicValue();
+    List retrev=new ArrayList();
+    retrev.add("Yes");
+    retrev.add("No");
+    dv.setValue(retrev);
+    f.setAllowedValuesDefinition(dv);
+    sect.add(f);
+  
+  }
+}
+
+
+frm.add(sect);
+
+serilog.debug("Form=\n"+frm.toXml());
+
+return frm;
+
+      ]]></Source>
+    </Script>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step name="Sponsor Decision">
+    <Approval description="Transfer : $(identityFullname) : Retain / Revoke" 
+              owner="ref:sponsor" return="retMap"
+              send="identityFullname, oldManagerName, newManagerName, decision, currentApps, currentRiskScore, currentRoles">
+      <Arg name="workItemType" value="string:Form" />
+      <Arg name="workItemDescription" value="string:Transfer : $(identityFullname) : Retain / Revoke" />
+      <Arg name="workItemForm" value="ref:theForm" />
+      <Arg name="workItemFormBasePath" value="retMap"/>      
+    </Approval>
+    <Transition to="Specify Retention Expiry">
+      <Script>
+        <Source><![CDATA[
+                println("Beanshell namespace:");
+    for (int i = 0 ; i < this.variables.length ; i++) {
+       String name = this.variables[i];
+       Object value = eval(name);
+       if (value == void)
+           println(name + " = void");
+       else if (value == null)
+           println(name + " = null");
+       else
+           println(name + ": " + value.getClass().getSimpleName() + " = " + value);
+    }
+            
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.SponsorDecision.TxToSpecifyRetentionExpiry");
+String dcsn=retMap.get("decision");
+serilog.debug("decision = " + dcsn);
+return (approved && dcsn.equals("Retain"));
+  ]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Review"/>
+  </Step>
+  <Step name="println">
+      <Script>
+        <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.SponsorDecision.TxToSpecifyRetentionExpiry");
+for (String key: retMap.keySet()) {
+  System.out.println(key+"="+retMap.get(key));
+}
+  ]]></Source>
+      </Script>
+  </Step>
+  <Step name="Specify Retention Expiry">
+    <Approval description="Transfer : $(identityFullname) : Specify Retention Expiry" owner="ref:sessionOwner" return="retentionExpiry" send="retentionExpiry">
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Specify Retention Expiration"/>
+          </Map>
+        </Attributes>
+        <Button action="back" label="Back"/>
+        <Button action="next" label="Next"/>
+        <Button action="cancel" label="Cancel"/>
+        <Section>
+          <Field displayName="Select:" name="retentionExpiry" type="date"/>
+        </Section>
+      </Form>
+      <ValidationScript>
+        <Source><![CDATA[
+String error = null;
+
+// Only do validation if the user is trying to advance wizard
+//
+if (WorkItem.State.Finished.equals(item.getState())) {
+
+  // make sure they've selected a date
+  Date expiration = item.getDate("retentionExpiry");
+  if (expiration == null) {
+    error = "Please select an expiration date";
+  } else {
+    Date now = new Date();
+    if (expiration.before(now)) {
+      error = "Please select a future date";
+    }
+  }
+}
+
+return error;
+        ]]></Source>
+      </ValidationScript>
+    </Approval>
+    <Transition to="Review" when="approved"/>
+    <Transition to="Sponsor Decision"/>
+  </Step>
+  <Step name="Review">
+    <Approval description="Transfer : $(identityFullname) : Review" owner="ref:sessionOwner" return="retentionExpiry, reason" send="identityFullname, decision, retentionExpiry, reason">
+      <Form >
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Transfer Process"/>
+            <entry key="title" value="Review"/>
+          </Map>
+        </Attributes>
+        <Button action="back" label="Back"/>
+        <Button action="next" label="Submit"/>
+        <Section type="text">
+          <Field value="&#xA;&#x9;&#x9;  You have chosen to revoke the existing access, an access review will be generated to facilitate revocation.      &#xA;&#x9;&#x9;"/>
+        </Section>
+        <Section type="datatable">
+          <Attributes>
+            <Map>
+              <entry key="hideNulls" value="true"/>
+            </Map>
+          </Attributes>
+          <Field displayName="Employee" name="identityFullname" readOnly="true" type="string"/>
+          <Field displayName="Access Decision" name="decision" readOnly="true" type="string"/>
+          <Field displayName="Retention Expiry" name="retentionExpiry" readOnly="true" type="date"/>
+          <Field displayName="Comments" multi="true" name="reason" readOnly="true" type="string"/>
+        </Section>
+      </Form>
+    </Approval>
+    <Transition to="Generate Certification">
+      <Script>
+        <Source>
+    return (approved &amp;&amp; "Revoke".equals(retMap.get("decision")) );
+  </Source>
+      </Script>
+    </Transition>
+    <Transition to="Schedule Retain Decision">
+      <Script>
+        <Source>
+    return (approved &amp;&amp; "Retain".equals(retMap.get("decision")));
+  </Source>
+      </Script>
+    </Transition>
+    <Transition to="Sponsor Decision">
+      <Script>
+        <Source>
+    return ("Revoke".equals(retMap.get("decision")));
+  </Source>
+      </Script>
+    </Transition>
+    <Transition to="Specify Retention Expiry">
+      <Script>
+        <Source>
+    return ("Retain".equals(retMap.get("decision")));
+  </Source>
+      </Script>
+    </Transition>
+  </Step>
+  <Step name="Generate Certification">
+    <Description>Generate a certification for the new manager</Description>
+    <Script>
+      <Source><![CDATA[
+import java.util.ArrayList;
+import java.util.List;
+
+import sailpoint.api.CertificationScheduler;
+import sailpoint.object.Certification;
+import sailpoint.object.CertificationDefinition;
+import sailpoint.object.Identity;
+import sailpoint.object.TaskSchedule;
+import sailpoint.web.certification.CertificationScheduleDTO;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.GenerateCertification");
+
+Identity requestor = context.getObject(Identity.class, launcher);  
+Identity identity = context.getObject(Identity.class, event.getIdentityName());
+
+serilog.debug("Building certification for " + identity.getName());
+
+// Certifier is the sponsor...
+//
+Identity certifier = context.getObject(Identity.class, sponsor);
+serilog.debug("Certification will be done by " + certifier.getName());
+
+CertificationScheduler scheduler = new CertificationScheduler(context);
+
+CertificationSchedule schedule = scheduler.initializeScheduleBean(requestor, Certification.Type.Identity);
+schedule.setRunNow(true);
+
+CertificationDefinition definition = schedule.getDefinition();
+definition.setCertifierSelectionType(CertificationDefinition.CertifierSelectionType.Manual);
+definition.setProcessRevokesImmediately(true);
+
+definition.setNameTemplate("Transfer Access Review of " + identity.getDisplayName() + " for " + certifier.getDisplayName());
+definition.setShortNameTemplate("Transfer Access Review of " + identity.getDisplayName());
+definition.setName("Transfer Access Review : " + identity.getDisplayName() + " [" + new Date().toString() + "]");
+
+List identities = new ArrayList();
+identities.add(identity.getName());
+definition.setIdentitiesToCertify(identities);
+definition.setCertifierName(certifier.getName());
+
+Identity certGroupOwner = context.getObjectByName(Identity.class, "IT Security");
+if (null == certGroupOwner) {
+  certGroupOwner = context.getObjectByName(Identity.class, "spadmin");
+}
+
+definition.setCertificationOwner(certGroupOwner);
+definition.setCertificationNameTemplate("Transfer-Initiated Access Review : " + identity.getDisplayName());
+
+TaskSchedule taskSchedule = scheduler.saveSchedule(schedule, false);
+
+      ]]></Source>
+    </Script>
+    <Transition to="Move owned resources"/>
+  </Step>
+  <Step name="Move owned resources">
+    <Description>Generate a certification for the new manager</Description>
+    <Script>
+      <Source><![CDATA[
+import java.sql.*;     
+import sailpoint.object.Identity;          
+          
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.TransferProcessor.GenerateCertification");
+
+// check through retMap
+// if any answer is 'yes', change owner to sponsor
+Identity idSponsor=context.getObjectByName(Identity.class, sponsor);
+String email=idSponsor.getEmail();
+
+String url="jdbc:sqlserver://"+SIQDBServer+";databaseName="+SIQDBName+";";
+String updateSQL="merge into whiteops.business_service_owner lnk "+
+                   "using whiteops.ra_user usr "+
+                   "on lnk.business_service_id=? "+
+                   "and usr.user_email='"+email+"' "+
+                 "when matched then "+
+                   "update "+
+                     "set lnk.ra_user_id=usr.id;";
+serilog.debug(updateSQL);
+serilog.debug("Getting connection");
+Connection conn = DriverManager.getConnection(url,SIQDBUser,SIQDBPassword);
+serilog.debug("..done");
+
+Statement stmt = conn.prepareStatement(updateSQL);
+
+for (String key: retMap.keySet()) {
+  if (key.startsWith("decision:")) {
+    String value=retMap.get(key);
+    serilog.debug(key+"="+value);
+    if ("Yes".equals(value)) {
+      String num=key.substring(9);
+      serilog.debug("Got ID:"+num);
+      int iNum=Integer.parseInt(num);
+      stmt.setInt(1, iNum);
+      serilog.debug("updating "+iNum);
+      stmt.executeUpdate();
+      serilog.debug("..done");
+    }
+  }
+
+}
+      ]]></Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+  
+<!--  Old behavior - Didn't work, seems this is disconnected. It should call itsAmanda Rosself and not the other workflow
+   <Step action="call:scheduleWorkflowEvent" name="Schedule Retain Decision">
+    <Arg name="workflow" value="Retained Access Reapproval"/>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="requestName" value="Access Retention Expiration"/>
+    <Arg name="scheduleDate" value="script:retentionExpiry"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="identityFullname" value="ref:identityFullname"/>
+    <Arg name="sponsor" value="ref:sponsor"/>
+    <Arg name="reason" value="ref:reason"/>
+    <Arg name="futureDate" value="ref:retentionExpiry"/>
+    workaround for Bug #27980
+    <Arg name="catchExceptions" value="true"/>
+    
+    <Transition to="end"/>
+  </Step>
+--> 
+   <Step action="call:scheduleWorkflowEvent" name="Schedule Retain Decision">
+    <Arg name="workflow" value="Lifecycle Event - Transfer Processor"/>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="requestName" value="Access Retention Expiration"/>
+    <Arg name="scheduleDate" value="script:retentionExpiry"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="identityFullname" value="ref:identityFullname"/>
+    <Arg name="sponsor" value="ref:sponsor"/>
+    <Arg name="reason" value="ref:reason"/>
+    <Arg name="futureDate" value="ref:retentionExpiry"/>
+    <Arg name="oldManagerName" value="ref:oldManagerName"/>
+    <Arg name="newManagerName" value="ref:newManagerName"/>
+    <Arg name="event" value="ref:event"/>
+    <Arg name="ownedApps" value="ref:ownedApps"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+         
+    <Transition to="end"/>
+  </Step>
+ 
+  <Step name="end"/>
+</Workflow>

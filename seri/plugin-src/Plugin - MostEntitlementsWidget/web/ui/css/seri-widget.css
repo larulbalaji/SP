@@ -1,0 +1,37 @@
+.home-widget .seri-widget .panel-body {
+  padding: 0;
+  margin: 0;
+}
+.home-widget .seri-widget {
+  font-size: 14px;
+}
+.home-widget .seri-widget .panel-body {
+  overflow: hidden;
+  max-height: 247px;
+}
+.home-widget .seri-widget .list-group {
+  min-height: 247px;
+  position: relative;
+  -ms-transition-property: top;
+  -ms-transition-duration: 0.5s;
+  -ms-transition-timing-function: ease-in;
+  -moz-transition-property: top;
+  -moz-transition-duration: 0.5s;
+  -moz-transition-timing-function: ease-in;
+  -webkit-transition-property: top;
+  -webkit-transition-duration: 0.5s;
+  -webkit-transition-timing-function: ease-in;
+  transition-property: top;
+  transition-duration: 0.5s;
+  transition-timing-function: ease-in;
+}
+.home-widget .seri-widget .list-group-item {
+  padding-top: 9px;
+  padding-bottom: 9px;
+  min-height: 50px;
+  margin-bottom: 0;
+  border-top-width: 0;
+}
+.home-widget .seri-widget .current-page-info {
+  color: inherit;
+}

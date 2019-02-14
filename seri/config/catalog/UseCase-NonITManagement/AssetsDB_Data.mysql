@@ -1,0 +1,102 @@
+USE assetsdb;
+# Mobiles
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ( '10-0001','Apple','iPhone 6 128GB','Mobile Phone','iPhone 6','2015','123456789','iPhone 6 128GB, Gold','Gold' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ( '10-0002','Apple','iPhone 6s 128GB','Mobile Phone','iPhone 6s','2016','123456789','iPhone 6s 128GB, Grey','Grey' );                       
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ( '10-0003','Apple','iPhone 6+ 128GB','Mobile Phone','iPhone 6+','2015','123456789','iPhone 6+ 128GB, Black','Black' );                       
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ( '10-0004','Apple','iPhone 6s+ 128GB','Mobile Phone','iPhone 6+','2016','123456789','iPhone 7 128GB, Gold','Gold' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0005','Apple','iPhone 7 128GB','Mobile Phone','iPhone 7','2017','123456789','iPhone 7+ 128GB, Silver','Silver' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0006','Apple','iPhone 7+ 128GB','Mobile Phone','iPhone 7+','2017','123456789','iPhone 7+ 128GB, Gold','Gold' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0007','Apple','iPhone 7 256GB','Mobile Phone','iPhone 7','2017','123456789','iPhone 7 256GB, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0008','Apple','iPhone 7+ 256GB','Mobile Phone','iPhone 7+','2017','123456789','iPhone 7+ 256GB, Jet Black','Jet Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0009','Apple','iPhone 5 64GB','Mobile Phone','iPhone 5','2014','123456789','iPhone 5 64GB, White','White' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0010','Apple','iPhone 5s 64GB','Mobile Phone','iPhone 5s','2014','123456789','iPhone 5s 64GB, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0011','Apple','iPhone 7+ 256GB','Mobile Phone','iPhone 7+','2017','123456789','iPhone 7+ 256GB, Jet Black','Jet Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0012','Apple','iPhone 7+ 256GB','Mobile Phone','iPhone 7+','2016','123456789','iPhone 7+ 256GB, Jet Black','Jet Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('10-0013','Apple','iPhone 7+ 128GB','Mobile Phone','iPhone 7+','2016','123456789','iPhone 7+ 128GB, Jet Black','Jet Black' );
+# Tablets
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('20-0001','Apple','iPad Air 3 128GB','Tablet','iPad Air 3rd Gen.','2015','123456789','iPad Air 3rd Gen., 128GB, Wireless, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('20-0002','Apple','iPad Air 3 64GB','Tablet','iPad Air 3rd Gen.','2015','123456789','iPad Air 3rd Gen., 64GB, Wireless, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('20-0003','Apple','iPad Air 3 128GB','Tablet','iPad Air 3rd Gen.','2015','123456789','iPad Air 3rd Gen., 128GB, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('20-0004','Apple','iPad Mini 64GB','Tablet','iPad Mini 2nd Gen.','2013','123456789','iPad Mini 3rd Gen., 64GB, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('20-0005','Apple','iPad Mini 64GB','Tablet','iPad Mini 2nd Gen.','2013','123456789','iPad Mini 3rd Gen., 128 GB, Wireless, Black','Black' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('20-0006','Apple','iPad Pro 128GB','Tablet','iPad Pro','2016','123456789','iPad Pro, 128 GB, Wireless, Black','Black' );
+# Laptops
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('30-0001','Apple','MacBook Pro Retina 15" 16GB, 1TB','Laptop','MacBook Pro (Retina, 15", Ende 2013)','2013','C02MT1B1FDXY','MacBook Pro Retina 15" 16GB, 1TB', 'Silver' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('30-0002','Apple','MacBook Pro Retina 15" 16GB, 1TB','Laptop','MacBook Pro (Retina, 15", Ende 2013)','2013','C04MT1B1FDXY','MacBook Pro Retina 15" 16GB, 1TB','Silver' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('30-0003','Apple','MacBook Pro Retina 15" 16GB, 512GB','Laptop','MacBook Pro (Retina, 15", Ende 2016)','2016','C05MT1B1FDXY','MacBook Pro Retina 15" 16GB, 512GB','Silver' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('30-0004','Apple','MacBook Pro Retina 15" 16GB, 512GB','Laptop','MacBook Pro (Retina, 15", Anfang 2014)','2014','C06MT1B1FDXY','MacBook Pro Retina 15" 16GB, 512GB','Silver' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('30-0005','Apple','MacBook Pro Retina 13"  8GB, 256GB','Laptop','MacBook Pro (Retina, 13", Anfang 2014)','2014','C07MT1B1FDXY','MacBook Pro Retina 13"  8GB, 256GB','Silver' );
+INSERT INTO assets ( asset_id,asset_brand,asset_name,asset_type,asset_model,asset_prod_date,asset_serialno,asset_description,asset_color )
+                   VALUES
+                       ('30-0006','Apple','MacBook Pro Retina 13"  8GB, 256GB','Laptop','MacBook Pro (Retina, 13", Ende 2016)','2016','C08MT1B1FDXY','MacBook Pro Retina 13"  8GB, 256GB','Silver' );
+
+                       
+# Some user data
+INSERT INTO `accounts` VALUES ('Amanda.Ross','Amanda','Ross',NULL,NULL,NULL,NULL,NULL,NULL),
+                              ('Catherine.Simmons','Catherine','Simmons',NULL,NULL,NULL,NULL,NULL,NULL),
+                              ('Jerry.Bennett','Jerry','Bennett',NULL,NULL,NULL,NULL,NULL,NULL),
+                              ('Adam.Kennedy','Adam','Kennedy',NULL,NULL,NULL,NULL,NULL,NULL);
+
+# And the crosslink table
+INSERT INTO `accounts_assets` VALUES ('Amanda.Ross','10-0001'),
+                                     ('Amanda.Ross','20-0001'),
+                                     ('Amanda.Ross','30-0001'),
+                                     ('Catherine.Simmons','30-0002'),
+                                     ('Catherine.Simmons','20-0002'),
+                                     ('Catherine.Simmons','10-0002'),
+                                     ('Jerry.Bennett','10-0003'),
+                                     ('Jerry.Bennett','20-0003'),
+                                     ('Jerry.Bennett','30-0003'),
+                                     ('Adam.Kennedy','30-0004'),
+                                     ('Adam.Kennedy','20-0004'),
+                                     ('Adam.Kennedy','10-0004');                       
+                                     
+                                     

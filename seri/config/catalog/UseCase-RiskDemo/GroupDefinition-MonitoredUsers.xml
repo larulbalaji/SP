@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE GroupDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<GroupDefinition indexed="true" name="Monitored Users" private="true">
+  <Description>Contains all Identities with an "Employee Id" starting with "00" or "SP" (from OrangeHRM) or who report to Amanda or Henry. Includes some specific users used in other scenarios (joiner, mover, leaver for example)
+  </Description>
+  <GroupFilter>
+    <CompositeFilter operation="OR">
+      <Filter ignoreCase="true" operation="EQ" property="manager.name" value="Amanda.Ross"/>
+      <Filter ignoreCase="true" operation="EQ" property="manager.name" value="Henry.Butler"/>
+      <Filter ignoreCase="true" matchMode="START" operation="LIKE" property="employeeId" value="SP"/>
+      <Filter ignoreCase="true" matchMode="START" operation="LIKE" property="employeeId" value="00"/>
+      <Filter ignoreCase="true" operation="EQ" property="lastname" value="Butler"/>
+      <Filter ignoreCase="true" operation="EQ" property="lastname" value="Ross"/>
+      <Filter ignoreCase="true" operation="EQ" property="lastname" value="Wood"/>
+      <Filter ignoreCase="true" operation="EQ" property="lastname" value="Stephens"/>
+      <Filter ignoreCase="true" operation="EQ" property="lastname" value="Williamson"/>
+    </CompositeFilter>
+  </GroupFilter>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</GroupDefinition>

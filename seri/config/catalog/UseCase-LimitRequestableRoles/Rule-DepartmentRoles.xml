@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="DepartmentRoles" type="RequestObjectSelector">
+  <Description>Request Object Selector Rules are used by the Life Cycle Manager to determine the Objects that can be requested by a given user on a given population.  For bulk request this rule is run twice.  The first time the result determines which applications are shown to the requestor.  The second time the result determines whether or not the specified requestee has access to the object.  On the first execution the requestee is always null, so the rule needs to expect and handle that case in order to be usable for bulk requests.</Description>
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="SubRoleSearchRuleLibrary"/>
+  </ReferencedRules>
+  <Signature returnType="sailpoint.object.QueryInfo">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="requestor" type="sailpoint.object.Identity">
+        <Description>
+          Identity that is making the Life Cycle Manager request.
+        </Description>
+      </Argument>
+      <Argument name="requestee" type="sailpoint.object.Identity">
+        <Description>
+          Identity on whose behalf the Life Cycle Manager request is being made.  In the case of bulk requests,
+          this argument will be set to null when determining the roles that are visible to the requestor.
+          It will be provided once a selection has been made in order to determine whether or not the given requestee
+          should have access to the selected role.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="filter">
+        <Description>
+          A Filter object that will be used to search for accessible request objects.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+    import sailpoint.object.Filter;
+    import sailpoint.object.Bundle;
+    import sailpoint.object.QueryOptions;
+    import sailpoint.object.QueryInfo;
+    import sailpoint.tools.Util;
+    import sailpoint.object.SailPointObject;
+    
+    //First retrieve the Department of the Requesting manager
+    String mngrDep = requestor.getAttribute("department");
+    
+    // General Lists used in this logic
+    List topRoles = getSubRoles(mngrDep);   // retrieve all toplevel roles based on the Department
+    List allRoles = new ArrayList(topRoles);    // List wil hold all retrieved roles, starting with the toplevel ones
+    List allRoleNames = new ArrayList();
+    List subRoles = new ArrayList();
+    List s1Roles = new ArrayList();
+    
+    //Building a complete list of all Business SubRoles starting at the topRoles level.
+    if (0 != topRoles.size()) {
+        while (0 != topRoles.size()){
+            for (Bundle role : topRoles) {
+                s1Roles = getSubRoles(role.getName());
+                subRoles.addAll(s1Roles);
+                s1Roles.clear();
+            }
+            allRoles.addAll(subRoles);
+            topRoles.clear();
+            topRoles.addAll(subRoles);
+            subRoles.clear();
+        }
+        
+    } else {
+    //Return all Business Roles for Managers without a matching Organizational Role
+        QueryOptions qo = new QueryOptions();
+        qo.addFilter(Filter.eq("type", "Business"));
+        return new QueryInfo(qo);
+    }
+    
+    //Now clean up any duplicates:
+    allRoles = new ArrayList(new LinkedHashSet(allRoles));
+    //Build a new List with only the names of the final Roles.
+    for (Bundle chkRole : allRoles) {
+        allRoleNames.add(chkRole.getName());
+    }
+   
+   // This Creates the QueryInfo object based on the names present in the allRoleNames Array
+    QueryOptions returnQueryOptions = new QueryOptions();
+    returnQueryOptions.addFilter(Filter.in("name", allRoleNames));      
+    QueryInfo returnQueryInfo = new QueryInfo(returnQueryOptions); 
+
+    return returnQueryInfo;
+
+    
+  ]]></Source>
+</Rule>

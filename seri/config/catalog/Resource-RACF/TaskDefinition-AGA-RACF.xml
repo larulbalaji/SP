@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition  formPath="/monitor/tasks/accountGroupAggregationTask.xhtml"  name="Aggregate Mainframe Groups" resultAction="Delete" type="AccountGroupAggregation">
+  <Attributes>
+    <Map>
+      <entry key="aggregationType" value="group"/>
+      <entry key="applications" value="Mainframe"/>
+      <entry key="descriptionAttribute" value="INSTALL_DATA"/>
+      <entry key="descriptionLocale" value="en_US"/>
+    </Map>
+  </Attributes>
+  <Description>Load Mainframe group objects and their associated fine-grained permissions</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Account Group Aggregation"/>
+  </Parent>
+</TaskDefinition>

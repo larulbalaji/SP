@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IdentityTrigger PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IdentityTrigger  handler="sailpoint.api.WorkflowTriggerHandler"  name="Native Change for Catherine only" type="NativeChange">
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+  <HandlerParameters>
+    <Attributes>
+      <Map>
+        <entry key="workflow" value="Lifecycle Event - Manager Approval for all native changes"/>
+      </Map>
+    </Attributes>
+  </HandlerParameters>
+  <Selector>
+    <IdentitySelector>
+      <PopulationRef>
+        <Reference class="sailpoint.object.GroupDefinition"  name="Native Change for Catherine"/>
+      </PopulationRef>
+    </IdentitySelector>
+  </Selector>
+</IdentityTrigger>

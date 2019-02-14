@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="Oracle EBS SSO Application Default Role" name="Oracle EBS_SSOApplication_Default" type="launcher">
+  <Profiles>
+    <Profile name="launcher">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Azure Active Directory - IIQ Integration"/>
+      </ApplicationRef>
+      <Constraints>
+        <Filter operation="CONTAINS_ALL" property="groups">
+          <Value>
+            <List>
+              <String>834c6f09-6f4b-4016-919a-5754cb27b6de</String>
+            </List>
+          </Value>
+        </Filter>
+      </Constraints>
+    </Profile>
+  </Profiles>
+</Bundle>

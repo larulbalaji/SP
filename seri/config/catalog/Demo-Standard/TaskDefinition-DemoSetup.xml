@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.seri.task.SEDemoSetupExecutor" name="SERI - Demo Setup" template="true" type="Generic">
+  <Description>Template for running parts of the demo setup.</Description>
+  <Signature>
+    <Inputs>
+      <Argument name="mode" type="string">
+        <AllowedValues>
+          <String>ACT_ON_CERTS</String>
+          <String>ALL_SETUP</String>
+          <String>CERT_SETUP</String>
+          <String>DASHBOARD_SETUP</String>
+          <String>REQUEST_SETUP</String>
+          <String>TRENDING_SETUP</String>
+        </AllowedValues>
+        <Description>
+            The available modes: TRENDING_SETUP, CERT_SETUP, DASHBOARD_SETUP, REQUEST_SETUP, ALL_SETUP.
+          </Description>
+      </Argument>
+      <Argument name="actionsFile" type="string">
+        <Description>
+            The file to take inputs from
+          </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+</TaskDefinition>

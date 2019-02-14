@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin displayName="End Forwarding Service" minSystemVersion="7.1" name="endForwardingService" rightRequired="endForwardingServiceRight" version="0.1">
+  <Attributes>
+    <Map>
+      <entry key="minUpgradableVersion" value="0.1"/>
+      <entry key="serviceExecutors">
+        <value>
+          <List>
+            <String>sailpoint.server.EndForwardingService</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>

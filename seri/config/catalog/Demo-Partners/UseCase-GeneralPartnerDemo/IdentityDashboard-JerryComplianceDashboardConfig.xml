@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IdentityDashboard PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IdentityDashboard    name="Jerry.Bennett_Compliance" type="Compliance">
+  <IdentityDashboardIdentity>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </IdentityDashboardIdentity>
+  <Layout>
+    <Reference class="sailpoint.object.DashboardLayout"  name="twoColEven"/>
+  </Layout>
+  <References>
+    <DashboardReference  index="1"  region="Medium1">
+      <Attributes>
+        <Map>
+          <entry key="chartDateRange" value="6 Months"/>
+          <entry key="chartGroup" value="Department"/>
+          <entry key="chartIs3d" value="true"/>
+          <entry key="chartOrientation" value="vertical"/>
+          <entry key="chartType" value="stackedarea"/>
+          <entry key="chartValue">
+            <value>
+              <List>
+                <String>Accounting</String>
+                <String>Engineering</String>
+                <String>Finance</String>
+                <String>Human Resources</String>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+      <Content>
+        <Reference class="sailpoint.object.DashboardContent"  name="Policy Violation Chart"/>
+      </Content>
+    </DashboardReference>
+    <DashboardReference   index="2"  region="Medium2">
+      <Attributes>
+        <Map>
+          <entry key="chartDateRange" value="3 Months"/>
+          <entry key="chartGroup" value="Department"/>
+          <entry key="chartIs3d" value="true"/>
+          <entry key="chartOrientation" value="vertical"/>
+          <entry key="chartType" value="stackedbar"/>
+          <entry key="chartValue">
+            <value>
+              <List>
+                <String>Accounting</String>
+                <String>Engineering</String>
+                <String>Finance</String>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+      <Content>
+        <Reference class="sailpoint.object.DashboardContent"  name="Risk Score Chart"/>
+      </Content>
+    </DashboardReference>
+    <DashboardReference   index="4" region="Medium2">
+      <Content>
+        <Reference class="sailpoint.object.DashboardContent"  name="Certifications"/>
+      </Content>
+    </DashboardReference>
+  </References>
+</IdentityDashboard>

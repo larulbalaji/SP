@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+  <!-- Joiner Lifecycle Event; notification email contains deep links this scenario depends on-->
+  <ImportAction name='include' value='../UseCase-LifecycleEvent-Joiner/setup.xml'/>
+
+  <!-- Pull in dynamic identity attribute query to populate drop-downs in form -->
+  <ImportAction name="include" value="/seri/xml/Rule/Rule-AllowedValues-QueryIdentityAttribute.xml"/>
+
+  <ImportAction name="include" value="/seri/xml/Rule/Rule-I18nLibrary.xml"/>
+  <ImportAction name="include" value="Rule-FieldValue-UniqueUsername-I18n.xml"/>
+  <ImportAction name="include" value="Rule-GeneratePasswordFromPolicy.xml"/>
+  <ImportAction name="include" value="Form-CreateIdentity.xml"/>
+  <ImportAction name="include" value="Workflow-Seri-LcmCreateAndUpdateWrapper.xml"/>
+  
+  <!-- Update system configuration to reference our custom Create Identity form -->
+  <ImportAction name="include" value="Configuration-SystemConfig.xml"/>
+
+</sailpoint>

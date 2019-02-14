@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="services.standard.build.java">
+    <!-- targets responsible for taking custom java artifacts and compiling them into a customerName.jar-->
+
+    <path id="build.compile.classpath">
+        <fileset dir="./lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${build.iiqBinaryExtract}/WEB-INF/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+    </path>
+
+    <target name="compile">
+        <mkdir dir="${build}/classes"/>
+        <javac srcdir="src" destdir="${build}/classes" debug="true" classpathref="build.compile.classpath">
+            <!-- uncomment these to explore the occasional warning, but there's
+                 a lot of harmless stuff in here now, so don't leave them on
+                 all the time
+            <compilerarg value="-Xlint:deprecation"/>
+            <compilerarg value="-Xlint:unchecked"/>
+            -->
+        </javac>
+        <copy todir="${build}/classes">
+            <fileset dir="src">
+                <include name="**/*.hbm.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+
+    <target name="-createCustomJar" depends="compile">
+        <jar destfile="${build}/identityiqCustomizations.${customer}.jar" basedir="${build}/classes"/>
+    </target>
+
+    <target name="includeCustomJar" depends="-createCustomJar,-generateDTD">
+        <copy todir="${build.iiqBinaryExtract}/WEB-INF/lib">
+            <fileset dir="${build}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+</project>

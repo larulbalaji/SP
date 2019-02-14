@@ -1,0 +1,68 @@
+Console Commands
+
+Active Directory commands:
+	ADcreateUser 	- create a user in AD
+		-Parameters used: id, bindUser, bindPass, targetUser, targetPass, time, action
+
+	ADdeleteUser 	- delete a user in AD
+		-Parameters used: id, bindUser, bindPass, targetUser, time, action
+
+	ADmodifyPass 	- modify a user’s password in AD
+		-Parameters used: id, bindUser, bindPass, targetUser, targetPass, time, action, param1[newTargetPass]
+
+	ADmodifyProp 	- modify a user’s property in AD
+		-Parameters used: id, bindUser, bindPass, targetUser, targetPass, time, action, param1[propName], param2[property]
+
+	ADcreateGroup 	- create a group in AD
+		-Parameters used: id, bindUser, bindPass, time, action, param1[groupName]
+
+	ADdeleteGroup 	- delete a group in AD
+		-Parameters used: id, bindUser, bindPass, time, action, param1[groupName]
+
+	ADaddMember 	- add a member to a group in AD
+		-Parameters used: id, bindUser, bindPass, targetUser, time, action, param1[groupName]
+
+	ADremoveMember 	- delete a member from a group in AD
+		-Parameters used: id, bindUser, bindPass, targetUser, time, action, param1[groupName]
+
+File System commands:
+	FScreateFile 	- create a file
+		-Parameters used: id, bindUser, bindPass, time, action, param1[filePath]
+
+	FSdeleteFile 	- delete a file
+		-Parameters used: id, bindUser, bindPass, time, action, param1[filePath]
+
+	FSreadFile 	- reads from a file
+		-Parameters used: id, bindUser, bindPass, time, action, param1[filePath]
+
+	FSwriteFile 	- writes to a file
+		-Parameters used: id, bindUser, bindPass, time, action, param1[filePath], param2[writeText]
+
+	FSmoveFile 	- moves a file to a new location
+		-Parameters used: id, bindUser, bindPass, time, action, param1[filePath], param2[newFilePath]
+
+	FSfileAccess 	- modifies ACL of a file
+		-Parameters used: id, bindUser, bindPass, time, action, param1[filePath], param2[accessType*], param3[accessSetting**]
+		* accessType defined as a case sensitive string from FileSystemRightsEnumeration 
+			Found here: https://msdn.microsoft.com/en-us/library/system.security.accesscontrol.filesystemrights(v=vs.110).aspx
+		* accessSetting defined as a case sensitive string from AccessControlType (eg. "Allow")
+			Found here: https://msdn.microsoft.com/en-us/library/w4ds5h86(v=vs.110).aspx
+
+	FScreateDir 	- creates a directory
+		-Parameters used: id, bindUser, bindPass, time, action, param1[dirPath]
+
+	FSdeleteDir 	- deletes a directory
+		-Parameters used: id, bindUser, bindPass, time, action, param1[dirPath]
+
+	FSreadDir	- reads contents of a directory
+		-Parameters used: id, bindUser, bindPass, time, action, param1[dirPath]
+
+	FSmoveDir 	- moves a directory to a new location
+		-Parameters used: id, bindUser, bindPass, time, action, param1[dirPath], param2[newDirPath]
+
+	FSdirAccess 	- modifies ACL of a directory
+		-Parameters used: id, bindUser, bindPass, time, action, param1[dirPath], param2[accessType*], param3[accessSetting**]
+		* accessType defined as a case sensitive string from FileSystemRightsEnumeration 
+			Found here: https://msdn.microsoft.com/en-us/library/system.security.accesscontrol.filesystemrights(v=vs.110).aspx
+		* accessSetting defined as a case sensitive string from AccessControlType (eg. "Allow")
+			Found here: https://msdn.microsoft.com/en-us/library/w4ds5h86(v=vs.110).aspx

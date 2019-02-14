@@ -1,0 +1,119 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.JDBCConnector"
+  featuresString="DISCOVER_SCHEMA, SYNC_PROVISIONING, DIRECT_PERMISSIONS"
+  icon="databaseIcon" name="TRAKK" profileClass="" type="JDBC">
+  <Attributes>
+    <Map>
+      <entry key="SQL"
+        value="select * from users left outer join capabilities on users.id = capabilities.id order by users.username; " />
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately" />
+      <entry key="aggregationMode">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="compositeDefinition" />
+      <entry key="daysToWaitForDeletion" />
+      <entry key="deltaTable" />
+      <entry key="driverClass" value="com.mysql.jdbc.Driver" />
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="getDeltaSQL" />
+      <entry key="getObjectSQL"
+        value="select * from users left outer join capabilities on users.id = capabilities.id where users.username = '$(identity)'; " />
+      <entry key="indexColumns">
+        <value>
+          <List>
+            <String>username</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="isPermissionEnabled">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="mergeColumns">
+        <value>
+          <List>
+            <String>capability</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements" />
+      <entry key="nativeChangeDetectionAttributes" />
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations" />
+      <entry key="partitionMode">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="partitionStatements" />
+      <entry key="password" value="1:7qu+XvQvQHsmirRAPzhCBw==" />
+      <entry key="provisionRule" value="globalRule" />
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US" value="The TRAKK Time Tracking Application" />
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="JDBC Template" />
+      <entry key="url" value="jdbc:mysql://seri.sailpointdemo.com/trakk" />
+      <entry key="useExecuteQuery">
+        <value>
+          <Boolean />
+        </value>
+      </entry>
+      <entry key="user" value="root" />
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule" name="Correlation - TRAKK" />
+  </CorrelationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin" />
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="username" identityAttribute="username"
+      instanceAttribute="" nativeObjectType="account" objectType="account"
+      permissionsRemediationModificationType="None">
+      <AttributeDefinition name="id" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="username" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="firstname" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="lastname" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="email" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true"
+        managed="true" multi="true" name="capability" type="string">
+        <Description />
+      </AttributeDefinition>
+      <AttributeDefinition name="description" type="string">
+        <Description />
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+</Application>

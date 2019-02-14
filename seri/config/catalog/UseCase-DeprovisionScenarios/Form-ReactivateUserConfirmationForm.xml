@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Reactivate User Confirmation">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Confirm Selected User(s) to Reactivate"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Reactivate Now"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Description>This form is used to delete selected users that are duplicates.</Description>
+  <Section type="text">
+    <Attributes>
+      <Map>
+        <entry key="subtitle" value="Please review the following selected user(s) you wish to reactivate."/>
+      </Map>
+    </Attributes>
+    <Field value=" "/>
+  </Section>
+  <Section >
+    <Field  displayName="Users(s) To Reactivate" name="identityNames" type="string" multi="true"/>
+    <Field  name="workerType" type="string" hidden="true"/>
+  <Field  displayName="Reactivation Date" name="reactivationDate" type="date">
+    <Script>
+      <Source><![CDATA[
+
+if(field.isHidden()) {
+  return null;
+}
+                 
+if(form.getField("workerType").getValue()!= null && form.getField("workerType").getValue().equals("Vendor")) {
+  Calendar x = Calendar.getInstance();
+  x.add(Calendar.DATE,180);
+  return x.getTime();
+}
+return null;
+      ]]></Source>
+    </Script>
+  </Field>
+</Section>
+</Form>

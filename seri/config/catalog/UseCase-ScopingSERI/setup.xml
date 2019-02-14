@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <!--  make sure that the IdentityIQ Loopback Connector is available -->
+  <ImportAction name="include" value="../Connector-IIQConnector/setup.xml"/>  
+  <ImportAction name="include" value="Application-IdentityiqLoopback.xml"/>
+  <ImportAction name="include" value="TaskDefinition-IdentityiqAccountAggregation.xml"/>
+  <ImportAction name="include" value="TaskDefinition-AggregateIdentityiqEntitlements.xml"/>
+  <!-- Enable adding of IIQ Capabilities by Workgroup -->
+  <ImportAction name="include" value="Workgroup-Roleadmin.xml"/>
+  <ImportAction name="include" value="TaskDefinition-RoleImporter-PromoteIdentityToRoleAdmin.xml"/>  
+  <ImportAction name="include" value="TaskDefinition-UpdateRolesAndAssignements.xml"/>
+      
+  <ImportAction name="include" value="Configuration-Systemconfiguration.xml"/>
+  <ImportAction name="include" value="ObjectConfig-Identity.xml"/>
+  <ImportAction name="include" value="Rule-Seri-scopecorrelation.xml"/>
+  <ImportAction name="include" value="TaskDefinition-RefreshIdentityCube.xml"/>
+  <ImportAction name="include" value="TaskDefinition-RoleImporter-PlaceDemoRolesInScopes.xml"/>    
+  <ImportAction name="include" value="TaskDefinition-SetupScopingDemo.xml"/>
+  
+  <ImportAction name="include" value="Rule-NoObjects.xml"/>
+  <ImportAction name="include" value="DynamicScope-Manager.xml"/>
+  <ImportAction name="include" value="DynamicScope-SelfService.xml"/>
+</sailpoint>

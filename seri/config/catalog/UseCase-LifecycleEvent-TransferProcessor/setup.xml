@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="/seri/xml/Rule/RuleLibrary-Demo-Workflow.xml"/>
+<!-- does not seem to be working / useful in this context    <ImportAction name="include" value="Workflow-RetainedAccessReApproval.xml"/>  -->
+    <ImportAction name="include" value="Workflow-TransferProcessor.xml"/>
+    <ImportAction name="include" value="EmailTemplate-UserTransferNotification.xml"/>
+    <ImportAction name="include" value="IdentityTrigger-Mover.xml"/>
+</sailpoint>	

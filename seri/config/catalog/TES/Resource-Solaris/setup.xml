@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-Solaris.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateSolarisAccounts.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AggregateSolarisGroups.xml'/>
+</sailpoint>

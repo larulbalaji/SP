@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name='Link'>
+  <ObjectAttribute displayName="Service account" editMode="UntilFeedValueChanges" extendedNumber="2" name="service" type="boolean">
+    <AttributeSource name="AppRule: AD Account Tagging - Service Account Active Directory">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Active Directory"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="AD Account Tagging - Service Account"/>
+      </RuleRef>
+    </AttributeSource>
+    <AttributeSource name="app_service">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="ERP Portal"/>
+      </ApplicationRef>
+    </AttributeSource>
+    
+  </ObjectAttribute>
+  <ObjectAttribute displayName="Last login" editMode="ReadOnly" extendedNumber="4" name="lastLogin" type="date">
+    <RuleRef>
+      <Reference class="sailpoint.object.Rule" name="lastLoginToDate"/>
+    </RuleRef>
+    <AttributeSource name="GlobalRule:lastLoginToDate">
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="lastLoginToDate"/>
+      </RuleRef>
+    </AttributeSource>
+  </ObjectAttribute>
+  <ObjectAttribute displayName="Inactive account" editMode="ReadOnly" extendedNumber="1" name="inactive" type="boolean">
+    <AttributeSource name="AppRule: Link Attribute - Active Directory Inactive Active Directory">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application"  name="Active Directory"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule"  name="Link Attribute - Active Directory Inactive"/>
+      </RuleRef>
+    </AttributeSource>
+    <AttributeSource name="AppRule: Link Attribute - Procurement_System Inactive Procurement_System">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Mainframe"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Link Attribute - RACF Inactive"/>
+      </RuleRef>
+    </AttributeSource>
+    <AttributeSource name="AppRule: Link Attribute - Enterprise Directory Inactive Enterprise Directory">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application"  name="Enterprise Directory"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule"  name="Link Attribute - Enterprise Directory Inactive"/>
+      </RuleRef>
+    </AttributeSource>
+    <AttributeSource name="AppRule: Link Attribute - HR Inactive Human Resources">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Human Resources"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Link Attribute - HR Inactive"/>
+      </RuleRef>
+    </AttributeSource>
+    <AttributeSource name="app_inactive">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="ERP Portal"/>
+      </ApplicationRef>
+    </AttributeSource>
+  </ObjectAttribute>
+  <ObjectAttribute displayName="Privileged account" editMode="Permanent" extendedNumber="3" name="privileged" type="boolean">
+    <AttributeSource name="AppRule: Link Attribute - Active Directory Privileged Active Directory">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application"  name="Active Directory"/>
+      </ApplicationRef>
+      <RuleRef>
+        <Reference class="sailpoint.object.Rule" name="Link Attribute - Active Directory Privileged"/>
+      </RuleRef>
+    </AttributeSource>
+    <AttributeSource name="app_privileged">
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="ERP Portal"/>
+      </ApplicationRef>
+    </AttributeSource>
+  </ObjectAttribute>
+
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

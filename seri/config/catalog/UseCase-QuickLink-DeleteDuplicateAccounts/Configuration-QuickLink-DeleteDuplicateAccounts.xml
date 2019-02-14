@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <ImportAction name="merge">
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+	<Map>
+	  <entry key='helpDeskQuickLinks'>
+            <value>
+	      <List>
+	    <QuickLink action="workflow" bulk="true" category="Manage" messageKey="Delete Duplicate Identity" name="Delete Duplicate Identity" ordering="7">
+              <Attributes>
+                <Map>
+                  <entry key="launcher">
+                    <value>
+                      <Script>
+                        <Source>return currentUser.getName()</Source>
+                      </Script>
+                    </value>
+                  </entry>
+                  <entry key="requester">
+                    <value>
+                      <Script>
+                        <Source>return currentUser.getName()</Source>
+                      </Script>
+                    </value>
+                  </entry>
+                  <entry key="workflowName" value="QuickLink - Delete Duplicate Account"/>
+                </Map>
+              </Attributes>
+               </QuickLink>
+	      </List>
+	       
+	    </value>
+	  </entry>
+	</Map>
+      </Attributes>
+     
+    </Configuration>
+  </ImportAction>
+
+</sailpoint>

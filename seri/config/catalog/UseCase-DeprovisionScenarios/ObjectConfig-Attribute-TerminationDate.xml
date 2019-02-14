@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <ImportAction name="merge">
+    <ObjectConfig name="Identity">
+      <ObjectAttribute name="inactive" editMode="Permanent"/>
+      <ObjectAttribute displayName="Termination Date" editMode="Permanent" name="terminationDate" namedColumn="true" type="string">
+        <ListenerRule>
+          <Reference class="sailpoint.object.Rule" name="Leave date change rule with notifications"/>
+        </ListenerRule>
+      </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <ImportAction name="merge">
+	<ObjectConfig name="Application">
+	  <ObjectAttribute displayName="Password Attribute Name" editMode="Permanent" name="passwordAttrName" required="true">
+	    <Description>This is the name of the password attribute from the create provisioning policy.  This is required in order to send a users manager, initial passwords for accounts created for the application.</Description>
+	  </ObjectAttribute>
+	</ObjectConfig>
+  </ImportAction>
+</sailpoint>

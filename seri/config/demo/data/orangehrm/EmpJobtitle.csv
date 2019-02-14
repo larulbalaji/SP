@@ -1,0 +1,149 @@
+employeeId,jobTitle
+1a2a,Global Infrastructure Manager
+1a2aX,Global Infrastructure Manager
+1a2a3a,IT Database Manager
+1a2a3b,Information Security Analyst
+1a2a3c,Senior Production Manager
+1a2a3d,Production Manager
+1a2b3a,HR Manager
+1a2b3b,Training & Development Specialist
+1a2b3c,Procurement Manager
+1a2b3d,Cost Savings Analyst
+1a2c3a,Senior Finance Manager
+1a2c3c,Data Analyst
+1a2c3d,Financial Planning Analyst
+1a2a3a4a,RACF Security Administrator
+1a2a3a4b,Oracle Administrator
+1a2a3a4e,SQL Server Administrator
+1a2a3b4a,Information Security Analyst
+1a2a3b4e,Information Security Analyst
+1a2a3c4a,Production Developer I
+1a2a3c4b,Production Developer II
+1a2a3c4e,Production Developer I
+1a2a3d4a,Staging Test Engineer I
+1a2a3d4b,Production Test Engineer II
+1a2a3d4e,Production Test Engineer I
+1a2b3a4a,Recruiter
+1a2b3a4b,Recruiter
+1a2b3a4e,Recruiter
+1a2b3b4a,Training & Development Specialist
+1a2b3b4e,Training & Development Specialist
+1a2b3c4a,Procurement Analyst
+1a2b3c4b,Inventory Analyst II
+1a2b3c4e,Procurement Analyst
+1a2b3d4a,Cost Savings Analyst
+1a2b3d4b,Cost Savings Analyst
+1a2b3d4e,Cost Savings Analyst
+1a2c3a4a,AP Accounting Manager
+1a2c3a4b,Accounts Payable Analyst
+1a2c3a4e,Accounts Payable Analyst
+1a2c3b4a,AR Accounting Manager
+1a2c3b4b,Accounts Receivable Analyst
+1a2c3b4e,Accounts Receivable Analyst
+1a2c3c4a,Financial Planning Analyst
+1a2c3c4b,Financial Planning Analyst
+1a2c3c4e,Financial Planning Analyst
+1a2c3d4a,Data Analyst
+1a2c3d4b,Data Analyst
+1a2c3d4e,Data Analyst
+1b2a,Inventory Analyst I
+1b2a3a,Security Architect
+1b2a3b,Telecommunications and Network Manager
+1b2a3c,Staging Manager
+1b2a3d,Staging Manager
+1b2b3a,Compensation
+1b2b3b,Employment Manager
+1b2b3c,Procurement Manager
+1b2b3d,Procurement Buyer
+1b2c3a,Payroll Manager
+1b2c3b,Payroll Manager
+1b2c3c,Treasury Analyst
+1b2c3d,Treasury Researcher
+1b2a3a4a,Security Architect
+1b2a3a4b,Security Architect
+1b2a3a4e,Security Architect
+1b2a3b4a,Network Systems Administrator
+1b2a3b4b,Network Systems Administrator
+1b2a3b4e,Data Communications Analyst
+1b2a3c4a,Staging Developer II
+1b2a3c4b,Inventory Analyst I
+1b2a3c4e,Inventory Analyst I
+1b2a3d4a,Staging Test Engineer I
+1b2a3d4b,Production Test Engineer I
+1b2a3d4e,Staging Developer I
+1b2b3a4a,Compensation
+1b2b3a4b,Compensation
+1b2b3a4e,Compensation
+1b2b3b4a,Employee Relations Manager
+1b2b3b4b,Employee Relations Manager
+1b2b3b4e,Employee Relations Manager
+1b2b3c4a,Procurement Buyer
+1b2b3c4b,Procurement Buyer
+1b2b3c4e,Inventory Analyst II
+1b2b3d4a,Procurement Buyer
+1b2b3d4b,Procurement Buyer
+1b2b3d4e,Procurement Buyer
+1b2c3a4a,Payroll Analyst I
+1b2c3a4b,Payroll Analyst I
+1b2c3a4e,Payroll Analyst II
+1b2c3b4a,Senior Payroll Analyst
+1b2c3b4b,Senior Payroll Analyst
+1b2c3b4e,Payroll Analyst I
+1b2c3c4a,Treasury Analyst
+1b2c3c4b,Treasury Analyst
+1b2c3c4e,Inventory Analyst II
+1b2c3d4a,Treasury Analyst
+1b2c3d4b,Treasury Analyst
+1b2c3d4e,Treasury Analyst
+1c,Operations Manager
+1c2a,SOX Access Reviewer
+1c2b,Operations Director
+1c2c,Operations Analyst
+1c2a3a,IT Distributed Systems Manager
+1c2a3b,Internal Audit Manager
+1c2a3c,Internal Development Manager
+1c2a3d,Internal QA Manager
+1c2b3a,Compensation & Benefits Manager
+1c2b3b,Compensation & Benefits Manager
+1c2b3c,Inventory Manager
+1c2b3d,Inventory Manager
+1c2c3a,Tax Accountant
+1c2c3b,Tax Accountant
+1c2c3c,Inventory Analyst III
+1c2c3d,Financial Systems Analyst
+1c2a3a4a,Windows Administrator
+1c2a3a4b,Helpdesk Associate
+1c2a3a4e,Windows Administrator
+1c2a3b4a,Internal Auditor
+1c2a3b4b,Unix Administrator
+1c2a3b4e,Internal Auditor
+1c2a3c4a,Product Developer I
+1c2a3c4b,Product Developer II
+1c2a3c4e,Product Developer III
+1c2a3d4a,QA Analyst
+1c2a3d4b,QA Analyst
+1c2a3d4e,QA Analyst
+1c2b3a4a,Benefits Manager
+1c2b3a4b,Benefits Clerk
+1c2b3a4e,Benefits Clerk
+1c2b3b4a,Benefits Manager
+1c2b3b4b,Benefits Clerk
+1c2b3b4e,Benefits Clerk
+1c2b3c4a,Inventory Analyst I
+1c2b3c4b,Inventory Analyst I
+1c2b3c4e,Inventory Analyst I
+1c2b3d4a,Receiving Analyst
+1c2b3d4b,Receiving Analyst
+1c2b3d4e,Receiving Analyst
+1c2c3a4a,Tax Accountant
+1c2c3a4b,Tax Accountant
+1c2c3a4e,Tax Accountant
+1c2c3b4a,Accounts Payable Analyst
+1c2c3b4b,Tax Accountant
+1c2c3b4e,Tax Accountant
+1c2c3c4a,Financial Systems Analyst
+1c2c3c4b,Financial Systems Analyst
+1c2c3c4e,Financial Systems Analyst
+1c2c3d4a,Financial Systems Analyst
+1c2c3d4b,Financial Systems Analyst
+1c2c3d4e,Financial Systems Analyst

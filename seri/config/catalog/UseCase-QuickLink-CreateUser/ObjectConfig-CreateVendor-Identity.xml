@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <ImportAction name="merge">
+    <ObjectConfig name="Identity">
+	  <ObjectAttribute displayName="Company" editMode="ReadOnly" groupFactory="true" name="company" type="string"/>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

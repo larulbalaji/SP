@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<TaskDefinition  executor="sailpoint.seri.task.SODMatrixImporterExecutor" name="Import Matrix SOD Definitions" template="true" type="Generic">
+  <Description>Template for SOD definition Imports</Description>
+  <Signature>
+    <Inputs>
+      <Argument name="filename" type="string" required="true">
+        <Prompt>Filename</Prompt>
+      </Argument>
+      <Argument name="fileType" type="string" required="true">
+        <Prompt>File type (XLS or CSV)</Prompt>
+      </Argument>
+      <Argument name="sheetName" type="string">
+        <Prompt>Sheet name (only for XLS)</Prompt>
+      </Argument>
+      <Argument name="generateRoles" type="boolean">
+        <Prompt>Generate Role Definitions</Prompt>
+      </Argument>
+      <Argument name="roleType" type="string" required="true">
+        <Prompt>Role type (IT or Business, or entitlement for entitlements)</Prompt>
+      </Argument>
+      <Argument name="entitlementApp" type="string">
+        <Prompt>Application containing entitlements (if using entitlements)</Prompt>
+      </Argument>
+      <Argument name="entitlementAttr" type="string">
+        <Prompt>Entitlement attribute (if using entitlements)</Prompt>
+      </Argument>
+      <Argument name="labelSource" type="string">
+        <Prompt>Label Source (Row or Column)</Prompt>
+      </Argument>
+      <Argument name="labelIndex" type="int">
+        <Prompt>Label index (of row or column)</Prompt>
+      </Argument>
+      <Argument name="nameColIndex" type="int" required="true">
+        <Prompt>Index of name Column</Prompt>
+      </Argument>
+      <Argument name="nameRowIndex" type="int" required="true">
+        <Prompt>Index of name Row</Prompt>
+      </Argument>
+      <Argument name="dataColIndex" type="int" required="true">
+        <Prompt>Index of first data column</Prompt>
+      </Argument>
+      <Argument name="dataRowIndex" type="int" required="true">
+        <Prompt>Index of first data row</Prompt>
+      </Argument>
+      <Argument name="dataSize" type="int" required="true">
+        <Prompt>Data size</Prompt>
+      </Argument>
+      <Argument name="activeSODcsvString" type="string" required="true">
+        <Prompt>Comma separated values to indicate active SOD</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="rolesCreated" type="int">
+        <Prompt>Roles created</Prompt>
+      </Argument>
+      <Argument name="rolesSkipped" type="int">
+        <Prompt>Roles skipped (existing)</Prompt>
+      </Argument>
+      <Argument name="sodsCreated" type="int">
+        <Prompt>SOD Policies created</Prompt>
+      </Argument>
+      <Argument name="sodsUpdated" type="int">
+        <Prompt>SOD Policies updated</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>
+</sailpoint>

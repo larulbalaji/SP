@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="Configuration-SystemConfig.xml"/>
+  <ImportAction name="include" value="EmailTemplate-Seri-NotifyRoleChangesPropagation.xml"/>
+  <ImportAction name="include" value="TaskDefinition-EvaluateRoleChangesImpacts.xml"/>
+  <ImportAction name="include" value="TaskDefinition-Seri-EvaluateRoleChangesImpacts.xml"/>
+  <ImportAction name="include" value="TaskDefinition-ProcessRoleChanges.xml"/>
+  <ImportAction name="include" value="Workflow-RoleModeler-ImpactAnalysis-ChangesPropagation.xml"/>
+  <ImportAction name="include" value="Workflow-SeriRoleChangesPropagation.xml"/>
+</sailpoint>

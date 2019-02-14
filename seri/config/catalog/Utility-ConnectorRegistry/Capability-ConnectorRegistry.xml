@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Capability displayName="ConnectorRegistry" name="ConnectorRegistry">
+  <Description>ConnectorRegistry</Description>
+  <RightRefs>
+    <Reference class="sailpoint.object.SPRight" name="ConnectorRegistry"/>
+  </RightRefs>
+</Capability>
+</sailpoint>

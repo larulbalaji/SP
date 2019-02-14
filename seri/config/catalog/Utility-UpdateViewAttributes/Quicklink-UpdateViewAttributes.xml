@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <QuickLink action="workflow" category="Admin Tools" messageKey="Update View Attributes" name="Update View Attributes" enabled="true" ordering="8">
+    <Attributes>
+      <Map>
+        <entry key="workflowName" value="Update view attributes"/>
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope"
+        name="Admins" />
+    </DynamicScopes>
+
+  </QuickLink>  
+</sailpoint>

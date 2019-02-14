@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE GroupDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<GroupDefinition indexed="true" name="High risk users">
+  <Description>All users in the "High Risk" category</Description>
+  <GroupFilter>
+    <CompositeFilter operation="AND">
+      <Filter operation="GT" property="scorecard.compositeScore">
+        <Value>
+          <Integer>668</Integer>
+        </Value>
+      </Filter>
+    </CompositeFilter>
+  </GroupFilter>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</GroupDefinition>

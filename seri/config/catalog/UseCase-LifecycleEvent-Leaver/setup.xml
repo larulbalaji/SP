@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="emailTemplate-LCMNotfications.xml"/>
+    <ImportAction name="include" value="workflow-leaver.xml"/>
+    <ImportAction name="include" value="seri/config/xml/RuleLibrary-Demo-Workflow.xml"/>
+    <ImportAction name="include" value="seri/config/xml/Rule/RuleLibrary-Util.xml"/>
+</sailpoint>

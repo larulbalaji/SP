@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition    name="New Hire Access Reviews" resultAction="Rename" subType="Access Review and Certification Reports" type="LiveReport">
+  <Attributes>
+    <Map>
+      <entry key="disableDetail" value="false"/>
+      <entry key="disableSummary" value="false"/>
+      <entry key="exclusions">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="reportColumnOrder" value="application, firstName, lastName, entitlementType, entitlement, decision, decisionMaker, comments, nativeIdentity"/>
+      <entry key="tags">
+        <value>
+          <List>
+            <String>2c90c28a403008b601403010dfb6191c</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Description>Displays information about all manager certifications in detailed format.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Identity Access Review Live Report"/>
+  </Parent>
+</TaskDefinition>

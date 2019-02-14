@@ -1,0 +1,185 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.DelimitedFileConnector" featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="enterpriseIcon" name="Alerts" profileClass="" type="DelimitedFile">
+  <Attributes>
+    <Map>
+      <entry key="Alert.delimiter" value=","/>
+      <entry key="Alert.file" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-alerts.csv"/>
+      <entry key="Alert.filterEmptyRecords">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="Alert.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="Alert.isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="Alert.isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="Alert.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="Alert.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="alert.columnNames"/>
+      <entry key="alert.commentCharacter"/>
+      <entry key="alert.delimiter" value=","/>
+      <entry key="alert.file" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-alerts.csv"/>
+      <entry key="alert.fileEncoding"/>
+      <entry key="alert.filterEmptyRecords">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="alert.filterString"/>
+      <entry key="alert.hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="alert.indexColumn"/>
+      <entry key="alert.isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="alert.isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="alert.mergeColumns"/>
+      <entry key="alert.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="alert.numberOfLinesToSkip"/>
+      <entry key="alert.regularExpression"/>
+      <entry key="alert.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="delimiter" value=","/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="file" value="WEB-INF/config/seri/data/OracleEBS/oracleEBS-accounts.csv"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="group.filetransport" value="local"/>
+      <entry key="group.filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="group.partitionMode" value="auto"/>
+      <entry key="hasHeader">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="isCaseInsensitiveMerge">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="isSortedByIndexColumn">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="parseType" value="delimited"/>
+      <entry key="partitionMode" value="auto"/>
+      <entry key="stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="DelimitedFile Template"/>
+      <entry key="transportUser" value="spadmin"/>
+      <entry key="transportUserPassword" value="1:p+qvPBo4Rig8PYlNWbr3Zg=="/>
+    </Map>
+  </Attributes>
+  <CreationRule>
+    <Reference class="sailpoint.object.Rule" name="Alert Creation Rule"/>
+  </CreationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="USER_NAME" identityAttribute="USER_NAME" instanceAttribute="" nativeObjectType="account" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="USER_NAME" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPLOYEE_ID" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LAST_LOGIN" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="RESPONSIBILITIES" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROLES" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="LAST_LOGIN1" identityAttribute="LAST_LOGIN1" instanceAttribute="" nativeObjectType="alert" objectType="alert" permissionsRemediationModificationType="None">
+      <AttributeDefinition name="USER_NAME1" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPLOYEE_ID1" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LAST_LOGIN1" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

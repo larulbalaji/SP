@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate name="ContractorToEmployeeEmail">
+  <Body><![CDATA[
+<html>
+	<head><link rel="stylesheet" type="text/css" href="$spTools.formatURL('/css/iiq-custom.css')"></head>
+	<body>
+		<div class="padder-v">
+		  <img src="$spTools.formatURL('/images/TopLogo1.png')" alt="company logo"><br>
+		</div>
+	  <br>
+	  This is an automated notification from IdentityIQ.<br>
+	  <br>
+	  Your former Contractor has been on-boarded as an Employee.<br>
+	  <br>
+	  <br>
+	  Sincerely,<br>
+	  IT Oversight Team
+	</body>
+</html>
+  ]]></Body>
+  <Description>
+      Email Template for notifying Manager that their new hire has been on-boarded.
+  </Description>
+  <Subject>Manager Notification - $identityFirstname New Hire</Subject>
+</EmailTemplate>

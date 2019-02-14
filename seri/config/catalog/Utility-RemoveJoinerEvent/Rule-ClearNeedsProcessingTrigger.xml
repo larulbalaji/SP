@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Rule language="beanshell" name="Identity Refresh - Clear needsCreateProcessing Trigger">
+    <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Identity.CreateProcessingStep;
+import sailpoint.object.NativeChangeDetection;
+import java.util.List;
+// Expect: sailpoint.object.Identity identity
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.ClearNeedsCreateProcessingTrigger");
+serilog.debug("Removing Create Trigger for " + identity.getName());
+identity.setNeedsCreateProcessing(false,Identity.CreateProcessingStep.Trigger);
+
+// Uncomment to also clear NativeChangeDetections
+//  List ncds = identity.getNativeChangeDetections();
+//  if (ncds != null) {
+//    for (int i = 0; i < ncds.size(); i++) {
+//        ncds.remove(i); 
+//    }
+//  }
+//  identity.setNativeChangeDetections(ncds);
+  
+context.saveObject(identity);
+context.commitTransaction();
+
+    ]]></Source>
+  </Rule>
+</sailpoint>

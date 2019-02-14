@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Link Status Report Search Fields">
+  <Section columns="2" label="Identity Entitlements Report Arguments" name="customProperties">
+
+	<Field name="identity" displayName="identities"
+		   helpKey="help_rept_identity_entitlement_identities"
+		   multi="true"
+		   type="Identity"
+		   value="ref:identity" />
+
+	<Field name="application" displayName="applications"
+		   helpKey="help_rept_identity_entitlement_applications"
+		   multi="true"
+		   type="Application"
+		   value="ref:application" />
+
+
+  </Section>
+
+</Form>

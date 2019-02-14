@@ -1,0 +1,301 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="IIQStats">
+  <Source><![CDATA[
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+import sailpoint.api.SailPointContext;
+import sailpoint.object.*;
+import sailpoint.tools.GeneralException;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Utility.IIQStats");
+
+public String sizingRule(SailPointContext context) {
+  StringBuffer buffOut = new StringBuffer();
+  // create Query objects
+
+  Filter filter = null;
+  QueryOptions qo = new QueryOptions();
+
+  // generate our numbers
+  try {
+    int count = 0;
+    Map resultMap = null;
+    int cacheCounter = 0;
+
+    buffOut.append("\n\nIIQ Installation Statistics\n");
+    buffOut.append("***************************\n");
+    
+    //***********************************   IIQ VERSION   **************************************
+    buffOut.append("Version Information\n");    
+    iiqversion = sailpoint.Version.getVersion();
+    iiqpatch = sailpoint.Version.getPatchLevel();
+    lcmenabled = sailpoint.Version.isLCMEnabled();
+    builddate = sailpoint.Version.getBuildDate();
+    buffOut.append("  IIQ Version: " + iiqversion + "  Patch: " + iiqpatch + "\n  Build Date: " + builddate + "\n  LCM Enabled: " + lcmenabled + "\n\n");
+
+    //***********************************   IDENTITIES   **************************************
+    buffOut.append("Identity Statistics:\n");
+
+    // get total identities
+    count = countObj("sailpoint.object.Identity",null, context);
+    buffOut.append("  Total Identities: " + count + "\n");
+
+    // get count of active identities
+    filter = Filter.eq("inactive", false);
+    count = countObj("sailpoint.object.Identity",filter, context);
+    buffOut.append("  Active Identities: " + count + "\n");
+
+    // get a count of inactive identities
+    filter = Filter.eq("inactive", true);
+    count = countObj("sailpoint.object.Identity",filter, context);
+    buffOut.append("  Inactive Identities: " + count + "\n");
+
+    // get a count of uncorrelated identities
+    filter = Filter.eq("correlated", false);
+    count = countObj("sailpoint.object.Identity",filter, context);
+    buffOut.append("  Uncorrelated Identities: " + count + "\n");
+
+    //get a count of identity snapshots
+    count = countObj("sailpoint.object.IdentitySnapshot",null, context);
+    buffOut.append("  Identity Snapshots: " + count + "\n");
+
+    //***********************************  APPLICATIONS  *************************************
+    buffOut.append("\nApplication statistics\n");
+
+    // get a count of applications
+    count = countObj("sailpoint.object.Identity",null, context);
+    buffOut.append("  Total Applications: " + count + "\n");
+
+    // get a count of applications by connector type
+    buffOut.append("  Application number by connector type:" + "\n");
+    appendHQLQuery("select count(*),type from Application group by type", buffOut, context);
+
+    //***********************************  LINKS  ********************************************
+    buffOut.append("\nLink statistics:\n");
+
+    // get total links
+    count = countObj("sailpoint.object.Link",null, context);
+    buffOut.append("  Links: " + count + "\n");
+
+    //*******************************  CERTIFICATIONS  ***************************************
+    buffOut.append("\nCertification statistics\n");
+
+    //get total certification groups
+    count = countObj("sailpoint.object.CertificationGroup",null, context);
+    buffOut.append("  CertificationGroups: " + count + "\n");
+
+    //get total certification items
+    count = countObj("sailpoint.object.CertificationItem",null, context);
+    buffOut.append("  CertificationItems: " + count + "\n");
+
+    try {
+      //get certification schedule names and frequencies
+      List taskList = context.getObjects(TaskSchedule.class, new QueryOptions());
+      buffOut.append("\nTaskSchedule stats:\n");
+      int certCount = 0;
+      int accountAggCount = 0;
+      int accountGroupAggCount = 0;
+      int sequentialCount = 0;
+      if(taskList!=null) {
+        Iterator taskItr = taskList.iterator();
+        TaskSchedule taskSchedule = null;
+        while (taskItr.hasNext()) {
+          Object temp = taskItr.next();
+          if (temp instanceof TaskSchedule) {
+            taskSchedule = (TaskSchedule) temp;
+            String arg = taskSchedule.getArgument("executor");
+            String taskDefID = taskSchedule.getDefinitionId();
+            // DefinitionId turns out to be the name and not the Id
+            if (arg != null && (arg.compareTo("Certification Manager") == 0)) {
+              buffOut.append("  Certification: " + taskSchedule.getName() + " Cron: "
+                + taskSchedule.getCronExpressions() + "\n");
+              certCount++;
+            } else {
+              TaskDefinition taskDef = (TaskDefinition) context.getObjectByName(TaskDefinition.class,taskDefID);
+              if (taskDef!=null) {
+                TaskItemDefinition parentDef = taskDef.getParent();
+                if(parentDef!=null) {
+                  if (taskDef.getArguments().containsKey("taskList")) {
+                    buffOut.append("  Sequential Task: " + taskSchedule.getName()
+                      + " Cron: " + taskSchedule.getCronExpressions() + "\n");
+                    sequentialCount++;
+                  } else if (parentDef.getType() == TaskItemDefinition.Type.AccountAggregation) {
+                    buffOut.append("  Account Aggregation: " + taskSchedule.getName()
+                      + " Cron: " + taskSchedule.getCronExpressions() + "\n");
+                    accountAggCount++;
+                  } else if (parentDef.getType() == TaskItemDefinition.Type.AccountGroupAggregation) {
+                    buffOut.append("  Account Group Aggregation: " + taskSchedule.getName() + " Cron: "
+                      + taskSchedule.getCronExpressions() + "\n");
+                    accountGroupAggCount++;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      buffOut.append("     Total Scheduled Certifications: " + certCount + "\n");
+      buffOut.append("     Total Scheduled Account Aggregations: " + accountAggCount + "\n");
+      buffOut.append("     Total Scheduled Account Group Aggregations: " + accountGroupAggCount + "\n");
+      buffOut.append("     Total Scheduled Sequential Tasks: " + sequentialCount + "\n");
+    } catch(Exception e) {
+      serilog.error(e);
+      e.printStackTrace();
+    }
+
+    //***********************************  ROLES  ******************************************
+    buffOut.append("\nRole statistics\n");
+
+    //get total roles
+    count = countObj("sailpoint.object.Bundle",null, context);
+    buffOut.append("  Role number: " + count + "\n");
+
+    //get roles broken out by type
+    buffOut.append("  Role number by role type:" + "\n");
+    appendHQLQuery("select count(*),type from Bundle group by type", buffOut, context);
+
+    //get role types and if they are requestable
+    buffOut.append("  Role types and if they are requestable:\n");
+    ObjectConfig bundleConfig = ObjectConfig.getObjectConfig(Bundle.class);
+    Map bundleTypeMap = bundleConfig.getRoleTypesMap();
+    for (Object key  : bundleTypeMap.keySet()){
+      RoleTypeDefinition def = (RoleTypeDefinition) bundleTypeMap.get(key);
+      buffOut.append("    " + def.getName() + "\t\t\t" + def.isAssignable() + "\n");
+    }
+
+    //********************************* LCM *****************************************************
+    buffOut.append("\nLCM statistics\n");
+
+    //get total number of IdentityRequests
+    count = countObj("sailpoint.object.IdentityRequest",null, context);
+    buffOut.append("  IdentityRequests: " + count + "\n");
+
+    //******************************* Entitlement Catalog ************************************
+    buffOut.append("\nEntitlement Catalog statistics\n");
+
+    //get count of items in entitlement catalog
+    count = countObj("sailpoint.object.ManagedAttribute",null, context);
+    buffOut.append("  Entitlement Catalog entries: " + count + "\n");
+
+    //************************** System Configuration ***********************************************
+    buffOut.append("\nSystem Configuration statistics\n");
+
+    //get system configuration then output the relevant attributes
+    Configuration sysConfig = context.getObject(Configuration.class,"SystemConfiguration");
+    if (sysConfig != null) {
+      Attributes attr = sysConfig.getAttributes();
+      buffOut.append("  identitySnapshotInterval: " + attr.getString("identitySnapshotInterval") + "\n");
+      buffOut.append("  identitySnapshotMaxAge: " + attr.getString("identitySnapshotMaxAge") + "\n" );
+      buffOut.append("  taskResultMaxAge: " + attr.getString("taskResultMaxAge") + "\n");
+      buffOut.append("  identityIndexGranule: " + attr.getString("identityIndexGranule") + "\n");
+      buffOut.append("  groupIndexGranule: " + attr.getString("groupIndexGranule") + "\n");
+      buffOut.append("  certificationArchiveMaxAge: " + attr.getString("certificationArchiveMaxAge") +"\n");
+      buffOut.append("  certificationMaxAge: " + attr.getString("certificationMaxAge") + "\n");
+      buffOut.append("  lcmEnabled: " + attr.getString("lcmEnabled") + "\n");
+    }
+
+    //*************************** Extended Attributes  *********************************************
+    buffOut.append("\nExtended attribute statistics");
+
+    //output the extended attribute count for each of the objects
+    buffOut.append("  Extended Identity Attributes: " + getExtendedAttributeCount(Identity.class) + "\n");
+    buffOut.append("  Extended Bundle Attributes: " + getExtendedAttributeCount(Bundle.class) + "\n");
+    buffOut.append("  Extended Link Attributes: " + getExtendedAttributeCount(Link.class) + "\n");
+    buffOut.append("  Extended Application Attributes: " + getExtendedAttributeCount(Application.class) + "\n");
+    buffOut.append("  Extended ManagedAttribute: " + getExtendedAttributeCount(ManagedAttribute.class) + "\n");
+
+
+  } catch (Exception e) {
+    serilog.error(e);
+  }
+  return buffOut.toString();
+}
+
+// getExtendedAttributeCount takes a class that has an ObjectConfig, retrieves it and counts the extended attributes
+public int getExtendedAttributeCount(java.lang.Class aclass) {
+  int extCount = 0;
+  ObjectConfig config = ObjectConfig.getObjectConfig(aclass);
+  if (config == null)
+      return -1;
+  List objAttrList = config.getObjectAttributes();
+  if (objAttrList == null) return 0;
+  for (Object objAttr : objAttrList) {
+    if (objAttr instanceof ObjectAttribute) {
+      objAttr = (ObjectAttribute) objAttr;
+      if (((ObjectAttribute) objAttr).isExtended()) extCount++;
+    }
+  }
+  return extCount;
+}
+
+
+//appendHQLQuery performs an HQL query, parses the result and appends it to the provided buffer
+public void appendHQLQuery(String query, StringBuffer buffOut, SailPointContext context) throws GeneralException {
+  Iterator it = context.search(query,null,null);
+  while(it != null && it.hasNext()) {
+    Object current = it.next();
+    if (current instanceof Object[]) {
+    buffOut.append("    ");
+    Object[] array = (Object[]) current;
+    for (Object o : array) {
+      if (o != null)
+        buffOut.append(o.toString() + "\t");
+      }
+      buffOut.append("\n");
+    }
+  }
+}
+
+//Send in a filter and an class and get a count of the number of those objects that satisfy the filter
+public int countObj(String className, Filter filter, SailPointContext context) {
+  try {
+    Class aClass = Class.forName(className);
+    if (filter == null) {
+      return context.countObjects(aClass, new QueryOptions());
+    } else {
+      QueryOptions qo = new QueryOptions();
+      qo.addFilter(filter);
+      return context.countObjects(aClass, qo);
+    }
+  } catch (org.apache.bsf.BSFException e){
+    serilog.error(e);
+    return -1;
+  }
+  catch (ClassNotFoundException e){
+    serilog.error(e);
+    return -1;
+  }
+  catch (GeneralException e) {
+    serilog.error(e);
+    return -1;
+  }
+}
+
+String output=sizingRule(context);
+
+// Uncomment this section to write the results to a file
+/*******************************************************
+
+// Set up output file
+// Path to the file output
+final String OUT_FILE = "c:\\temp\\outfile.txt";
+
+try{
+  PrintWriter fileOut = new PrintWriter(OUT_FILE);
+  //write out to the file
+  fileOut.print(output);
+  fileOut.flush();
+  fileOut.close();
+} catch (Exception e) {
+  serilog.error(e);
+}
+*******************************************************/
+
+return output;
+
+
+  ]]></Source>
+</Rule>

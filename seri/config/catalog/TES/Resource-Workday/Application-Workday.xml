@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application authoritative="true" connector="sailpoint.connector.OpenConnectorAdapter" featuresString="ENABLE, SEARCH, PROVISIONING" icon="internetIcon" name="Workday" profileClass="" type="Workday">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="Workday"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="CAConnector" value="false"/>
+      <entry key="ChunkSize"/>
+      <entry key="EffectiveDateOffset"/>
+      <entry key="IntegrationSystemID"/>
+      <entry key="ServerTimeZone"/>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1493839589874</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1493839567234</Date>
+        </value>
+      </entry>
+      <entry key="compositeDefinition"/>
+      <entry key="connectorClass" value="openconnector.connector.WorkDay"/>
+      <entry key="customTimeOut" value="2"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+<!--       <entry key="filterString" value="(FILENUMBER == null) || (FILENUMBER != &quot;21329&quot; &amp;&amp; FILENUMBER != &quot;21040&quot; &amp;&amp; FILENUMBER != &quot;21222&quot;)"/> -->
+      <entry key="isInactiveWorkersAllowed">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="managerCorrelationFilter">
+        <value>
+          <Filter operation="EQ" property="employeeId" value="MANAGER_ID"/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="password" value="%%WORKDAY_PASSWORD%%"/>
+      <entry key="provisioningPassword"/>
+      <entry key="provisioningUser"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="Workday"/>
+      <entry key="url" value="%%WORKDAY_URL%%"/>
+      <entry key="user" value="%%WORKDAY_USERNAME%%"/>
+      <entry key="version" value="24.1"/>
+    </Map>
+  </Attributes>
+  <CreationRule>
+    <Reference class="sailpoint.object.Rule" name="Workday Identity Creation Script"/>
+  </CreationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="WORKER_DESCRIPTOR" identityAttribute="FILENUMBER" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="WORKER_DESCRIPTOR" remediationModificationType="None" required="true" type="string">
+        <Description>Worker Description</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="USERID" remediationModificationType="None" required="true" type="string">
+        <Description>Worker ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="FILENUMBER" remediationModificationType="None" required="true" type="string">
+        <Description>Employee ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MANAGER" remediationModificationType="None" required="true" type="string">
+        <Description>Current manager of the worker</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MANAGER_ID" remediationModificationType="None" required="true" type="string">
+        <Description>Manager ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMAIL_ADDRESS_HOME" remediationModificationType="None" required="true" type="string">
+        <Description>Home Email address</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMAIL_ADDRESS_WORK" remediationModificationType="None" required="true" type="string">
+        <Description>Work Email address</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS_HOME" remediationModificationType="None" required="true" type="string">
+        <Description>Home Address</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS_WORK" remediationModificationType="None" required="true" type="string">
+        <Description>Work Address</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="FIRST_NAME" remediationModificationType="None" required="true" type="string">
+        <Description>First name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LAST_NAME" remediationModificationType="None" required="true" type="string">
+        <Description>Last name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CLASS" remediationModificationType="None" required="true" type="string">
+        <Description>Combination of Position, Time Type and Employment Type</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DEPARTMENT" remediationModificationType="None" required="true" type="string">
+        <Description>Cost center</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="JOBCODE" remediationModificationType="None" required="true" type="string">
+        <Description>Job profile</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="JOBTITLE" remediationModificationType="None" required="true" type="string">
+        <Description>Business title</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LOCATION" remediationModificationType="None" required="true" type="string">
+        <Description>Location</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="COST_CENTER_HIERARCHY" remediationModificationType="None" required="true" type="string">
+        <Description>Cost center hierarchy</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="HIREDATE" remediationModificationType="None" required="true" type="string">
+        <Description>Hire date</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="FULLPARTTIME" remediationModificationType="None" required="true" type="string">
+        <Description>Employee Type</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TERMINATION_DATE" remediationModificationType="None" required="true" type="string">
+        <Description>Termination date</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TEAM" remediationModificationType="None" required="true" type="string">
+        <Description>Team in the organization data of worker</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DIVISION" remediationModificationType="None" required="true" type="string">
+        <Description>Sales channel in the organization data of worker</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="POSTAL_CODE" remediationModificationType="None" required="true" type="string">
+        <Description>Postal Code</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="COUNTRY" remediationModificationType="None" required="true" type="string">
+        <Description>Country</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CITY" remediationModificationType="None" required="true" type="string">
+        <Description>City</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PHONE_HOME" remediationModificationType="None" required="true" type="string">
+        <Description>Home Phone Number</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PHONE_WORK" remediationModificationType="None" required="true" type="string">
+        <Description>Business Phone Number</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ON_LEAVE" remediationModificationType="None" required="true" type="string">
+        <Description>Status of worker</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LEGAL_MIDDLE_NAME" remediationModificationType="None" required="true" type="string">
+        <Description>Legal Middle Name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MIDDLE_NAME" remediationModificationType="None" required="true" type="string">
+        <Description>Middle Name</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="WORKER_NAME" remediationModificationType="None" required="true" type="string">
+        <Description>Worker Name</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>
+

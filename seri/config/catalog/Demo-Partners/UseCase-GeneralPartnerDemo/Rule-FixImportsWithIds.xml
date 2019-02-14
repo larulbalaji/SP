@@ -1,0 +1,260 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="FixImportsWithIds">
+  <Description>
+  </Description>
+  <Signature returnType="RemediationItem">
+    <Inputs>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to
+          access the database.
+        </Description>
+      </Argument>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.object.*;
+
+
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.eq("type","TargetAggregation"));
+List lTasks = context.getObjects(TaskDefinition.class,qo);
+for (TaskDefinition lTask : lTasks) {
+  String sTargetSource = lTask.getArgument("targetSource");
+  if (sTargetSource!=null) {
+  	qo = new QueryOptions();
+  	qo.addFilter(Filter.eq("name",sTargetSource));
+  	List lTargetSources = context.getObjects(TargetSource.class,qo);
+  	for (TargetSource lTargetSource : lTargetSources) {
+  	  String sId = lTargetSource.getId();
+  	  lTask.setArgument("targetSource",sId);
+        context.saveObject(lTask);
+        context.commitTransaction();
+        context.decache();
+        context.commitTransaction();
+  	  System.out.println("Fixed Imported Task: "+lTask.getName());
+  	}
+  }
+}
+
+
+qo = new QueryOptions();
+qo.addFilter(Filter.eq("type","Generic"));
+List lTasks2 = context.getObjects(TaskDefinition.class,qo);
+for (TaskDefinition lTask : lTasks2) {
+  String sRule = lTask.getArgument("ruleName");
+  if (sRule!=null) {
+  	qo = new QueryOptions();
+  	qo.addFilter(Filter.eq("name",sRule));
+  	List lRules = context.getObjects(Rule.class,qo);
+  	for (Rule lRule : lRules)	{
+  	  String sId = lRule.getId();
+  	  lTask.setArgument("ruleName",sId);
+      context.saveObject(lTask);
+      context.commitTransaction();
+      context.decache();
+      context.commitTransaction();
+  	  System.out.println("Fixed Imported Task: "+lTask.getName());
+  	}
+  }
+}
+
+
+// **** Adding logic for Dashboards ****
+List lDashboards = context.getObjects(IdentityDashboard.class);
+for (IdentityDashboard lDashboard : lDashboards)
+{
+  Boolean bFixed = false;
+  List lDashboardReferences = lDashboard.getReferences();
+  for (DashboardReference lDashboardReference : lDashboardReferences)
+  {
+    Attributes attrMap = lDashboardReference.getArguments();
+	if (attrMap!=null)
+	{
+	  List lChartValues = attrMap.getList("chartValue");
+	  List lTemp = new ArrayList();
+	  for (String lChartValue : lChartValues)
+	  {
+	    qo = new QueryOptions();
+	    qo.addFilter(Filter.eq("name",lChartValue));
+	    List lGroupDefs = context.getObjects(GroupDefinition.class,qo);
+		if (lGroupDefs.isEmpty()) {lTemp.add(lChartValue);}
+		for (GroupDefinition lGroupDef : lGroupDefs)
+		{
+		  String sId = lGroupDef.getId();
+		  lTemp.add(sId);
+		  bFixed = true;
+		}
+		attrMap.remove("chartValue");
+		attrMap.put("chartValue",lTemp);
+	  }
+	  lChartValues = lTemp;
+      lDashboardReference.setArguments(attrMap);
+	}
+  }
+  if (bFixed)
+  {
+    lDashboard.setReferences(lDashboardReferences);
+    context.saveObject(lDashboard);
+    context.commitTransaction();
+    System.out.println("Fixed Dashboard: "+lDashboard.getName());
+  }
+}
+
+
+// **** Adding logic for role composition reviews ****
+
+  // First the CertificationDefinition
+  List lCerts = context.getObjects(CertificationDefinition.class);
+  //System.out.println("List is: " +lCerts +"\n\n");
+  Boolean bFixed = false;
+  
+  for (CertificationDefinition lCert : lCerts) {
+  
+    if (lCert.getType()==Certification.Type.BusinessRoleComposition) {
+      //System.out.println("\nfound one: " +lCert);
+      Attributes attrMap = lCert.getAttributes();
+    List lTemp = new ArrayList();
+  
+      if (attrMap!=null) {
+        String sRole = attrMap.get("businessRoles");
+        //System.out.println("sRole is: " +sRole +"\n");
+        String[] rolesArray = sRole.split(",");
+      
+        for ( splitRoles : rolesArray ) {
+          bundleObject = context.getObjectByName(Bundle.class, splitRoles.trim() );
+          //System.out.println("bundleObject is: " +bundleObject);
+      
+          if (bundleObject!=null) {
+           String sId = bundleObject.getId();
+           //System.out.println("Bundle Id is: " +sId);
+           lTemp.add(sId);
+           bFixed = true;
+          }
+        }
+      }
+   
+      if (bFixed) {
+        attrMap.remove("businessRoles");
+        String lTemp2 = lTemp.toString();
+        String lTemp3 = lTemp2.substring(1,lTemp2.length()-1);
+        //System.out.println("lTemp3 is: " +lTemp3);
+        attrMap.put("businessRoles",lTemp3);
+        lCert.setAttributes(attrMap);
+        context.saveObject(lCert);
+        context.commitTransaction();
+        System.out.println("Fixed Role Composition Cert: "+lCert.getName());
+      }              
+    }
+  }
+  
+  // Next the Certification
+  // What about the group?
+  // Putting this on ice, as I need more time to doe the group and certification properly. Especially the certification is nasty due to the nesting and snapshots involved. 
+  
+
+
+// **** Adding logic for Role Mining Tasks ****
+// Need to reference Applications by Id.
+
+//<TaskDefinition name="Business and IT role mining" resultAction="Rename" subType="Business Role Mining" type="RoleMining"> (select on subType)
+//  <Attributes>
+//    <Map>
+//      <entry key="applications" value="Active Directory, ERP Portal"/> (Change you application names with the actual Id's of the applications)
+
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.eq("subType","Business Role Mining"));
+List lTasks = context.getObjects(TaskDefinition.class,qo);
+List lTemp = new ArrayList();
+System.out.println("List is: " +lTasks +"\n\n");
+Boolean bFixed = false;
+
+for (TaskDefinition lTask : lTasks) {
+  String sApplications = lTask.getArgument("applications");
+  System.out.println("sApplications is: " +sApplications +"\n\n");
+  String[] sApplArray = sApplications.split(",");
+  
+  if (sApplications!=null) {
+  
+  for ( splitApps : sApplArray ) {
+          applObject = context.getObjectByName(Application.class, splitApps.trim() );
+          System.out.println("applObject is: " +applObject);
+      
+          if (applObject!=null) {
+           String sId = applObject.getId();
+           System.out.println("Application Id is: " +sId);
+           lTemp.add(sId);
+           bFixed = true;
+          }
+        }
+        
+  if (bFixed) {
+        //attrMap.remove("businessRoles");
+        String lTemp2 = lTemp.toString();
+        String lTemp3 = lTemp2.substring(1,lTemp2.length()-1);
+        System.out.println("lTemp3 is: " +lTemp3);
+    lTask.setArgument("applications",lTemp3);     
+        context.saveObject(lTask);
+        context.commitTransaction();
+        System.out.println("Fixed Role Mining Task: "+lTask.getName());
+    }       
+  }
+}
+ 
+ 
+ 
+// **** Adding logic for Manager Access Review reports ****
+// Need to reference Access Reviews by Id.
+//<TaskDefinition name="Manager Access Review report for current Quarter" resultAction="Rename" subType="Access Review and Certification Reports" type="LiveReport"> (leverage subType)
+//  <Attributes>
+//    <Map>
+//     <entry key="certificationGroups">
+//        <value>
+//          <List>
+//            <String>Manager Certification Campaign : Q4 FY2014</String> (Replace the name with the Id of the cert)
+//          </List>
+
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.eq("subType","Access Review and Certification Reports"));
+List lTasks = context.getObjects(TaskDefinition.class,qo);
+List lCerts = new ArrayList();
+List lTemp = new ArrayList();
+//System.out.println("List is: " +lTasks +"\n\n");
+Boolean bFixed = false;
+
+for (TaskDefinition lTask : lTasks) {
+  lCerts = lTask.getArgument("certificationGroups");
+  //System.out.println("lCerts is: " +lCerts +"\n\n");
+  
+  if (lCerts!=null) {
+  
+  for ( splitCerts : lCerts ) {
+    System.out.println("splitCerts is: " +splitCerts);
+    certObject = context.getObjectByName(CertificationGroup.class, splitCerts );
+    System.out.println("certObject is: " +certObject);
+    
+        if (certObject!=null) {
+         String sId = certObject.getId();
+         System.out.println("Certification Id is: " +sId);
+         lTemp.add(sId);
+         bFixed = true;
+        }
+      }
+        
+  if (bFixed) {
+    lTask.setArgument("certificationGroups",lTemp); 
+    context.saveObject(lTask);
+    context.commitTransaction();
+    System.out.println("Fixed Report Definition: "+lTask.getName());
+    }       
+  }
+}  
+  
+  ]]></Source>
+</Rule>

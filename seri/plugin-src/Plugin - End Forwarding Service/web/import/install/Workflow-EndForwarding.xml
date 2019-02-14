@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" libraries="Identity"
+          name="End Forwarding Period" type="IdentityLifecycle" resultExpiration="-1">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable name="workitemIds" type="java.util.List"/>
+  <Variable name="trace" initializer="string:false"/>
+  <Description>Find all the workitems that were forwarded from this user, and assign them back</Description>
+  <Step icon="Start" name="start" posX="36" posY="39">
+    <Transition to="Find forwarded workitems"/>
+  </Step>
+  <Step icon="Default" name="Find forwarded workitems" posX="511" posY="29" resultVariable="workitemIds">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.AuditEvent;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.WorkItem;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EndForwardingPeriod.FindItems");
+
+      
+// Get the user's forwarding user
+Identity user=context.getObjectByName(Identity.class, identityName);
+if (user==null) {
+  serilog.error("Can't find user "+identityName);
+  return null;
+}
+// I'm not sure if we need to include this in the search
+// It would break in the case that the forwarding user had been removed/changed anyway
+// So let's just look for audit events where the forwarded-for user is the identity
+/* String forwardingUserName=user.getPreference("forward");
+if (forwardingUserName==null) {
+  serilog.error("Can't find forwarding user for "+identityName);
+  return new ArrayList();
+}
+Identity forwardingUser=context.getObjectByName(Identity.class, forwardingUserName);
+if (forwardingUser==null) {
+  serilog.error("Can't find forwarding user '"+forwardingUserName+"' for "+identityName);
+  return new ArrayList();
+}
+ */
+
+// Check the audit logs for a 'Forwarded' audit record
+// with the relevant users in the relevant strings
+
+QueryOptions qo=new QueryOptions();
+Filter fltr=Filter.eq("string1", identityName);
+//Filter fltr2=Filter.eq("string2", forwardingUserName);
+Filter fltr3=Filter.eq("action", "Forward");
+List filters=new ArrayList();
+filters.add(fltr);
+//filters.add(fltr2);
+filters.add(fltr3);
+Filter theFilter=Filter.and(filters);
+qo.addFilter(theFilter);
+
+Iterator iter=context.search(AuditEvent.class, qo);
+if(!iter.hasNext()) {
+  serilog.debug("No workitems found");
+  return new ArrayList();
+}
+List workitemIds=new ArrayList();
+while(iter.hasNext()) {
+  AuditEvent wi=(AuditEvent)iter.next();
+  serilog.debug("Adding workitem from event "+wi.getTarget());
+  workitemIds.add(wi.getString4());
+}
+
+// return the result
+return workitemIds;
+      ]]></Source>
+    </Script>
+    <Transition to="Reassign Workitems"/>
+  </Step>
+  <Step icon="Task" name="Reassign Workitems" posX="49" posY="265">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.AuditEvent;
+import sailpoint.object.Identity;
+import sailpoint.object.WorkItem;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EndForwardingPeriod.FindItems");
+
+Identity original=context.getObjectByName(Identity.class, identityName);
+// for each workitem id
+for (String workitemId: workitemIds) {
+  // change the Owner back to the original user
+  WorkItem itm=context.getObjectById(WorkItem.class, workitemId);
+  if (itm==null) {
+    serilog.error("unable to find WorkItem: "+workitemId);
+  } else {
+    serilog.debug("got item "+workitemId+" : "+itm.getName());
+    Identity oldOwner=itm.getOwner();
+    serilog.debug("Setting owner to "+identityName);
+    itm.setOwner(original);
+    serilog.debug("Saving..");
+    context.saveObject(itm);
+    // Create an audit record
+    serilog.debug("Creating audit event");
+    AuditEvent ae=new AuditEvent();
+    ae.setAction("EndForward");
+    ae.setSource("spadmin");
+    ae.setTarget("Workitem:"+itm.getName());
+    ae.setString1(oldOwner.getName());
+    ae.setString2(identityName);
+    ae.setString3("EndForwardingUser");
+    ae.setString4(itm.getId());
+    serilog.debug("Saving audit event");
+    context.saveObject(ae);
+  }
+}
+context.commitTransaction();      
+serilog.debug("done");
+      ]]></Source>
+    </Script>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="760" posY="367"/>
+</Workflow>
+

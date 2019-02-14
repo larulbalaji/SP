@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Form-DeleteDuplicateUserConfirmation.xml'/>
+  <ImportAction name='include' value='Workflow-QuickLink-DeleteDuplicateAccount.xml'/>
+
+  <!-- Merge updates to SystemConfiguration to turn on pass-thru for AD and Forgot Password link on login page  -->
+  <ImportAction name='include' value='../UseCase-QuickLink-DeleteDuplicateAccounts/Configuration-QuickLink-DeleteDuplicateAccounts.xml'/>
+</sailpoint>

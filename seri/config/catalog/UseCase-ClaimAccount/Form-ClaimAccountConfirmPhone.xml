@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form hidden="true" name="Claim Account Confirm Contact" type="RegisterIdentity">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="new_user_registration_title"/>
+      <entry key="subtitle" value="new_user_registration_description"/>
+    </Map>
+  </Attributes>
+  <Description>This form is used to claim accounts.</Description>
+  <Button action="next" label="Claim"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Section label="User Information">
+    <Field displayName="User Name" name="name" readOnly="true" type="string"/>
+  </Section>
+  <Section>
+    <Field displayName="Primary Phone" name="phone" required="true" type="string"/>
+    <Field displayName="Email" name="email" readOnly="true" type="string">
+      <Attributes>
+        <Map>
+          <entry key="vtype" value="email"/>
+        </Map>
+      </Attributes>
+    </Field>
+  </Section>
+  <Section columns="1" label="Coporate Password Policy" type="text">
+    <Field value="&#10;&#9;&#9;  Users must access a variety of IT resources, including computers and other hardware devices, data storage systems, and other accounts. Passwords are a key part of our strategy to make sure only authorized people can access those resources and data.  &#10; All users who have access to any of those resources are responsible for choosing strong passwords and protecting their log-in information from unauthorized people.  &#10; The purpose of this policy is to make sure all esources and data receive adequate password protection. The policy covers all users who are responsible for one or more account or have access to any resource that requires a password.&#10;"/>
+  </Section>
+  <Section columns="2">
+    <Field columnSpan="2" displayName="Policy Agreement" name="agreement" required="true" type="string">
+      <AllowedValuesDefinition>
+        <Script>
+          <Source><![CDATA[
+List myValues = new ArrayList();
+myValues.add("I signify my agreement");
+return myValues;
+            ]]></Source>
+        </Script>
+      </AllowedValuesDefinition>
+    </Field>
+  </Section>
+  <Section>
+    <Field displayName="label_password" name="password" required="true" type="secret">
+      <ValidationRule>
+        <Reference class="sailpoint.object.Rule" name="LCM Validate Password"/>
+      </ValidationRule>
+    </Field>
+    <Field displayName="label_confirm_password" name="confirmPassword" required="true" type="secret">
+      <ValidationScript>
+        <Source><![CDATA[     
+import sailpoint.web.messages.MessageKeys;
+import sailpoint.tools.Message;
+
+List errors = null;
+
+String password = form.getField("password").getValue();
+String confirmPassword = value; 
+if (!password.equals(confirmPassword)) {
+	errors = new ArrayList();
+	Message msg = new Message();
+	msg.setKey(MessageKeys.ERROR_IDENTITY_CONFIRM_PASS_MISMATCH);
+	errors.add(msg);
+}
+
+return errors; 
+          ]]></Source>
+      </ValidationScript>
+    </Field>
+  </Section>
+</Form>

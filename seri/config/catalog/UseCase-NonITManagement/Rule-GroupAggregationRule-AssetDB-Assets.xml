@@ -1,0 +1,195 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+	<Rule language="beanshell" name="GroupAggregationRule-AssetDB-Assets"	type="GroupAggregationRefresh">
+		<Description>This rule is used to set the owner or modify the account
+			group before it is persisted to the database.</Description>
+		<Signature returnType="Object">
+			<Inputs>
+				<Argument type="environment">
+					<Description>
+						Arguments passed to the aggregation task.
+					</Description>
+				</Argument>
+				<Argument type="obj">
+					<Description>
+						A sailpoint.object.ResourceObject generated from the application
+						and the ProvisioningPlan's ObjectRequest.
+					</Description>
+				</Argument>
+				<Argument type="accountGroup">
+					<Description>
+						The account group being refreshed.
+					</Description>
+				</Argument>
+				<Argument type="groupApplication">
+					<Description>
+						Application being aggregated.
+					</Description>
+				</Argument>
+			</Inputs>
+			<Returns>
+				<Argument type="accountGroup">
+					<Description>
+						The refreshed account group object.
+					</Description>
+				</Argument>
+			</Returns>
+		</Signature>
+<!-- 
+		<ReferencedRules> 
+		  <Reference class="sailpoint.object.Rule" name="getManagerByOrg"/> 
+		</ReferencedRules>
+ -->		
+		<Source>
+<![CDATA[
+/*******
+ *                                                                            *
+ * Generated: Thu Nov 24 18:28:38 CET 2016                                    *
+ * Rule: Group Aggregation Refresh Template                                   *
+ * Description: Group Aggregation Refresh Template                            *
+ * Inputs:                                                                    *
+ *     environment - Arguments passed to the aggregation task.                *
+ *     obj - A sailpoint.object.ResourceObject generated from the application *
+ *           and the ProvisioningPlan's ObjectRequest.                        *
+ *     accountGroup - The account group being refreshed.                      *
+ *     groupApplication - Application being aggregated.                       *
+ * Returns:                                                                   *
+ *     accountGroup - The refreshed account group object.                     *
+ ******/       
+       import java.util.HashMap;
+       import java.util.List;
+       import java.util.Map;        
+       import sailpoint.object.ManagedAttribute;
+       
+       import sailpoint.object.ResourceObject;
+       import sailpoint.object.ObjectConfig;
+       import sailpoint.object.ObjectAttribute;
+       import sailpoint.object.Attributes;
+       import sailpoint.object.Application;
+       import sailpoint.object.Scope;
+       import sailpoint.object.Configuration;       
+       import sailpoint.object.Bundle;
+       import sailpoint.object.Link;
+       import sailpoint.object.Identity;
+       import sailpoint.object.AccountGroup;
+       import sailpoint.object.EmailOptions;
+       import sailpoint.object.EmailTemplate;
+       import sailpoint.tools.GeneralException;
+
+       import sailpoint.api.Correlator;
+       import sailpoint.api.ManagedAttributer;
+       import org.apache.commons.logging.LogFactory;
+       import org.apache.commons.logging.Log;
+
+       Log serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.GroupAggregationRule-AssetDB-Assets");
+ 
+     //
+     //  Handle incoming group object; determine if we're creating or updating
+     //
+     public boolean alreadyExists(ManagedAttribute ma) throws GeneralException 
+     {
+           ManagedAttribute existing = ManagedAttributer.get(context, ma.getApplicationId(), ma.getAttribute(), ma.getValue());
+           if (existing == null) {
+               //serilog.debug("...in CREATE mode");
+               return false;
+           } else {
+              //serilog.debug("...in UPDATE mode");
+              return true;
+           }
+     }
+
+     //
+     // Retrieve the Text Description from the Group Object
+     //
+     public String getDescription(Application app, ResourceObject ro)
+     {
+           String description = null;
+
+           // TODO:  Change attribute name to correspond to group schema for
+           //              specific app being aggregated.
+           //
+           if ( ro != null ) {
+              description = (String) ro.getStringAttribute("description");
+           }
+
+           return description;
+     }
+
+ //
+     //  ManagedAttribute objects support multiple languages...just use default locale
+     //
+     public String getDefaultLang() throws GeneralException
+     {   
+         String defaultLanguage = "en_US";
+         Configuration sysConfig = context.getObject(Configuration.class,"SystemConfiguration");
+         if (sysConfig != null) {
+            Attributes attr = sysConfig.getAttributes();
+            defaultLanguage = attr.getString("defaultLanguage");
+         }
+         serilog.debug("Default Language: " + defaultLanguage );
+         return defaultLanguage;
+     }
+
+
+     //
+     // Main Entry Point for AccountGroup (ManagedAttribute) Refresh Rule Logic
+     //
+     // NOTE:  As of 6.0, the input argument "accountGroup" is a handle to the
+     //        ManagedAttribute object we're creating or updating (i.e., based on 
+     //        the ResourceObject we're aggregating).
+     
+     try {
+
+         if (!alreadyExists(accountGroup)) {
+              // Do CREATE stuff here....
+             //alertNotifyForNewGroup(accountGroup, description);
+         } else {
+             // do UPDATE processing here...
+         }
+
+
+         Identity groupOwner = context.getObjectByName(Identity.class, "spadmin" );
+         accountGroup.setOwner(groupOwner);
+
+         // make it requestable now
+         accountGroup.setRequestable( true );
+         
+         
+         // build description from description and the serialno
+         
+         String desc = accountGroup.getAttribute("asset_description");
+         String serialNo =  accountGroup.getAttribute("asset_serialno");
+         String description;
+         
+         if( null != desc ) {
+            description = desc;
+         }
+         if( null != serialNo ) {
+           description = description + " - Serial Number: " + serialNo;
+         }
+         if( null != description ) {
+            serilog.debug("description: " + description );
+            accountGroup.addDescription( getDefaultLang(), description );         
+         }
+         
+         
+         // Hack:
+         // make anything that contains Cabrio approval required
+         //if( null != modelName && modelName.contains("Cabrio") ) {         
+         //  accountGroup.setAttribute("needApproval", true );
+         //}
+
+     } catch (GeneralException e) {
+          // Don't puke the agg because of this....
+          serilog.debug("ERROR - AssetDB Group Refresh Rule.  Cannot process ManagedAttribute object..." + e.toString());
+     }
+
+     // return the ManagedAttribute handle that was passed to us so it can be persisted
+     //
+     return accountGroup;
+
+       ]]>
+		</Source>
+	</Rule>
+</sailpoint>

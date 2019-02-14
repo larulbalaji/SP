@@ -1,0 +1,198 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  libraries="Identity,IdentityRequest"  name="Enable Joiner" type="SERI">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable input="true" name="appsToNotify"/>
+  <Variable name="refreshResult" type="sailpoint.object.TaskResult"/>
+  <!-- RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="LCM Workflow Library"/>
+  </RuleLibraries-->
+  <Step icon="Start" name="Start" posX="10" posY="20" resultVariable="plan">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+Identity i=context.getObjectByName(Identity.class, identityName);
+i.setInactive(false);
+context.saveObject(i);
+context.commitTransaction();
+
+      ]]></Source>
+    </Script>
+    <Transition to="Add Notification Attributes"/>
+  </Step>
+  
+  <Step name="Add Notification Attributes" posX="310" posY="20" >
+    <Description>This is left over from the previous incarnation of this workflow. Need to figure out if this is still needed</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.WorkflowCase;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EnableJoiner.AddNotificationAttributes");
+
+// Grab the cube
+Identity cube = context.getObjectByName(Identity.class, identityName);
+
+String managerApprover;
+Identity manager = cube.getManager();
+if (manager != null) {
+    managerApprover = manager.getName();
+} else {
+  managerApprover = "spadmin"; // Default No Manager Notification
+}
+String identityDisplayName = cube.getDisplayName();
+
+WorkflowCase c = wfcontext.getWorkflowCase();
+c.put("identityDisplayName", identityDisplayName);
+c.put("managerDisplayName", managerApprover);
+c.put("userId", cube.getName());
+c.put("firstName", cube.getFirstname());
+c.put("lastName", cube.getLastname());
+serilog.debug ("Joiner Event for: " + identityDisplayName);
+serilog.debug ("\tmanagerDisplayName: " + managerApprover);
+serilog.debug ("\tfirstName: " + cube.getFirstname());
+serilog.debug ("\tlastName: " + cube.getLastname());
+serilog.debug ("\tlauncher is: " + launcher);
+// serilog.debug ("\tevent is: " + event.toXml());
+
+     ]]></Source>
+   </Script>
+   <Transition to="Provision Birthright roles"/>
+ </Step>
+ <Step action="call:refreshIdentity" icon="Task" name="Provision Birthright roles" posX="1028" posY="7">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="correlateEntitlements" value="true"/>
+    <Arg name="provision" value="true"/>
+    <Arg name="promoteAttributes" value="true"/>
+    <Transition to="Notify Manager"/>
+  </Step>
+  <Step action="call:sendEmail" icon="Email" name="Notify Manager" posX="760" posY="20">
+    <Arg name="template" value="string:Manager Notification Joiner Provisioning Completed"/>
+    <Arg name="to" value="script:getManagersEmail(identityName)"/>
+    <Arg name="userId" value="ref:userId"/>
+    <Arg name="nativeIdentity" value="ref:identityDisplayName"/>
+    <Arg name="firstName" value="ref:firstName"/>
+    <Arg name="lastName" value="ref:lastName"/>
+    <Arg name="ProvisioningPlan" value="ref:plan"/>
+    <Arg name="Notify User" value="ref:json"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="phone">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EnableJoiner.NotifyManager.phone");
+
+serilog.debug("getting attribute 'phone' for identity "+identityName);
+Identity identity=context.getObjectByName(Identity.class, identityName);
+if(identity!=null) {
+  String phone=identity.getAttribute("phone");
+  serilog.debug("returning "+phone);
+  return phone;
+}
+serilog.warn("No phone attribute found");
+return null;
+        ]]></Source>
+      </Script>  
+    </Arg>
+    <Arg name="appMap">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Application;
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EnableJoiner.NotifyManager.appMap");
+
+serilog.debug("Checking apps to notify for identity "+identityName+" ("+appsToNotify+")");
+Identity identity=context.getObjectByName(Identity.class, identityName);
+
+List links = identity.getLinks();
+List mapAppList = new ArrayList();
+if (links!=null) {
+  serilog.debug("Found "+links.size()+" links on "+identityName);
+  for (Link link : links) {
+   
+    Application app = link.getApplication();
+    if (app == null) {
+      serilog.debug("App is null");
+      return false;
+    }
+  
+    //if this app is not in the list of apps to notify mgr skip it
+    if (appsToNotify.indexOf(app.getName()) == -1) {
+      serilog.debug("Application " + app.getName() + " not marked to notify");
+      continue;
+    } else {
+      serilog.debug("Application " + app.getName() + " is marked to notify");
+    }
+      
+    String accountId = link.getDisplayableName();
+    if (accountId == null )
+        accountId = link.getNativeIdentity();
+  
+    Map appParam = new HashMap();
+    appParam.put("application", app.getName());
+    appParam.put("accountid", accountId);
+  
+    mapAppList.add(appParam);
+  }
+} else {
+  serilog.debug("No links found on identity "+identityName);
+}
+return mapAppList;
+        ]]></Source>
+      </Script>  
+    </Arg>
+    <Transition to="Notify User"/>
+  </Step>
+
+  <Step action="sendEmail" icon="Email" name="Notify User" posX="910" posY="20">
+    <Arg name="template" value="New User Creation"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="firstName" value="ref:firstName"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="to">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+Identity identity=context.getObjectByName(Identity.class, identityName);
+return identity.getEmail();
+        ]]></Source>
+      </Script>
+    </Arg>
+    <Arg name="jobTitle">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+Identity identity=context.getObjectByName(Identity.class, identityName);
+return identity.getAttribute("jobTitle");
+        ]]></Source>
+      </Script>
+    </Arg>
+    <Arg name="region">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+Identity identity=context.getObjectByName(Identity.class, identityName);
+return identity.getAttribute("region");
+        ]]></Source>
+      </Script>
+    </Arg>
+    <Arg name="department">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+Identity identity=context.getObjectByName(Identity.class, identityName);
+return identity.getAttribute("department");
+        ]]></Source>
+      </Script>
+    </Arg>
+    <Transition to="Stop"/>
+  </Step>
+  
+  <Step icon="Stop" name="Stop" posX="526" posY="170"/>
+  
+</Workflow>

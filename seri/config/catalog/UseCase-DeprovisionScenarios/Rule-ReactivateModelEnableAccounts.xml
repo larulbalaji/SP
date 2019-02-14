@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Account Provisioning - Model - Enable all Links" type="Workflow">
+  <Description>Iterates through all links on a cube and sets IIQDisabled=false</Description>
+  <Source><![CDATA[
+// Expect: java.util.Map identityModel
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String nativeIdentity
+ 
+List links = (List)identityModel.get("links");
+for(Map aLink: links) {	
+  if(((String)aLink.get("sysName")).equals(applicationName) &&
+    ((String)((Map)aLink.get("sys")).get("nativeIdentity")).equals(nativeIdentity)) {            
+   ((Map)aLink.get("sys")).put("IIQDisabled", false);
+    aLink.put("IIQDisabled", false);
+  }                    
+}
+return identityModel;
+     ]]>
+    </Source> 
+</Rule>

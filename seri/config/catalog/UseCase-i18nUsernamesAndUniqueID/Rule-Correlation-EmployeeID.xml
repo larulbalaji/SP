@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Correlation - EmployeeID" type="Correlation">
+  <Source>
+      <![CDATA[
+import sailpoint.connector.Connector;
+import sailpoint.connector.*;
+import sailpoint.object.Application;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+import java.util.*;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.IdentityCorrelation.empid");
+
+Map returnMap = new HashMap();
+
+String empID = account.getStringAttribute("empid");
+//System.out.println("HRV DEBUG 1: " + empID);
+
+if(empID==null) {
+  serilog.debug("no Employee ID: skipping rule");
+  return null;
+} else {
+  serilog.debug("EmployeeID "+empID);
+}
+
+QueryOptions options = new QueryOptions();
+options.addFilter(Filter.eq("employeeId",empID));
+Iterator identities =  context.search(Identity.class, options);
+
+if (identities.hasNext()) {
+  Identity cube = identities.next();
+  System.out.println("HRV DEBUG MATCH:" + cube.getName());
+  returnMap.put("identity", cube);
+  return(returnMap);
+} else {
+//System.out.println("HRV DEBUG NO MATCH");
+    }
+
+   ]]>
+    
+  </Source>
+</Rule>
+   

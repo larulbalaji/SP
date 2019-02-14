@@ -1,0 +1,582 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Form name="CreateUserForm" type="RegisterIdentity">
+    <Attributes>
+      <Map>
+        <entry key="pageTitle" value="Create New User"/>
+      </Map>
+    </Attributes> 
+    <Description>This form is used to for self-service registration.</Description>
+    <Section type="text">
+      <Attributes>
+        <Map>
+          <entry key="subtitle" value="Please enter the following required information in order to create a new Sailpoint User. When complete, to submit your request, click 'Submit'. To cancel this request, click 'Cancel'."/>
+        </Map>
+      </Attributes>
+      <Field value=" "/>
+    </Section>
+    <Button action="next" label="register"/>
+    <Button action="cancel" label="nav_cancel"/>
+    
+    <Section label="Employment Information" columns="2">
+      <Field displayName="Worker Type" name="workerType" postBack="true" required="true" type="string" columnSpan="2">
+        <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+List myValues = new ArrayList();
+myValues.add("Employee");
+myValues.add("Contractor");
+myValues.add("Vendor");
+myValues.add("IBM");
+myValues.add("Partner");
+return myValues;
+            ]]></Source>
+          </Script>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="Sponsor" name="sponsor" required="true" type="Identity" columnSpan="2">
+        <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;     
+
+if (form.getField("workerType").getValue()==null || form.getField("workerType").getValue().equals("Employee")) {
+    return true;
+}
+
+Map args = new HashMap();
+args.put("permission","ViewSponsor");
+Rule rule = context.getObjectByName(Rule.class, "hasViewPermission");
+if (rule != null) return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+import sailpoint.object.Rule; 
+Map args = new HashMap();
+args.put("permission","EditSponsor");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+if (rule != null) return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[ 
+if (field.isHidden()) {
+    return null;
+}
+return field.getValue();                                  
+          ]]></Source>
+        </Script>  
+      </Field> 
+      <Field displayName="Manager" name="manager" required="true" type="Identity" columnSpan="2">
+        <Attributes>
+          <Map>
+            <entry key="hidden"> 
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+import sailpoint.object.*;  
+import sailpoint.web.*; 
+import sailpoint.object.Rule;    
+
+if (form.getField("workerType").getValue()!= null && form.getField("workerType").getValue().equals("Employee") == false) {
+    return true;
+}
+
+Map args = new HashMap();
+args.put("permission","ViewManager");
+Rule rule = context.getObjectByName(Rule.class, "hasViewPermission");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","EditManager");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+
+if (rule != null)
+    return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[ 
+if (field.isHidden()) {
+    return null;
+}   
+return field.getValue();                                  
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="Start Date" name="startDate" required="true" type="date">
+        <Script>
+          <Source><![CDATA[
+Calendar x = Calendar.getInstance();
+return x.getTime();  
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="End Date" dynamic="true" name="expirationDate" required="true" type="date">
+        <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+if (form.getField("workerType").getValue()!= null && form.getField("workerType").getValue().equals("Employee") == false) {                     
+    return false;
+} else {                     
+    return true;       
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","EditExpirationDate");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+if(field.isHidden()) {
+    return null;
+}
+
+if(form.getField("workerType").getValue()!= null && form.getField("workerType").getValue().equals("Contractor")) {                     
+    Calendar x = Calendar.getInstance();
+    x.add(Calendar.DATE,90);
+    return x.getTime();                 
+} else  if(form.getField("workerType").getValue()!= null && form.getField("workerType").getValue().equals("Vendor")) {                     
+    Calendar x = Calendar.getInstance();
+    x.add(Calendar.DATE,180);
+    return x.getTime();                 
+}
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+    </Section>
+    
+    <Section columns="2" label="User Information"> 
+      <Field displayName="First Name" name="firstname" required="true" type="string" columnSpan="2"/>
+      <Field displayName="Last Name" name="lastname" postBack="true" required="true" type="string" columnSpan="2"/>
+      <Field displayName="Gender" name="gender" required="true" type="string">
+        <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+List myValues = new ArrayList();
+myValues.add("Male");
+myValues.add("Female");
+return myValues;
+            ]]></Source>
+          </Script>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="Date Of Birth" name="dateOfBirth" required="true" type="date"/>
+      <Field displayName="SSN/National Id" name="nationalIdentifier"  type="string"/>
+      <Field displayName="Citizenship" name="citzenship" required="true" type="string"/>
+    </Section>
+    
+    <Section label="Contact Information">
+      <Field displayName="Email" name="email" required="true" type="string">
+        <Attributes>
+          <Map>
+            <entry key="vtype" value="email"/>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","EditEmail");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+if (form.getField("firstname").getValue() != null && form.getField("lastname").getValue()!= null) {
+    return form.getField("firstname").getValue() + "."+  form.getField("lastname").getValue() + "@sailpointdemo.com";
+}
+return null;
+          ]]></Source> 
+        </Script>
+      </Field>
+      <Field displayName="Work Phone" name="workPhone" type="string"/> 
+      <Field displayName="Alternate Phone" name="alternatePhone" type="string"/>
+    </Section>
+    <Section label="Location Information" columns="2">
+      <Field displayName="Company" dynamic="true" helpKey="my help text" name="company" columnSpan="2" required="true" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","ViewCompany");
+Rule rule = context.getObjectByName(Rule.class, "hasViewPermission");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("permission","EditCompany");
+Rule rule = context.getObjectByName(Rule.class, "hasWritePermission");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[ 
+            return "SailPoint";
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="Job Title" name="jobTitle"  required="true" type="string" columnSpan="2">
+        <AllowedValuesDefinition>
+          <RuleRef>
+            <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+          </RuleRef>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="Department" dynamic="true" name="department" required="true" type="string" columnSpan="2">
+        <AllowedValuesDefinition>
+          <RuleRef>
+            <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+          </RuleRef>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="location" name="location" postBack="true" required="true" type="string">
+        <AllowedValuesDefinition>
+          <RuleRef>
+            <Reference class="sailpoint.object.Rule" name="Query Identity Attribute" />
+          </RuleRef>
+        </AllowedValuesDefinition>
+      </Field>
+      <Field displayName="Edit Addresss" name="editAddress" postBack="true" type="boolean"/>
+      
+      <Field displayName="Street Addresss" name="streetAddress" postBack="true" type="string">
+        <Attributes>
+          <Map>
+            <entry key="hidden" value="true"/>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+return form.getField("addressLine1").getValue()+"\n"+form.getField("addressLine2").getValue();
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="Address Line 1" name="addressLine1" required="true" type="string"  columnSpan="2" dynamic="true">
+        <Attributes>
+          <Map>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+if (form.getField("editAddress").getValue()!= null && (boolean)form.getField("editAddress").getValue() == true ||
+form.getField("location").getValue() != null && form.getField("location").getValue().equals("Home Office")) {                    
+    return false;
+} else {                     
+    return true;                  
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("locationAttr","addressline1");
+args.put("locationName",form.getField("location").getValue());
+Rule rule = context.getObjectByName(Rule.class, "getLocationValue");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="Address Line 2" name="addressLine2" type="string"  columnSpan="2" dynamic="true">
+        <Attributes>
+          <Map>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+if(form.getField("editAddress").getValue()!= null && (boolean)form.getField("editAddress").getValue() == true ||
+form.getField("location").getValue()!= null && form.getField("location").getValue().equals("Home Office")  ) {
+    return false;                   
+} else {
+    return true;
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("locationAttr","addressline2");
+args.put("locationName",form.getField("location").getValue());
+Rule rule = context.getObjectByName(Rule.class, "getLocationValue");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="City" name="city" required="true" type="string" dynamic="true">
+        <Attributes>
+          <Map>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[ 
+if(form.getField("editAddress").getValue()!= null && (boolean)form.getField("editAddress").getValue() == true ||
+form.getField("location").getValue()!= null && form.getField("location").getValue().equals("Home Office")  ) { 
+    return false;                   
+} else {
+    return true;
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("locationAttr","city");
+args.put("locationName",form.getField("location").getValue());
+Rule rule = context.getObjectByName(Rule.class, "getLocationValue");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="State/Prov Name" name="state" type="string" dynamic="true">
+        <Attributes>
+          <Map>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+if(form.getField("editAddress").getValue()!= null && (boolean)form.getField("editAddress").getValue() == true ||
+form.getField("location").getValue()!= null && form.getField("location").getValue().equals("Home Office")  ) {
+    return false;                   
+} else {                      
+    return true;                  
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("locationAttr","stateprovince");
+args.put("locationName",form.getField("location").getValue());
+Rule rule = context.getObjectByName(Rule.class, "getLocationValue");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="Postal Code" name="postalCode" required="true" type="string" dynamic="true">
+        <Attributes>
+          <Map>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+if(form.getField("editAddress").getValue()!= null && (boolean)form.getField("editAddress").getValue() == true ||
+form.getField("location").getValue()!= null && form.getField("location").getValue().equals("Home Office"))              
+{
+    return false;
+} else {
+    return true;
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("locationAttr","postalcode");
+args.put("locationName",form.getField("location").getValue());
+Rule rule = context.getObjectByName(Rule.class, "getLocationValue");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+      <Field displayName="Country" name="country" required="true" type="string" dynamic="true">
+        <Attributes>
+          <Map>
+            <entry key="readOnly">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+if (form.getField("editAddress").getValue()!= null && (boolean)form.getField("editAddress").getValue() == true || form.getField("location").getValue() != null && 
+form.getField("location").getValue().equals("Home Office")) {                     
+    return false;                   
+} else {                     
+    return true;                  
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>
+          </Map>
+        </Attributes>
+        <Script>
+          <Source><![CDATA[
+import sailpoint.object.Rule;
+Map args = new HashMap();
+args.put("locationAttr","country");
+args.put("locationName",form.getField("location").getValue());
+Rule rule = context.getObjectByName(Rule.class, "getLocationValue");
+if (rule != null)
+    return context.runRule(rule, args);
+
+return null;
+          ]]></Source>
+        </Script>
+      </Field>
+    </Section>
+    <Section columns="2" label="Username Information">    
+      <Field displayName="user_name" name="name" required="true" type="string" columnSpan="2" dynamic="true">
+        <Script>
+          <Source><![CDATA[
+if (form.getField("firstname").getValue() != null && form.getField("lastname").getValue()!= null) {
+    return form.getField("firstname").getValue() +"."+form.getField("lastname").getValue();
+}
+return null;
+          ]]></Source>
+        </Script> 
+        <ValidationRule>
+          <Reference class="sailpoint.object.Rule" name="LCM Validate Identity Name"/>
+        </ValidationRule>
+      </Field>
+      <Field displayName="label_password" name="password" required="true" type="secret">
+        <ValidationRule>
+          <Reference class="sailpoint.object.Rule" name="LCM Validate Password"/>
+        </ValidationRule>
+      </Field>
+      <Field displayName="label_confirm_password" name="confirmPassword" required="true" type="secret">
+        <ValidationScript>
+          <Source><![CDATA[     
+import sailpoint.web.messages.MessageKeys;
+import sailpoint.tools.Message;
+
+List errors = null;
+
+String password = form.getField("password").getValue();
+String confirmPassword = value; 
+if (!password.equals(confirmPassword)) {
+    errors = new ArrayList();
+    Message msg = new Message();
+    msg.setKey(MessageKeys.ERROR_IDENTITY_CONFIRM_PASS_MISMATCH);
+    errors.add(msg);
+}
+
+return errors; 
+          ]]></Source>
+        </ValidationScript>
+      </Field>
+    </Section> 
+  </Form> 
+</sailpoint>
+

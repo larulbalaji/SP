@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<TaskDefinition name="Block List Refresh" resultAction="Delete" subType="task_item_type_generic" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="ruleConfig" value="test,test"/>
+      <entry key="ruleName" value="BlockListPreferences"/>
+    </Map>
+  </Attributes>
+  <Description>Updates all identities in the BlockList workgroup so that any work items are moved to the identities in the AdminTeam workgroup.
+               Executives in the BlockList should never get work items.  Admins will manages these items instead.
+  </Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Run Rule"/>
+  </Parent>
+</TaskDefinition>
+</sailpoint>

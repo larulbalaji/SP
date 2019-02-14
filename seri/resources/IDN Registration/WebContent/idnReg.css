@@ -1,0 +1,2 @@
+    .ng-required::after { content:" *"; color: red; }
+    input.ng-invalid-required { background-color: red }

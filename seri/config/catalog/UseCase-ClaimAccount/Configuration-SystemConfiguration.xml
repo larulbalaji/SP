@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+	<ImportAction name='merge'>
+		<Configuration name="SystemConfiguration">
+			<Attributes>
+				<Map>
+					<entry key="enableForgotPassword">
+						<value>
+							<Boolean>true</Boolean>
+						</value>
+					</entry>
+					<entry key="authQuestionsEnabled">
+						<value>
+							<Boolean>true</Boolean>
+						</value>
+					</entry>
+					<entry key="numAuthQuestionAnswersRequired">
+						<value>
+							<Integer>2</Integer>
+						</value>
+					</entry>
+					<entry key="numAuthQuestionsForAuthn">
+						<value>
+							<Integer>2</Integer>
+						</value>
+					</entry>
+					<entry key="workflowLCMSelfServiceRegistrationRequest" value="Claim Account" />
+					<entry key="enableSelfServiceRegistration">
+						<value>
+							<Boolean>true</Boolean>
+						</value>
+					</entry>
+					<entry key="passwordMinLength" value="7" />
+					<entry key="passwordMinLower" value="1" />
+					<entry key="passwordMinNumeric" value="1" />
+				</Map>
+			</Attributes>
+		</Configuration>
+	</ImportAction>
+</sailpoint>

@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="PO Form Validation" type="Validation">
+  <Signature>
+    <Inputs>
+      <Argument name='workItemDecisionMap'/>
+    </Inputs>
+  </Signature>
+
+  <Source><![CDATA[
+import sailpoint.tools.Message;
+
+List messages = new ArrayList();
+
+String decisionFieldName = field.getName().substring(0,field.getName().indexOf("-newOwner"));
+if (workItemDecisionBasePath.get(decisionFieldName) != null) {
+  if (workItemDecisionBasePath.get(decisionFieldName).equals("No")) {
+    if (workItemDecisionBasePath.get(field.getName()) == null) {
+    	Message msg = new Message();
+    	msg.setKey("NFL rules state we must have a Replacement Player" );
+    	messages.add(msg);
+    }
+  }
+}
+
+return messages;
+	]]></Source>
+</Rule>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition formPath="/monitor/tasks/sequentialTask.xhtml" name="Setup Scoping Demo" resultAction="Delete" subType="task_item_type_generic" type="Generic">
+  <Attributes>
+    <Map>
+      <entry key="exitOnError" value="false"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+      <entry key="taskList" value="IdentityIQ Account Aggregation, Aggregate IdentityIQ Entitlements, Promote Identity To Role Admin, Update Roles and Assignements, Assign Demo Roles To Scopes, Refresh Scopes"/>
+      <entry key="trace" value="false"/>
+    </Map>
+  </Attributes>
+  <Description>Execute the necessary actions for changing SERI to Multi Tenenacy</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Sequential Task Launcher"/>
+  </Parent>
+</TaskDefinition>

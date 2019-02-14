@@ -1,0 +1,3 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE LocalizedAttribute PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<LocalizedAttribute attribute="description" locale="en_US" name="Enterprise Directory : description : en_US" targetClass="Application" targetName="Enterprise Directory" value="Corporate-wide LDAP directory; supports &quot;white pages&quot;, enterprise web app authorization and centralized Unix authentication"/>

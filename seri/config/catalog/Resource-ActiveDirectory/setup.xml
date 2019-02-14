@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='CorrelationConfig-AD.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicyField-ADDistinguishedName.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicyField-sAMAccountName.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicyField-ADDisplayName.xml'/>
+  <ImportAction name='include' value='Rule-LinkAttribute-ADServiceAccount.xml'/>
+  <ImportAction name='include' value='Configuration-LocationOUConfiguration.xml'/>
+  <ImportAction name='include' value='Rule-TargetCorrelation-ADFileshares.xml'/>
+  <ImportAction name='include' value='Rule-TargetCorrelation-WindowsFileServer.xml'/>
+  <ImportAction name='include' value='TargetSource-AD.xml'/>
+  <ImportAction name='include' value='TargetSource-WindowsFileServer.xml'/>
+  <ImportAction name='include' value='PasswordPolicy-ADPasswordPolicy.xml'/>
+  <ImportAction name='include' value='Application-AD.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AA-AD.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AGA-AD.xml'/>
+  <ImportAction name='include' value='LocalizedAttribute-AD.xml'/>
+  <ImportAction name='include' value='TaskDefinition-TargetAggregation-ADFileshares.xml'/>
+  <ImportAction name='include' value='Rule-GroupRefresh-CreateUpdateManagedAttribute.xml'/>
+  <ImportAction name='include' value='Rule-AfterProvisioning-ADFixLink.xml'/>
+  <ImportAction name='include' value='../Resource-SecurityIQ/RuleLibrary-SecurityIQConfiguration.xml'/>
+</sailpoint>

@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Query Identity Attribute" type="AllowedValues">
+  <Description>
+   Returns a list of all available values for a specific identity attribute. i.e. get all identity attribute job titles from the jobTitle attribute.
+  </Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+          The Identity object being provisioned.
+        </Description>
+      </Argument>
+      <Argument name="form">
+        <Description>
+          The Form object for the provisioning plan.
+        </Description>
+      </Argument>
+      <Argument name="field">
+        <Description>
+          The Field object being analyzed.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source><![CDATA[
+// What isn't in the rule signature is that AllowedValues also gets passed in      
+// a variable 'field' which is a reference to the containing Field. So we can get the
+// attribute name from that
+
+import sailpoint.object.Identity;
+import sailpoint.object.QueryOptions;
+
+List resultList = new ArrayList();
+
+QueryOptions qo = new QueryOptions();
+qo.setDistinct(true);
+qo.addOrdering(field.getName(), true);
+
+List props = new ArrayList();
+props.add(field.getName());
+Iterator result = context.search(Identity.class, qo, props);
+if(result != null) {
+  while (result.hasNext()) {
+    Object [] record = result.next();
+    String attr = (String) record[0];
+    resultList.add(attr);
+  }
+}
+
+return resultList;      
+
+    ]]></Source>
+</Rule>

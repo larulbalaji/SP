@@ -1,0 +1,6 @@
+Since (Next version after 6.4)
+
+UseCase-Report-EntitlementUsage
+ A custom report that allows the user to select some entitlements and get a report of which roles they are
+ used in.
+ 

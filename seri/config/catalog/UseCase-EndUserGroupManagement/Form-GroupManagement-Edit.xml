@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <Form name='Group Management - Edit AD Group II'>
+    <Attributes>
+      <Map>
+	<entry key="pageTitle" value='script: "Manage My Groups - " + $(sAMAccountName);'/>
+	<entry key="labelAlign" value="top"/>
+      </Map>
+    </Attributes>
+    <Section label='Modify Group Details' columns='2'>
+      <Field displayName="Group Name" name="sAMAccountName" required="true" type="string">
+	<Attributes>
+	  <Map>
+	    <entry key="readOnly" value="true"/>
+	  </Map>
+	</Attributes>
+      </Field>
+      <Field displayName="Group Owner" name="sys.owner" required="true" type="Identity" postBack="true">
+	<Attributes>
+	  <Map>
+	    <entry key="valueProperty" value="id"/>
+	  </Map>
+	</Attributes>
+      </Field>
+      <Field displayName="Group Description" columnSpan="2" name="description" displayType="textarea"/>
+      <Field displayName='Identity Membership' name='identityMembership' type='Identity' multi='true' helpKey="Add/remove members of this group">
+	<Attributes>
+	  <Map>
+	    <entry key="valueProperty" value="id"/>
+	  </Map>
+	</Attributes>
+      </Field>
+      <Field displayName='Group Membership' name='memberOf' type='ManagedAttribute' multi='true' filterString='application.name == "Active Directory" &amp;&amp; attribute == "memberOf"' helpKey="Add/remove parent groups from this group"/>
+      <Field displayName="Group Type" name="GroupType" value='script: ( value == null ) ? "Security" : value'>
+	<AllowedValuesDefinition>
+          <Value>
+            <List>
+	      <String>Security</String>
+              <String>Distribution</String>
+            </List>
+          </Value>
+	</AllowedValuesDefinition>
+      </Field>
+      <Field name='managedBy' type='string' hidden = 'true' dynamic='true' dependencies="sys.owner">
+	    <Script> <Source><![CDATA[
+
+import sailpoint.object.*;
+
+if ($(sys.owner) != null) {
+  Identity identity = context.getObjectById(Identity.class,$(sys.owner));
+  if (identity != null) {
+	List accountsManager = identity.getLinksByAppIdOrName(null,"Active Directory");
+    if(!accountsManager.isEmpty()) {
+      Link accountManager = (Link) accountsManager.get(0);
+      managerDN = (String) accountManager.getAttribute("distinguishedName");
+    }
+  }
+}
+
+return (managerDN);
+
+
+          ]]></Source> </Script>
+      </Field> 
+    </Section>
+    <Button label='Back' action='next' parameter='selectAnother' skipValidation='true' value='true'/>
+    <Button label='Update Group' action='next'/>
+    <Button label='Delete Group' action='next' parameter='deleteGroup' skipValidation='true' value='true'/>
+    <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/>
+  </Form>
+
+</sailpoint>

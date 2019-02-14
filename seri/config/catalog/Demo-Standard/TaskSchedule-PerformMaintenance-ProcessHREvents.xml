@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskSchedule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskSchedule name="Process HR Events">
+  <Arguments>
+    <Map>
+      <entry key="executor" value="SERI_HR_TRIGGER_PROCESSING"/>
+      <entry key="launcher" value="spadmin"/>
+    </Map>
+  </Arguments>
+  <CronExpressions>
+    <String>0 0/1 * * * ?</String>
+  </CronExpressions>
+</TaskSchedule>

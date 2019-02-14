@@ -1,0 +1,1118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow configForm="Provisioning Workflow Config Form" explicitTransitions="true" handler="sailpoint.api.StandardWorkflowHandler" libraries="Identity,Role,PolicyViolation,LCM,BatchRequest" name="LCM Provisioning - Scopes" taskType="LCM" type="LCMProvisioning">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity being updated.</Description>
+  </Variable>
+  <Variable initializer="false" input="true" name="endOnManualWorkItems">
+    <Description>Option to skip requests with manual work items.</Description>
+  </Variable>
+  <Variable initializer="false" input="true" name="endOnProvisioningForms">
+    <Description>Option to skip requests with provisioning forms.</Description>
+  </Variable>
+  <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName">
+    <Description>The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.</Description>
+  </Variable>
+  <Variable input="true" name="plan">
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+  <Variable input="true" name="flow">
+    <Description>The name of the LCM flow that launched this workflow.
+
+      This is one of these three values:
+
+      AccountsRequest
+      EntitlementsRequest
+      RolesRequest</Description>
+  </Variable>
+  <Variable editable="true" initializer="false" name="optimisticProvisioning">
+    <Description>Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.</Description>
+  </Variable>
+  <Variable editable="true" initializer="true" name="foregroundProvisioning">
+    <Description>Normally provisioning is done in a step that uses the &amp;quot;background&amp;quot;
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to
+      see the results of the request.</Description>
+  </Variable>
+  <Variable input="true" name="batchRequestItemId">
+    <Description>Used by the batch interface to record back individual request item status. The specific item id for the individual request in the batch file.</Description>
+  </Variable>
+  <Variable editable="true" initializer="true" name="doRefresh">
+    <Description>Set to true to cause an identity refresh after the changes in the plan
+      have been provisioned.  This is normally off, you might want this on
+      if you want modification of identity or link attributes to result in
+      an immediate re-evaluation of assigned and detected roles.</Description>
+  </Variable>
+  <Variable initializer="user, requester" input="true" name="notificationScheme">
+    <Description>A string that specifies who should be notified when the request has been complete.
+     The value can be null or a csv of one or more of the following options.
+
+     none or null
+       disable notifications
+
+     user
+       Identity that is being update will be notified.
+
+     manager
+       The manager of the Identity that is being updated will be notified.
+
+     requester
+       The person that has requested the update will be notified.</Description>
+  </Variable>
+  <Variable initializer="LCM User Notification" input="true" name="userEmailTemplate">
+    <Description>The email template to use for user notification.</Description>
+  </Variable>
+  <Variable initializer="LCM Requester Notification" input="true" name="requesterEmailTemplate">
+    <Description>The email template to use for requester notification.</Description>
+  </Variable>
+  <Variable initializer="LCM Manager Notification" input="true" name="managerEmailTemplate">
+    <Description>The email template to use for manager notification.</Description>
+  </Variable>
+  <Variable input="true" name="securityOfficerEmailTemplate">
+    <Description>The email template to use for security officer notification.</Description>
+  </Variable>
+  <Variable initializer="parallel" input="true" name="approvalMode">
+    <Description>A string that specifies how we should handle the approvals.
+
+        By default this is serial since most of these request with
+        the exception of manager transfers will have only one approver.
+
+        parallel
+        Approvals are processed concurrently and there must be consensus,
+        we wait for all approvers to approve.  The first approver that
+        rejects terminates the entire approval.
+
+        parallelPoll
+        Approvals are processed concurrently but consensus is not required.
+        All approvals will be processed, we don&amp;#39;t stop if there are any
+        rejections.
+
+        serial
+        Approvals are processed one at a time and there must be consensus.
+        The first approver that rejects terminates the entire approval.
+
+        serialPoll
+        Approvals are processed in order but consensus is not required.
+        All approvals will be processed, we don&amp;#39;t stop if there are any
+        rejections.  In effect we are &amp;quot;taking a poll&amp;quot; of the approvers.
+
+        any
+        Approvals are processed concurrently, the first approver to
+        respond makes the decision for the group.</Description>
+  </Variable>
+  <Variable initializer="none" input="true" name="approvalScheme">
+    <Description>A csv string that specifies how approval items should be generated
+      for the incoming request.
+
+      The value can be &amp;quot;none&amp;quot;, in which case approvals are disabled.
+
+      The value can also be a combination of any of the values below
+      in any order, separated by commas. The order in which they are
+      specified is the order in which they are processed:
+
+      owner
+        The object owner gets the approval item.
+        For Role approvals this is the Role object owner.
+        For Entitlement approvals this is the Entitlement object owner.
+
+      manager
+        The manager gets the approval item.
+
+      securityOfficer
+        The identity in the variable securityOfficerName gets the approval item.
+
+      identity
+        The identities/workgroups in the variable approvingIdentities get the approval item.</Description>
+  </Variable>
+  <Variable initializer="LCM Identity Update Approval" input="true" name="approvalEmailTemplate">
+    <Description>The email template to use for approval notifications.</Description>
+  </Variable>
+  <Variable initializer="Normal" input="true" name="workItemPriority">
+    <Description>The String version of a WorkItem.Priority. This variable is
+       used to set the priority on all of the workitems generated
+       as part of this workflow and also set on the IdentityRequest
+       object.</Description>
+  </Variable>
+  <Variable input="true" name="securityOfficerName">
+    <Description>The name of the identity that will be sent approvals
+       during security officer approvals.</Description>
+  </Variable>
+  <Variable initializer="spadmin" input="true" name="fallbackApprover">
+    <Description>A String that specifies the name of the Identity that will
+      be assigned any approvals where the owner of the approver
+      can&amp;#39;t be resolved. Example if the scheme is &amp;quot;owner&amp;quot; and the
+      application doesn&amp;#39;t specify and owner.</Description>
+  </Variable>
+  <Variable initializer="interactive" input="true" name="policyScheme">
+    <Description>A String that specifies how policy checks effect the overall
+      process.
+
+      none - disabled policy checking
+
+      continue -  continue if policy violations are found
+
+      interactive -  allow requester to remove request items which are causing violations
+
+      fail -  this option will cause the workflow to terminate immediately if any policy violations are found.
+              Note that the requester will not be notified that the workflow has terminated.</Description>
+  </Variable>
+  <Variable initializer="false" input="true" name="enableRetryRequest">
+    <Description>When set to true it will disable the workflow retry loop and let the
+      Provision step launch requests to handle the retries.  Enabling
+      this flag will enable some older functionality.</Description>
+  </Variable>
+  <Variable input="true" name="policiesToCheck">
+    <Description>A List of policies that should be checked. If this list is
+      empty all violations will be checked. Used in combination
+      with policyScheme.</Description>
+  </Variable>
+  <Variable initializer="LCM" input="true" name="source">
+    <Description>String version of sailpoint.object.Source to indicate
+      where the request originated.  Defaults to LCM.</Description>
+  </Variable>
+  <Variable initializer="true" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Variable name="approvalSet">
+    <Description>This attributes is set during the &amp;quot;Build Approval Set&amp;quot; step,
+       which builds this list by going through the ProvisioningPlan
+       to build the line items that need to be approved,
+
+       This variable includes all ApprovalItems that are part of
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions
+       and comments from the Approvals copy of the ApprovalItem.</Description>
+  </Variable>
+  <Variable initializer="true" name="allowRequestsWithViolations">
+    <Description>If this variable is set to true, requesters will be able to proceed past
+      the Policy Violation Review form without taking any action on
+      policy violations resulting from the request. This is only relevant
+      if policyScheme=interactive.</Description>
+  </Variable>
+  <Variable initializer="true" name="requireViolationReviewComments">
+    <Description>If true, requesters will be required to enter in comments if they
+      proceed with a request that will result in policy violations. This
+      is only relevant if policyScheme=interactive.</Description>
+  </Variable>
+  <Variable name="project">
+    <Description>ProvisioningProject which is just a compiled version of the ProvisioningPlan.</Description>
+  </Variable>
+  <Variable name="policyViolations">
+    <Description>List of policy violations that were found during our initial policy scan.
+       This list is passed into each work item so the approvers can see
+       pending violations.</Description>
+  </Variable>
+  <Variable name="identityRequestId" output="true">
+    <Description>The sequence id of the Identity request object which is stored in
+       the name field of the identity request and auto-incremented.</Description>
+  </Variable>
+  <Variable name="violationReviewDecision">
+    <Description>Decision made by the user in the Policy Violation Review step.
+       This may be one of three choices:
+
+       -ignore:   User is ignoring the violations and letting the request continue. If
+                   requireViolationReviewComments=true the user will be required to enter
+                   comments indicating why they are allowing the violations.
+
+       -remediate: Indicates that the user removed the request items that were causing the
+                   violations
+
+       -cancel:   Indicates that the user decided to abandon the request, terminating the workflow.</Description>
+  </Variable>
+  <Variable name="workItemComments">
+    <Description>Global comments accumulated during the workflow which should be shared
+      with other approvals. When a new approval is created, the comments in this
+      list will be added to the work item.</Description>
+  </Variable>
+  <Variable input="true" name="ticketManagementApplication">
+    <Description>Name of the application that can handle ticket requests.
+      When non-null the Manage Ticket Steps will be visited to open
+      tickets during the workflow lifecycle.</Description>
+  </Variable>
+  <Variable name="ticketId">
+    <Description>The id of the ticket that is generated by the ticketingManagementApplication.
+      This is typically generated on the &amp;quot;open&amp;quot; call, and then used in subsequent
+      calls.  It is also stored on the IdentityRequest object under the
+      externalTicketId variable.</Description>
+  </Variable>
+  <Variable input="true" name="managerElectronicSignature">
+    <Description>The name of the electronic signature object that should be used when workitems
+       are completed by a manager.</Description>
+  </Variable>
+  <Variable input="true" name="ownerElectronicSignature">
+    <Description>The name of the electronic signature object that should be used when workitems
+       are completed by object owners.</Description>
+  </Variable>
+  <Variable input="true" name="securityOfficerElectronicSignature">
+    <Description>The name of the electronic signature object that should be used when workitems
+       are completed by the security officer.</Description>
+  </Variable>
+  <Variable input="true" name="approvingIdentities">
+    <Description>List of identities and/or workgroups names/ids that should be involved in the approval
+      process.</Description>
+  </Variable>
+  <Variable input="true" name="identityElectronicSignature">
+    <Description>The name of the electronic signature object that should be used when workitems
+      are completed by identities and/or workgroups.</Description>
+  </Variable>
+  <Variable input="true" name="identityEmailTemplate">
+    <Description>Name of the email template to use when notifying the identities/workgroups of pending approvals.</Description>
+  </Variable>
+  <Variable initializer="true" input="true" name="filterRejects">
+    <Description>True to filter rejected items when running in Serial/SerialPoll mode.</Description>
+  </Variable>
+  <Variable initializer="false" input="true" name="setPreviousApprovalDecisions">
+    <Description>True to pre-populate approval decisions from previous approvals.</Description>
+  </Variable>
+  <Variable name="approvalSplitPoint">
+    <Description>Variable to determine when to split into parallel processing.
+          This should map to a configured approvalScheme. We will process all schemes up until
+          the approvalSplitPoint in the Pre Split approvals, and the remaining schemes after
+          we split the items. If this is not specified, we will not split the Provisioning
+          project, and process the entire project as a whole.</Description>
+  </Variable>
+  <Variable name="splitPlans">
+    <Description>List of ProvisioningPlan that is generated from the splitPlans step if approvalSplitPoint is set.</Description>
+  </Variable>
+  <Variable name="splitProjects">
+    <Description>Variable to store the returns if approvalSplitPoint is set. This will contain a List&amp;lt;ProvisioningProject&amp;gt;</Description>
+  </Variable>
+  <Variable name="splitApprovalSet">
+    <Description>Variable to store the list of approvalSets returned from the split subprocess if approvalSplitPoint is set.</Description>
+  </Variable>
+  <Variable name="splitWorkItemComments">
+    <Description>Variable to store the list of WorkItem comments returned from the split subprocess if approvalSplitPoint is set.</Description>
+  </Variable>
+  <Variable name="expectedScopes">
+    <Description>This variable is set automatically to true by the workflow when scopes are required for the requested roles or entitlements</Description>
+  </Variable>
+  <Variable name="scopeForm"/>
+  <Variable name="formModel"/>
+  <Variable name="formOriginalValues"/>
+  <Variable initializer="ref:plan" name="updatedPlan"/>
+  <Variable name="identityRequestId" output="true"/>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="11" posY="10">
+    <Transition to="Analyze Provisioning Plan"/>
+  </Step>
+  <Step icon="Default" name="Analyze Provisioning Plan" posX="98" posY="10" resultVariable="plan">
+    <Arg name="plan" value="ref:plan"/>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningPlan.*;
+import sailpoint.object.Bundle;
+import sailpoint.object.Attributes;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.api.ManagedAttributer;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LcmWithScopes.AnalyzePlan");
+
+// initialize a list that will contain the attribute request that need
+List expectedScopes = new ArrayList();
+
+if(plan != null) {
+  //serilog.debug("Incoming plan:" + plan.toXml());
+  
+  // Go through the AccessRequests and detect if scopes are required for the requested objects
+  for (AccountRequest acctReq : plan.getAccountRequests()) {
+  
+      Attributes argsAcctReq = acctReq.getArguments();
+      if (argsAcctReq == null) {
+          argsAcctReq = new Attributes();
+      }
+      
+      // Only keep Modify AccountRequest
+      if (ProvisioningPlan.AccountRequest.Operation.Modify.equals(acctReq.getOperation())) {
+        
+        
+        
+        // IdentityIQ: focus on Modify assignedRoles. Ignore remove as the standard process will handle it correctly
+        if (ProvisioningPlan.IIQ_APPLICATION_NAME.equals(acctReq.getApplicationName())) {
+            for (AttributeRequest attrReq : acctReq.getAttributeRequests()) {
+                if (ProvisioningPlan.Operation.Add.equals(attrReq.getOperation()) && "assignedRoles".equals(attrReq.getName())) {
+                    serilog.debug("The request contains IIQ role assignments");
+                    Attributes args = attrReq.getArguments();
+                    if (args == null) {
+                        args = new Attributes();
+                    }
+                    
+                    // get the bundle and check if a scope is required
+                    Bundle b = context.getObjectByName(Bundle.class, attrReq.getValue());
+                    if (b == null) {
+                        serilog.error("Unable to get Bundle " + attrReq.getValue());
+                        continue;
+                    }
+                    // Test if the Bundle is a business role and requires scopes
+                    if ("business".equals(b.getType()) && (b.getAttribute("scopeRequired") == true)) {
+                        serilog.debug("Found business role that requires a scope " + b.getDisplayableName());
+                        args.put("scopeRequired", true);
+                        args.put("scopeMulti", b.getAttribute("scopeMulti"));
+                        argsAcctReq.put("scopeRequired", true);
+                        attrReq.setArguments(args);
+                        acctReq.setArguments(argsAcctReq);
+                        workflow.put("expectedScopes", true);
+                        continue;
+                    }
+                } else {
+                  // ignored attribute request for IIQ
+                  // todo...
+                }
+            }
+            
+        } else {
+          // Other applications: focus on new entitlement requests
+          for (AttributeRequest attrReq : acctReq.getAttributeRequests()) {
+              if (ProvisioningPlan.Operation.Add.equals(attrReq.getOperation())) {
+                  serilog.debug("The request contains entitlement assignments");
+                  Attributes args = attrReq.getArguments();
+                    if (args == null) {
+                        args = new Attributes();
+                    }
+                  
+                  // get the Managed Attribute from the catalog and check if it needs scope
+                  serilog.debug(acctReq.getApplicationName() + ", " + attrReq.getName() + ", " + attrReq.getValue());
+                  ManagedAttribute entitlement = ManagedAttributer.get(context, acctReq.getApplication(context), attrReq.getName(), attrReq.getValue());
+                  if (entitlement == null) {
+                    serilog.error("Unable to find the entitlement");
+                    continue;
+                  }
+                  
+                  if (entitlement.getAttribute("scopeRequired") == true) {
+                    serilog.debug("Found entitlement that requires a scope " + entitlement);
+                    // flag the request in the plan
+                    args.put("scopeRequired", true);
+                    argsAcctReq.put("scopeRequired", true);
+                    argsAcctReq.put("scopeMulti", entitlement.getAttribute("scopeMulti"));
+                    attrReq.setArguments(args);
+                    acctReq.setArguments(argsAcctReq);
+                    workflow.put("expectedScopes", true);
+                    continue;
+                 }
+              } else {
+                // ignored attribute request for IIQ
+                // todo...
+              }
+          }
+       }
+     } else {
+        // ignored AccountRequest, not a modify
+     }
+  }
+}
+
+serilog.debug("Plan after scope flagging:" + plan.toXml());
+return plan;
+
+        ]]></Source>
+    </Script>
+    <Transition to="Build Form for Scopes">
+      <Script>
+        <Source><![CDATA[System.out.println("Excepted Scopes : " + expectedScopes);
+
+return (expectedScopes == true);]]></Source>
+      </Script>
+    </Transition>
+    <Transition to="Call LCM Provisioning"/>
+  </Step>
+  <Step icon="Default" name="Build Form for Scopes" posX="311" posY="121" resultVariable="scopeForm">
+    <Arg name="plan" value="ref:plan"/>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccessRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.Attributes;
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Identity;
+import sailpoint.object.IdentityEntitlement;
+import sailpoint.object.Bundle;
+import sailpoint.object.Scope;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LcmWithScopes.BuildForm");
+//serilog.debug("Plan: " + plan.toXml());
+
+// model for the form
+Map model = new HashMap();
+// hash to store original values
+Map originalValues = new HashMap();
+Identity identity = context.getObjectByName(Identity.class, identityName);
+
+//
+// Build the form
+//
+Form frm = new Form();
+frm.put("pageTitle", "Assign scopes to your requested items");
+frm.setName("Access Request - Scope Assignment for " + identityName);
+
+// Default next and cancel buttons
+List buttons = new ArrayList();
+Button nextButton = new Button("Next", "next");
+Button rejectButton = new Button("Cancel request", "cancel");
+buttons.add(rejectButton);
+buttons.add(nextButton);
+frm.setButtons(buttons);
+
+// Text section
+Section sectionText = new Section();
+sectionText.setType(Section.TYPE_TEXT);
+sectionText.setLabel("Instructions");
+Field textForSection = new Field();
+textForSection.setValue("Some items in your request require additional information with regards to scope of assignment. Specifying one or multiple scopes is mandatory to allow this request moves to the next steps");
+
+sectionText.add(textForSection);
+frm.add(sectionText);
+
+// Process plan
+int numRoles = 0;
+int numEnts = 0;
+Section sectionRoles = new Section();
+sectionRoles.setColumns(2);
+sectionRoles.setLabel("Requested roles");
+
+Section sectionEntitlements = new Section();
+sectionEntitlements.setColumns(1);
+sectionEntitlements.setLabel("Requested entitlements");
+
+for (AccountRequest acctReq : plan.getAccountRequests()) {
+    // check the flag that indicates a scope is needed
+    Attributes acctReqArgs = acctReq.getArguments();
+    if ((acctReqArgs != null) && (acctReqArgs.get("scopeRequired") == true)) {
+        // go through the attribute requests
+        serilog.debug("processing acctReq: " + acctReq.toXml());
+        for (AttributeRequest attrReq : acctReq.getAttributeRequests()) {
+            Attributes attrReqArgs = attrReq.getArguments();
+            if ((attrReqArgs != null) && (attrReqArgs.get("scopeRequired") == true)) {
+                
+                serilog.debug("processing attrReq: " + attrReq.toXml());
+                        
+                // we found a role or entitlement that needs a scope, generate the Field for the Form
+                serilog.debug("Creating Field for " + attrReq.getValue());
+                Field myField = new Field();
+                myField.setRequired(true);
+                
+                // We are using native scopes objects
+                // but this could be adapted to other types (e.g custom bundles) and filtered
+                myField.setType("Scope");
+                
+                // manage multiple scopes
+                if (attrReqArgs.get("scopeMulti") == true) {
+                    myField.setMulti(true);
+                }
+
+                // get the current scopes for this entitlement/role
+                // that will be used to prepopulate the form
+                // and potentially calculate deltas and perform the add/remove operations
+                List currentScopes = new ArrayList();
+
+                // add it to the appropriate section in the Form
+                if (ProvisioningPlan.IIQ_APPLICATION_NAME.equals(acctReq.getApplicationName())) {               
+                  serilog.debug("This is a role");
+                  myField.setName("role"+numRoles);
+                  myField.setDisplayName(attrReq.getValue());
+                  
+                  // get currently assigned scopes for this role
+                  List identityAssignedRoles = identity.getAssignedRoles();
+                  String roleName = attrReq.getValue();
+                  if (identityAssignedRoles != null) {
+                    String pattern = "^" + roleName + "\\s-\\s([^-]+)$";
+                    Pattern regex = Pattern.compile(pattern);
+                    
+                    for (Bundle ar : identityAssignedRoles) {
+                        serilog.debug("Checking if user already has a scope for this role. Processing " + ar.getName());
+                        Matcher m = regex.matcher(ar.getName());
+                        if (m.find()) {
+                            serilog.debug("Found scope " + m.group(1));
+                            Scope existingScope = context.getObjectByName(Scope.class, m.group(1));
+                            currentScopes.add(existingScope.getId());
+                        }
+                    }
+                  }
+                  sectionRoles.add(myField);
+                  numRoles++;
+                } else {
+                  serilog.debug("This is an entitlement");
+                  myField.setName("ent"+numEnts);
+                  String entName = attrReq.getValue();
+                  if (attrReq.getDisplayValue() != null) {
+                    entName = attrReq.getDisplayValue();
+                  }
+                  
+                  // get currently assigned scopes for this entitlement
+                  // we only focus on directly assigned entitlements (not assigned by a role)
+                  QueryOptions qo = new QueryOptions();
+                  List filters = new ArrayList();
+                  filters.add(Filter.eq("identity", identity));
+                  filters.add(Filter.eq("application.name", acctReq.getApplicationName()));
+                  filters.add(Filter.eq("aggregationState", "Connected"));
+                  filters.add(Filter.eq("grantedByRole", false));
+                  Filter fIdentityEnts = Filter.and(filters);
+                  qo.addFilter(fIdentityEnts);
+                  List identityEnts = context.getObjects(IdentityEntitlement.class, qo);
+                  serilog.debug("Current direct entitlements for this app " + identityEnts);
+                  
+                  if (identityEnts != null) {
+                    
+                    String entValueTemplate = attrReq.getValue();
+                    // Change it into a regexp
+                    String pattern = "^" + entValueTemplate.replaceAll("%scope%", "(.+)") + "$";
+                    serilog.debug("Pattern for entitlement matching : " + pattern);
+                    Pattern regex = Pattern.compile(pattern);
+                    
+                    // go through the list of entitlements for this app
+                    // try to find an entitlement value that matches the entitlement template
+                    for (IdentityEntitlement ie : identityEnts) {
+                        serilog.debug("Checking if user already has this entitlement with another scope. Processing " + ie.getValue());
+                        Matcher m = regex.matcher(ie.getValue());
+                        if (m.find()) {
+                            serilog.debug("Found scope " + m.group(1));
+                            Scope existingScope = context.getObjectByName(Scope.class, m.group(1));
+                            currentScopes.add(existingScope.getId());
+                        }
+                    }
+                    
+                  }
+                  
+                  
+                  myField.setDisplayName(acctReq.getApplicationName() + " - " + entName);
+                  sectionEntitlements.add(myField);
+                  numEnts++;
+                }
+                
+                // we also save the attribute name in the plan to make a link between the requested role
+                // and the Form field. That will be used in the next steps to patch the plan with the collected values
+                attrReqArgs.put("field", myField.getName());
+                attrReq.setArguments(attrReqArgs);
+                
+                // Initialize the form with the scopes the user has for this role/entitlement
+                // if multi, we expect the values as a list
+                // if not multi, just a Scope
+                if (myField.isMulti()) {
+                    myField.setValue(currentScopes);
+                } else {
+                    if (currentScopes.size() > 0) {
+                        if (currentScopes.size() > 1) {
+                            serilog.warn("We expect only one Scope but received " + currentScopes.size() +"... Using no value");
+                        } else {
+                            myField.setValue(currentScopes.get(0));
+                        }
+                    }
+                }
+                model.put(myField.getName(), myField.getValue());
+                originalValues.put(myField.getName(), myField.getValue());
+            } else {
+                continue;
+            }
+        }
+    } else {
+        continue;
+    }
+}
+if (numRoles > 0) {
+    frm.add(sectionRoles);
+}
+if (numEnts > 0) {
+    frm.add(sectionEntitlements);
+}
+
+// save the provisioningPlan and prepare the model that will store values
+workflow.put("plan", plan);
+workflow.put("formModel", model);
+workflow.put("formOriginalValues", originalValues);
+serilog.debug("Plan: " + plan.toXml());
+serilog.debug("Model: " + model);
+serilog.debug("Form: " + frm.toXml());
+
+return frm;
+
+        ]]></Source>
+    </Script>
+    <Transition to="Display Form"/>
+  </Step>
+  <Step icon="Approval" name="Display Form" posX="424" posY="122">
+    <Approval name="Assign Scopes" owner="ref:launcher" return="formModel">
+      <Arg name="workItemType" value="string:Form"/>
+      <Arg name="workItemDescription" value="string:Access Request - Assign scopes for $(identityName)"/>
+      <Arg name="workItemForm" value="ref:scopeForm"/>
+      <Arg name="workItemFormBasePath" value="formModel"/>
+    </Approval>
+    <Transition to="Update catalog and plan"/>
+  </Step>
+  <Step icon="Default" name="Update catalog and plan" posX="543" posY="123" resultVariable="updatedPlan">
+    <Arg name="originalPlan" value="ref:plan"/>
+    <Arg name="model" value="ref:formModel"/>
+    <Arg name="orig" value="ref:formOriginalValues"/>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccessRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.Operation;
+import sailpoint.object.Application;
+import sailpoint.object.Bundle;
+import sailpoint.object.Attributes;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.Scope;
+import sailpoint.api.ManagedAttributer;
+import sailpoint.object.Filter;
+import sailpoint.object.Filter.LeafFilter;
+import sailpoint.object.Profile;
+import sailpoint.object.RoleScorecard;
+import java.util.ArrayList;
+import java.util.List;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LcmWithScopes.CreateRolesAndEntitlements");
+serilog.debug("Model: " + model);
+serilog.debug("original values: " + orig);
+
+// in this step, we will check if we already have the <entitlement:scope> and <role:scope> in
+// the catalog
+// if these objects are not found, then we will create them
+// By design, entitlements entries have a key with format "entX" in the model
+// role entries are stored as "roleX"
+
+// duplicate the provisioning plan
+ProvisioningPlan updatedPlan = originalPlan.deepCopy(context);
+
+// Go through the model returned by the form
+// and process each field
+for (String formField : model.keySet()) {
+    
+    serilog.debug("Processing model entry for " + formField);
+    Object fieldValue = model.get(formField);
+    
+    // Compare old and new values to detect changes
+    List addedScopes = new ArrayList();
+    List removedScopes = new ArrayList();
+    // case1 : single perimeter
+    if (fieldValue instanceof String) {
+        // no previous value -> add the new scope)
+        if (orig.get(formField) == null || orig.get(formField).equals("")) {
+            serilog.debug("Adding new scope : " + fieldValue);
+            addedScopes.add(fieldValue);
+        } else {
+            // a previous value was set, only change if the new value is different
+            if (!orig.get(formField).equals(fieldValue)) {
+                serilog.debug("Adding new scope : " + fieldValue);
+                serilog.debug("Removing old scope : " + orig.get(formField));
+                addedScopes.add(fieldValue);
+                removedScopes.add(orig.get(formField));
+            }
+        }
+    }
+    
+    // case2 : multi perimeters
+    if (fieldValue instanceof List) {
+        // go through the new list and detect additions
+        List origValuesForField = orig.get(formField);
+        for (String newScope : fieldValue) {
+            if (origValuesForField == null) {
+                serilog.debug("Adding new scope : " + newScope);
+                addedScopes.add(newScope);
+            } else {
+                if (!origValuesForField.contains(newScope)) {
+                    serilog.debug("Adding new scope : " + newScope);
+                    addedScopes.add(newScope);
+                }
+            }
+        }
+        // go through the old list if it exists, and detect removals
+        if (origValuesForField != null) {
+          for (String oldScope : origValuesForField) {
+              if (!fieldValue.contains(oldScope)) {
+                  serilog.debug("Removing old scope : " + oldScope);
+                  removedScopes.add(oldScope);
+              }
+          }
+       }
+    }
+    
+    serilog.debug("addedScopes: " + addedScopes);
+    serilog.debug("removedScopes: " + removedScopes);
+    
+    // Locate the attribute request in the plan
+    AccountRequest targetAcctReq = null;
+    AttributeRequest targetReq = null;
+    Application targetApp = null;
+    for (AccountRequest acctReq : updatedPlan.getAccountRequests()) {
+
+      // check the flag that indicates a scope was needed
+      Attributes acctReqArgs = acctReq.getArguments();
+      if ((acctReqArgs != null) && (acctReqArgs.get("scopeRequired") == true)) {
+
+          // go through the attribute requests and find the one that is related to our field
+          for (AttributeRequest attrReq : acctReq.getAttributeRequests()) {
+              Attributes attrReqArgs = attrReq.getArguments();
+              if ( (attrReqArgs != null) && (formField.equals(attrReqArgs.get("field"))) ) {
+                
+                // Found it!
+                targetReq = attrReq;
+                targetApp = acctReq.getApplication(context);
+                targetAcctReq = acctReq;
+                break;
+              }
+          }
+          if (targetReq != null) {
+            break;
+          }
+      }
+   }
+    
+    
+   // ADD all added scopes
+   for (String newScopeId : addedScopes) {
+      // Get the scope
+      // the map contains the Id
+      Scope myScope = context.getObjectById(Scope.class, newScopeId);
+      serilog.debug("Requested scope " + myScope); 
+     
+      serilog.debug("targetReq " + targetReq);
+      serilog.debug("targetAcctReq " + targetAcctReq);
+      serilog.debug("targetApp " + targetApp);
+       
+      // use the request to create missing entitlement/role and then patch it
+      if (targetReq != null) {
+      
+      // First, check if the role or entitlement exists
+      // If not, create it and substitute scope value in it
+      // We use the entitlement:scope
+      
+      // Entitlements
+      //
+      if (formField.startsWith("ent")) {
+          // substitute the scope with the gathered value
+          String templateEntitlementValue = targetReq.getValue();
+          String scopedEntitlementValue = templateEntitlementValue.replaceAll("%scope%", myScope.getName());
+          serilog.debug("Looking up entitlement " + scopedEntitlementValue);
+          ManagedAttribute reqEntitlement = ManagedAttributer.get(context, targetApp, targetReq.getName(), scopedEntitlementValue);
+          if (reqEntitlement == null) {
+            serilog.debug("Entitlement does not exist in the catalog. Create it");
+            serilog.debug("Looking up entitlement " + templateEntitlementValue);
+            ManagedAttribute templateEntitlement = ManagedAttributer.get(context, targetApp, targetReq.getName(), templateEntitlementValue);
+            if (templateEntitlement == null) {
+              // Unable to find the template entitlement for a copy
+              serilog.error("Unable to find the template entitlement");
+              continue;
+            } else {
+              // create the new entitlement for this scope
+              // we make these new entitlements not requestable (todo : could be set with the workflow variable)
+              ManagedAttribute newEntitlement = templateEntitlement.deepCopy(context);
+              newEntitlement.setId(null);
+              newEntitlement.setValue(scopedEntitlementValue);
+              newEntitlement.setDisplayName(newEntitlement.getDisplayName() + " - " + myScope.getName());
+              newEntitlement.setRequestable(false);
+              Map entDescs = newEntitlement.getDescriptions();
+              if (entDescs != null) {
+                  for (String locale : entDescs.keySet()) {
+                      entDescs.put(locale, entDescs.get(locale).replaceAll("%scope%", myScope.getName()));
+                  }
+                  newEntitlement.setDescriptions(entDescs);
+              }
+              
+              // it might be that %scope% is referenced in other properties for this entitlement (e.g AD groups)
+              Attributes entitlementAttrs = newEntitlement.getAttributes();
+              for (String attr : entitlementAttrs.keySet()) {
+                  if (entitlementAttrs.get(attr) instanceof String) {
+                      String newValue = entitlementAttrs.get(attr).replaceAll("%scope%", myScope.getName());
+                      entitlementAttrs.put(attr, newValue);
+                  }
+              }
+              // remove the 'scopeRequired' flag for the new entitlement
+              if (entitlementAttrs == null) {
+                  entitlementAttrs = new Attributes();
+              }
+              entitlementAttrs.put("scopeRequired", false);
+              newEntitlement.setAttributes(entitlementAttrs);
+              
+              context.saveObject(newEntitlement);
+              context.commitTransaction();
+            }
+            
+            
+          } 
+          
+          // Update provisioning plan with the new value for the entitlement
+          // Duplicate the attr request, instead of changing the value (in case of multiple perimeters)
+          // "template" requests will be removed from plan at the end
+          AttributeRequest newAttrReq = targetReq.deepCopy(context);
+          newAttrReq.setValue(scopedEntitlementValue);
+          Attributes newAttrReqArgs = newAttrReq.getArguments();
+          newAttrReqArgs.remove("scopeRequired");
+          newAttrReq.setArguments(newAttrReqArgs);
+          targetAcctReq.add(newAttrReq);
+          
+          continue;
+      }
+      
+      // Roles
+      // 
+      if (formField.startsWith("role")) {
+          String templateRoleName = targetReq.getValue();
+          String scopedRoleName = templateRoleName + " - " + myScope.getName();
+          serilog.debug("Looking up role " + scopedRoleName);
+          Bundle reqRole = context.getObjectByName(Bundle.class, scopedRoleName);
+          if (reqRole == null) {
+              serilog.debug("Role does not exist in the catalog. Create it");
+              serilog.debug("Looking up role " + templateRoleName);
+              Bundle templateRole = context.getObjectByName(Bundle.class, templateRoleName);
+              if (templateRole == null) {
+                  // Unable to find the template role for a copy
+                  serilog.error("Unable to find the template role");
+                  continue;
+              } else {
+                  // Create a new role from the template
+                  // and do all required substitutions
+                  // Duplicated role is of type business_scope to prevent it from being published in the request catalog
+                  Bundle newRole = templateRole.deepCopy(context);
+                  newRole.setId(null);
+                  newRole.setRoleIndex(null);
+                  newRole.add(new RoleScorecard());
+                  newRole.setName(scopedRoleName);
+                  newRole.setType("business_scope");
+                  newRole.setDisplayName(templateRole.getDisplayName() + " - " + myScope.getName());
+                  Map roleDescs = newRole.getDescriptions();
+                  if (roleDescs != null) {
+                      for (String locale : roleDescs.keySet()) {
+                          roleDescs.put(locale, roleDescs.get(locale).replaceAll("%scope%", myScope.getName()));
+                      }
+                      newRole.setDescriptions(roleDescs);
+                  }
+                  
+                  // check if the role has required roles
+                  // IMPORTANT : we assume that we are dealing with business roles with required IT roles (SERI config)
+                  // in a production environment, this logic should be adapted to another role model with potential multiple levels hierarchy
+                  // if any required roles assigns an entitlement that needs scope, then duplicate it and add it to the business role
+                  if (newRole.getRequirements() != null) {
+                      // iterate over the required roles
+                      
+                      for (Bundle requiredRole : newRole.getRequirements()) {
+                          serilog.debug("Analyzing required role : " + requiredRole.getName());
+                          
+                          boolean hasChanged = false;
+                          
+                          // create a copy of the role in case we need to duplicate it
+                          Bundle copiedRequiredRole = requiredRole.deepCopy(context);
+                          copiedRequiredRole.setId(null);
+                          copiedRequiredRole.setRoleIndex(null);
+                          copiedRequiredRole.add(new RoleScorecard());
+                          copiedRequiredRole.setName(requiredRole.getName() + " - " + myScope.getName());
+                          copiedRequiredRole.setDisplayName(requiredRole.getDisplayName() + " - " + myScope.getName());
+                          
+                          // search for entitlements which value must be changed with the collected scope
+                          List profiles = copiedRequiredRole.getProfiles();
+                          for (Profile p : profiles) {
+                              p.setId(null);
+                              List newConstraints = new ArrayList();
+                              List constraints = p.getConstraints();
+                              for (int iCount=0 ; iCount < constraints.size() ; iCount++) {
+                                  LeafFilter filter = (LeafFilter)constraints.get(iCount);
+                                  
+                                  if (constraints.get(iCount) instanceof LeafFilter) {
+                                      Object value = filter.getValue();
+                                      if (value instanceof List) {
+                                          ArrayList entitlements = (ArrayList)value;
+                                          ArrayList newEntitlements = new ArrayList();
+                                          
+                                          for (String entitlement : entitlements) {
+                                              // for now, we only check if the entitlements contains the "%scope%" placeholder
+                                              // TBD later : lookup the entitlements and query the scopeRequired attribute
+                                              String newEntValue = entitlement;
+                                              if (entitlement.indexOf("%scope%") > -1) {
+                                                  serilog.debug("Found scope dependant entitlement : " + entitlement);
+                                                  newEntValue = entitlement.replaceAll("%scope%", myScope.getName());
+                                                  serilog.debug("Changed to: " + newEntValue);
+                                                  hasChanged = true;
+                                              }
+                                              newEntitlements.add(newEntValue);
+                                          }
+                                          // if constraints have been changed, updated the Filter in the profile
+                                          if (hasChanged) {
+                                              filter.setValue(newEntitlements);
+                                          }
+                                      }
+                                  }
+                              }
+                          }
+                          // if the changed, we need to save it in the db and update the requirements
+                          // on the business role
+                          if (hasChanged) {
+                              serilog.debug("Created an new required role : " + copiedRequiredRole.getName());
+                              serilog.debug("New required role : " + copiedRequiredRole.toXml());
+                              context.saveObject(copiedRequiredRole);
+                              newRole.removeRequirement(requiredRole);
+                              newRole.addRequirement(copiedRequiredRole);
+                          }
+                      } // end loop on requirements
+                  }
+                  
+                  serilog.debug("New requested role : " + newRole.toXml());
+                  
+                  // finally write the new version of the assigned role
+                  context.saveObject(newRole);
+                  context.commitTransaction();
+              }
+          }
+          
+          // Update provisioning plan with the new value for the role
+          // Duplicate the attr request, instead of changing the value (in case of multiple perimeters)
+          // "template" requests will be removed from plan at the end
+          AttributeRequest newAttrReq = targetReq.deepCopy(context);
+          newAttrReq.setValue(scopedRoleName);
+          Attributes newAttrReqArgs = newAttrReq.getArguments();
+          newAttrReqArgs.remove("scopeRequired");
+          newAttrReq.setArguments(newAttrReqArgs);
+          targetAcctReq.add(newAttrReq);
+          
+          continue;
+      }
+      
+      // We should never reach that point
+      serilog.warn("Something went wrong");
+      
+     } else {
+      // Request was not found.
+      serilog.error("The Attribute Request for field " + formField + " was not found");
+     }
+   } // end ADD new scopes
+   
+   // REMOVE old scopes
+   for (String removedScopeId : removedScopes) {
+      // Get the scope
+      // the map contains the Id
+      Scope myScope = context.getObjectById(Scope.class, removedScopeId);
+      serilog.debug("Scope to remove " + myScope); 
+     
+      serilog.debug("targetReq " + targetReq);
+      serilog.debug("targetAcctReq " + targetAcctReq);
+      serilog.debug("targetApp " + targetApp);
+      
+      String attrValueToRemove = null;
+      // Entitlements
+      //
+      if (formField.startsWith("ent")) {
+        String templateEntitlementValue = targetReq.getValue();
+        String scopedEntitlementValue = templateEntitlementValue.replaceAll("%scope%", myScope.getName());
+        serilog.debug("Looking up entitlement " + scopedEntitlementValue);
+        ManagedAttribute reqEntitlement = ManagedAttributer.get(context, targetApp, targetReq.getName(), scopedEntitlementValue);
+        if (reqEntitlement == null) {
+            serilog.error("Entitlement was not found. Cannot create remove request. Skipping");
+            continue;
+        }
+        attrValueToRemove = scopedEntitlementValue;
+      }
+      
+      // Roles
+      //
+      if (formField.startsWith("role")) {
+        String templateRoleName = targetReq.getValue();
+        String scopedRoleName = templateRoleName + " - " + myScope.getName();
+        serilog.debug("Looking up role " + scopedRoleName);
+        Bundle reqRole = context.getObjectByName(Bundle.class, scopedRoleName);
+        if (reqRole == null) {
+          serilog.error("Role was not found. Cannot create remove request. Skipping");
+          continue;
+        }
+        attrValueToRemove = scopedRoleName;
+      }
+      
+      // Build the remove Attribute Request and add it to the plan
+      AttributeRequest removeReq = new AttributeRequest();
+      removeReq.setName(targetReq.getName());
+      removeReq.setValue(attrValueToRemove);
+      removeReq.setOperation(ProvisioningPlan.Operation.Remove);
+      targetAcctReq.add(removeReq);
+      
+   } // end REMOVE old scopes
+   
+   
+   // REMOVE the template attribute request from the plan
+   targetAcctReq.remove(targetReq);
+   
+}
+
+serilog.debug("Updated plan: " + updatedPlan.toXml());
+return updatedPlan;
+
+        ]]></Source>
+    </Script>
+    <Transition to="Post update"/>
+  </Step>
+  <Step icon="Default" name="Post update" posX="667" posY="122">
+    <Transition to="Call LCM Provisioning"/>
+  </Step>
+  <Step icon="Task" name="Call LCM Provisioning" posX="762" posY="6" resultVariable="identityRequestId">
+    <Arg name="identityEmailTemplate"/>
+    <Arg name="enableRetryRequest"/>
+    <Arg name="securityOfficerElectronicSignature"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="endOnManualWorkItems"/>
+    <Arg name="userEmailTemplate"/>
+    <Arg name="policiesToCheck"/>
+    <Arg name="project"/>
+    <Arg name="workItemComments"/>
+    <Arg name="identityRequestId"/>
+    <Arg name="approvalSplitPoint"/>
+    <Arg name="source" value="ref:source"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="foregroundProvisioning"/>
+    <Arg name="ownerElectronicSignature"/>
+    <Arg name="batchRequestItemId"/>
+    <Arg name="splitPlans"/>
+    <Arg name="doRefresh"/>
+    <Arg name="plan" value="ref:updatedPlan"/>
+    <Arg name="flow" value="ref:flow"/>
+    <Arg name="identityElectronicSignature"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="approvalSet"/>
+    <Arg name="violationReviewDecision"/>
+    <Arg name="filterRejects"/>
+    <Arg name="splitProjects"/>
+    <Arg name="requesterEmailTemplate"/>
+    <Arg name="approvalEmailTemplate"/>
+    <Arg name="ticketManagementApplication"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="approvingIdentities"/>
+    <Arg name="managerEmailTemplate"/>
+    <Arg name="ticketId"/>
+    <Arg name="approvalScheme"/>
+    <Arg name="allowRequestsWithViolations"/>
+    <Arg name="workItemPriority"/>
+    <Arg name="managerElectronicSignature"/>
+    <Arg name="requireViolationReviewComments"/>
+    <Arg name="splitApprovalSet"/>
+    <Arg name="approvalMode"/>
+    <Arg name="trace"/>
+    <Arg name="endOnProvisioningForms"/>
+    <Arg name="splitWorkItemComments"/>
+    <Arg name="notificationScheme"/>
+    <Arg name="policyViolations"/>
+    <Arg name="policyScheme" value="ref:policyScheme"/>
+    <Arg name="setPreviousApprovalDecisions"/>
+    <Arg name="optimisticProvisioning"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" name="LCM Provisioning"/>
+    </WorkflowRef>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Stop" name="end" posX="860" posY="5"/>
+</Workflow>

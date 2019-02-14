@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition    name="Business and IT role mining" resultAction="Rename" subType="Business Role Mining" type="RoleMining">
+  <Attributes>
+    <Map>
+      <entry key="applications" value="Active Directory, ERP Portal"/>
+      <entry key="attachITProfiles" value="false"/>
+      <entry key="bfrPrefix" value="MiningDemo"/>
+      <entry key="businessRoleType" value="business"/>
+      <entry key="computeCoverage" value="false"/>
+      <entry key="createSubRoles" value="true"/>
+      <entry key="genContainerRole" value="true"/>
+      <entry key="itRoleAssociation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="itRoleType" value="it"/>
+      <entry key="mineITRoles" value="true"/>
+      <entry key="minimumRoleSize" value="2"/>
+      <entry key="orgRoleType" value="container"/>
+      <entry key="owner" value="Jerry.Bennett"/>
+      <entry key="resultName" value="Business and IT role mining"/>
+      <entry key="simulate" value="false"/>
+      <entry key="threshold" value="80"/>
+      <entry key="tieredIdentityMiningAttrs" value="department, jobTitle"/>
+      <entry key="uidNaming" value="false"/>
+    </Map>
+  </Attributes>
+  <Description>
+        Mine Business Roles based on organizational and functional identity attributes
+      </Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Business Role Mining"/>
+  </Parent>
+</TaskDefinition>

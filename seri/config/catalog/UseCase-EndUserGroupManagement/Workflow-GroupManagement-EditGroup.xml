@@ -1,0 +1,356 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <Workflow name='AD Group Management - Edit' libraries="Identity,LCM,ManagedAttribute">
+  
+    <Description>    
+      A workflow that illustrates editing an existing ActiveDirectory Link
+      using the Identity Model.          
+    </Description>
+    
+     <Variable name='transient' initializer='true'>
+      <Description>
+        Set to false to cause workflow-related objects, such as approval
+        work items, to be saved in the database even if they are only
+        viewed by the person registering.
+      </Description>
+    </Variable>
+
+    <Variable name='trace' initializer='false'>
+      <Description>enable this to see stuff spit out to stdout</Description>  
+    </Variable>
+        
+    <Variable name='readOnlyForm'>
+      <Description>Read only form for confirmation dialog.</Description>
+    </Variable>
+    
+    <Variable initializer='Group Management - Edit AD Group II' name='formName'>
+       <Description>The name of the form that is used to edit an existing group</Description>
+    </Variable>
+    
+    <Variable initializer='groupModel' name='basePath'>
+       <Description>The formpath to the link we are interested in editing.</Description>
+    </Variable>
+    
+    <Variable initializer='serial' input='true' name='approvalMode'>
+      <Description>
+       A string that specifies how we should handle the approvals.  
+
+       By default this is serial since most of these request with
+       the exception of manager transfers will have only one approver.
+
+       parallel
+         Approvals are processed concurrently and there must be consensus,
+         we wait for all approvers to approve.  The first approver that
+         rejects terminates the entire approval.
+ 
+       parallelPoll 
+         Approvals are processed concurrently but consensus is not required.
+         All approvals will be process, we don't stop if there any
+         rejections.  
+
+       serial
+         Approvals are processed one at a time and there must be consensus.
+         The first approver that rejects terminates the entire approval.
+
+       serialPoll
+         Approvals are processed in order but consensus is not required.
+         All approvals will be processed, we don't stop if there are any
+         rejections.  In effect we are "taking a poll" of the approvers.
+
+       any
+        Approvals are processed concurrently, the first approver to 
+        respond makes the decision for the group.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='owner' input='true' name='approvalScheme'>
+      <Description>
+      A csv string that specifies how approvals should be generated for 
+      the incoming request.
+ 
+      The value can be any of the values below, combined together but
+      are always processed in this order:
+  
+      1. manager
+      2. owner
+      3. securityOfficer
+
+      Any rejected items from previous approvals will be omitted from the  
+      next phase of approvers.
+
+      none - disabled approvals
+
+      owner - the object owner gets the approval
+              For Role approvals this is the Role object owner. When dealing 
+              with things like Unlock and other account level changes 
+              the approvals will be assigned to the the application owner.
+
+      manager - The manager will get all approvals
+
+      securityOfficer - The identity named security the security in the variable
+                        securityOfficerName.
+
+      </Description>
+    </Variable>    
+    
+    <Variable initializer='continue' input='true' name='policyScheme'>
+      <Description>
+        A String that specifies how policy checks effect the overall
+        process.
+
+        none - disabled policy checking
+
+        continue -  continue if policy violations are found
+
+        interactive -  allow requester to remove request items which are causing violations
+
+        fail -  this option will cause the workflow to terminate immediately if any policy violations are found.
+                Note that the requester will not be notified that the workflow has terminated.
+      </Description>
+    </Variable>
+    
+    <Variable initializer='user,requester' input='true' name='notificationScheme'>
+      <Description>
+       A string that specifies who should be notified when the request has been complete.
+       The value can be null or a csv of one or more of the following options. 
+
+       none or null
+         disable notifications
+
+       user 
+         Identity that is being update will be notified.
+
+       manager
+         The manager of the Identity that is being updated will be notified.
+
+       requester
+         The person that has requested the update will be notified.
+      </Description>
+    </Variable>
+        
+    <Variable name='doRefresh' editable='true'>
+      <Description>
+        Set to true to cause an identity refresh after the changes in the plan
+        have been provisioned.  This is normally off, you might want this on
+        if you want modification of identity or link attributes to result in
+        an immediate re-evaluation of assigned and detected roles.
+      </Description>
+    </Variable>
+    
+    <Variable name="exitWorkflow">
+       <Description>
+         Value posted by the "Exit Workflow" form button, to indicate the workflow should end.
+         This is somethign handled in transitions on Approvals that have forms and gives
+         a way for customers to exit the workflow.
+       </Description>    
+    </Variable>
+
+    <Variable name='appId' type='string'>
+      <Description>The application id for the app we're managing groups on</Description>
+    </Variable>
+
+    <Variable name='groupAttributeName' initializer="memberOf"/>
+
+    <Variable name='groupDN' type='string'>
+      <Description>The group DN for the group selected to edit</Description>
+    </Variable>
+
+    <Variable name="groupModel"/>
+    <Variable name="plans"/>
+    <Variable name="plan"/>
+    <Variable name='resourceName' initializer='Active Directory'>
+      <Description>Two attributes are needed.  resourceName and baseGroupDN</Description>  
+    </Variable>
+    
+    <Step icon="Start" name="start" resultVariable='appId' posX="12" posY="19">
+      <Script>
+        <Source><![CDATA[
+            import sailpoint.object.Application;
+            
+            Application app = context.getObjectByName(Application.class, resourceName);
+            if ( app == null ) {
+                throw new GeneralException("This example workflow requires an Active Directory application named '" + resourceName + "', which could not be found.");
+            }
+            return app.getId();
+	      ]]></Source>
+      </Script>
+      <Transition to='Select Group'/>
+    </Step>
+        
+    <Step name='Select Group' icon='Approval' posX="94" posY="19">
+      <Description>
+         Render a form with a single input that collects the group to manage
+      </Description>
+      <Approval send='launcher' return='groupDN, exitWorkflow' owner='ref:launcher' mode='serial'>
+        <Arg name="workItemType" value="Form"/>
+        <Arg name="groupDN" value="script: return null;"/>
+        <Form>
+          <Attributes>
+            <Map>
+              <entry key="pageTitle" value="Manage My Groups"/>
+            </Map>
+          </Attributes>
+          <Section label='Select Group'>
+            <Field name='groupDN' displayName='My Groups' type='ManagedAttribute' dynamic='true' helpKey='The drop-down consists of groups where you are the designated owner'>
+              <Script><Source>return "";</Source></Script>
+              <Attributes>
+                <Map>
+                  <entry key="hidden">
+                    <value>
+                      <Script>
+                      	<Source><![CDATA[
+// Expect: java.lang.String launcher
+field.setHidden(false);
+// String filterString = "application.name == \"" + resourceName + "\"" + " && owner.name == \"" + launcher + "\""; 
+String filterString = "application.name == \"Active Directory\"" + " && owner.name == \"" + launcher + "\""; 
+field.setFilterString(filterString);
+return false;
+                        ]]></Source>
+                      </Script>
+                    </value>
+                  </entry>
+                </Map>
+              </Attributes>
+            </Field>
+          </Section>
+          <Button label='Edit' action='next'/>
+          <Button label='Exit Workflow' action='next' parameter='exitWorkflow' skipValidation='true' value='true'/> 
+        </Form>
+        <Arg name='workItemDescription' value='Manage My Groups - Select Group'/> 
+      </Approval>    
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Build Group Model' when='approved'/>
+    </Step>
+        
+    <Step name='Build Group Model' icon='Task' resultVariable='groupModel' action='call:getManagedAttributeModel'  posX="162" posY="127">
+      <Description></Description>
+      <Arg name='name' value='ref:groupAttributeName'/>
+      <Arg name='appId' value='ref:appId'/>
+      <Arg name='value' value='ref:groupDN'/>
+      <Transition to='Present Group Edit Form'/>
+    </Step>
+            
+    <Step name='Present Group Edit Form' icon='Approval' posX="292" posY="126">
+      <Description>Present a form that allows editing the group object</Description>
+      <Approval send='groupModel, exitWorkflow' return='groupModel, exitWorkflow, deleteGroup, selectAnother' owner='ref:launcher' mode='serial'>    
+	<Arg name='workItemFormBasePath' value='ref:basePath'/>
+        <Arg name='workItemForm' value='ref:formName'/>
+        <Arg name='workItemDescription'>
+           <Script>
+             <Source>
+                 return "Edit Group '" + $(groupModel.sAMAccountName) + "'";
+             </Source>
+           </Script>
+	</Arg>
+	<AfterScript>
+	  <Source><![CDATA[
+import sailpoint.tools.Util;
+if ( Util.otob(trace) ) {
+  System.out.println("zeeitem : " + item.toXml());
+}
+	 ]]> </Source>
+	</AfterScript>
+      </Approval>                  
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Select Group' when='selectAnother'/>
+      <Transition to='Delete Group' when='deleteGroup'/>
+      <Transition to='Build Read Only Form' when='approved'/>
+    </Step>
+      
+    <Step name='Build Read Only Form' icon='Task' posX="361" posY="224" resultVariable='readOnlyForm' 
+          action='call:buildReadOnlyForm'>
+      <Arg name='form' value='ref:formName'/>
+      <Arg name='helpText' value="Please review your updates.  Click 'Back' to make changes.  Click 'Submit' to save updates."/>
+      <Arg name='includeExitButton' value='true'/>
+    </Step>
+       
+    <Step name='Confirm Entered Values' icon='Approval' posX="488" posY="223">
+      <Description>
+       Present a confirmation form that is readonly and displays the values from the  
+       model as it was persisted in the previous step.
+      </Description>
+      <Approval send='groupModel' return='exitWorkflow' owner='ref:launcher' mode='serial'>
+	<Arg name='workItemDescription' value='Confirm updates to $(groupModel.sAMAccountName)'/>
+	<Arg name='workItemForm' value='ref:readOnlyForm'/> 
+	<Arg name='workItemFormBasePath' value='ref:basePath'/>               
+      </Approval>
+      <Transition to='end' when='exitWorkflow'/>
+      <Transition to='Present Group Edit Form' when='!approved'/>
+      <Transition to='Build Provisioning Plans' when='approved'/>
+    </Step>
+        
+    <Step name='Build Provisioning Plans' icon='Task' resultVariable='plans' action='call:buildPlansFromManagedAttributeModel' posX="688" posY="219">
+      <Description>
+      </Description>
+      <Arg name='maModel' value='ref:groupModel'/>
+      <Transition to='Execute Plans' when='plans != null'/>
+      <Transition to='end'/>
+    </Step>
+
+    <Step name='Execute Plans' icon='Task' action='call:executeManageAttributePlans' posX="884" posY="106">
+      <Arg name='plans' value='ref:plans'/>  
+      <!-- groupWorkflow and identityWorkflow can be specified here to override default workflows -->
+      <Arg name='flow' value='EntitlementRequest'/>  
+      <Arg name='approvalScheme' value='none'/>  
+      <Arg name='notificationScheme' value='none'/>  
+      <Arg name='doRefresh' value='true'/>  
+      <Arg name='policyScheme' value='none'/>  
+      <Arg name='trace' value='false'/>
+      <Transition to='end'/> 
+    </Step>
+
+    <Step name='Delete Group' posX="504" posY="118" resultVariable="plan">
+      <Script><Source>
+import sailpoint.object.ProvisioningPlan.ObjectRequest;
+import sailpoint.object.ProvisioningPlan.*;
+import sailpoint.object.ProvisioningPlan.ObjectOperation;
+
+// Construct ObjectRequet
+ProvisioningPlan plan = new ProvisioningPlan();
+ObjectRequest objReq = new ObjectRequest();
+objReq.setOp(ObjectOperation.Delete);
+objReq.setType("group");
+objReq.setApplication(resourceName);
+objReq.setNativeIdentity($(groupModel.sys.nativeIdentity));
+objReq.add(new AttributeRequest("sysAttribute", "memberOf"));
+objReq.add(new AttributeRequest("sysManagedAttributeType", "group"));
+
+plan.addObjectRequest(objReq);
+
+return plan;
+      </Source></Script>
+      <Transition to='Schedule Delete'/>
+    </Step>
+
+    <Step icon="Task" name="Schedule Delete" posX="609" posY="118">
+      <Arg name="optimisticProvisioning" value="false"/>  
+      <!-- Normally in background, but for demo's I do not want to wait 5 minutes for 
+           perform maintenance task to run -->
+      <Arg name="foregroundProvisioning" value="true"/>  
+      <Arg name="doManualActions" value="false"/> 
+      <Arg name="fallbackApprover" value="spadmin"/> 
+      <Arg name="plan" value="ref:plan"/> 
+      <Arg name="approver"/>
+      <Arg name="sessionOwner" value="ref:launcher"/>
+      <Arg name="summaryName" value=""/>
+      <Arg name="project" />
+      <Arg name="changes" />
+      <Arg name="trace" value="false"/>
+      <WorkflowRef>
+        <Reference class="sailpoint.object.Workflow" name="Entitlement Update"/>
+      </WorkflowRef>
+      <Transition to="end" />
+    </Step>
+    
+    
+    <Step name='end' icon='Stop' posX="746" posY="11"/>
+    
+  </Workflow>
+
+</sailpoint>
+

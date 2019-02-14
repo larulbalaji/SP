@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<Rule language='beanshell' name='SubRoleSearchRuleLibrary'>
+  <Source><![CDATA[
+ /*******
+ *   Rule Library                                                                    *
+ *                                                                                   *
+ *   A rule library is a collection of utility methods that can be called from other *
+ *   Rules or workflows.                                                             *
+ *                                                                                   *
+ *   To include a library in another Rule, use this format:                          *
+ *     <Rule ......>                                                                 *
+ *       <ReferencedRules>                                                           *
+ *         <Reference class="sailpoint.object.Rule" name="I18n Library"/>            *
+ *       </ReferencedRules>                                                          *
+ *       ..                                                                          *
+ *       ..                                                                          *
+ *     </Rule>                                                                       *
+ *                                                                                   *
+ *   To include a library in a Workflow, use this format:                            *
+ *                                                                                   *
+ *     <Workflow ......>                                                             *
+ *       <RuleLibraries>                                                             *
+ *         <Reference class="sailpoint.object.Rule" name="Approval Library" />       *
+ *       </RuleLibraries>                                                            *
+ *       ..                                                                          *
+ *       ..                                                                          *
+ *     </Workflow>                                                                   *
+ ******/
+
+    import sailpoint.object.Filter;
+    import sailpoint.object.Bundle;
+    import sailpoint.object.QueryOptions;
+    
+    public List getSubRoles(String roleName){
+        // System.out.println("Currently Searching subRoles for: " + roleName);
+        QueryOptions qo = new QueryOptions();
+        qo.addFilter(Filter.eq("type", "Business"));
+        qo.addFilter(Filter.like("inheritance.name", roleName));
+        List roles = context.getObjects(Bundle.class, qo);
+        // System.out.println("Number of Roles found: " + roles.size());
+        return roles;
+    }
+
+ 
+  ]]></Source></Rule>

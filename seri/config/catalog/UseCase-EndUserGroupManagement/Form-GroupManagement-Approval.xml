@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<sailpoint>
+
+  <Form name='Group Management - Request AD Group Approval'>
+    <Attributes>
+      <Map>
+  <entry key="pageTitle" value="Request Group - Approval"/>
+  <entry key="title" value="Action Required!"/>
+  <entry key="labelAlign" value="top"/>
+      </Map>
+    </Attributes>
+    <Section>
+      <Field name='approvalLabel'>
+  <Attributes>
+    <Map>
+      <entry key='xtype' value='label'/>
+      <entry key='text'>
+        <value>
+    <Script>
+      <Source>
+        return "Upon approval this group will be provisioned here:  " + $(groupModel.sys.nativeIdentity);
+      </Source>
+    </Script>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+      </Field>
+    </Section>
+    <Section label='Group Details' columns='2'>
+      <Field displayName="Group Name" name="sAMAccountName" readOnly="true" type="string">
+  <Attributes>
+    <Map>
+      <entry key="vtype" value="alphanum"/>
+    </Map>
+  </Attributes>
+      </Field>
+      <Field displayName="Group Owner" name="sys.owner" required="true" type="Identity" value="ref:launcher">
+  <Attributes>
+    <Map>
+      <entry key="valueProperty" value="id"/>
+    </Map>
+  </Attributes>
+      </Field>
+      <Field displayName="Group Description" columnSpan="2" name="description" displayType="textarea"/>
+      <Field displayName='Identity Membership' name='identityMembership' type='Identity' multi='true' helpKey="Select initial persons who should be a member of this group" readOnly="true">
+  <Attributes>
+    <Map>
+      <entry key="valueProperty" value="id"/>
+    </Map>
+  </Attributes>
+      </Field>
+      <Field displayName='Group Membership' name='memberOf' type='ManagedAttribute' multi='true' filterString='application.name == "Active Directory" &amp;&amp; attribute == "memberOf"' helpKey="Select initial parent groups for this group" readOnly="true"/>
+      <Field displayName="Group Type" name="GroupType" value='script: ( value == null ) ? "Security" : value' readOnly='true'>
+  <AllowedValuesDefinition>
+          <Value>
+            <List>
+        <String>Security</String>
+              <String>Distribution</String>
+            </List>
+          </Value>
+  </AllowedValuesDefinition>
+      </Field>
+    </Section>
+    <Section label='Approval/Rejection Comments'>
+      <Field displayName="Comments" name="sys.approverComments" displayType="textarea" required="true"/>
+    </Section>
+    <Button label='Approve' action='next'/>
+    <Button label='Reject' action='next' parameter='requestRejected' value='true'/>
+  </Form>
+
+</sailpoint>

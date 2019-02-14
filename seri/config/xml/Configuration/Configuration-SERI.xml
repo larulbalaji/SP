@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="merge">
+    <Configuration name="SERI Configuration">
+      <Attributes>
+        <Map>
+          <entry key="helpDesk-ToAddress" value="helpdesk@sailpointdemo.com"/>
+          <entry key="helpDesk-EmailTemplate" value="Notify Help Desk"/>
+        
+          <!-- set this phone number to the phone number you wish to recieve SMS password reset codes. Example 5125551212-->
+          <entry key="smsphone" value=""/>
+
+          <!-- Below are Location-to-Address mappings.  These are used by the Workforce Onboarding form.  -->
+          <entry key='locations'>
+            <value>
+              <Map>
+          <entry key="Austin">
+            <value><Map>
+              <entry key='addressline1' value='11305 Four Points Drive'/>
+              <entry key='addressline2' value='Building 2, Suite 100'/>
+              <entry key='city' value='Austin'/>
+              <entry key='stateprovince' value='TX'/>
+              <entry key='country' value='USA'/>
+              <entry key='phone' value='+1 (512) 346-2000'/>
+              <entry key='postalcode' value='78726'/>
+              <entry key='fax' value='+1 (512) 346-2033'/>
+            </Map></value>
+          </entry>
+          <entry key="London">
+            <value><Map>
+              <entry key='addressline1' value='145-157 St John Street'/>
+              <entry key='addressline2' value='2nd Floor'/>
+              <entry key='city' value='London'/>
+              <entry key='stateprovince' value=''/>
+              <entry key='country' value='England'/>
+              <entry key='phone' value='+44 (0) 845 273 3826'/>
+              <entry key='postalcode' value='EC1V 4PY'/>
+              <entry key='fax' value=''/>
+            </Map></value>
+          </entry>
+          <entry key="Cape Town">
+            <value><Map>
+              <entry key='addressline1' value='1st Floor Convention Towers'/>
+              <entry key='addressline2' value='Cnr Heerengracht St and Coen Steytler Avenue'/>
+              <entry key='city' value='Cape Town'/>
+              <entry key='stateprovince' value=''/>
+              <entry key='country' value='South Africa'/>
+              <entry key='phone' value='+27 21 403 6475'/>
+              <entry key='postalcode' value='8000'/>
+              <entry key='fax' value=''/>
+            </Map></value>
+          </entry>
+          <entry key="Frankfurt">
+            <value><Map>
+              <entry key='addressline1' value='Messeturm, 25th floor'/>
+              <entry key='addressline2' value='Friedrich-Ebert-Anlage 49'/>
+              <entry key='city' value='Frankfurt'/>
+              <entry key='stateprovince' value=''/>
+              <entry key='country' value='Germany'/>
+              <entry key='phone' value='+49 (0) 69 50956 5434'/>
+              <entry key='postalcode' value='60308'/>
+              <entry key='fax' value=''/>
+            </Map></value>
+          </entry>
+          <entry key="Singapore">
+            <value><Map>
+              <entry key='addressline1' value='80 Raffles Place'/>
+              <entry key='addressline2' value='UOB Plaza 1 - 36th Floor'/>
+              <entry key='city' value='Singapore'/>
+              <entry key='stateprovince' value=''/>
+              <entry key='country' value='Singapore'/>
+              <entry key='phone' value='+65 6248 4820'/>
+              <entry key='postalcode' value='048624'/>
+              <entry key='fax' value=''/>
+            </Map></value>
+          </entry>
+              </Map>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>

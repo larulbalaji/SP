@@ -1,0 +1,505 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Edit Objects" type="Subprocess">
+  <Variable initializer="string:true" name="transient"/>
+  <Variable name="templateId"/>
+  <Variable name="templateName"/>
+  <Variable initializer="string:false" name="newTemplate"/>
+  <Variable input="true" name="requester"/>
+  <Variable initializer="string:true" name="trace"/>
+  <Variable name="launcher"/>
+  <Variable name="type"/>
+  <Variable name="obj"/>
+  <Step icon="Start" name="Start" posX="17" posY="105">
+    <Transition to="Select Object"/>
+  </Step>
+  <Step icon="Default" name="Select Object" posX="126" posY="106">
+    <Approval name="Select Object" owner="ref:requester" return="templateId,newTemplate,type" send="">
+      <AfterScript>
+        <Source><![CDATA[
+import sailpoint.object.EmailTemplate;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.SelectObject.AfterScript");
+serilog.debug("--");
+if(!"new".equals(templateId)) {
+  EmailTemplate t=context.getObjectById(EmailTemplate.class, templateId);
+  if(t!=null) {
+    workflow.put("templateName", t.getName());
+  }
+}
+      ]]></Source>
+      </AfterScript>
+      <Form name="Select Object">
+        <Attributes>
+          <Map>
+            <entry key="pageTitle" value="Select Object"/>
+          </Map>
+        </Attributes>
+        <Button action="next" label="Next"/>
+        <Button action="cancel" label="Cancel"/>
+        <Section>
+          <Field displayName="Type" name="type" postBack="true" type="string">
+            <AllowedValuesDefinition>
+              <Value>
+                <List>
+                  <String>Email Template</String>
+                  <String>Quick Link</String>
+                  <String>SPRight</String>
+                  <String>Capability</String>
+                  <String>Dynamic Scope</String>
+                </List>
+              </Value>
+            </AllowedValuesDefinition>
+          </Field>
+          <Field displayName="Template" dynamic="true" name="templateId" type="string" value="new">
+            <AllowedValuesDefinition>
+              <Script>
+                <Source><![CDATA[
+import sailpoint.object.*;
+import sailpoint.object.Capability;
+import sailpoint.object.DynamicScope;
+import sailpoint.object.EmailTemplate;
+import sailpoint.object.QuickLink;
+import sailpoint.object.Rule;
+import sailpoint.object.SPRight;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EditObjects.SelectObject.Form.Template.AllowedValues");
+serilog.debug("--");
+List temps= null;
+if(form.getField("type").getValue() != null)
+ {
+  String formValue = form.getField("type").getValue();
+  switch(formValue) 
+     {
+    case "Email Template":
+      temps=context.getObjects(EmailTemplate.class);
+      break;
+    case "SPRight":
+      temps=context.getObjects(SPRight.class);
+      break;
+    case "Capability":
+      temps=context.getObjects(Capability.class);
+      break;
+    case "Rule":
+      temps=context.getObjects(Rule.class);
+      break;
+    case "Quick Link":
+      temps=context.getObjects(QuickLink.class);
+      break;
+    case "Dynamic Scope":
+      temps=context.getObjects(DynamicScope.class);
+      break;
+      }
+  
+  List items=new ArrayList();
+  ArrayList item=new ArrayList();
+  item.add("new");
+  item.add("-- Create New Object --");
+  items.add(item);
+  if(temps!=null) {
+    for (SailPointObject temp: temps) {
+      String id=temp.getId();
+      String name=temp.getName();
+      item=new ArrayList();
+      item.add(id);
+      item.add(name);
+      items.add(item);
+        }
+     }
+
+  return items;
+} 
+else 
+{
+  return new ArrayList();
+}
+return null;
+                
+                ]]></Source>
+              </Script>
+            </AllowedValuesDefinition>
+          </Field>
+        </Section>
+      </Form>
+    </Approval>
+    <Arg name="requester" value="ref:requester"/>
+    <Transition to="parseObject"/>
+  </Step>
+  <Step icon="Default" name="Edit Object" posX="329" posY="141">
+    <Approval name="Edit Object" owner="ref:launcher" return="obj" send="obj">
+      <Arg name="workItemType" value="Form"/>
+      <Arg name="workItemDescritption" value="Edit The Object You have Selected"/>
+      <Arg name="workItemForm" value="Edit Objects"/>
+      <Arg name="workItemFormBasePath" value="obj"/>
+    </Approval>
+    <Arg name="workItemBaseFormPath" value="obj"/>
+    <Arg name="workItemForm" value="Edit Objects"/>
+    <Arg name="workItemType" value="Form"/>
+    <Arg name="workItemDescription" value="Edit the Object you have Selected"/>
+    <Transition to="Save Object"/>
+  </Step>
+  <Step icon="Default" name="Save Object" posX="437" posY="142">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+import org.apache.commons.lang.StringEscapeUtils;
+import sailpoint.object.IdentitySelector.MatchExpression;
+import sailpoint.object.IdentitySelector.MatchTerm;
+
+if(type.equals("Email Template")) {
+  EmailTemplate et=null;
+  if("new".equals(templateId)) {
+    et=new EmailTemplate();
+  } else {
+    et=context.getObjectById(EmailTemplate.class, (String)obj.get("id"));
+  }
+
+  et.setName((String)obj.get("name"));
+  et.setSubject((String)obj.get("subject"));
+  et.setBody(StringEscapeUtils.escapeHtml((String)obj.get("body")));
+  et.setTo((String)obj.get("to"));
+  et.setFrom((String)obj.get("from"));
+  et.setCc((String)obj.get("cc"));
+  et.setBcc((String)obj.get("bcc"));
+  et.setDescription((String)obj.get("description"));
+  
+        
+  context.saveObject(et);
+  context.commitTransaction();
+} else if(type.equals("SPRight")) {
+
+  SPRight right=null;
+  if("new".equals(templateId)) {
+    right =new SPRight();
+  } else {
+    right=context.getObjectById(SPRight.class, (String)obj.get("id"));
+  }
+
+  right.setDescription((String)obj.get("description"));
+  right.setDisplayName((String)obj.get("displayName"));
+  right.setName((String)obj.get("name"));
+      
+  context.saveObject(right);
+  context.commitTransaction();
+
+} else if(type.equals("Capability")) {
+
+  Capability capability=null;
+  if("new".equals(templateId)) {
+    capability =new Capability();
+  } else {
+    capability=context.getObjectById(Capability.class, (String)obj.get("id"));
+  }
+
+  capability.setDescription((String)obj.get("description"));
+  capability.setName((String)obj.get("name"));
+
+  if(obj.get("rights")!= null) {
+    List items = new ArrayList();
+
+    for(String aRight: obj.get("rights")) {
+      SPRight theRightObj=context.getObjectByName(SPRight.class, aRight);
+      items.add(theRightObj);
+    }
+    capability.setRights(items);
+  } else {
+    capability.setRights(null);
+  }
+               
+  if(obj.get("capabilities")!= null) {
+    List items = new ArrayList();
+
+    for(String aRight: obj.get("capabilities")) {
+      Capability theRightObj=context.getObjectByName(Capability.class, aRight);
+      items.add(theRightObj);
+    }
+    capability.setInheritedCapabilities(items);
+  } else {
+    capability.setInheritedCapabilities(null);
+  }
+
+  context.saveObject(capability);
+  context.commitTransaction();
+
+} else if(type.equals("Quick Link")) {
+
+  QuickLink ql=null;
+  if("new".equals(templateId)) {
+    ql =new QuickLink();
+  } else {
+    ql=context.getObjectById(QuickLink.class, (String)obj.get("id"));
+  }
+
+  ql.setName((String)obj.get("name"));
+  ql.setAction((String)obj.get("action"));
+  ql.setCategory((String)obj.get("category"));
+  ql.setDescription((String)obj.get("description"));
+  ql.setIcon((String)obj.get("icon"));
+  ql.setMessageKey((String)obj.get("messageKey"));
+  ql.setOrdering(Integer.parseInt((String)obj.get("ordering")));
+     
+  Attributes attributes =  new Attributes();
+  if(  ql.getArguments()!= null)
+    attributes = ql.getArguments();
+
+  attributes.put("bulk", obj.get("isBulk"));
+  attributes.put("forceAllowOthers", obj.get("isForceAllowOthers"));
+  attributes.put("forceAllowSelf",obj.get("isForceAllowSelf"));
+  attributes.put("hidden", obj.get("isHidden"));
+  attributes.put("hideAllowOthers", obj.get("isHideAllowOthers"));
+  attributes.put("hideAllowSelf", obj.get("isHideAllowSelf"));  
+  attributes.put("workflowName", obj.get("workflowName")); 
+  attributes.put("workflowSuccess", obj.get("workflowSuccess")); 
+  ql.setArguments(attributes);                   
+
+  if(obj.get("dynamicScopes")!= null) 
+{
+    List items = new ArrayList();
+
+    for(String scopeName: obj.get("dynamicScopes"))
+   {              
+      if(scopeName.equals("0,Admin")) {
+         items.add("0,Admin");
+      } else {
+System.out.println("adding the scope:  "+ scopeName);
+         DynamicScope ds=context.getObjectByName(DynamicScope.class, scopeName);
+         items.add(ds);
+      }
+    }
+System.out.println("adding the items:  "+ items);
+    ql.setDynamicScopes(items);
+  } else {
+System.out.println("adding the items: null ");
+    ql.setDynamicScopes(null);
+  }
+
+  context.saveObject(ql);
+  context.commitTransaction();
+
+} else if(type.equals("Dynamic Scope")) {
+
+  DynamicScope ds =null;
+
+  if("new".equals(templateId)) {
+    ds=new DynamicScope();
+  } else {
+    ds=context.getObjectById(DynamicScope.class,templateId);
+  }
+
+  ds.setName((String)obj.get("name"));
+  ds.setDescription((String)obj.get("description"));
+  ds.setAllowAll((boolean)obj.get("isAllowAll"));
+
+  if(obj.get("containsWorkgroups")!= null || obj.get("containsRights") != null || obj.get("containsCapabilities")!= null) {
+    IdentitySelector is = new IdentitySelector();
+    MatchExpression exp = new MatchExpression();
+
+    if(obj.get("andOr").equals("Or")) {
+     exp.setAnd(false);
+    } else {
+     exp.setAnd(true);
+    }
+
+    List workgroups = (List)obj.get("containsWorkgroups"); 
+    if(workgroups!= null) {
+      for(String aName: workgroups) {
+        MatchTerm mt = new MatchTerm();
+        mt.setName("workgroups");
+        mt.setValue(aName);
+        exp.addTerm(mt);
+      }
+    }
+
+    List rights = (List)obj.get("containsRights"); 
+    if(rights!= null) {
+      for(String aName: rights) {
+        MatchTerm mt = new MatchTerm();
+        mt.setName("rights");
+        mt.setValue(aName);
+        exp.addTerm(mt);
+      }
+    }
+    List capabiilities = (List)obj.get("containsCapabilities"); 
+    if(capabiilities!= null) {
+        for(String aName: capabiilities) {
+        MatchTerm mt = new MatchTerm();
+        mt.setName("capabilities");
+        mt.setValue(aName);
+        exp.addTerm(mt);
+      }
+    }
+    is.setMatchExpression(exp);
+    ds.setSelector(is);
+  }
+
+  /*
+  * List inclusions = new ArrayList();
+  List exclusions = new ArrayList();
+  ds.setExclusions(exclusions));*/
+
+  context.saveObject(ds);
+  context.commitTransaction();
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Select Object"/>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="587" posY="138"/>
+  <Step icon="Default" name="parseObject" posX="223" posY="140" resultVariable="obj">
+    <Script>
+      <Source><![CDATA[
+      
+import sailpoint.object.*;
+import sailpoint.object.IdentitySelector.MatchExpression;
+import sailpoint.object.IdentitySelector.MatchTerm;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.EditObjects.ParseObject");
+
+Map obj = new HashMap();
+
+serilog.debug("templateId="+templateId);
+serilog.debug("type="+type);
+
+obj.put("type", type);
+obj.put("id", templateId);
+
+if(templateId.equalsIgnoreCase("new") == false) {
+
+  if(type.equals("SPRight")) {
+    SPRight right = context.getObjectById(SPRight.class,templateId);
+    obj.put("id", templateId);
+    obj.put("description", right.getDescription());
+    obj.put("displayName", right.getDisplayName());
+    obj.put("name", right.getName());
+  } else if(type.equals("Email Template")) {
+    EmailTemplate right = context.getObjectById(EmailTemplate.class,templateId);
+    obj.put("id", templateId);
+    obj.put("name", right.getName());
+    obj.put("to", right.getTo());
+    obj.put("from", right.getFrom());
+    obj.put("subject", right.getSubject());
+    obj.put("body", right.getBody());
+    obj.put("cc", right.getCc());
+    obj.put("bcc", right.getBcc());
+    obj.put("description", right.getDescription());
+  } else if(type.equals("Capability")) {
+    Capability right = context.getObjectById(Capability.class,templateId);
+    obj.put("id", templateId);
+    obj.put("name", right.getName());
+    obj.put("rights", right.getRights());
+
+    if(right.getRights()!= null) {
+      List items = new ArrayList();
+      for(SailPointObject temp: right.getRights()) {
+        
+        String name=temp.getName();
+        items.add(name);
+      }
+      obj.put("rights", items);
+    }
+
+    obj.put("capabilities", right.getInheritedCapabilities());
+    if(right.getInheritedCapabilities()!= null) {
+      List items = new ArrayList();
+      for(SailPointObject temp: right.getInheritedCapabilities()) {
+        String name=temp.getName();
+        items.add(name); 
+      }
+      obj.put("capabilities", items);
+    }
+    obj.put("description", right.getDescription());
+    obj.put("displayName", right.getDisplayName());
+  } else if(type.equals("Rule")) {
+    Rule right = context.getObjectById(Rule.class,templateId);
+    obj.put("id", templateId);
+    obj.put("name", right.getName());
+    obj.put("description", right.getDescription());
+    obj.put("source", right.getSource());
+    obj.put("type", right.getType());
+    obj.put("referencedRules", right.getReferencedRules());
+    obj.put("language", right.getLanguage());
+  } else if(type.equals("Quick Link")) {
+    QuickLink right = context.getObjectById(QuickLink.class,templateId);
+    obj.put("id", templateId);
+    obj.put("name", right.getName());
+    obj.put("action", right.getAction());
+    obj.put("category", right.getCategory());
+   // obj.put("dynamicScopes", right.getDynamicScopes());
+   // obj.put("workflow", right.getArguments());
+
+    if(right.getDynamicScopes()!= null) {
+      List items = new ArrayList();
+      for(Object scopeObj: right.getDynamicScopes()) {
+        if(scopeObj instanceof java.util.List) {
+          items.add("0,Admin");
+        } else {
+          SailPointObject temp = (DynamicScope)scopeObj;
+          String name=temp.getName();
+          items.add(name);
+        }
+        obj.put("dynamicScopes", items);
+      }
+    }
+
+    obj.put("description", right.getDescription());
+    obj.put("icon", right.getIcon());
+    obj.put("messageKey", right.getMessageKey());
+    obj.put("ordering", right.getOrdering());
+    obj.put("isbulk", right.isBulk());
+    obj.put("isForceAllowOthers", right.isForceAllowOthers());
+    obj.put("isForceAllowSelf", right.isForceAllowSelf());
+    obj.put("isHidden", right.isHidden());
+    obj.put("isHideAllowOthers", right.isHideAllowOthers());
+    obj.put("isHideAllowSelf", right.isHideAllowSelf());  
+
+    Attributes attrs = right.getArguments();
+    obj.put("workflowName", attrs.get("workflowName"));  
+    obj.put("workflowSuccess", attrs.get("workflowSuccess"));  
+  } else if(type.equals("Dynamic Scope")) {
+    DynamicScope ds = context.getObjectById(DynamicScope.class,templateId);
+    obj.put("id", templateId);
+    obj.put("name", ds.getName());
+    obj.put("description", ds.getDescription());
+    obj.put("exclusions", ds.getExclusions());
+    obj.put("inclusions", ds.getInclusions());
+    obj.put("isAllowAll", ds.isAllowAll());
+
+    IdentitySelector is = ds.getSelector();
+    if(is!= null) {
+      MatchExpression me = is.getMatchExpression();
+      if(me.isAnd()) {
+        obj.put("andOr","And");
+      } else {
+        obj.put("andOr","Or");
+      }
+
+      List terms =  me.getTerms();
+
+      List workgroups = new ArrayList(); 
+      List rights = new ArrayList();
+      List capabilities = new ArrayList(); 
+
+      for(MatchTerm mt: terms) {
+     
+        if(mt.getName().equals("workgroups")) {
+          workgroups.add(mt.getValue());
+        } else if(mt.getName().equals("rights")) {
+          rights.add(mt.getValue());
+        } else if(mt.getName().equals("capabilities")) {
+          capabilities.add(mt.getValue());
+        }
+      }
+      obj.put("containsWorkgroups", workgroups);
+      obj.put("containsRights", rights);
+      obj.put("containsCapabilities", capabilities);
+
+    }
+
+  }
+}
+return obj;
+      ]]></Source>
+    </Script>
+    <Transition to="Edit Object"/>
+  </Step>
+</Workflow>

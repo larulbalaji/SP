@@ -1,0 +1,11 @@
+Add Role,organizational,Identitiy.Inc,,OrganizationRoot,,
+Add Scope,Identitiy.Inc,
+Add ScopeAssignment,Identitiy.Inc,Identitiy.Inc
+#
+Add Role,organizational,Order Management,,,,Identitiy.Inc
+Add Scope,Order Management,Identitiy.Inc
+Add ScopeAssignment,Order Management,Order Management
+#
+Add Role,organizational,Fulfillment,,,,Identitiy.Inc
+Add Scope,Fulfillment,Identitiy.Inc
+Add ScopeAssignment,Fulfillment,Fulfillment

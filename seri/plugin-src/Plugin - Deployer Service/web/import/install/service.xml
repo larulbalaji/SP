@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+  <ServiceDefinition name="DeployerService" executor="sailpoint.seri.plugin.service.PluginDeployerService" interval="30" hosts="global">
+    <Description>
+      Service to replace the deployment of plugins from a folder on the filesystem. This will run the new installer but using the file from the filesystem.  
+    </Description>
+    <Attributes>
+      <Map>
+        <entry key="pluginName" value="Deployer" />
+      </Map>
+    </Attributes>
+  </ServiceDefinition>
+
+</sailpoint>
+

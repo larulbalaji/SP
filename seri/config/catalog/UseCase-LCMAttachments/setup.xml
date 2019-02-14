@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Configuration-SystemConfiguration_merge.xml'/>
+  <ImportAction name='include' value='Custom-File_Attachment_Parameters.xml'/>
+  <ImportAction name='include' value='Workflow-ApproveAndProvisionSubprocessWithAttachments.xml'/>
+  <ImportAction name='include' value='Workflow-LCMProvisioningWithAttachments.xml'/>
+  <ImportAction name='include' value='Workflow-ProvisioningApprovalSubprocessWithAttachments.xml'/>
+</sailpoint>
+

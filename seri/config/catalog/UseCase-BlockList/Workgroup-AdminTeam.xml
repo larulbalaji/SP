@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Identity name="AdminTeam" workgroup="true">
+  <Attributes>
+    <Map>
+      <entry key="displayName" value="AdminTeam"/>
+      <entry key="email" value="adminteam@sailpointdemo.com"/>
+    </Map>
+  </Attributes>
+  <Description>List of users who should receive notifications, escalations, or work items for the members of the Block list.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Preferences>
+    <Map>
+      <entry key="workgroupNotificationOption">
+        <value>
+          <WorkgroupNotifationOption>GroupEmailOnly</WorkgroupNotifationOption>
+        </value>
+      </entry>
+    </Map>
+  </Preferences>
+</Identity>
+</sailpoint>

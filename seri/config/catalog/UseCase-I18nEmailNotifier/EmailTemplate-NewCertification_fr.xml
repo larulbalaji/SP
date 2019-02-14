@@ -1,0 +1,151 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<EmailTemplate   name="New Certification - HTML_fr">
+  <Body>
+  <![CDATA[
+   
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>New Review d'accès</title>
+    
+</head>
+
+<body style="background:#00799d;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td> <img src="%%seriIIQlink%%/images/TopLogo1.png" height="" vspace="10">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fafafa;margin:0;padding:0;text-align:left;border-bottom:5px solid #b2b2b2;">
+        <tr valign="middle">
+          <td height="85">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>
+            <!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+            <h2 style="color:#222222;margin:0;padding:0;font:bold 12pt Arial;text-transform:uppercase;">New Review d'accès</h2>
+            <h1 style="color:#037da1;margin:0;padding:0;font:bold 22pt Arial;">$!{workItemName}</h1>             
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+     <table cellpadding="0" cellspacing="0" width="588" style="background:#dadada;margin:0;padding:0;text-align:left;border-left:0px solid #b2b2b2;border-right:0px solid #b2b2b2;">
+        <tr valign="top"> 
+          <td colspan="3"><img src="%%seriIIQlink%%/images/LogoHeader.png" height=""hspace="10" vspace="10" /></td>
+        </tr>
+        <tr valign="top">
+          <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:#007080;font:bold 10pt Arial;line-height:15pt;">$!{workItem.owner.firstname},</p>
+            <p/>
+            <p style="margin:0 0 20px;padding:0;color:#007080;font:normal 10pt Arial;line-height:15pt;">Dans le cadre de nos efforts de conformité périodiques, vous êtes responsable de la certification de l'accès à vos employés ont aux applications d'entreprise.</p>
+            <p style="margin:0;padding:0;color:#007080;font:normal 10pt Arial;line-height:15pt;">Une certification d'accès spécifique nommé <b>$!{workItemName}</b> a été créé pour vous, et est due sur <strong>$spTools.formatDate( $certification.expiration,3,3)</strong>.</p>
+            
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:20px 0;padding:0;color:#0000ee;font:bold 10pt Arial;line-height:15pt;"><a href="%%seriIIQlink%%/manage/certification/entityList.jsf?certificationId=$!{certification.id}">Cliquez ici pour commencer cette tâche.</a></p>
+            <p style="margin:0 0 20px;padding:0;color:#007080;font:normal 10pt Arial;line-height:15pt;">Votre achèvement en temps opportun de l'examen de l'accès est une partie importante de la protection de nos renseignements précieux de l'entreprise. Votre participation est grandement appréciée</p>
+		 </td>
+            </tr>
+            </table>
+            
+            
+                     <table cellpadding="0" cellspacing="0" width="500" border="0" style="margin-bottom:30px">
+                <tr valign="top">
+                <td style="background:#00799d;border-bottom:2px solid #FFF;">
+                  <!-- CHANGE HEADER BACKGROUND COLOR ABOVE : green - #668641 ; red - #a22831 -->
+                  <p style="color:#FFF;font:bold 11pt Arial;margin:10px 0 10px 15px;line-height:13pt;">Détails</p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#fafafa;border-bottom:2px solid #FFF;">
+                  <p style="color:#007080;font:normal 8pt Arial;margin:10px 0 10px 15px;line-height:13pt;"><strong>Date d'échéance: </strong>$spTools.formatDate($certification.expiration,3,3)</p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#fafafa;border-bottom:2px solid #FFF;">
+                  <p style="color:#007080;font:normal 8pt Arial;margin:10px 0 0 15px;padding:0;line-height:13pt;"><strong>Créé par: </strong>$!{requesterName}</p>
+                    <p style="color:#007080;font:normal 8pt Arial;margin:0 0 0 15px;padding:0;line-height:13pt;"><strong>Date de création: </strong>$spTools.formatDate($certification.created,3,3)<br/></p>
+                </td>
+                </tr>
+                <tr valign="top">
+                <td style="background:#fafafa;border-bottom:2px solid #FFF;">
+                  <p style="color:#007080;font:bold 8pt Arial;margin:10px 0 0 15px;padding:0;line-height:13pt;">balises:</p>
+                    <p style="color:#007080;font:normal 8pt Arial;margin:0 0 0 15px;padding:0;line-height:13pt;">
+#foreach( $tag in $certification.tags )
+$tag.name</br>
+#end
+</p>
+                </td>
+                </tr>
+              </table>       
+           
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:0;padding:0;color:#007080;font:normal %%thankYouStatementFontSize%% Arial;line-height:15pt;">Merci pour votre coopération</p>
+            <p style="margin:0 0 50px;padding:0;color:#007080;font:bold %%thankYouStatementFontSize%% Arial;line-height:15pt;">Votre équipe Sécurité et conformité</p>
+            </td>
+            <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+               <p style="margin:0 0 0 30px;padding:0;color:%%supportLinksSeparator%%;font:normal 12pt Arial;line-height:12pt;margin-bottom:30px"><a href="%%seriIIQlink%%/dashboard.jsf" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="%%seriIIQlink%%/dashboard.jsf" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="%%seriIIQlink%%/dashboard.jsf" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+          </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#fafafa;margin:0;padding:0;text-align:right;border-top:0px solid #b2b2b2;">
+        <tr valign="middle">
+          <td width="180" height="60">&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+	</body>
+	</html>
+  ]]>
+    </Body>
+ <Description>
+      Email Template for notifying work item owners of new certifications.
+    </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="workItemName" type="string">
+        <Description>The description property (also the name property) of the certification WorkItem.</Description>
+      </Argument>
+      <Argument name="workItem" type="WorkItem">
+        <Description>The WorkItem object for the certification.</Description>
+      </Argument>
+      <Argument name="certification" type="Certification">
+        <Description>The Certification object.</Description>
+      </Argument>
+      <Argument name="requesterName" type="string">
+        <Description>The display name of the Identity that requested the certification.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Subject>Nouvelle certification d'accès: $workItemName</Subject>
+</EmailTemplate>
+</sailpoint>

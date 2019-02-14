@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="Rule-AlertCreationRule.xml"/>
+  <ImportAction name="include" value="Rule-AlertMatcherRule.xml"/>
+  <ImportAction name="include" value="Application-Alerts.xml"/>
+  <ImportAction name="include" value="TaskDefinition-AlertAggregation.xml"/>
+  <ImportAction name="include" value="TaskDefinition-AlertProcessor.xml"/>
+  <ImportAction name="include" value="AlertDefinition-AlertNotification.xml"/>
+  <ImportAction name="include" value="EmailTemplate-AlertNotification.xml"/>
+</sailpoint>

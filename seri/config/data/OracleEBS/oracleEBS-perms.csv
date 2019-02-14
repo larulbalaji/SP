@@ -1,0 +1,24 @@
+RESPONSIBILITY, MENU_NAME, DATA_GROUP_NAME, REQUEST_GROUP_NAME
+Payables Manager, AP_NAVIGATE_GUI12, Standard, All Reports
+Payables Inquiry, AP_NAVIGATE_INQUIRY_GUI12, Standard, Payables Reports Only
+Receivables Manager, AR_NAVIGATE_GUI, Standard, Receivables All
+Purchasing Buyer,PO_BUYER_GUI,Standard,All Reports
+Purchasing Receiver,PO_RECEIVER_GUI,Standard,Purchasing Reports
+Purchasing Requester,PO_REQUESTOR_GUI,Standard,Purchasing Reports
+Purchasing Super User,PO_SUPERUSER_GUI,Standard,All Reports
+AX Cost Management,AX_NAV_SUPERVISOR_CST,Standard,AX Inventory
+AX Developer,AX_NAV_DEVELOPER,Standard,AX Developer
+AX General Ledger Supervisor,AX_NAV_SUPERVISOR_GL,Standard,AX General Ledger Supervisor
+AX General Ledger User MRC,AX_NAV_USER_GL,Standard,AX General Ledger
+AX General Ledger User,AX_NAV_USER_GL,Standard,AX General Ledger
+AX Inventory User,AX_USER,Standard,AX Inventory
+AX Inventory,AX_NAV_SUPERVISOR_INV,Standard,AX Inventory Supervisor
+AX Payables Supervisor,AX_NAV_SUPERVISOR_AP,Standard,AX Payables Supervisor
+AX Payables User,AX_NAV_USER_AP,Standard,AX Payables
+AX Receivables Supervisor,AX_NAV_SUPERVISOR_AR,Standard,AX Receivables Supervisor
+AX Receivables User MRC,AX_NAV_USER_AR,Standard,AX Receivables MRC
+AX Receivables User,AX_NAV_USER_AR,Standard,AX Receivables
+System Administrator,FND_NAVIGATE4.0,Standard,System Administrator Reports
+System Administration,ICX_SYSTEM_ADMINISTRATION,Standard,System Administrator Reports
+Application Developer,FND_DEVNAVIGATE4.0,Standard,Application Developer Reports
+INSERT RESPONSIBILITY, INSERT MENU, INSERT DATA_GROUP, INSERT REQUEST_GROUP

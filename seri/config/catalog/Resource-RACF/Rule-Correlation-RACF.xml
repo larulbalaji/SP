@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Correlation - RACF" type="Correlation">
+  <Source>
+    <![CDATA[
+    //
+    //  As we process each RACF account, this rule is called to script the correlation logic
+    //
+    Map map = new HashMap();
+
+    // get RACF account attribute that holds correlation data
+    //
+    String programmer = account.getStringAttribute("PROGRAMMER");    
+    String cubeName = null;
+
+    if (null != programmer) {
+        int pos = programmer.indexOf(",");
+        if (pos > 0) {
+            cubeName = programmer.substring(pos+1) + "." + programmer.substring(0, pos);
+        } else {
+            cubeName = programmer;
+        }
+        map.put("identityName", cubeName.trim());
+    }
+
+    return(map);
+    
+    ]]>
+  </Source>
+</Rule>

@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"   name="Lifecycle Event - LOA Return Accounts" type="IdentityLifecycle">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="rule:Rule_ParseApplicationLOAReturnPolicies" name="accountDeprovisioningMap"/>
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event">
+    <Description>The IdentityChangeEvent</Description>
+  </Variable>
+  <Variable name="userName">
+    <Description>The display name of the identity.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace"/>
+  <Variable initializer="string:true" name="enableIdentity"/>
+  <Variable name="project"/>
+  <Variable name="plan"/>
+  <Description>Based on the application attribute settings initiate disable processing.</Description>
+  <Step icon="Start" name="Start">
+    <Transition to="Set Identity Active"/>
+  </Step>
+  <Step icon="Provision" name="Set Identity Active" posX="120" posY="21">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;      
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LifecycleEventLOAReturnAccounts.SetIdentityActive");
+
+serilog.debug("Set Identity Active");
+Identity identity = (Identity) context.getObject(Identity.class, identityName);
+identity.setInactive(false);
+
+      ]]></Source>
+    </Script>
+	    <ConditionScript>
+	      <Source><![CDATA[
+		if(enableIdentity== null || enableIdentity.equalsIgnoreCase("false"))
+	{
+	return false;
+	}
+	else
+	{
+	return true;
+
+]]>	}</Source>
+	    </ConditionScript>
+    <Transition to="Initiate Deprovisioning Tasks"/>
+  </Step>
+
+  <Step action="rule:Rule_InitiateLOAReturnWorkflows" icon="Default" name="Initiate Deprovisioning Tasks" posX="190" posY="20">
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="355" posY="19"/>
+</Workflow>

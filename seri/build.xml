@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="SERI" default="help">
+
+    <import file="scripts/build.filelayout.xml"/>
+    <import file="scripts/build.config.xml"/>
+    <import file="scripts/build.dev.xml"/>
+
+<property name="ant.build.javac.source" value="1.7"/>
+<property name="ant.build.javac.target" value="1.7"/>
+    <!-- Compiler options -->
+
+    <property name="compiler.debug" value="on"/>
+    <property name="compiler.generate.no.warnings" value="off"/>
+    <property name="compiler.args" value=""/>
+    <property name="compiler.max.memory" value="128m"/>
+    <patternset id="ignored.files">
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/SCCS/**"/>
+        <exclude name="**/RCS/**"/>
+        <exclude name="**/rcs/**"/>
+        <exclude name="**/.DS_Store/**"/>
+        <exclude name="**/.svn/**"/>
+        <exclude name="**/.pyc/**"/>
+        <exclude name="**/.pyo/**"/>
+        <exclude name="**/*.pyc/**"/>
+        <exclude name="**/*.pyo/**"/>
+        <exclude name="**/.git/**"/>
+        <exclude name="**/*.hprof/**"/>
+        <exclude name="**/_svn/**"/>
+        <exclude name="**/.hg/**"/>
+        <exclude name="**/*.lib/**"/>
+        <exclude name="**/*~/**"/>
+    </patternset>
+    <patternset id="library.patterns">
+        <include name="*.zip"/>
+        <include name="*.war"/>
+        <include name="*.egg"/>
+        <include name="*.ear"/>
+        <include name="*.swc"/>
+        <include name="*.jar"/>
+    </patternset>
+    <patternset id="compiler.resources">
+        <include name="**/?*.properties"/>
+        <include name="**/?*.xml"/>
+        <include name="**/?*.gif"/>
+        <include name="**/?*.png"/>
+        <include name="**/?*.jpeg"/>
+        <include name="**/?*.jpg"/>
+        <include name="**/?*.html"/>
+        <include name="**/?*.dtd"/>
+        <include name="**/?*.tld"/>
+        <include name="**/?*.ftl"/>
+    </patternset>
+
+    <!-- JDK definitions -->
+
+    <property name="jdk.bin.1.6" value="${jdk.home.1.6}/bin"/>
+    <path id="jdk.classpath.1.6">
+        <fileset dir="${jdk.home.1.6}">
+            <include name="jre/lib/alt-rt.jar"/>
+            <include name="jre/lib/alt-string.jar"/>
+            <include name="jre/lib/charsets.jar"/>
+            <include name="jre/lib/deploy.jar"/>
+            <include name="jre/lib/javaws.jar"/>
+            <include name="jre/lib/jce.jar"/>
+            <include name="jre/lib/jsse.jar"/>
+            <include name="jre/lib/management-agent.jar"/>
+            <include name="jre/lib/plugin.jar"/>
+            <include name="jre/lib/resources.jar"/>
+            <include name="jre/lib/rt.jar"/>
+            <include name="jre/lib/ext/dnsns.jar"/>
+            <include name="jre/lib/ext/localedata.jar"/>
+            <include name="jre/lib/ext/sunjce_provider.jar"/>
+            <include name="jre/lib/ext/sunmscapi.jar"/>
+            <include name="jre/lib/ext/sunpkcs11.jar"/>
+        </fileset>
+    </path>
+    
+    
+
+    <!-- ********************************************************* -->
+    <!-- Global properties                                         -->
+    <!-- ********************************************************* -->
+
+    <taskdef resource="net/sf/antcontrib/antlib.xml">
+        <classpath>
+            <pathelement location="lib/ant-contrib-1.0b3.jar"/>
+        </classpath>
+    </taskdef>
+
+    <taskdef name="build-init" classname="sailpoint.services.tools.ant.BuildInitTask">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </taskdef>
+    <taskdef name="indexize" classname="sailpoint.seri.tools.ant.IndexizeTask">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </taskdef>
+    <taskdef name="IIQRunTask" classname="sailpoint.seri.tools.ant.epiiq.IIQRunTaskTask">
+        <classpath>
+            <pathelement location="lib/commons-codec-1.10.jar"/>
+            <pathelement location="lib/commons-logging-1.1.jar"/>
+            <pathelement location="lib/flexjson-2.1.jar"/>
+            <pathelement location="lib/services-tools.jar"/>
+            <pathelement location="lib/ant/httpclient-4.3.6.jar"/>
+            <pathelement location="lib/ant/httpcore-4.3.3.jar"/>
+        </classpath>
+    </taskdef>
+    <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask">
+        <classpath>
+            <pathelement location="lib/xmltask.jar"/>
+        </classpath>
+    </taskdef>
+
+    <typedef name="gt" classname="sailpoint.services.tools.ant.ConditionGreaterThan">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </typedef>
+    
+    <typedef name="lt" classname="sailpoint.seri.tools.ant.ConditionLessThan">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </typedef>
+
+    <typedef name="filterExport" classname="sailpoint.seri.tools.ant.FilterExport">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </typedef>
+
+    <typedef name="htmlize" classname="sailpoint.seri.tools.ant.catalog.CatalogHTMLizer">
+        <classpath>
+            <pathelement location="lib/commons-collections-3.2.jar"/>
+            <pathelement location="lib/commons-lang-2.6.jar"/>
+            <pathelement location="lib/services-tools.jar"/>
+            <pathelement location="lib/velocity-1.7.jar"/>
+        </classpath>
+    </typedef>  
+    
+    <typedef name="addcolumn" classname="sailpoint.seri.tools.ant.AddColumnTask">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </typedef>  
+    
+    <taskdef name="manager.deploy" classname="org.apache.catalina.ant.DeployTask">
+      <classpath>
+        <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+      </classpath>
+    </taskdef>
+    <taskdef name="manager.undeploy" classname="org.apache.catalina.ant.UndeployTask">
+      <classpath>
+        <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+      </classpath>
+    </taskdef>
+    <!-- ********************************************************* -->
+    <!-- Help Text                                                 -->
+    <!-- ********************************************************* -->
+    <target name="help">
+        <echo>
+SailPoint SERI Build environment
+The ANT script provides targets that can be run from the command line.
+
+clean                     - cleans the build environment
+war                       - build an IdentityIQ War containing the base product,
+                            optional patches and the SERI artefacts
+deploy                    - deploys the war file to a configured Tomcat instance
+createdb                  - runs the DDL scripts on the configured database instance
+tomcat.start              - Starts the configured tomcat instance
+tomcat.stop               - Stops the configured tomcat instance
+tomcat.deploy                 - deploy IIQ to a remote configured tomcat instance
+tomcat.undeploy           - undeploy IIQ from a remote configured tomcat instance
+droptables                - Runs the drop_identityiq_tables script against the configured database
+dropdb                    - Drops the identity database
+import-stock              - Import base IdentityIQ CM and LCM artefacts
+import-seri               - Import selected SERI catalog entries to build a demo system
+import-healthcare         - Import selected SERI catalog entries to build a health care demo system (requires import-seri)
+disable-passthrough       - Turn off passthrough authentication once the Demo System has been
+                                  installed
+setup-demo                - Runs the "Setup Demo" task
+setup-demo-healthcare     - Runs the "Setup Demo - HealhCare" task
+UserStore-ERPPortal       - Install the UserStore web application with the ERP configuration
+enableTimeMachine         - Enables IdentityIQ TimeMachine features.   Useful for demoing future events
+just-catalog              - Rebuilds the IdentityIQ war including the SERI catalog, but without
+                                modifying any core files (e.g. hibernate files)
+          
+--------------------
+These can be concatenated on the command line to perform multiple tasks, e.g.
+  ant clean war deploy
+This will clean the build environment, rebuild the war and deploy to tomcat.
+        
+        </echo>
+    
+    </target>
+
+
+
+    <!-- ********************************************************* -->
+    <!-- Global properties                                         -->
+    <!-- ********************************************************* -->
+    <!-- Eclipse -->
+    <property name="build" location="build"/>
+    <property name="build.iiqBinaryExtract" location="${build}/extract"/>
+
+    <target name="init-properties" unless="properties-initialized">
+        <!-- Allows you to essentially dereference a property -->
+        <macrodef name="propertycopy">
+            <attribute name="name"/>
+            <attribute name="from"/>
+            <sequential>
+                <property name="@{name}" value="${@{from}}"/>
+            </sequential>
+        </macrodef>
+        
+        <!-- The build.properties is loaded further below, after the host
+             name is derived.  This allows per-hostname over-ride of the
+             build.properties file.
+        <property file="build.properties"/>
+         -->
+        
+        <!-- list of servers and associated build environments -->
+        <property environment="env"/>
+        
+        <!-- environment property pulled servers.  -->
+        <exec executable="hostname" osfamily="unix" failifexecutionfails="false" outputproperty="env.COMPUTERNAME"/>
+        <exec executable="hostname" osfamily="unix" failifexecutionfails="false" outputproperty="env.HOSTNAME"/>
+        <condition property="hostname" value="${env.HOSTNAME}">
+            <os family="unix"/>
+        </condition>
+        <condition property="hostname" value="${env.COMPUTERNAME}">
+            <os family="windows"/>
+        </condition>
+        <condition property="hostname" value="${env.HOSTNAME}">
+            <os family="mac"/>
+        </condition>
+        
+        <!-- convert the host name to lower case (windows retruns uppercase often) -->
+        <pathconvert property="hostname">
+           <path path="${hostname}"/>
+           <chainedmapper>
+             <flattenmapper/>
+             <scriptmapper language="javascript">
+               self.addMappedName(source.toLowerCase()); 
+             </scriptmapper>
+           </chainedmapper>
+        </pathconvert>
+        
+        <property file="build.properties"/>
+        <if>
+            <not>
+                <isset property="build.properties.version"/>
+            </not>
+            <then>
+                <property name="build.properties.version" value="0"/>
+            </then>
+        </if>
+        <if>
+            <not>
+                <isset property="instance.name"/>
+            </not>
+            <then>
+                <property name="instance.name" value="identityiq"/>
+            </then>
+        </if>
+    <fail message="instance.name cannot be empty. Please define instance.name correctly">
+      <condition>
+        <equals arg1="${instance.name}" arg2=""/>
+      </condition>
+    </fail>
+    <property name="iiqpath" value="/${instance.name}"/>
+        <!-- check build properties against build.properties.template -->
+        <!-- compare Build.properties.version -->
+        <loadproperties srcFile="build.properties.template" prefix="template">
+          <filterchain>
+            <linecontains>
+              <contains value="build.properties."/>
+            </linecontains>
+          </filterchain>
+        </loadproperties>
+        <echo>template version=${template.build.properties.version}, build version=${build.properties.version}</echo>
+        <fail message="build.properties is out of date.${line.separator}
+Please review build.properties.template for any new options that have been added.${line.separator}
+Add these to your build.properties if required, and update the property build.properties.version${line.separator}
+in your build.properties file to match build.properties.template">
+            <condition>
+                <lt  arg1="${build.properties.version}" arg2="${template.build.properties.version}"/>
+            </condition>
+        </fail>
+
+    <condition property="IIQHome" value="${env.IIQ_HOME}">
+      <isset property="env.IIQ_HOME" />
+    </condition>
+
+    <echo>IIQHome set to: ${IIQHome}</echo> 
+        
+        <!--information regarding host and discovered target -->
+        <echo message="host = ${hostname}"/>
+        
+        <!-- common directories -->
+        <property name="build" location="build"/>
+        <property name="build.iiqBinaryExtract" location="${build}/extract"/>
+        <property name="build.customXMLDir" location="${build.iiqBinaryExtract}/WEB-INF/config/seri"/>
+
+        <!-- common files -->
+        <if>
+            <isset property="IIQPatchLevel"/>
+            <then>
+                <property name="dtd" location="${build.iiqBinaryExtract}/sailpoint.${IIQVersion}${IIQPatchLevel}.dtd"/>
+            </then>
+            <else>
+                <property name="dtd" location="${build.iiqBinaryExtract}/sailpoint.${IIQVersion}.dtd"/>
+            </else>
+        </if>
+        
+        <tstamp>
+          <format property="build.zipstamp" pattern="yyyyMMdd-HHmm" />
+        </tstamp>
+    
+        <property name="properties-initialized" value="true"/>
+    </target>
+
+
+    <!-- ********************************************************* -->
+    <!-- Main                                                      -->
+    <!--    expands ga bin and applies customizations              -->
+    <!-- ********************************************************* -->
+
+    <target name="main"
+            depends="init-properties" description="makes complete iiq distribution directory">
+        <!-- laydown initial binaries and custom static web content -->
+        <antcall inheritall="true" target="prepBinaries"/>
+        <!-- search for custom tasks to perform on the files that will be included in the web application folder -->
+        <if>
+            <equals arg1="${runCustomScripts}" arg2="true"/>
+            <then>
+                <subant target="post.expansion.hook" inheritall="true">
+                    <fileset dir="." includes="scripts/build.custom.*.xml"/>
+                </subant>
+            </then>
+        </if>
+
+        <!-- compile custom java artifacts and put them a in jar -->
+        <antcall inheritall="true" target="includeSERIJar"/>
+
+        <!-- compile custom configuration, apply env tokens and setup init files-->
+        <antcall inheritall="true" target="prepareSERI"/>
+        <antcall target="cleanUpFromFailure"/>
+    </target>
+
+    <!-- ********************************************************* -->
+    <!-- War                                                       -->
+    <!--    makes war file and applies customizations              -->
+    <!-- ********************************************************* -->
+
+    <target name="war" depends="main" description="Makes war file from main target results and applies custom post war custom scripts">
+      <uptodate property="war.uptodate">
+            <srcfiles dir="${build.iiqBinaryExtract}"/>
+          <mergemapper to="${build}/deploy/${instance.name}.war"/>
+      </uptodate>
+      <!-- package a war file for deployment -->
+      <if>
+        <not><isset property="war.uptodate"/></not>
+              <then>
+                <war destfile="build/deploy/${instance.name}.war" update="true">
+                    <fileset dir="${build.iiqBinaryExtract}"/>
+                </war>
+                <if>
+                    <equals arg1="${runCustomScripts}" arg2="true"/>
+                    <then>
+                        <subant target="post.war.hook" inheritall="true" failonerror="false">
+                            <fileset dir="." includes="scripts/build.custom.*.xml"/>
+                        </subant>
+                    </then>
+                </if>
+                <checksum file="build/deploy/${instance.name}.war" forceOverwrite="yes"/>
+                <echo>A MD5 checksum was generated for this war file and placed in the war file directory. Keep this checksum to diagnose potential version issues</echo>
+            </then>
+        </if>
+    </target>
+    
+  
+    <target name="just-catalog" depends="clean,init-properties,prepBinaries,includeSERIJar,prepareFiles.setUptodate,prepare.xmlFiles,prepare.libFiles">
+      <war destfile="build/deploy/identityiq.war">
+        <fileset dir="${build.iiqBinaryExtract}"/>
+      </war>
+    </target>
+
+    <!--                                                            -->
+    <!-- Target: deploy                                             -->
+    <!-- Move files over to the Application server                  -->
+    <!--                                                            -->
+    <target name="deploy" depends="war">
+        <echo message="Deploying build to local IIQ instance: ${IIQHome}."/>
+        <unzip src="build/deploy/${instance.name}.war" dest="${IIQHome}" overwrite="true"/>
+        <property name="build.deployed" value="true"/>
+    </target>
+
+    <!--                                                            -->
+    <!-- Target: tomcat.deploy                                      -->
+    <!-- deploy IdentityIQ through the manager intertace over HTTP  -->
+    <!--                                                            -->
+    <target name="tomcat.deploy" depends="war">
+        <echo message="Deploying build ${instance.name} to remote IIQ instance: ${manager.url}"/>
+        <manager.deploy url="${manager.url}" path="${iiqpath}" war="file:build/deploy/${instance.name}.war"
+        username="${manager.username}" password="${manager.password}"
+        update="true"/>
+
+        <property name="build.deployed" value="true"/>
+    </target>
+
+    <!--                                                            -->
+    <!-- Target: tomcat.undeploy                                    -->
+    <!-- undeploy IdentityIQ through the manager interface over HTTP-->
+    <!--                                                            -->
+    <target name="tomcat.undeploy" depends="init-properties">
+      <echo message="Undeploying build to remote IIQ instance: ${manager.url}"/>
+      <manager.undeploy url="${manager.url}" username="${manager.username}" password="${manager.password}"
+            path="${iiqpath}"/>
+    </target>
+
+    
+
+    
+    <!--                                                            -->
+    <!-- Target: install                                             -->
+    <!-- Move files over to the IdentityIQ side                     -->
+    <!--                                                            -->
+    <target name="install" depends="war">
+        <echo message="Deploying build to local IIQ instance: ${IIQHome}."/>
+        <unzip src="build/deploy/${instance.name}.war" dest="${IIQHome}" overwrite="true"/>
+        <property name="build.deployed" value="true"/>
+    </target>
+    
+    <!-- ********************************************************* -->
+    <!-- CleanUpFromFailure                                        -->
+    <!--    Catch all clean up task for detected failures.
+            Any target that can leave the build in a bad state on error should
+            set the "critical.failure" property with an appropriate error
+            message and clean up its artifacts.                   -->
+    <!-- ********************************************************* -->
+    <!-- -->
+    <target name="cleanUpFromFailure" if="critical.failure">
+        <antcall target="clean"/>
+        <fail message="${critical.failure}"/>
+    </target>
+
+    <target name="clean">
+         <!-- search for custom clean tasks -->
+        <if>
+            <equals arg1="${runCustomScripts}" arg2="true"/>
+            <then>
+                <subant target="clean" inheritall="true">
+                    <fileset dir="." includes="scripts/build.custom.*.xml"/>
+                </subant>
+            </then>
+        </if>
+        <delete dir="build"  deleteonexit="true"/>
+    </target>
+    
+    <!-- Ant task to build a time-stamped deployment zip file.  This   -->
+    <!-- helps automate the procedure of deploying to Dev, Test, Prod. -->
+    <!-- Files get named this: PROJNAME-customizations-20110217-1053.zip  -->
+    <target name="zipfile" depends="init-properties">
+       <delete file="${ant.project.name}-customizations.zip" />
+       <delete file="${ant.project.name}-customizations-*.zip" />
+       <echo message="Building zipfile named ${ant.project.name}-customizations-${build.zipstamp}.zip ..."/>
+       <zip destfile="${ant.project.name}-customizations-${build.zipstamp}.zip"
+            excludes="**/CVS/**,**/SCCS/**,**/SCCS/**,**/rcs/**,**/.DS_Store/**,**/.svn/**,**/*.pyc/**,**/.pyo/**,**/.git/**,**/*.hprof/**,**/_svn/**,**/.hg/**">
+        <!-- excludes skips files in sub-directories that are managed by version control systems. -->
+        <!-- explicitly include certain directories of the build tree: -->
+        <fileset dir="." includes="build.*"/>
+        <fileset dir="." includes="*.properties"/>
+        <fileset dir="." includes="target*common"/>
+        <fileset dir="." includes="StandardServices*.*"/>
+        <fileset dir="." includes="ServicesStd*.*"/>
+        <zipfileset dir="config/"  prefix="config/"   />
+        <zipfileset dir="db/"      prefix="db/"       />
+        <zipfileset dir="lib/"     prefix="lib/"      />
+        <zipfileset dir="scripts/" prefix="scripts/"  />
+        <zipfileset dir="src/"     prefix="src/"      />
+        <zipfileset dir="web/"     prefix="web/"      />
+       </zip>
+  </target>
+
+    <path id="build.compile.classpath">
+        <fileset dir="./lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <fileset dir="${build.iiqBinaryExtract}/WEB-INF/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+    </path>
+
+    <!--                                                                                      -->
+    <!-- targets responsible for taking SERI Java artifacts and compiling them into a SERI.jar-->
+    <!--                                                                                      -->
+
+    <target name="compile">
+        <mkdir dir="${build}/classes"/>
+        <javac srcdir="src" destdir="${build}/classes" debug="true" classpathref="build.compile.classpath"
+            includeantruntime="false">
+            <!-- uncomment these to explore the occasional warning, but there's
+                 a lot of harmless stuff in here now, so don't leave them on
+                 all the time
+            <compilerarg value="-Xlint:deprecation"/>
+            <compilerarg value="-Xlint:unchecked"/>
+            -->
+        </javac>
+        <copy todir="${build}/classes">
+            <fileset dir="src">
+                <include name="**/*.hbm.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+
+    <target name="createSERIJar" depends="compile">
+        <jar destfile="${build}/seri.jar" basedir="${build}/classes"/>
+    </target>
+
+    <target name="generateDTD" depends="init-properties">
+        <uptodate property="dtd.uptodate">
+            <srcfiles dir="${build.customXMLDir}">
+                <include name="**/*.xml" />
+            </srcfiles>
+            <mergemapper to="${dtd}"/>
+        </uptodate>
+        <if>
+            <not><isset property="dtd.uptodate"/></not>
+            <then>
+                <echo>Generating ${dtd}...</echo>
+                <java classname="sailpoint.launch.Launcher" fork="true">
+                    <arg line="sailpoint.tools.xml.DTDGenerator '${dtd}'"/>
+                    <classpath>
+                        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+                        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+                    </classpath>
+                </java>
+            </then>
+        </if>
+    </target>
+
+    <target name="includeSERIJar" depends="createSERIJar">
+        <copy todir="${build.iiqBinaryExtract}/WEB-INF/lib">
+            <fileset dir="${build}">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="UserStore" depends="init-properties">
+        <property name="app" value="none"/>
+        <fail message="Cannot find application ${app}">
+            <condition>
+                <not>
+                    <resourceexists>
+                        <file file="config/data/${app}"/>
+                    </resourceexists>
+                </not>
+            </condition>
+        </fail>
+        <fail message="Tomcat directory not found">
+            <condition>
+                <not>
+                    <resourceexists>
+                        <file file="${application.server.home}"/>
+                    </resourceexists>
+                </not>
+            </condition>
+        </fail>
+        <!-- unpack the war -->
+        <unzip src="resources/UserStore/UserStore.war" dest="${application.server.home}/webapps/${app}"/>
+        <property name="usersCSV" value="${application.server.home}/webapps/${app}/users.csv"/>
+        <!-- update web.xml to point to where to store the users.csv -->
+        <xmltask source="${application.server.home}/webapps/${app}/WEB-INF/web.xml" dest="${application.server.home}/webapps/${app}/WEB-INF/web.xml">
+            <replace path="/:web-app/:context-param[:param-name/text()='storeLocation']/:param-value/text()"
+                     withText="${usersCSV}"/>
+        </xmltask>
+        <!-- copy the attributes.csv from the resource over -->
+        <copy file="config/data/${app}/attributes.csv"
+            todir="${application.server.home}/webapps/${app}/WEB-INF/classes"/>
+        <!-- copy the users.csv from the resource -->
+        <copy file="config/data/${app}/users.csv"
+            tofile="${usersCSV}"/>
+
+    </target>
+
+    <target name="UserStore-ERPPortal">
+        <antcall target="UserStore">
+            <param name="app" value="ERPPortal"/>
+        </antcall>
+    </target>
+    
+    <target name="doc-catalog" unless="doc-catalog.uptodate">
+        <htmlize
+            catalogLocation="config/catalog"
+            docLocation="${build.iiqBinaryExtract}/doc/seri"
+            templateLocation="servicestools/doc/templates"/>
+        <copy todir="${build.iiqBinaryExtract}/doc/seri">
+            <fileset dir="servicestools/doc">
+                <include name="css/**"/>
+                <include name="images/**"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="set-snapshot">
+        <propertyfile file="build.properties">
+            <entry  key="snapshot.date"
+                    type="date"
+                    value="now"
+                    pattern="yyyyMMddHHmmssSSS"/>
+        </propertyfile>
+    </target>
+    
+    <target name="export-snapshot" depends="init-properties">
+        <!-- get a handle to a temp file -->
+        <tempfile property="export.file" destDir="${java.io.tmpdir}" prefix="export" suffix=".xml"/>
+        <mkdir dir="${snapshot.location}"/>
+        
+        <!-- export all to temp file -->
+        <java classname="sailpoint.launch.Launcher" fork="true">
+            <arg line="console iiqBeans -c &quot;export '${export.file}'&quot;"/>
+            <classpath>
+                <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+                <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <!-- process exported file -->
+        <!-- = all objects with modified or created after ${installDate} -->
+        <filterExport exportFile="${export.file}"
+            outputDir="${snapshot.location}"
+            since="${snapshot.date}"
+            sincePattern="yyyyMMddHHmmssSSS"/>
+  </target>
+    
+  <target name="selenium-test" depends="init-properties">
+    <java jar="${basedir}/lib/selenium-server-standalone-2.39.0.jar" fork="true">
+      <arg line="-htmlSuite '*firefox' 'http://${application.server.host}:${application.server.port}' 'test/selenium/SERITestCases.html' 'seleniumResults.html'"/>
+    </java>
+  </target>
+  
+</project>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Link Attribute - EPIC Break The Glass" type="LinkAttribute">
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="environment">
+        <Description>
+          The optional arguments passed from the task executor, if the rule is running within a task.
+        </Description>
+      </Argument>
+      <Argument name="link">
+        <Description>
+          The Link whose attribute is being promoted.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="value">
+        <Description>
+          An Object to be used as the attribute value.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+  
+
+boolean breakTheGlass = false;
+
+List groups = (List) link.getAttribute("LinkedTemplateID");
+
+if (null != groups) {
+
+      for (String group : groups) {
+        if ("HHC ER RESP LINK".equalsIgnoreCase(group)) {
+          breakTheGlass = true;
+          break;
+        }
+      }
+
+}
+
+return (breakTheGlass);
+
+
+]]></Source>
+</Rule>

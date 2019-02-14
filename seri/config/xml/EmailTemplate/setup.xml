@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="EmailTemplate-DelegationFinished.xml"/>
+    <ImportAction name="include" value="EmailTemplate-DelegationNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-DelegationRevocation.xml"/>
+    <ImportAction name="include" value="EmailTemplate-IdentityAdminTransferAlert.xml"/>
+    <ImportAction name="include" value="EmailTemplate-LCMIdentityUpdateApproval.xml"/>
+    <ImportAction name="include" value="EmailTemplate-LCMManagerNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-LCMRequestNotifier.xml"/>
+    <ImportAction name="include" value="EmailTemplate-LCMUserNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-NewAccountCredentialsNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-NewCertification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-PolicyViolation.xml"/>
+    <ImportAction name="include" value="EmailTemplate-PolicyViolationDelegation.xml"/>
+    <ImportAction name="include" value="EmailTemplate-ProvisioningFormNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-RemediationNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-RemediationNotificationHTML.xml"/>
+    <ImportAction name="include" value="EmailTemplate-RoleModelerApprover.xml"/>
+    <ImportAction name="include" value="EmailTemplate-RoleModelerImpactAnalysis.xml"/>
+    <ImportAction name="include" value="EmailTemplate-UserTransferNotification.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkitemAssignment.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkitemAssignmentRemoval.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkItemComment.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkItemEscalation.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkitemForward.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkitemReminder.xml"/>
+    <ImportAction name="include" value="EmailTemplate-WorkitemReminderHTML.xml"/>
+</sailpoint>	

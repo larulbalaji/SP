@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QuickLink PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<QuickLink action="workflow" category="ITServices" messageKey="Edit CSS" name="Edit CSS">
+  <Attributes>
+    <Map>
+      <entry key="requestor">
+        <value>
+          <Script>
+            <Source><![CDATA[
+return currentUser.getName();
+              ]]></Source>
+          </Script>
+        </value>
+      </entry>
+      <entry key="workflowName" value="Manage CSS"/>
+    </Map>
+  </Attributes>
+  <DynamicScopes>
+    <Reference class="sailpoint.object.DynamicScope" name="Admins"/>
+  </DynamicScopes>
+</QuickLink>

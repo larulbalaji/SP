@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Rule language="beanshell" name="BlockListPreferences">
+  <Description>
+  This use case prevents a list of users 'Block List' from getting
+  work items.  Their work items are forwarded automatically to the
+  'Admin Team'.
+  </Description>
+  <Signature returnType="RemediationItem">
+    <Inputs>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to
+          access the database.
+        </Description>
+      </Argument>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Source><![CDATA[
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.BlockListPreferences");
+boolean bChanged = false;
+QueryOptions qo = new QueryOptions();
+qo.addFilter(Filter.eq("workgroups.name", "BlockList"));
+List lMembers = context.getObjects(Identity.class, qo);
+for (Identity Member : lMembers) {
+  if (Member.getPreference("forward")!=null) {
+    if (!Member.getPreference("forward").equals("AdminTeam")) {
+      serilog.debug("BlockList Preferences: Set forwarding info for "+Member.getName());
+      bChanged = true;
+    }
+  } else {
+    serilog.debug("BlockList Preferences: Set forwarding info for "+Member.getName());
+    bChanged = true;
+  }
+  if (!Member.getName().equals("spadmin")) {
+    Map map = Member.getPreferences();
+    Member.setPreference("forward","AdminTeam");
+    Member.setPreference("forwardStartDate",null);
+    Member.setPreference("forwardEndDate",null);
+    context.saveObject(Member);
+    context.commitTransaction();
+    context.decache();
+    context.commitTransaction();
+  } else {
+    serilog.debug("BlockList Preferences: Skip forwarding info change for "+Member.getName());
+  }
+}
+if (!bChanged) {serilog.debug("BlockList Preferences: completed without changes");}
+return "SUCCESS";
+  ]]></Source>
+</Rule>
+</sailpoint>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+ <sailpoint>
+   <ImportAction name="merge">
+     <Configuration name="SystemConfiguration">
+       <Attributes>
+         <Map>
+           <entry key="promptForAuthQuestionAnswersAfterLogin">
+             <value>
+               <Boolean>false</Boolean>
+             </value>
+           </entry>
+           <entry key="smsResetConfig">
+             <value>
+               <SMSResetConfig accountId="changeme" authToken="changeme" durationValid="10" fromPhone="5125551212" phoneAttribute="phone" smsResetEnabled="true"/>
+             </value>
+           </entry>
+           <entry key="authQuestionsEnabled">
+             <value>
+               <Boolean/>
+             </value>
+           </entry>
+         </Map>
+       </Attributes>
+     </Configuration>
+   </ImportAction>
+ </sailpoint>

@@ -1,0 +1,284 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="SplitPlan" type="Workflow">
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+
+Note that an Attributes map of all variables from the current WorkflowContext, merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+  <Signature returnType="Object">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="plan" type="sailpoint.object.ProvisioningPlan">
+        <Description>
+          The provisioning plan
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="wfcontext">
+        <Description>
+          The current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="handler">
+        <Description>
+          The workflow handler associated with the current WorkflowContext.
+        </Description>
+      </Argument>
+      <Argument name="workflow">
+        <Description>
+          The current Workflow definition.
+        </Description>
+      </Argument>
+      <Argument name="step">
+        <Description>
+          The current Step.
+        </Description>
+      </Argument>
+      <Argument name="approval">
+        <Description>
+          The current Approval.
+        </Description>
+      </Argument>
+      <Argument name="item">
+        <Description>
+          The WorkItem being processed.
+        </Description>
+      </Argument>
+      <Argument name="identityName"/>
+    </Inputs>
+    <Returns>
+      <Argument name="Object">
+        <Description>
+          The result of the workflow rule; dependent on the rule itself.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source> 
+  <![CDATA[
+  import sailpoint.object.WorkflowLaunch;
+import sailpoint.api.WorkflowSession;
+import sailpoint.api.IdentityLifecycler;
+import java.util.Iterator;
+import sailpoint.object.Filter;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+import java.util.Date;
+import java.util.Calendar;
+import sailpoint.api.Terminator;
+import sailpoint.tools.xml.XMLObjectFactory;
+import sailpoint.tools.xml.XMLReferenceResolver;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.PermissionRequest;
+import sailpoint.score.EntitlementScoreConfig;
+import sailpoint.object.*;
+
+// Expect: java.lang.String allowRequestsWithViolations
+// Expect: java.lang.String approvalMode
+// Expect: java.lang.String approvalScheme
+// Expect: sailpoint.object.ApprovalSet approvalSet
+// Expect: java.lang.String doRefresh
+// Expect: java.lang.String batchRequestItemId
+// Expect: java.lang.String fallbackApprover
+// Expect: java.lang.String identityDisplayName
+// Expect: java.lang.String workItemPriority
+// Expect: java.lang.String endOnManualWorkItems 
+// Expect: java.lang.String endOnProvisioningForms
+// Expect: sailpoint.object.Workflow flow
+// Expect: java.lang.String optimisticProvisioning
+// Expect: java.lang.String foregroundProvisioning
+// Expect: java.lang.String notificationScheme
+// Expect: java.lang.String securityOfficerName
+// Expect: java.lang.String policyScheme
+// Expect: java.lang.String enableRetryRequest
+// Expect: java.lang.String policiesToCheck
+// Expect: java.lang.String source
+// Expect: java.lang.String trace
+// Expect: java.lang.String requireViolationReviewComments
+// Expect: sailpoint.object.ProvisioningProject project
+// Expect: java.lang.String policyViolations
+// Expect: java.lang.String identityRequestId
+// Expect: java.lang.String violationReviewDecision
+// Expect: java.lang.String workItemComments
+// Expect: java.lang.String identityName
+// Expect: java.lang.String provisioningWorkflow
+// Expect: int roleRiskApprovalLevel
+// Expect: int entitlementRiskApprovalLevel
+// Expect: sailpoint.object.ProvisioningPlan plan
+  
+// This workflow has been designed to replace "LCM Provisioning" as the default workflow called
+// on a request access. 
+// The ProvisioningPlan will be split into 2 ProvisioningPlans one for high risk and one for 
+// low risk. "LCM Provisioning" or equivalent will be called for both plans.
+//
+// This is based on some work I did for the Nestle POC and Dana's ParseCart.
+// It could be combined with the ParseCart to provide advanced approval modes.
+//
+
+//
+// Function to kickoff LCM provisioning (equivalent) with the plan passed.
+// If appScheme = "none" pass "none" to LCM Provisioning (equivalent) for low risk
+// otherwise let the default settings of LCM Provisioning (equivalent) or this workflow 
+// drive the approvalScheme for high risk assignments
+//
+private void executeProvision(ProvisioningPlan plan, String appScheme) {
+
+  if (plan.isEmpty()) {
+	serilog.info("executeProvison. Empty plan passed. Ignoring.");
+	return;
+  }
+  
+  serilog.debug("executeProvision with PLAN:  "+ plan.toMap() + " with approvalScheme = " + appScheme);
+  plan.setIdentity((Identity)context.getObjectByName(Identity.class,identityName));
+  
+  Attributes args = new Attributes();
+  //
+  // If not set to "none" let the Workflow attributes drive the approvalScheme
+  //
+  if (appScheme.equals("none"))
+    args.put("approvalScheme", appScheme);
+  else
+	args.put("approvalScheme", approvalScheme);
+  // pass in the display name to avoid having to do a lookup
+  args.put("identityDisplayName", identityDisplayName);
+  args.put("workItemPriority", workItemPriority);
+  args.put("endOnManualWorkItems", endOnManualWorkItems );
+  args.put("endOnProvisioningForms", endOnProvisioningForms);
+  args.put("identityDisplayName", identityDisplayName);
+  args.put("flow", flow);
+  args.put("optimisticProvisioning", optimisticProvisioning);
+  args.put("foregroundProvisioning", foregroundProvisioning);
+  args.put("batchRequestItemId", batchRequestItemId);
+  args.put("doRefresh", doRefresh);
+  args.put("approavalModenotificationScheme", notificationScheme);
+  args.put("approvalMode", approvalMode);
+  args.put("workItemPriority", workItemPriority);
+  args.put("securityOfficerName", securityOfficerName);
+  args.put("fallbackApprover", fallbackApprover);
+  args.put("policyScheme", policyScheme);
+  args.put("enableRetryRequest", enableRetryRequest);
+  args.put("policiesToCheck", policiesToCheck);
+  args.put("source", source);
+  args.put("trace", trace);
+  args.put("plan", plan);
+  args.put("approvalSet", approvalSet);
+  args.put("allowRequestsWithViolations", allowRequestsWithViolations);
+  args.put("requireViolationReviewComments", requireViolationReviewComments);
+  args.put("project", project);
+  args.put("policyViolations", policyViolations);
+  args.put("identityRequestId", identityRequestId);
+  args.put("violationReviewDecision", violationReviewDecision);
+  args.put("workItemComments", workItemComments);
+  IdentityLifecycler cycler = new IdentityLifecycler(context);
+  // first arg is owner
+  WorkflowSession ses = cycler.launchUpdate(null, plan.getIdentity(), plan, provisioningWorkflow, args);
+  WorkflowLaunch launch = ses.getWorkflowLaunch();
+
+  if ( launch != null ) {
+
+  }
+  serilog.debug("executeProvision has launched " + provisioningWorkflow + " and returned " + launch.getStatus());
+}
+//
+// We start executing here
+//
+//Setup the logging
+//
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.RiskBasedApprovals");
+
+serilog.debug("Risk based approvals workflow launched");
+serilog.debug("Input plan : " + plan.toMap());
+// 
+// Create two ProvisioningPlans, one for high risk and one for low risk
+//
+ProvisioningPlan lowRiskPlan = new ProvisioningPlan();
+ProvisioningPlan highRiskPlan = new ProvisioningPlan();
+
+//
+// Scan the input ProvisioningPlan for the individual AttributeRequests
+// Check the risk score for each Role/Entitlement
+// Determine if the request should be added to the plan requiring the normal
+// (LCM Provisioning or equivalent) flow of approvals or the plan requiring no approvals
+// Fire LCM provisioning for both plans (if they both have content)
+//
+
+for(AccountRequest planReq : plan.getAccountRequests())
+{
+  //
+  // Make a copy of the AccountRequest for low and high risk
+  // Remove the AttributeRequests so we can add them to the correct plan
+  //
+  AccountRequest lowRiskAcctReq = (AccountRequest)planReq.deepCopy((XMLReferenceResolver)context);
+  lowRiskAcctReq.setRequestID(null);
+  lowRiskAcctReq.setTargetIntegration(null);
+  lowRiskAcctReq.setTrackingId(null);
+  if (lowRiskAcctReq.getArguments() != null) {
+	  lowRiskAcctReq.getArguments().remove("id");
+  }
+  //
+  // Clear the Attribute Requests
+  //
+  lowRiskAcctReq.setAttributeRequests(new ArrayList());
+  
+  AccountRequest highRiskAcctReq = (AccountRequest)planReq.deepCopy((XMLReferenceResolver)context);
+  highRiskAcctReq.setRequestID(null);
+  highRiskAcctReq.setTargetIntegration(null);
+  highRiskAcctReq.setTrackingId(null);
+  if (highRiskAcctReq.getArguments() != null) {
+	  highRiskAcctReq.getArguments().remove("id");
+  }
+  //
+  // Clear the Attribute Requests
+  //
+  highRiskAcctReq.setAttributeRequests(new ArrayList());
+  
+  //
+  // Now add each of the original Attribute requests to the correct AccountRequest
+  //
+  for ( AttributeRequest planAttr : planReq.getAttributeRequests() ) {
+	//
+    // First deal with the roles
+    //
+    serilog.debug("Attribute request name :" + planAttr.getName() + " value: " + planAttr.getValue());
+    if ( planAttr.getName().equals(Identity.ATT_ASSIGNED_ROLES) ) {
+      Bundle b = context.getObjectByName(Bundle.class, (String)planAttr.getValue());
+      serilog.debug("Weight of Role: " + planAttr.getValue() + " = " + b.getRiskScoreWeight());
+  	  if ( b.getRiskScoreWeight() < roleRiskApprovalLevel ) {
+  	    lowRiskAcctReq.add(planAttr);
+  	  } else {
+  	    highRiskAcctReq.add(planAttr);
+  	  }
+    }
+    //
+    // Anything left should be entitlements
+    //
+    else {
+      EntitlementScoreConfig esc = new EntitlementScoreConfig( context );
+  	  int weight = esc.getValueWeight( planReq.getApplicationName(), planAttr.getName(), (String)planAttr.getValue() );
+  	  serilog.debug("Weight of Entitlement: " + planAttr.getValue() + " = " + weight);
+  	  if ( weight < entitlementRiskApprovalLevel ) {
+  		lowRiskAcctReq.add(planAttr);
+  	  }	else {
+  		highRiskAcctReq.add(planAttr); 
+  	  }
+    }
+  }
+  if (!lowRiskAcctReq.isEmpty())
+    lowRiskPlan.add(lowRiskAcctReq);
+  if (!highRiskAcctReq.isEmpty())
+    highRiskPlan.add(highRiskAcctReq);
+}
+executeProvision(lowRiskPlan, "none");
+executeProvision(highRiskPlan, "");
+serilog.debug("Risk based approvals complete");
+]]>
+</Source>
+</Rule>

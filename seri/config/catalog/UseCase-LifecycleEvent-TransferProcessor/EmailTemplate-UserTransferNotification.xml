@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate   name="User Transfer Notification">
+  <Body>
+      
+      &lt;html>
+        &lt;br>
+        This is an automated notification from IdentityIQ.&lt;br>&lt;br>
+        $identityFullname has transferred.  An Access Verification has been automatically generated for the user's sponsor.&lt;br> 
+        This is to allow the sponsor to determine whether $identityFullname's current access should be retained or revoked.&lt;br>
+        &lt;br>
+        Sincerely,&lt;br>
+        Identity Governance Team
+      &lt;/html>
+      
+    </Body>
+  <Description>
+      Email Template for notifying IIQ admin team about user transfer
+    </Description>
+  <Subject>Employee Transfer Event</Subject>
+</EmailTemplate>

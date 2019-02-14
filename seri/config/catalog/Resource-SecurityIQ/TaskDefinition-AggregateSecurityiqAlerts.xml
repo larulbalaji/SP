@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition formPath="/monitor/tasks/alertAggregationTask.xhtml" name="Aggregate SecurityIQ Alerts" resultAction="Delete" subType="task_item_type_activity_alerts" type="ActivityAlert">
+  <Attributes>
+    <Map>
+      <entry key="TaskDefinition.runLengthAverage" value="3"/>
+      <entry key="TaskDefinition.runLengthTotal" value="15"/>
+      <entry key="TaskDefinition.runs" value="4"/>
+      <entry key="TaskSchedule.host"/>
+      <entry key="deltaAggregation" value="false"/>
+      <entry key="processAlerts" value="true"/>
+      <entry key="sources" value="SecurityIQ"/>
+      <entry key="taskCompletionEmailNotify" value="Disabled"/>
+      <entry key="taskCompletionEmailRecipients"/>
+      <entry key="taskCompletionEmailTemplate"/>
+    </Map>
+  </Attributes>
+  <Description>Aggregate Alert Objects from External Sources and optionally process.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Alert Aggregation"/>
+  </Parent>
+</TaskDefinition>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition    name="Refresh Entitlement Connections" resultAction="Delete" type="Identity">
+  <Attributes>
+    <Map>
+      <entry key="refreshIdentityEntitlements" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>Refresh identity-entitlement connections and reconcile actual vs. desired state</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Identity Refresh"/>
+  </Parent>
+</TaskDefinition>

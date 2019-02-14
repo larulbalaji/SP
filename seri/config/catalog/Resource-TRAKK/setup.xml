@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Application-TRAKK.xml'/>
+  <ImportAction name='include' value='Rule-Correlation-TRAKK.xml'/>
+  <ImportAction name='include' value='TaskDefinition-Aggregate-TRAKK.xml'/>
+</sailpoint>

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<!-- This QuickLink Category is also imported from Demo-Standard -->
+<!-- However, we need it when Demo-Standard is not necessarily   -->
+<!-- being used.                                                 -->
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+	<Map>
+          <entry key='quickLinkCategories'>
+            <value>
+              <List>
+                <QuickLinkCategory
+                  name="Admin Tools" messageKey="Admin Tools"
+                  enabled="true" icon="quickLinkCategoryAdmin" />
+              </List>
+            </value>
+          </entry>
+	</Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>

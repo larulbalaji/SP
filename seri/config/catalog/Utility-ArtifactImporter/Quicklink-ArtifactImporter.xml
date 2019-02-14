@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <QuickLink action="workflow" category="ITServices" messageKey="Artifact Importer" name="Artifact Importer" enabled="true" ordering="8">
+    <Attributes>
+      <Map>
+        <entry key="workflowName" value="Artifact Importer"/>
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope"
+        name="Admins" />
+    </DynamicScopes>
+
+  </QuickLink>  
+</sailpoint>

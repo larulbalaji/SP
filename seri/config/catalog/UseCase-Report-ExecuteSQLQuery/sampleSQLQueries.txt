@@ -1,0 +1,189 @@
+
+---------------------------------------------------------------------------------------
+--  % active users per departement
+---------------------------------------------------------------------------------------
+SELECT department,count(*) as 'Number of identities',
+concat(round(100*count(*)/(select count(*) from identityiq.spt_identity where correlated=1 and inactive=0 and workgroup=0)),'%') as 'Percentage of identities' 
+FROM identityiq.spt_identity
+where correlated=1 
+and inactive=0
+and workgroup=0
+group by department
+order by department
+
+
+---------------------------------------------------------------------------------------
+--  % of active direct users per manager
+---------------------------------------------------------------------------------------
+SELECT m.name,count(u.id) as 'Number of identities',
+concat(round(100*count(u.id)/(select count(*) from identityiq.spt_identity where correlated=1 and inactive=0 and workgroup=0)),'%') as 'Percentage of identities' 
+FROM identityiq.spt_identity as u join identityiq.spt_identity as m on u.manager = m.id
+where u.correlated=1 
+and u.inactive=0
+and u.workgroup=0
+and m.correlated=1 
+and m.inactive=0
+and m.workgroup=0
+group by u.manager
+order by m.name
+
+
+---------------------------------------------------------------------------------------
+--  users per job title
+---------------------------------------------------------------------------------------
+SELECT job_title as 'Job Title',count(*) as 'Number of identities',
+concat(round(100*count(*)/(select count(*) from identityiq.spt_identity where correlated=1 and inactive=0 and workgroup=0 and job_title is not null)),'%') as 'Percentage of identities' 
+FROM identityiq.spt_identity
+where correlated=1
+and inactive=0
+and workgroup=0
+and job_title is not null
+group by job_title
+order by 'Number of identities' desc
+
+
+---------------------------------------------------------------------------------------
+--  user per employee type
+---------------------------------------------------------------------------------------
+SELECT employee_type as 'Employee Type',count(*) as 'Number of identities',
+concat(round(100*count(*)/(select count(*) from identityiq.spt_identity where correlated=1 and inactive=0 and workgroup=0 and employee_type is not null)),'%') as 'Percentage of identities' 
+FROM identityiq.spt_identity
+where correlated=1
+and inactive=0
+and workgroup=0
+and employee_type is not null
+group by employee_type
+order by 'Number of identities' desc
+
+---------------------------------------------------------------------------------------
+--  identity created by department and month over the last year                     --
+---------------------------------------------------------------------------------------
+select department as 'Department'
+case when CreatedMonth = "01" then NBR end as January,
+case when CreatedMonth = "02" then NBR end as February,
+case when CreatedMonth = "03" then NBR end as Mars,
+case when CreatedMonth = "04" then NBR end as April,
+case when CreatedMonth = "05" then NBR end as May,
+case when CreatedMonth = "06" then NBR end as June,
+case when CreatedMonth = "07" then NBR end as July,
+case when CreatedMonth = "08" then NBR end as August,
+case when CreatedMonth = "09" then NBR end as September,
+case when CreatedMonth = "10" then NBR end as October,
+case when CreatedMonth = "11" then NBR end as November,
+case when CreatedMonth = "12" then NBR end as December,
+NBR_TOTAL as 'Total - including previous years'
+from (
+select department,
+DATE_FORMAT(FROM_UNIXTIME(created/1000),'%m') as CreatedMonth,
+count(*) as NBR,
+(select count(*) 
+from identityiq.spt_identity i2
+where i.department = i2.department
+and i2.correlated=1
+and i2.workgroup=0) as NBR_TOTAL
+FROM identityiq.spt_identity i
+where FROM_UNIXTIME(created/1000)>DATE_ADD(CURDATE(), INTERVAL -365 DAY)
+and i.correlated=1
+and i.workgroup=0
+group by i.department,CreatedMonth) as sb
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+--  entitlementd and roles granted/discovered during the last year per month (indirect entitlement granted by a role are not included)             --
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+select ApplicationName as 'Application Name',
+case when CreatedMonth = "01" then NBR end as January,
+case when CreatedMonth = "02" then NBR end as February,
+case when CreatedMonth = "03" then NBR end as Mars,
+case when CreatedMonth = "04" then NBR end as April,
+case when CreatedMonth = "05" then NBR end as May,
+case when CreatedMonth = "06" then NBR end as June,
+case when CreatedMonth = "07" then NBR end as July,
+case when CreatedMonth = "08" then NBR end as August,
+case when CreatedMonth = "09" then NBR end as September,
+case when CreatedMonth = "10" then NBR end as October,
+case when CreatedMonth = "11" then NBR end as November,
+case when CreatedMonth = "12" then NBR end as December,
+NBR_TOTAL as 'Total - including previous years'
+from (
+select a.name as 'ApplicationName',
+DATE_FORMAT(FROM_UNIXTIME(ie.created/1000),'%m') as CreatedMonth,
+count(*) as NBR,
+(select count(*) 
+from identityiq.spt_identity_entitlement ie2 join identityiq.spt_application a2 on ie2.application = a2.id
+where a2.id=a.id and ie2.granted_by_role=0) as NBR_TOTAL
+FROM identityiq.spt_identity_entitlement ie join identityiq.spt_application a on ie.application = a.id
+where FROM_UNIXTIME(ie.created/1000)>DATE_ADD(CURDATE(), INTERVAL -365 DAY)
+and ie.granted_by_role=0
+group by a.name,CreatedMonth) as sb
+
+
+
+---------------------------------------------------------------------------------------
+--      number of account created by application and month over the last year        --
+---------------------------------------------------------------------------------------
+select ApplicationName as 'Application Name',
+case when CreatedMonth = "01" then NBR end as January,
+case when CreatedMonth = "02" then NBR end as February,
+case when CreatedMonth = "03" then NBR end as Mars,
+case when CreatedMonth = "04" then NBR end as April,
+case when CreatedMonth = "05" then NBR end as May,
+case when CreatedMonth = "06" then NBR end as June,
+case when CreatedMonth = "07" then NBR end as July,
+case when CreatedMonth = "08" then NBR end as August,
+case when CreatedMonth = "09" then NBR end as September,
+case when CreatedMonth = "10" then NBR end as October,
+case when CreatedMonth = "11" then NBR end as November,
+case when CreatedMonth = "12" then NBR end as December,
+NBR_TOTAL as 'Total - including previous years'
+from (
+select a.name as 'ApplicationName',
+DATE_FORMAT(FROM_UNIXTIME(l.created/1000),'%m') as CreatedMonth,
+count(*) as NBR,
+(select count(*) 
+from identityiq.spt_link l2 join identityiq.spt_application a2 on l2.application = a2.id
+where a2.id=a.id) as NBR_TOTAL
+FROM identityiq.spt_link l join identityiq.spt_application a on l.application = a.id
+where FROM_UNIXTIME(l.created/1000)>DATE_ADD(CURDATE(), INTERVAL -365 DAY)
+group by a.name,CreatedMonth) as sb
+
+
+
+---------------------------------------------------------------------------------------
+-- number of orphaned account per application and creation month over the last year  --
+---------------------------------------------------------------------------------------
+select ApplicationName as 'Application Name',
+case when CreatedMonth = "01" then NBR end as January,
+case when CreatedMonth = "02" then NBR end as February,
+case when CreatedMonth = "03" then NBR end as Mars,
+case when CreatedMonth = "04" then NBR end as April,
+case when CreatedMonth = "05" then NBR end as May,
+case when CreatedMonth = "06" then NBR end as June,
+case when CreatedMonth = "07" then NBR end as July,
+case when CreatedMonth = "08" then NBR end as August,
+case when CreatedMonth = "09" then NBR end as September,
+case when CreatedMonth = "10" then NBR end as October,
+case when CreatedMonth = "11" then NBR end as November,
+case when CreatedMonth = "12" then NBR end as December,
+NBR_TOTAL as 'Total - including previous years'
+from (
+select a.name as 'ApplicationName',
+DATE_FORMAT(FROM_UNIXTIME(l.created/1000),'%m') as CreatedMonth,
+count(*) as NBR,
+(select count(*) from identityiq.spt_link l2 
+    join identityiq.spt_application a2 on l2.application = a2.id
+    join identityiq.spt_identity i2 on l2.identity_id = i2.id
+where i2.correlated=0
+and i2.workgroup=0
+and i2.inactive=0
+and a2.id=a.id
+) as NBR_TOTAL
+FROM identityiq.spt_link l 
+    join identityiq.spt_application a on l.application = a.id
+    join identityiq.spt_identity i on l.identity_id = i.id
+where FROM_UNIXTIME(l.created/1000)>DATE_ADD(CURDATE(), INTERVAL -365 DAY)
+and i.correlated=0
+and i.workgroup=0
+and inactive=0
+group by a.name,CreatedMonth) as sb

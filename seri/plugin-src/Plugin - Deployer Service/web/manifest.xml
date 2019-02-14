@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin certificationLevel="None" displayName="Plugin Deployer" minSystemVersion="7.1" name="Deployer" version="1.0">
+  <Attributes>
+    <Map>
+      <entry key="minUpgradableVersion" value="1.0" />
+      <entry key="serviceExecutors">
+        <value>
+          <List>
+            <String>sailpoint.seri.plugin.service.PluginDeployerService</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="settings">
+        <value>
+          <List>
+            <Setting dataType="string" helpText="folder to monitor for new plugins" label="Plugins Folder" name="monitorFolder" defaultValue="/seri-plugins"/>
+            <Setting dataType="boolean" helpText="is this path relative to the war location? or Absolute on the filesystem" label="Relative to WAR" name="isRelative" defaultValue="true"/>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>
+

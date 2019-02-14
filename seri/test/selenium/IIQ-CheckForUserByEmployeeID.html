@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://seri.sailpointdemo.com/" />
+<title>IIQ-Check for user by Employee ID</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">IIQ-Check for user by Employee ID</td></tr>
+</thead><tbody>
+<tr>
+	<td>open</td>
+	<td>/identityiq/dashboard.jsf</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//a[text()='Advanced Analytics']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//button[span/text()='Identity Search']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//button[span/text()='Identity Search']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//table[@id='identityAttributesTbl']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//button[span/text()='Clear Search']</td>
+	<td></td>
+</tr>
+<!--This line waits for the 'clearing data' to finish-->
+<tr>
+	<td>waitForElementNotPresent</td>
+	<td>//div[@id='identitySearchContents' and contains(@class, 'x-masked')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>//input[@value='employeeId']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>employeeId=${employeeId}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>id=identityAttributeemployeeIdValSuggestCmp-inputEl</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>id=identityAttributeemployeeIdValSuggestCmp-inputEl</td>
+	<td>${employeeId}</td>
+</tr>
+<!--It looks like the Suggest components have to be "tabbed out of" (onBlur function) before the value typed in is persisted-->
+<tr>
+	<td>fireEvent</td>
+	<td>id=identityAttributeemployeeIdValSuggestCmp-inputEl</td>
+	<td>blur</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>id=preIdentitySearchBtn-btnEl</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForElementPresent</td>
+	<td>//div[@id='identitySearchResultsGridResultsMessagePanelResultsMessageContent']/div[@class='spContentTitle']</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//div[@id='identitySearchResultsGridResultsMessagePanelResultsMessageContent']/div[@class='spContentTitle']</td>
+	<td>Search Results - 1 Results Returned</td>
+</tr>
+</tbody></table>
+</body>
+</html>

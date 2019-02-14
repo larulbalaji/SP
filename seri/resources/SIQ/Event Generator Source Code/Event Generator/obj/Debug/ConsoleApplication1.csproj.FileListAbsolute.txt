@@ -1,0 +1,8 @@
+c:\users\derek\documents\visual studio 2015\Projects\UnitTestProject1\ConsoleApplication1\bin\Debug\ConsoleApplication1.pdb
+c:\users\derek\documents\visual studio 2015\Projects\UnitTestProject1\ConsoleApplication1\obj\Debug\ConsoleApplication1.pdb
+c:\users\derek\documents\visual studio 2015\Projects\UnitTestProject1\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe.config
+c:\users\derek\documents\visual studio 2015\Projects\UnitTestProject1\ConsoleApplication1\bin\Debug\ConsoleApplication1.exe
+c:\users\derek\documents\visual studio 2015\Projects\UnitTestProject1\ConsoleApplication1\obj\Debug\ConsoleApplication1.exe
+c:\users\derek\documents\visual studio 2015\Projects\UnitTestProject1\ConsoleApplication1\obj\Debug\ConsoleApplication1.csprojResolveAssemblyReference.cache
+C:\Users\Derek\Documents\Visual Studio 2015\Projects\UnitTestProject1\ConsoleApplication1\obj\Debug\Interop.ActiveDs.dll
+C:\Users\Derek\Documents\Visual Studio 2015\Projects\UnitTestProject1\ConsoleApplication1\obj\Debug\ConsoleApplication1.csproj.ResolveComReference.cache

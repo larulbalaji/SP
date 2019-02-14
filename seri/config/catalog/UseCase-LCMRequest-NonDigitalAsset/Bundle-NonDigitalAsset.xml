@@ -1,0 +1,912 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+    <Bundle    name="Non-Digital Assets" type="container">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+        </Owner>
+    </Bundle>
+    <Bundle  displayName="Apple iphone"   name="iPhone" type="cellPhone">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a an Apple iPhone phone&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="phoneContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="iPhone options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="iPhone Memory" dynamic="true" helpKey="Select the amount of memory you need in your iPhone" name="instance-iphone" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>16 GB</String>
+                                <String>32 GB</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+            </Template>
+        </Templates>
+        <Profiles>
+            <Profile   >
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Constraints>
+                    <Filter operation="CONTAINS_ALL" property="Asset Type">
+                        <Value>
+                            <List>
+                                <String>Apple iPhone</String>
+                            </List>
+                        </Value>
+                    </Filter>
+                </Constraints>
+            </Profile>
+        </Profiles>
+    </Bundle>
+    <Bundle  displayName="Phones"   name="phoneContainer" type="container">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="Non-Digital Assets"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+        </Owner>
+    </Bundle>
+    <Bundle  displayName="Software"   name="softwareContainer" type="container">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="Non-Digital Assets"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+        </Owner>
+    </Bundle>
+    <Bundle  displayName="Hardware"   name="hardwareContainer" type="container">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="Non-Digital Assets"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+        </Owner>
+    </Bundle>
+    <Bundle  displayName="Physical Access"   name="physicalAccessContainer" type="container">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="Non-Digital Assets"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+        </Owner>
+    </Bundle>
+    <Bundle  displayName="Samsung Galaxy S4"   name="galaxyS4" type="cellPhone">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="true"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a Samsung Galaxy S4 phone&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="phoneContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="Galaxy options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Memory Options" dynamic="true" helpKey="Select the amount of memory for your new phone" name="instance-galaxyS4" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>16 GB</String>
+                                <String>32 GB</String>
+                                <String>64 GB</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Google Nexus"   name="googleNexus" type="cellPhone">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a Google Nexus phone&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="phoneContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="Nexus options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Memory Options" dynamic="true" name="instance-nexus" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>16 GB</String>
+                                <String>32 GB</String>
+                                <String>64 GB</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+                <Field displayName="Resource Type" name="type-nexus" required="true" type="string" value="Google Nexus"/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Macbook Pro"   name="macbookPro" type="laptopAsset">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a Apple Macbook Pro.&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="hardwareContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="macbook Options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Macbook Configuration" dynamic="true" helpKey="Choose a standard Macbook configuration" name="instance-macbookPro" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>Basic Config</String>
+                                <String>Developer Config</String>
+                                <String>Sales Rep Config</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+                <Field displayName="Resource Type" name="type-Macbook Pro" required="true" type="string" value="Macbook Pro"/>
+                <OwnerDefinition value=""/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Dell Latitude"   name="dellLatitude" type="laptopAsset">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a Dell Latitiude laptop.&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="hardwareContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="Latitude Options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Dell Latitidue Config" dynamic="true" helpKey="Choose a standard configuration for your Latitude" name="instance-dellLatitude" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>Basic Config</String>
+                                <String>Developer Config</String>
+                                <String>Sales Rep Config</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+                <Field displayName="Resource Type" name="type-Dell Latitiude" required="true" type="string" value="Dell Latitude"/>
+                <OwnerDefinition value=""/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="MS Office Suite"   name="msOfficeSuite" type="softwareInstall">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for the MSFT Office Suite.&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="softwareContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="MS Office Options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="MS Office Options" dynamic="true" helpKey="Choose the version of MS Office you want" name="instance-msOfficeSuite" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>Pro for Mac</String>
+                                <String>Pro for Windows</String>
+                                <String>Basic for Windows</String>
+                                <String>Basic for Mac</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+                <Field displayName="Resource Type" name="type-msOfficeSuite" required="true" type="string" value="MS Office Suite"/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Desktop AV Install"   name="antiVirus" type="softwareInstall">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for n new Desktop Av install&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="softwareContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Janet.Washington"/>
+        </Owner>
+        <Templates>
+            <Template name="AV Options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="AV Options" dynamic="true" helpKey="There are no options AV - you just get it" name="instance-antiVirus" required="true" type="string" value="Standard AV options"/>
+                <Field displayName="Resource Type" name="type-antiVirus" required="true" type="string" value="Desktop AV "/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Virtual Machine"   name="virtualMachine" type="laptopAsset">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a new Virtual Machine.&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="hardwareContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="VirtualMachine Options">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Virtual Machine Configuration" dynamic="true" helpKey="Choose the size / configuration for your VM" name="instance-virtualMachine" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>Base 6GB</String>
+                                <String>BAse 6GB - Extended Disk Space</String>
+                                <String>ProdTest 16GB</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+                <Field displayName="Resource Type" name="type-virtualMachine" required="true" type="string" value="virtual Machine Instance"/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Physical Access Card"   name="physicalAccessCard" type="physicalAccess">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment for a new Physical Access card.&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="physicalAccessContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="Physical Access Card Request">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Card Request" dynamic="true" name="instance-physicalAccessCard" required="true" type="string" value="New Card"/>
+                <Field displayName="Resource Type" name="type-physicalAccessCard" required="true" type="string" value="Physical Access Card"/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Add Physical Access"   name="addPhysicalAccess" type="physicalAccess">
+        <Attributes>
+            <Map>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Access request and manual fulfillment to add additional physical access.&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="physicalAccessContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Templates>
+            <Template name="Physical Access ">
+                <ApplicationRef>
+                    <Reference class="sailpoint.object.Application"  name="Non-Digital Assets"/>
+                </ApplicationRef>
+                <Field displayName="Additional Physical Access" dynamic="true" helpKey="Choose the physical access you require" name="instance-addPhysicalAccess" required="true" reviewRequired="true" type="string">
+                    <AllowedValuesDefinition>
+                        <Value>
+                            <List>
+                                <String>Server Room</String>
+                                <String>Visitor Center</String>
+                                <String>Software Store</String>
+                            </List>
+                        </Value>
+                    </AllowedValuesDefinition>
+                </Field>
+                <Field displayName="Resource Type" name="type-addPhysicalAccess" required="true" type="string" value="Additional Physical Access"/>
+            </Template>
+        </Templates>
+    </Bundle>
+    <Bundle  displayName="Requestable Units"   name="requestContainer" type="container">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="Non-Digital Assets"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+        </Owner>
+    </Bundle>
+    <Bundle  displayName="New User Bundle"   name="newUserBundle" type="business">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="requestContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Permits>
+            <Reference class="sailpoint.object.Bundle"  name="dellLatitude"/>
+            <Reference class="sailpoint.object.Bundle"  name="galaxyS4"/>
+            <Reference class="sailpoint.object.Bundle"  name="macbookPro"/>
+            <Reference class="sailpoint.object.Bundle"  name="iPhone"/>
+        </Permits>
+        <Requirements>
+            <Reference class="sailpoint.object.Bundle"  name="physicalAccessCard"/>
+        </Requirements>
+    </Bundle>
+    <Bundle  displayName="Desktop AV Request"   name="Desktop AV Request" type="business">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean>true</Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Make a request via web services for SailPoint to get some desktop installed on my machine&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="requestContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Janet.Washington"/>
+        </Owner>
+        <Requirements>
+            <Reference class="sailpoint.object.Bundle"  name="antiVirus"/>
+        </Requirements>
+    </Bundle>
+    <Bundle  displayName="Physical Access Card Request"   name="Physical Access Card Request" type="business">
+        <Attributes>
+            <Map>
+                <entry key="AccessIQSyncDate"/>
+                <entry key="AccessIQType"/>
+                <entry key="ServiceNowApproval" value="None"/>
+                <entry key="ServiceNowRequestable">
+                    <value>
+                        <Boolean>true</Boolean>
+                    </value>
+                </entry>
+                <entry key="idNowExceptional"/>
+                <entry key="idNowServiceApp"/>
+                <entry key="isoRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="mergeTemplates" value="false"/>
+                <entry key="nercRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="pciRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="soxRelevant">
+                    <value>
+                        <Boolean></Boolean>
+                    </value>
+                </entry>
+                <entry key="sysDescriptions">
+                    <value>
+                        <Map>
+                            <entry key="en_US" value="Make a request via web services for SailPoint to get me a new access card delivered Marty is cool&lt;br>&#xD;&#xA;&#xD;&#xA;"/>
+                        </Map>
+                    </value>
+                </entry>
+            </Map>
+        </Attributes>
+        <Inheritance>
+            <Reference class="sailpoint.object.Bundle"  name="requestContainer"/>
+        </Inheritance>
+        <Owner>
+            <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+        </Owner>
+        <Requirements>
+            <Reference class="sailpoint.object.Bundle"  name="physicalAccessCard"/>
+        </Requirements>
+    </Bundle>
+</sailpoint>

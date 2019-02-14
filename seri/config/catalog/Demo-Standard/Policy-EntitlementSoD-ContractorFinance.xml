@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Policy PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Policy certificationActions="Acknowledged,Remediated,Mitigated,Delegated" configPage="entitlementPolicy.xhtml" executor="sailpoint.policy.EntitlementSODPolicyExecutor"   name="Contractor Finance Restrictions" state="Active" type="EntitlementSOD" typeKey="policy_type_entitlement_sod" violationOwnerType="Identity">
+  <PolicyAlert disabled="true" escalationStyle="none"/>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <ViolationOwner>
+    <Reference class="sailpoint.object.Identity"  name="AD Admins"/>
+  </ViolationOwner>
+  <GenericConstraints>
+    <GenericConstraint    name="Contractor TimesheetAdmin SoD" violationOwnerType="None">
+      <CompensatingControl>Certification with allow exception for 30 days</CompensatingControl>
+      <Description>Contractors may not have access to the TimesheetAdmin AD group.</Description>
+      <RemediationAdvice>Remove access to AD group</RemediationAdvice>
+      <IdentitySelector>
+        <MatchExpression>
+          <MatchTerm name="employeeType" value="Contractor"/>
+        </MatchExpression>
+      </IdentitySelector>
+      <IdentitySelector>
+        <MatchExpression>
+          <MatchTerm name="memberOf" value="CN=TimesheetAdmin,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com">
+            <ApplicationRef>
+              <Reference class="sailpoint.object.Application"  name="Active Directory"/>
+            </ApplicationRef>
+          </MatchTerm>
+        </MatchExpression>
+      </IdentitySelector>
+    </GenericConstraint>
+  </GenericConstraints>
+</Policy>

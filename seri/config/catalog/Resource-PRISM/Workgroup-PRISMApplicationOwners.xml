@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Identity PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Identity name="PRISM Application Owners" workgroup="true">
+  <Attributes>
+    <Map>
+      <entry key="department"/>
+      <entry key="displayName" value="PRISM Application Owners"/>
+      <entry key="email" value="prism_owners@sailpointdemo.com"/>
+      <entry key="employeeId"/>
+      <entry key="employeeType"/>
+      <entry key="jobTitle"/>
+      <entry key="location"/>
+      <entry key="oldJobTitle"/>
+      <entry key="phone"/>
+      <entry key="region"/>
+      <entry key="terminationDate"/>
+      <entry key="transferManager"/>
+    </Map>
+  </Attributes>
+  <Capabilities>
+    <Reference class="sailpoint.object.Capability" name="ApplicationAdministrator"/>
+  </Capabilities>
+  <Description>Group for all users with ownership for the PRISM application.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Preferences>
+    <Map>
+      <entry key="workgroupNotificationOption">
+        <value>
+          <WorkgroupNotifationOption>Both</WorkgroupNotifationOption>
+        </value>
+      </entry>
+    </Map>
+  </Preferences>
+</Identity>

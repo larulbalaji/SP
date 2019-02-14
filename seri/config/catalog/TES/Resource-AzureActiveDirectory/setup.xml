@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+<ImportAction name='include' value='Application-AzureActiveDirectory.xml'/>
+<ImportAction name='include' value='Rule-AzureGenImmutableID.xml'/>
+<ImportAction name='include' value='TaskDefinition-AggregateAzureActiveDirectoryAccounts.xml'/>
+<ImportAction name='include' value='TaskDefinition-AggregateAzureActiveDirectoryGroups.xml'/>
+</sailpoint>

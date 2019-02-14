@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.seri.task.OrgStructureImporter" name="Org Importer" type="Generic" template="true">
+  <Description>
+    IdentityIQ Org Structure Importer -- Import org definitions contained in a CSV file
+  </Description>
+  <Attributes>
+    <Map>
+      <entry key="orgStrucFile" value="WEB-INF/config/seri/catalog/Utility-OrgImporter/sampleOrgImport.csv"/>
+    </Map>
+  </Attributes>
+  <Signature>
+    <Inputs>
+      <Argument name="orgStrucFile" required="true" type="string">
+        <Prompt>CSV file containing org definitions.</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="lines" type="String">
+        <Prompt>Lines Processed:</Prompt>
+      </Argument>
+      <Argument name="orgsCreated" type="String">
+        <Prompt>Orgs Created:</Prompt>
+      </Argument>
+      <Argument name="orgsUpdated" type="String">
+        <Prompt>Org Updates:</Prompt>
+      </Argument>
+      <Argument name="orgsDeleted" type="String">
+        <Prompt>Orgs Created:</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>

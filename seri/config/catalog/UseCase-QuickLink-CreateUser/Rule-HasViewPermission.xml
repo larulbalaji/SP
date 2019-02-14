@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Rule name="hasViewPermission">
+    <Source><![CDATA[    
+
+// Expect: sailpoint.object.Permission permission
+
+System.out.println("In view permission");
+import sailpoint.web.BaseBean;
+BaseBean bb = new BaseBean();
+Collection myRights =  bb.getLoggedInUserRights();
+if (myRights!= null && myRights.contains(permission)) {
+  return false;
+} else {
+  return true;
+}
+
+    ]]></Source>
+  </Rule>
+</sailpoint>
+

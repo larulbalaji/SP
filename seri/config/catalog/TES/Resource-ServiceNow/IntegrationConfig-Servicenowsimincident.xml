@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE IntegrationConfig PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IntegrationConfig executor="sailpoint.integration.servicenow.ServiceNowIntegrationExecutor" name="ServiceNowSIMIncident" roleSyncStyle="none">
+  <Attributes>
+    <Map>
+      <entry key="alias"/>
+      <entry key="authType"/>
+      <entry key="dateFormat" value="yyyy-MM-dd'T'HH:mm:ss"/>
+      <entry key="getRequestStatus">
+        <value>
+          <Map>
+            <entry key="SOAPAction"/>
+            <entry key="closureInfoResponseElement" value="close_code"/>
+            <entry key="endpoint" value="https://ven01309.service-now.com/incident.do?SOAP"/>
+            <entry key="prefix" value="inc"/>
+            <entry key="responseElement" value="incident_state"/>
+            <entry key="soapMessage" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#9;&#9;&#9;&#9;&#9;  &lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:inc=&quot;http://www.service-now.com/incident&quot;&gt;&#10;&#9;&#9;&#9;&#9;&#9;    &lt;soapenv:Header&gt;&lt;/soapenv:Header&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&lt;soapenv:Body&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;  &lt;inc:getRecords&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;number&gt;$requestID&lt;/number&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;  &lt;/inc:getRecords&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&lt;/soapenv:Body&gt;&#10;&#9;&#9;&#9;&#9;&#9;  &lt;/soapenv:Envelope&gt;&#10;&#9;&#9;&#9;&#9;&#9;"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="keyPass"/>
+      <entry key="keystorePass"/>
+      <entry key="keystorePath"/>
+      <entry key="keystoreType"/>
+      <entry key="noProvisioningRequests" value="false"/>
+      <entry key="operations" value="Create,Modify,Delete,Enable,Unlock,SetPassword"/>
+      <entry key="password" value="%%SNOW_INTCONFIG_PASSWORD%%"/>
+      <entry key="provision">
+        <value>
+          <Map>
+            <entry key="SOAPAction"/>
+            <entry key="endpoint" value="https://ven01309.service-now.com/x_sapo_iiq_sim_incident.do?SOAP"/>
+            <entry key="prefix" value="x"/>
+            <entry key="responseElement" value="display_value"/>
+            <entry key="soapMessage" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#9;&#9;&#9;&#9;      &lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot; xmlns:x=&quot;http://www.service-now.com/x_sapo_iiq_sim_incident&quot;&gt;&#10;&#9;&#9;&#9;&#9;  &#9;    &lt;soapenv:Header&gt;&lt;/soapenv:Header&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&lt;soapenv:Body&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;  &lt;x:insert&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;    &lt;opened_by&gt;$!config.username&lt;/opened_by&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;caller_id&gt;$!provisioningPlan.integrationData.requester&lt;/caller_id&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;category&gt;request&lt;/category&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;assignment_group&gt;Service Desk&lt;/assignment_group&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;contact_type&gt;email&lt;/contact_type&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;impact&gt;3&lt;/impact&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;urgency&gt;3&lt;/urgency&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;incident_state&gt;1&lt;/incident_state&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;short_description&gt;IdentityIQ provisioning request for: $!provisioningPlan.integrationData.identityName   $!provisioningPlan.integrationData.identityRequestId&lt;/short_description&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;&#9;&lt;description&gt;#foreach ($request in $provisioningPlan.accountRequests)&#10;#if ($request.attributeRequests)&#10;#foreach ($att in $request.attributeRequests)&#10;$request.application $att.operation $att.name $att.value&#10;#end&#10;#else&#10;$request.operation $request.application nativeIdentity $request.nativeIdentity&#10;#end&#10;#end&#10;&#10;Source Data:&#10;  type= $!provisioningPlan.integrationData.source&#10;  id= $!provisioningPlan.integrationData.sourceId&#10;  name= $!provisioningPlan.integrationData.sourceName&#10;                            &lt;/description&gt;&#10;&#9;&#9;&#9;&#9;&#9;&#9;  &lt;/x:insert&gt;&#10;&#9;&#9;                &lt;/soapenv:Body&gt;&#10;&#9;&#9;              &lt;/soapenv:Envelope&gt; &#10;&#9;&#9;&#9;&#9;&#9;"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="statusMap">
+        <value>
+          <Map>
+            <entry key="1" value="inProcess"/>
+            <entry key="2" value="inProcess"/>
+            <entry key="3" value="inProcess"/>
+            <entry key="4" value="inProcess"/>
+            <entry key="5" value="inProcess"/>
+            <entry key="6" value="committed"/>
+            <entry key="7" value="committed"/>
+            <entry key="8" value="failure"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="statusMapCloserCode">
+        <value>
+          <Map>
+            <entry key="Closed/Resolved by Caller" value="committed"/>
+            <entry key="Not Solved (Not Reproducible)" value="failure"/>
+            <entry key="Not Solved (Too Costly)" value="failure"/>
+            <entry key="Solved (Permanently)" value="committed"/>
+            <entry key="Solved (Work Around)" value="committed"/>
+            <entry key="Solved Remotely (Permanently)" value="committed"/>
+            <entry key="Solved Remotely (Work Around)" value="committed"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="username" value="%%SNOW_INTCONFIG_USERNAME%%"/>
+    </Map>
+  </Attributes>
+  <PlanInitializer>
+    <Reference class="sailpoint.object.Rule" name="ServiceNowSIMIncidentAndChangeRule"/>
+  </PlanInitializer>
+  <ManagedResources>
+    <ManagedResource>
+      <ApplicationRef>
+        <Reference class="sailpoint.object.Application" name="Oracle EBS"/>
+      </ApplicationRef>
+    </ManagedResource>
+  </ManagedResources>
+</IntegrationConfig>

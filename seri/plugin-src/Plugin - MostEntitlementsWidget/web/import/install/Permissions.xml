@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <SPRight displayName="mostentitlementsRight" name="mostentitlementsRight"/>
+  <SPRight displayName="mostEntitlementsRESTAllow" name="mostEntitlementsRESTAllow"/>
+  <SPRight displayName="MostEntitlementUsersPluginRight" name="MostEntitlementUsersPluginRight"/>
+    <Capability displayName="MostEntitlementsUserWidget" name="MostEntitlementsUserWidget">
+        <Description>Allow access to Most Entitlements Widget Plugin</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="mostentitlementsRight"/>
+            <Reference class="sailpoint.object.SPRight" name="mostEntitlementsRESTAllow"/>
+            <Reference class="sailpoint.object.SPRight" name="MostEntitlementUsersPluginRight"/>
+        </RightRefs>
+    </Capability>
+</sailpoint>

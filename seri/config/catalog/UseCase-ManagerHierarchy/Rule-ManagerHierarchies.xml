@@ -1,0 +1,113 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Rule language="beanshell" name="getManager">
+  <Source>
+    import sailpoint.object.Identity;
+  
+    Identity libGetManager(Identity identity){
+      if(identity!=null){
+        return identity.getManager();
+      }else{
+        return null;
+      }
+    }
+  </Source>
+</Rule>
+<Rule language="beanshell" name="Set Manager Hierarchy" type="IdentityAttribute">
+  <Description>This rule returns the user manager hierarchy separated by a ' / '. </Description>
+  <ReferencedRules>
+    <Reference class="sailpoint.object.Rule" name="getManager"/>
+  </ReferencedRules>
+  <Signature returnType="String">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="environment" type="Map">
+        <Description>
+           Arguments passed to the aggregation or refresh task.
+        </Description>
+      </Argument>
+      <Argument name="identity">
+        <Description>
+           The Identity object that represents the user
+           that is being aggregated.
+        </Description>
+      </Argument>
+      <Argument name="attributeDefinition">
+        <Description>
+           The AttributeDefinition object for this attribute.
+        </Description>
+      </Argument>
+      <Argument name="link">
+        <Description>
+           The Link object from the Identity, if this is an application
+           mapping rule.  For global mapping rules this will be void.
+        </Description>
+      </Argument>
+      <Argument name="attributeSource">
+        <Description>
+          The AttributeSource object.
+        </Description>
+      </Argument>
+      <Argument name="oldValue">
+        <Description>
+          The original value of the application account attribute.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="attributeValue">
+        <Description>
+          The value of the attribute that should be populated.
+          The rule should return this value.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[ 
+  import sailpoint.object.Identity;
+  
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.IdentityAttribute.SetManagerHierarchy");
+  serilog.debug("----Rule Set Manager Hierarchy Starting with: " + identity.getName());
+  
+  Identity manager = identity.getManager();
+  if(manager!=null){
+    String hierarchy = manager.getName();
+	if(hierarchy.equals(identity.getName())){
+	  serilog.warn("Warning, user is his own manager: " + hierarchy);
+	  return "Warning, user is his own manager";
+    }
+	String hierarchyUrlRoot = "./define/identity/identity.jsf?id=";
+	while(manager!=null){
+      manager = libGetManager(manager);
+      if(manager!=null){
+        String newManager = manager.getName();
+		String newManagerUrl = "<a href=\"" + hierarchyUrlRoot + manager.getId() + "\" >" + manager.getName() + "</a>";
+        if(newManager!=null){
+          if(hierarchy.contains(newManager)){
+		    serilog.warn("Warning, there is a loop in the hierarchy. " + newManager + " was already in the hierarchy: " + hierarchy);
+		    return "Warning, there is a loop in the hierarchy. " + newManager + " was already in the hierarchy: " + hierarchy;
+		  }
+          hierarchy = newManager + " / " + hierarchy;
+		  serilog.debug("Hierarchies: " + hierarchy);
+        }
+      }
+    }
+	serilog.debug("----Rule Set Manager Hierarchy Ending. Returning: " + hierarchy);
+    return hierarchy;
+  }else{
+	serilog.debug("----Rule Set Manager Hierarchy Ending. Returning null value as this person does not has any manager defined.");
+    return null;
+  }
+  ]]></Source>
+</Rule>
+</sailpoint>

@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="SERI - Disable Passthrough">
+  <Source><![CDATA[
+
+import sailpoint.object.Configuration;
+
+// Turn off passthrough authentication to AD
+// And Challenge-response questions
+
+Configuration sysconfig=context.getObjectByName(Configuration.class, "SystemConfiguration");
+sysconfig.put(Configuration.LOGIN_PASS_THROUGH, new ArrayList());
+
+sysconfig.put(Configuration.ENABLE_FORGOT_PASSWORD, Boolean.FALSE);
+
+sysconfig.put(Configuration.PROMPT_FOR_AUTH_QUESTION_ANSWERS_AFTER_LOGIN, Boolean.FALSE);
+
+context.saveObject(sysconfig);
+context.commitTransaction();
+
+]]>
+  </Source>
+</Rule>

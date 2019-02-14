@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+	<ImportAction name='include' value='Configuration-SystemConfiguration.xml' />
+	<ImportAction name='include' value='ObjectConfig-Identity.xml' />
+	<ImportAction name='include' value='Workflow-ClaimAccount.xml' />
+	<ImportAction name='include' value='Form-ClaimAccountConfirmPhone.xml' />
+	<ImportAction name='include' value='Rule-ClaimAccountLibrary.xml' />
+	<ImportAction name='include' value='Form-ClaimAccountIdentify.xml' />
+	<ImportAction name='include' value='Rule-GetAuthQuestions.xml' />
+	<ImportAction name='include' value='Form-SetAuthenticationQuestions.xml' />
+	<ImportAction name='include' value='Rule-LoadClaimAccount.xml' />
+    <ImportAction name='execute' value='sailpoint.seri.execute.MakeSearchable'>
+      <Custom name='birthDate'/>
+    </ImportAction>
+</sailpoint>

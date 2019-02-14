@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<QuickLink action="workflow" category="Tools" cssClass="quicklink-connectorregistry" messageKey="ConnectorRegistry" name="ConnectorRegistry" ordering="8">
+  <Attributes>
+    <Map>
+      <entry key="requester">
+        <value>
+          <Script>
+            <Source><![CDATA[
+return currentUser
+            ]]></Source>
+          </Script>
+        </value>
+      </entry>
+      <entry key="workflowName" value="ConnectorRegistry"/>
+    </Map>
+  </Attributes>
+</QuickLink>
+</sailpoint>

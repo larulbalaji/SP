@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+ <sailpoint>
+   <ImportAction name="merge">
+     <Configuration name="SERI Configuration">
+       <Attributes>
+         <Map>
+           <entry key="leaverNotifications" value="30,15"/>
+         </Map>
+       </Attributes>
+     </Configuration>
+   </ImportAction>
+ </sailpoint>

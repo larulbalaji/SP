@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint><Rule language="beanshell" name="AutoApprove" type="Workflow">
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+    
+    Note that an Attributes map of all variables from the current WorkflowContext,
+    merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+<Signature returnType="Object">
+<Inputs>
+<Argument type="wfcontext">
+<Description>
+The current WorkflowContext.
+</Description>
+</Argument><Argument type="handler">
+<Description>
+The workflow handler associated with the current WorkflowContext.
+</Description>
+</Argument><Argument type="workflow">
+<Description>
+The current Workflow definition.
+</Description>
+</Argument><Argument type="step">
+<Description>
+The current Step.
+</Description>
+</Argument><Argument type="approval">
+<Description>
+The current Approval.
+</Description>
+</Argument><Argument type="item">
+<Description>
+The WorkItem being processed.
+</Description>
+</Argument></Inputs>
+<Returns>
+<Argument type="Object">
+<Description>
+The result of the workflow rule; dependent on the rule itself.
+</Description>
+</Argument></Returns>
+</Signature>
+<!--ReferencedRules>
+  <Reference class="sailpoint.object.Rule" name=""/>
+</ReferencedRules-->
+  <Source><![CDATA[
+
+  import sailpoint.object.Comment;
+  
+  
+  System.out.println(" context: "+ context);
+  System.out.println(" context: "+ identityName);
+  
+  
+  Comment comm = new Comment();
+  comm.setComment("Auto-approved. Here is a comment as to why.");
+  Map status = new HashMap();
+  status.put("status","approved");
+  status.put("approvalcomment", comm);
+  
+  
+  
+return status;
+
+
+  ]]></Source>
+</Rule>
+</sailpoint>

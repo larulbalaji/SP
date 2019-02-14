@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Configuration PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Configuration   name="Deprovisioning Configuration">
+  <Attributes>
+    <Map>
+      <entry key="ADDisabledContainer" value="ou=DisabledUsers,ou=demo,dc=seri,dc=sailpointdemo,dc=com"/>
+      <entry key="DeprovisioningUpdateWorkflow" value="Lifecycle Event - Deprovision Accounts"/>
+      <entry key="ReactivationUpdateWorkflow" value="Lifecycle Event - Reactivation"/>
+    </Map>
+  </Attributes>
+</Configuration>
+

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="UserStore">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.6"/>
+    <property name="source" value="1.6"/>
+	<property name="tomcat" value="D:/iiq-testing/6.0p4/tomcat"/>
+	
+    <path id="Apache CXF 2.7.3">
+      <fileset dir="lib/apache-cxf-2.7.3">
+        <include name="*.jar"/>
+      </fileset>
+    </path>
+    <path id="allLibraries">
+        <path refid="Apache CXF 2.7.3"/>
+        <pathelement location="lib/commons-beanutils-1.7.jar"/>
+        <pathelement location="lib/ezmorph-1.0.6.jar"/>
+        <pathelement location="lib/json-lib-2.3-jdk15.jar"/>
+        <pathelement location="lib/log4j-1.2.16.jar"/>
+    </path>
+    <path id="UserStore.classpath">
+        <pathelement location="build/classes"/>
+        <path refid="allLibraries"/>
+    </path>
+    <target name="init">
+        <mkdir dir="build/classes"/>
+        <copy includeemptydirs="false" todir="build/classes">
+            <fileset dir="src">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="build/classes"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-subprojects,build-project" name="build"/>
+    <target name="build-subprojects"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="build/classes" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src"/>
+            <classpath refid="UserStore.classpath"/>
+        </javac>
+    </target>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
+        <copy todir="${ant.library.dir}">
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </copy>
+        <unzip dest="${ant.library.dir}">
+            <patternset includes="jdtCompilerAdapter.jar"/>
+            <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.eclipse.jdt.core_*.jar"/>
+        </unzip>
+    </target>
+    <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
+        <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+        <antcall target="build"/>
+    </target>
+	<target name="war" depends="build-project">
+		<war destfile="UserStore.war" webxml="WebContent/WEB-INF/web.xml">
+			<mappedresources>
+				<restrict>
+				   <path refid="UserStore.classpath"/>
+				   <type type="file"/>
+				</restrict>
+				<chainedmapper>
+				  <flattenmapper/>
+				  <globmapper from="*" to="WEB-INF/lib/*"/>
+				</chainedmapper>
+			</mappedresources>
+			<classes dir="build/classes"/>
+			<fileset dir="WebContent"/>
+		</war>
+	</target>
+	<target name="deploy" depends="war">
+	  <copy todir="${tomcat}/webapps" file="UserStore.war"/>
+	</target>
+	
+</project>

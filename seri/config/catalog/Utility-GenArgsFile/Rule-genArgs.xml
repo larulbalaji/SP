@@ -1,0 +1,39 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="genArgs">
+  <Description>This utility will generate a properly formated args.xml file in the location specified based on the workflowcontext</Description>
+  <Source>	
+<![CDATA[
+
+import sailpoint.api.*;
+import sailpoint.object.Workflow;
+import sailpoint.workflow.WorkflowContext;
+import sailpoint.tools.xml.XMLObjectFactory;
+import sailpoint.tools.Util;
+
+
+/**
+   This utility will generate a properly formated args.xml file in the location specified based on the workflowcontext
+ */
+public void genArgs(WorkflowContext wfcontext, String fileLoc) {
+
+  serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.genArgs");
+  if (wfcontext != null) {
+
+    XMLObjectFactory f = XMLObjectFactory.getInstance();
+    Workflow wf = wfcontext.getWorkflow();
+    String xml = f.toXml(wf.getVariables());
+    String requestId = wf.getString("identityRequestId");
+    String fileName = fileLoc + wf.getName() + "-args";
+    if (requestId != null && requestId.length() >= 1)
+         fileName += "-" +  requestId;
+
+    fileName += ".xml";
+    serilog.debug("Writing args to file:" + fileName);
+    Util.writeFile(fileName, xml); 
+  }
+	
+}
+]]>
+    </Source>
+</Rule>

@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<EmailTemplate   name="User Transfer Notification">
+  <Body>
+  <![CDATA[
+   
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>Employee Transfer Event</title>
+    
+</head>
+
+<!-- Background for  -->
+<body style="background:%%mainBackgroundColor%%;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td> <img src="%%primaryLogoURL%%" height="%%primaryLogoHeight%%" vspace="10">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:%%topBannerColor%%;margin:0;padding:0;text-align:left;border-bottom:%%mainBorderWidthTop%% solid %%mainBorderColor%%;">
+        <tr valign="middle">
+          <td height="85">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>
+            <!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+            <h2 style="color:%%mainBannerSubtitleColor%%;margin:0;padding:0;font:bold %%mainBannerSubtitleFontSize%% %%mainBannerSubtitleFont%%;text-transform:uppercase;">Employee Transfer Event</h2>
+            <h1 style="color:%%mainBannerTitleColor%%;margin:0;padding:0;font:bold %%mainBannerTitleFontSize%% %%mainBannerTitleFont%%;">'$identityFullname'</h1>             
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+        
+        <!-- CONTENT -->
+     <table cellpadding="0" cellspacing="0" width="588" style="background:%%contentBackground%%;margin:0;padding:0;text-align:left;border-left:%%mainBorderWidthSide%% solid %%mainBorderColor%%;border-right:%%mainBorderWidthSide%% solid %%mainBorderColor%%;">
+        <tr valign="top"> 
+          <td colspan="3"><img src="%%secondaryLogoURL%%" height="%%secondaryLogoHeight%%"hspace="10" vspace="10" /></td>
+        </tr>
+        <tr valign="top">
+          <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:%%mainTextColor%%;font:bold %%mainTextSize%% %%mainTextFont%%;line-height:15pt;"></p>
+            <p/>
+            <p style="margin:0;padding:0;color:%%mainTextColor%%;font: %%mainTextSize%% %%mainTextFont%%;line-height:15pt;"> $identityFullname has transferred. An Access Verification has been automatically generated for the user's manager.<br> 
+	        This is to allow the manager to determine whether $identityFullname's current access should be retained or revoked.<br></p>
+            <br/>
+            </td>
+            </tr>
+            </table>
+
+            <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:0;padding:0;color:%%thankYouStatementFontColor%%;font:normal %%thankYouStatementFontSize%% %%thankYouStatementFont%%;line-height:15pt;">Thank you for your cooperation</p>
+            <p style="margin:0 0 50px;padding:0;color:%%thankYouStatementFontColor%%;font:bold %%thankYouStatementFontSize%% %%thankYouStatementFont%%;line-height:15pt;">Your Security and Compliance Team</p>
+            </td>
+            <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+               <p style="margin:0 0 0 30px;padding:0;color:%%supportLinksSeparator%%;font:normal %%supportLinksFontSize%% %%supportLinksFont%%;line-height:12pt;margin-bottom:30px"><a href="%%helpLink%%" style="color:%%supportLinksColor%%;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="%%faqLink%%" style="color:%%supportLinksColor%%;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="%%supportLink%%" style="color:%%supportLinksColor%%;text-decoration:none;font-weight:bold;">Support</a></p>
+          </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:%%bottomBannerColor%%;margin:0;padding:0;text-align:right;border-top:%%mainBorderWidthBottom%% solid %%mainBorderColor%%;">
+        <tr valign="middle">
+          <td width="180" height="60">&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+	</body>
+	</html>
+  ]]>
+    </Body>
+  <Description>
+      Email Template for notifying about user transfer
+    </Description>
+  <Subject>Employee Transfer Event</Subject>
+</EmailTemplate>
+</sailpoint>

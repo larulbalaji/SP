@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<SPRight  displayName="view_ssn" name="ViewSSN">
+  <Description>view_ssn</Description>
+</SPRight>
+<SPRight  displayName="edit_ssn" name="EditSSN">
+  <Description>edit_ssn</Description>
+</SPRight>
+
+
+
+
+</sailpoint>
+

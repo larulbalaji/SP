@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Form name="Form - Delete Duplicate User Confirmation Form" type="RegisterIdentity">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Delete Duplicate User(s)"/>
+    </Map>
+  </Attributes>
+  <Button action="next" label="Delete User(s)"/>
+  <Button action="cancel" label="nav_cancel"/>
+  <Description>This form is used to delete selected users that are duplicates.</Description>
+  <Section type="text">
+    <Attributes>
+      <Map>
+        <entry key="subtitle" value="Please review the following selected duplicate user(s) you wish to delete. To submit your request and delete these users, click &apos;Delete User(s)&apos;. To cancel this request, click &apos;Cancel&apos;."/>
+      </Map>
+    </Attributes>
+    <Field value=" "/>
+  </Section>
+  <Section>
+    <Field displayName="Users(s) to Delete" name="identityNames" type="string"/>
+  </Section>
+</Form>

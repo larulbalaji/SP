@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dev">
+    <import file="build.dev.tomcat.xml"/>
+    
+    <!--
+    **********************************************************
+    Targets to make your dev life easier
+    **********************************************************
+     -->
+    <condition property="is-windows">
+		<os family="windows" />
+	</condition>
+
+	<condition property='is-linux'>
+		<os family='unix' name='Linux' />
+	</condition>
+
+    <macrodef name="iiq.sql">
+        <attribute name="sql.file"/>
+        <attribute name="alt.db.url" default=""/>
+        <sequential>
+          <!-- conditional override of db.url with alt.db.url -->
+          <local name="local.db.url"/>            
+          <condition property="local.db.url" value="${db.url}">
+            <length string="@{alt.db.url}" when="equal" length="0"/>
+          </condition>
+          <condition property="local.db.url" value="@{alt.db.url}">
+            <length string="@{alt.db.url}" when="greater" length="0"/>
+          </condition>
+          <!--<echo>Executing @{sql.file}</echo>-->
+          <echo>db.url=${db.url}</echo>          
+          <echo>alt.db.url=@{alt.db.url}</echo>
+          <echo>local.db.url=${local.db.url}</echo>       
+          <sql
+                  driver="${db.driver}"
+                  url="${local.db.url}"
+                  userid="${db.userid}"
+                  password="${db.password}"
+                  src="@{sql.file}"
+                  print="yes"
+                  keepformat="true"
+                  escapeprocessing="false"
+                  expandproperties="false"
+                  >
+              <classpath>
+                  <pathelement path="${classpath}"/>
+                  <fileset dir="lib">
+                      <include name="**/*.jar"/>
+                  </fileset>
+              </classpath>
+          </sql>
+          <!-- Other interesting sql params
+               showwarnings="true"
+                autocommit="true"
+          -->
+        </sequential>
+    </macrodef>
+    <macrodef name="iiq.sqlstatement">
+        <attribute name="sql.statement"/>
+        <attribute name="alt.db.url" default=""/>
+        <sequential>
+            <!-- conditional override of db.url with alt.db.url -->
+            <local name="local.db.url"/>            
+            <condition property="local.db.url" value="${db.url}">
+              <length string="@{alt.db.url}" when="equal" length="0"/>
+            </condition>
+            <condition property="local.db.url" value="@{alt.db.url}">
+              <length string="@{alt.db.url}" when="greater" length="0"/>
+            </condition>
+            <!--<echo>Executing @{sql.file}</echo>-->
+          <echo>db.url=${db.url}</echo>          
+          <echo>alt.db.url=@{alt.db.url}</echo>
+          <echo>local.db.url=${local.db.url}</echo>          
+            <sql
+                    driver="${db.driver}"
+                    url="${local.db.url}"
+                    userid="${db.userid}"
+                    password="${db.password}"
+                    print="yes"
+                    keepformat="true"
+                    escapeprocessing="false"
+                    expandproperties="false"
+                    >
+                <classpath>
+                    <pathelement path="${classpath}"/>
+                    <fileset dir="lib">
+                        <include name="**/*.jar"/>
+                    </fileset>
+                </classpath>
+            	@{sql.statement}
+            </sql>
+            <!-- Other interesting sql params
+                 showwarnings="true"
+                  autocommit="true"
+            -->
+        </sequential>
+    </macrodef>
+
+    <macrodef name="iiq.sql.upgrade">
+        <attribute name="sql.file"/>
+        <sequential>
+            <!--<echo>Executing @{sql.file}</echo>-->
+            <sql
+                    driver="${db.driver}"
+                    url="${db.url}"
+                    userid="${db.userid}"
+                    password="${db.password}"
+                    src="@{sql.file}"
+                    print="yes"
+                    keepformat="true"
+                    escapeprocessing="false"
+                    expandproperties="false"
+                    onerror="continue"
+                    autocommit="true"
+
+                    >
+                <classpath>
+                    <pathelement path="${classpath}"/>
+                    <fileset dir="lib">
+                        <include name="**/*.jar"/>
+                    </fileset>
+                </classpath>
+            </sql>
+            <!-- Other interesting sql params
+                 showwarnings="true"
+                  autocommit="true"
+            -->
+        </sequential>
+    </macrodef>
+
+
+    <macrodef name="iiq.start.stop">
+        <attribute name="action"/>
+        <sequential>
+            <if>
+                <equals arg1="@{action}" arg2="stop"/>
+                <then>
+                    <if>
+                        <isset property="is-windows"/>
+                        <then>
+                            <echo>Shutting down app server..</echo>
+                            <exec executable="cmd.exe">
+                                <env key="CATALINA_HOME" value="${application.server.home}"/>
+                                <arg value="/c"/>
+                                <arg value="${application.server.stop}"/>
+                            </exec>
+                        </then>
+                        <else>
+                            <exec executable="${application.server.stop}">
+                                <env key="CATALINA_HOME" value="${application.server.home}"/>
+                                <!--<arg value="/c"/>-->
+                            </exec>
+                        </else>
+                    </if>
+                </then>
+                <else>
+                    <if>
+                        <isset property="is-windows"/>
+                        <then>
+                            <echo>Starting app server..</echo>
+                            <exec executable="cmd.exe">
+                                <!-- trys to start the app server in debug mode -->
+                                <env key="CATALINA_HOME" value="${application.server.home}"/>
+                                <env key="JAVA_OPTS" value="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005"/>
+                                <arg value="/c"/>
+                                <arg value="${application.server.start}"/>
+                            </exec>
+                        </then>
+                        <else>
+                            <exec executable="${application.server.start}">
+                                <env key="CATALINA_HOME" value="${application.server.home}"/>
+                                <!--<arg value="/c"/>-->
+                            </exec>
+                        </else>
+                    </if>
+                </else>
+            </if>
+        </sequential>
+    </macrodef>
+
+    <target name="createdb" depends="init-properties" description="creates the iiq tables for the specified product version, takes patch level into account">
+    	<!-- db.sourceName is the name of the database in the source iiq.properties -->
+    	<!-- for a GA this will be identityiq, for a patched version it will be identityiqXXp -->
+        <if>
+          <not><isset property="db.driver"/></not>
+          <then>
+            <loadproperties srcFile="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" prefix="iiqprops"/>
+            <property name="db.driver" value="${iiqprops.dataSource.driverClassName}"/>
+          </then>
+        </if>
+        <if>
+          <equals arg1="${db.type}" arg2="sqlserver"/>
+          <then>
+            <local name="mssql.url"/>
+            <!-- strip the db name from the MSSQL URL. MySQL silently ignores the db name, which is why we never needed to do this before -->
+            <script language="javascript">
+              var dbUrl = project.getProperty("db.url");
+              if (dbUrl.contains(";")) {
+                 dbUrl=dbUrl.substring(0, dbUrl.indexOf(";"));
+              }
+              project.setProperty("mssql.url", dbUrl);
+            </script>
+            <copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}"
+                  tofile="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}.nogo"/>
+            <!-- Wow, MSSQL really makes you jump through hoops to run a script from JDBC rather than one of their tools.. -->
+            <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}.nogo"
+              match="^\s*GO\s*$"
+              replace=";"
+              flags="gm"
+            />
+            <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}.nogo"
+              match="^(-- Enable automatic snapshot isolation)"
+              replace="\1${line.separator}COMMIT;${line.separator}"
+              flags="gm"
+            />
+            <iiq.sql sql.file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}.nogo"
+                     alt.db.url="${mssql.url}"
+                     
+            />
+          </then>
+          <else>
+            <!-- note(kmj): Currently this presupposes that if we're not using SQL Server, we're using MySQL. I don't know what we'd need to do to make this work
+                           for Oracle or DB2, but when we have the need, we'll need to revisit this -->
+            <script language="javascript">
+              var dbUrl = project.getProperty("db.url");
+              if (dbUrl.contains("/identityiq")) {
+                 loc=dbUrl.indexOf("/identityiq");
+                 dbUrl=dbUrl.substring(0, loc)+dbUrl.substring(loc+11);
+              }
+              project.setProperty("mysql.url", dbUrl);
+            </script>        
+            <iiq.sql sql.file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}"  alt.db.url="${mysql.url}"/>
+          </else>
+        </if>
+        <if>
+          <!-- KMJ 13/3/2017 curating Achim's updates to make the build process for !=MySQL, I also fixed the issue some people were seeing
+            where if you created the WAR file for manual deployment at e.g., a POC, the database files were not updated. They are now updated
+            with the instance name just after they are generated from the .hbm.xml files, so the .tokenReplaced stuff is no longer needed. Since
+            we advocate building IIQ from source when patchlevel>0 so the patch 'just gets included', I'm not touching this section. If you are reading
+            this and want to fix it, feel free to do so and submit a pull request.. --> 
+             
+            <and>
+                <isset property="IIQPatchLevel"/>
+                <length string="${IIQPatchLevel}" when="greater" length="1"/>
+            </and>
+            <then>
+                <copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/database/upgrade_identityiq_tables-${IIQVersion}${IIQPatchLevel}.${db.type}"
+                      tofile="${build.iiqBinaryExtract}/WEB-INF/database/upgrade_identityiq_tables-${IIQVersion}${IIQPatchLevel}.${db.type}.tokenReplaced"/>
+<!-- this will need some attention when PatchLevel>1 -->
+                <replace file="${build.iiqBinaryExtract}/WEB-INF/database/upgrade_identityiq_tables-${IIQVersion}${IIQPatchLevel}.${db.type}.tokenReplaced" casesensitive="false"
+                         token="${db.sourceName}" value="${instance.name}"/>
+                <!-- fix trailing white space which causes syntax errors -->
+                <replaceregexp
+                        file="${build.iiqBinaryExtract}/WEB-INF/database/upgrade_identityiq_tables-${IIQVersion}${IIQPatchLevel}.${db.type}.tokenReplaced"
+                        match="\s*$"
+                        replace=""
+                        byline="true"
+                        />
+                <iiq.sql.upgrade
+                        sql.file="${build.iiqBinaryExtract}/WEB-INF/database/upgrade_identityiq_tables-${IIQVersion}${IIQPatchLevel}.${db.type}.tokenReplaced"/>
+                <antcall target="runUpgrade"/>
+
+            </then>
+        </if>
+    </target>
+
+    <target name="droptables"  depends="init-properties" description="drops the database and iiq user">
+        <if>
+            <equals arg1="${override.safety.prompts}" arg2="false"/>
+            <then>
+                <input
+                        message="Are you sure you want to drop your db and all of your data? continue (y/n)?"
+                        validargs="y,n"
+                        addproperty="do.delete"
+                        />
+                <condition property="do.abort">
+                    <equals arg1="n" arg2="${do.delete}"/>
+                </condition>
+                <fail if="do.abort">Build aborted by user.</fail>
+            </then>
+        </if>
+        <iiq.sql sql.file="${build.iiqBinaryExtract}/WEB-INF/database/drop_identityiq_tables-${IIQVersion}.${db.type}"/>
+    </target>
+
+  	<target name="dropdb"  depends="init-properties" description="drops the database directly without dropping individual tables">
+      <if>
+        <not><isset property="db.driver"/></not>
+        <then>
+          <loadproperties srcFile="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" prefix="iiqprops"/>
+          <property name="db.driver" value="${iiqprops.dataSource.driverClassName}"/>
+        </then>
+      </if>
+      <if>
+        <equals arg1="${override.safety.prompts}" arg2="false"/>
+          <then>
+            <input
+              message="Are you sure you want to drop your db and all of your data? continue (y/n)?"
+              validargs="y,n"
+              addproperty="do.delete"
+            />
+            <condition property="do.abort">
+              <equals arg1="n" arg2="${do.delete}"/>
+            </condition>
+            <fail if="do.abort">Build aborted by user.</fail>
+          </then>
+      </if>
+      
+      <if>
+        <equals arg1="${db.type}" arg2="sqlserver"/>
+        <then>
+          <local name="mssql.url"/>
+          <!-- strip the db name from the MSSQL URL. MySQL silently ignores the db name, which is why we never needed to do this before -->
+          <script language="javascript">
+            var dbUrl = project.getProperty("db.url");
+            if (dbUrl.contains(";")) {
+               dbUrl=dbUrl.substring(0, dbUrl.indexOf(";"));
+            }
+            project.setProperty("mssql.url", dbUrl);
+          </script>        
+          <iiq.sqlstatement sql.statement="drop database if exists ${instance.name}; drop database if exists ${instance.name}Plugin; drop user if exists ${instance.name}; drop user if exists ${instance.name}Plugin; "
+                   alt.db.url="${mssql.url}"
+          />
+          <iiq.sqlstatement sql.statement="IF EXISTS (SELECT * FROM sys.server_principals WHERE name = N'${instance.name}') DROP LOGIN [${instance.name}]"
+                   alt.db.url="${mssql.url}" />
+          <iiq.sqlstatement sql.statement="IF EXISTS (SELECT * FROM sys.server_principals WHERE name = N'${instance.name}Plugin') DROP LOGIN [${instance.name}Plugin]"
+                   alt.db.url="${mssql.url}" />
+        </then>
+        <else>
+          <!-- note(kmj): Currently this presupposes that if we're not using SQL Server, we're using MySQL. I don't know what we'd need to do to make this work
+               for Oracle or DB2, but when we have the need, we'll need to revisit this -->
+          <script language="javascript">
+            var dbUrl = project.getProperty("db.url");
+            if (dbUrl.contains("/identityiq")) {
+               loc=dbUrl.indexOf("/identityiq");
+               dbUrl=dbUrl.substring(0, loc)+dbUrl.substring(loc+11);
+            }
+            project.setProperty("mysql.url", dbUrl);
+          </script>        
+
+          <iiq.sqlstatement sql.statement="drop database if exists ${instance.name}" alt.db.url="${mysql.url}"/>
+          <iiq.sqlstatement sql.statement="drop database if exists ${instance.name}Plugin" alt.db.url="${mysql.url}"/>
+
+        </else>
+      </if>
+    </target>
+
+    <target name="concurd" description="Takes a sql query that returns a list of SailPointObject IDs, number of threads
+     to spawn and deletes the IDs concurrently">
+
+    </target>
+
+
+
+    <target name="cycle" depends="init-properties" description="requires the application.server.start and stop properties to be set. Cycles app server">
+        <!-- stop the server -->
+        <if>
+            <and>
+                <isset property="env.CATALINA_HOME"/>
+                <!-- Have to test if version is at least 5.2 and there are memory leaks on 5.1 and less so total shutdown is required-->
+                <gt arg1="${IIQVersion}" arg2="5.1"/>
+            </and>
+            <then>
+                <antcall target="tomcat.cycle" inheritall="true"/>
+            </then>
+            <else>
+                <if>
+                    <isset property="is-windows"/>
+                    <then>
+                        <echo>Shutting down app server..</echo>
+                        <exec executable="cmd.exe">
+                            <arg value="/c"/>
+                            <arg value="${application.server.stop}"/>
+                        </exec>
+                    </then>
+                    <else>
+                        <exec executable="${application.server.stop}">
+                            <!--<arg value="/c"/>-->
+                        </exec>
+                    </else>
+                </if>
+                <waitfor maxwait="10" maxwaitunit="second">
+                    <not>
+                        <socket server="${application.server.host}" port="${application.server.port}"/>
+                    </not>
+                </waitfor>
+                <if>
+                    <isset property="is-windows"/>
+
+                    <then>
+                        <echo>Starting app server..</echo>
+                        <exec executable="cmd.exe">
+                            <arg value="/c"/>
+                            <arg value="${application.server.start}"/>
+                        </exec>
+                    </then>
+                    <else>
+                        <exec executable="${application.server.start}">
+                            <!--<arg value="/c"/>-->
+                        </exec>
+                    </else>
+                </if>
+                 <waitfor maxwait="10" maxwaitunit="second">
+                    <http url="http://${application.server.host}:${application.server.port}/${iiqpath}"/>
+                </waitfor>
+            </else>
+        </if>
+    </target>
+    
+    <target name='exportSingleObject' depends="init-properties">
+        <mkdir dir="${build}/export/"/>
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true" output="${build}/export/sailpoint.dtd">
+            <arg line="sailpoint.tools.xml.DTDGenerator"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <mkdir dir="${build}/export/${objectType}/"/>
+        <copy file="${build}/export/sailpoint.dtd" tofile="${build}/export/${objectType}/sailpoint.dtd"/>
+        <echo message="Exporting ${objectName} of type ${objectType}"/>     
+        <var name="consoleCommand" value='console iiqBeans -f ${build}/export/${objectType}/consoleCommandFile.txt'/>
+        <propertyregex property="objectName"
+                         input="${objectName}"
+                         override="true"
+                         regexp='"'
+                         replace="" global="true" />
+                 <propertyregex property="objectName"
+                         input="${objectName}"
+                         override="true"
+                         regexp='comma'
+                         replace="," global="true" />
+        <var name='consolePredicate' value='get ${objectType} &quot;${objectName}&quot;'/>
+        <echo message='Console Command is: ${consoleCommand} Console Predicate is: ${consolePredicate}'/>
+        <echo message='${consolePredicate}' file='${build}/export/${objectType}/consoleCommandFile.txt'/>
+        <propertyregex property="objectName"
+                       input="${objectName}"
+                       override="true"
+                       regexp="[\s/]"
+                       replace="_" global="true" />
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true" output="${build}/export/${objectType}/${objectType}-${objectName}.xml">
+            <arg line="${consoleCommand}"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <delete file='${build}/export/${objectType}/consoleCommandFile.txt'/>
+        <antcall target="cleanExportFiles"/>
+    </target>
+    
+    <target name="createExportFile" depends="init-properties">
+        <replaceregexp file="scripts/Rule-OutputCustomObjectFile.xml" match="%%INSTALL_DATE%%" replace="${installDate}" flags="g" />
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true">
+            <arg line="console iiqBeans -c &quot;import scripts/Rule-OutputCustomObjectFile.xml&quot;"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true" output="scripts/objectsToExport.properties">
+            <arg line="console iiqBeans -c &quot;rule OutputCustomObjectFile&quot;"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+    </target>
+    
+    <!--                                                            -->
+    <!-- Target: export                      -->
+    <!-- export objects from the repository       -->
+    <target name="exportObjectsAfterInstallDate" depends="init-properties,createExportFile">
+        <property file="scripts/objectsToExport.properties"/>
+        <echo message="objectType=${ObjectTypes}"/>
+        <echo message="Generating objects from repository ..."/>
+        <mkdir dir="${build}/export/"/>
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true" output="${build}/export/sailpoint.dtd">
+            <arg line="sailpoint.tools.xml.DTDGenerator"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <foreach list="${ObjectTypes}" param="objectType" target="objectFileGenerator"/>
+        <antcall target="cleanExportFiles"/>
+    </target>
+    
+    <!--                                                            -->
+    <!-- Target: export                      -->
+    <!-- export objects from the repository       -->
+    <target name="export" depends="init-properties">
+        <property file="scripts/objectsToExport.properties"/>
+        <echo message="objectType=${ObjectTypes}"/>
+        <echo message="Generating objects from repository ..."/>
+        <mkdir dir="${build}/export/"/>
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true" output="${build}/export/sailpoint.dtd">
+            <arg line="sailpoint.tools.xml.DTDGenerator"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <foreach list="${ObjectTypes}" param="objectType" target="objectFileGenerator"/>
+        <antcall target="cleanExportFiles"/>
+    </target>
+
+     <target name="cleanExportFiles" depends="init-properties">
+        <condition property="rulesPresent"> 
+             <available file="${build}/export/Rule" type="dir"/> 
+        </condition>
+        <replaceregexp flags="g">
+            <regexp pattern="\s(id|created|modified)=[&quot;']\w+[&quot;']"/>
+            <substitution expression=""/>
+            <fileset dir="${build}/export/">
+                <include name="**/*.xml"/>
+                <exclude name="**/${init-file}"/>
+            </fileset>
+        </replaceregexp>
+        <antcall target="cleanRuleFiles"/>
+     </target>
+     
+     <target name="cleanRuleFiles" depends="init-properties" if="rulesPresent">
+         <replaceregexp flags="g">
+             <regexp pattern="(&lt;Source&gt;)"/>
+             <substitution expression="&lt;Source&gt;&lt;![CDATA["/>
+             <fileset dir="${build}/export/Rule">
+                 <include name="**/*.xml"/>
+                 <exclude name="**/${init-file}"/>
+             </fileset>
+         </replaceregexp>
+         <replaceregexp flags="g">
+             <regexp pattern="(&lt;/Source&gt;)"/>
+             <substitution expression="\]\]&gt;&lt;/Source&gt;"/>
+             <fileset dir="${build}/export/Rule">
+                 <include name="**/*.xml"/>
+                 <exclude name="**/${init-file}"/>
+             </fileset>
+         </replaceregexp>
+         <replaceregexp flags="g">
+             <regexp pattern="(&amp;amp;)"/>
+             <substitution expression="&amp;"/>
+             <fileset dir="${build}/export/Rule">
+                 <include name="**/*.xml"/>
+                 <exclude name="**/${init-file}"/>
+             </fileset>
+         </replaceregexp>
+         <replaceregexp flags="g">
+             <regexp pattern="(&amp;lt;)"/>
+             <substitution expression="&lt;"/>
+             <fileset dir="${build}/export/Rule">
+                 <include name="**/*.xml"/>
+                 <exclude name="**/${init-file}"/>
+             </fileset>
+         </replaceregexp>
+         <replaceregexp flags="g">
+             <regexp pattern="(&amp;gt;)"/>
+             <substitution expression="&gt;"/>
+             <fileset dir="${build}/export/Rule">
+                 <include name="**/*.xml"/>
+                 <exclude name="**/${init-file}"/>
+             </fileset>
+         </replaceregexp>
+         <replaceregexp flags="g">
+             <regexp pattern="(&amp;amp;&amp;amp;)"/>
+             <substitution expression="&amp;&amp;"/>
+             <fileset dir="${build}/export/Rule">
+                 <include name="**/*.xml"/>
+                 <exclude name="**/${init-file}"/>
+             </fileset>
+        </replaceregexp>
+     </target>
+
+    <target name="objectFileGenerator" depends="init-properties">
+        <property file="scripts/objectsToExport.properties"/>
+        <propertycopy name="objectNames" from="${objectType}"/>
+        <mkdir dir="${build}/export/${objectType}/"/>
+        <copy file="${build}/export/sailpoint.dtd" tofile="${build}/export/${objectType}/sailpoint.dtd"/>
+        <foreach list="${objectNames}" param="objectName" inheritrefs="true" target="createObjectFile"/>
+    </target>
+    
+    <target name="createObjectFile" depends="init-properties">
+        <echo message="Exporting ${objectName} of type ${objectType}"/>     
+        <var name="consoleCommand" value='console iiqBeans -f ${build}/export/${objectType}/consoleCommandFile.txt'/>
+        <propertyregex property="objectName"
+                         input="${objectName}"
+                         override="true"
+                         regexp='"'
+                         replace="" global="true" />
+        <propertyregex property="objectName"
+                         input="${objectName}"
+                         override="true"
+                         regexp='comma'
+                         replace="," global="true" />
+        <var name='consolePredicate' value='get ${objectType} &quot;${objectName}&quot;'/>
+        <echo message='Console Command is: ${consoleCommand} Console Predicate is: ${consolePredicate}'/>
+        <echo message='${consolePredicate}' file='${build}/export/${objectType}/consoleCommandFile.txt'/>
+        <propertyregex property="objectName"
+                       input="${objectName}"
+                       override="true"
+                       regexp="[\s/]"
+                       replace="_" global="true" />
+        <java classname="sailpoint.launch.Launcher" fork="true" failonerror="true" output="${build}/export/${objectType}/${objectType}-${objectName}.xml">
+            <arg line="${consoleCommand}"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+        <delete file='${build}/export/${objectType}/consoleCommandFile.txt'/>
+    </target>
+
+    <!--                                                            -->
+    <!-- Target: importManagedAttributes                            -->
+    <!-- Import managedAttributes into the repository                  -->
+    <!--                                                            -->
+    <target name="importManagedAttributes" depends="init-properties">
+        <foreach list="${managedAttributeApplications}" param="application" target="importSingleAttributeFile"/>
+    </target>
+    
+    <target name="importSingleAttributeFile">
+        <echo message="Importing entitlements into the repository for ${application}..."/>
+        <propertycopy name="entitlementFile" from="${application}"/>
+        <java classname="sailpoint.launch.Launcher" fork="true">
+            <arg line="console iiqBeans -c &quot;importExplanations ${application} default ${entitlementLocation}/${entitlementFile}&quot;"/>
+            <classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+    </target>
+    
+    <target name="encryptString" depends="init-properties" description="Returns the encrypted version of the passed in string. Use '-DstringToEncrypt=yourString' on the command line.">
+    	<echo message="Encrypting string ${stringToEncrypt}"/>
+		<java classname="sailpoint.launch.Launcher" fork="true">
+			<arg line="console iiqBeans -c &quot;encrypt ${stringToEncrypt}&quot;"/>
+			<classpath>
+                <pathelement path="${IIQHome}/WEB-INF/classes"/>
+                <pathelement location="${IIQHome}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+	<target name="importDemoData" depends="init-properties" if="demodata.location">
+		<echo>Copying HR Sources</echo>
+		<copy todir="config/demo/data">
+			<fileset dir="${demodata.location}/data" includes="Auth*.csv"/>
+		</copy>
+		<echo>Building ZipFile for AD target</echo>
+		<zip destfile="config/demo/data/ADTargetFiles.zip"
+			basedir="${demodata.location}/scripts/createADDemoData"
+		/>
+		<echo>Extracting authoritative applications</echo>
+		<xslt basedir="${demodata.location}/config/web/WEB-INF/config/demo/xml"
+		      destdir="config/demo/data"
+			  extension=".xml"
+			  style="scripts/ExtractAuthoritativeApplications.xslt">
+			  <include name="Application.xml"/>
+			  <xmlcatalog>
+					<dtd 
+						publicId="sailpoint.dtd"
+						location="scripts/sailpoint.dtd"/>
+			  </xmlcatalog>
+		</xslt>
+		<echo>Extracting required rules</echo>
+		<xslt basedir="${demodata.location}/config/web/WEB-INF/config/demo/xml"
+		      destdir="config/demo/data"
+			  extension=".xml"
+			  style="scripts/ExtractRules.xslt">
+			  <include name="Rule.xml"/>
+			  <xmlcatalog>
+					<dtd 
+						publicId="sailpoint.dtd"
+						location="scripts/sailpoint.dtd"/>
+			  </xmlcatalog>
+		</xslt>
+		<echo>Extracting workgroups</echo>
+		<xslt basedir="${demodata.location}/config/web/WEB-INF/config/demo/xml"
+		      destdir="config/demo/data"
+			  extension=".xml"
+			  style="scripts/ExtractWorkgroups.xslt">
+			  <include name="Workgroups.xml"/>
+			  <xmlcatalog>
+					<dtd 
+						publicId="sailpoint.dtd"
+						location="scripts/sailpoint.dtd"/>
+			  </xmlcatalog>
+		</xslt>
+		<echo>Extracting tasks</echo>
+		<xslt basedir="${demodata.location}/config/web/WEB-INF/config/demo/xml"
+		      destdir="config/demo/data"
+			  extension=".xml"
+			  style="scripts/ExtractTasks.xslt">
+			  <include name="Task.xml"/>
+			  <xmlcatalog>
+					<dtd 
+						publicId="sailpoint.dtd"
+						location="scripts/sailpoint.dtd"/>
+			  </xmlcatalog>
+		</xslt>
+
+	</target>
+
+
+</project>

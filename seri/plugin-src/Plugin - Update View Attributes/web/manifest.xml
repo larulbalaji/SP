@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin certificationLevel="Gold" displayName="Update View Attributes" minSystemVersion="7.1" name="updateViewAttributes" version="1.0">
+  <Attributes>
+    <Map>
+      <entry key="fullPage">
+        <value>
+          <FullPage title="Update View Attributes" />
+        </value>
+      </entry>
+       <entry key="restResources">
+        <value>
+          <List>
+            <String>sailpoint.plugin.updateviewattributes.rest.UpdateViewAttributesResource</String>
+          </List>
+        </value>
+      </entry>     <entry key="snippets">
+        <value>
+          <List>
+            <Snippet regexPattern=".*/systemSetup/index.jsf" rightRequired="UpdateViewAttributesPluginRight">
+              <Scripts>
+                <String>ui/js/headerInject.js</String>
+              </Scripts>
+            </Snippet>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>

@@ -1,0 +1,470 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.RACFConnector"  featuresString="DIRECT_PERMISSIONS, NO_RANDOM_ACCESS, DISCOVER_SCHEMA" icon="mainframeIcon"   name="Mainframe" profileClass="" type="RACF">
+  <Attributes>
+    <Map>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1368977768479</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1368977766192</Date>
+        </value>
+      </entry>
+      <entry key="afterProvisioningRule"/>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="deltaAggregation"/>
+      <entry key="file" value="WEB-INF/config/seri/data/RACF/irrdbu00-extract.txt"/>
+      <entry key="filetransport" value="local"/>
+      <entry key="filterEmptyRecords">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="templateApplication" value="RACF Template"/>
+    </Map>
+  </Attributes>
+  <CorrelationRule>
+    <Reference class="sailpoint.object.Rule"  name="Correlation - RACF"/>
+  </CorrelationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Mainframe Admins"/>
+  </Owner>
+  <PasswordPolicies>
+    <PasswordPolicyHolder   >
+      <PolicyRef>
+        <Reference class="sailpoint.object.PasswordPolicy"  name="RACF Default Password Policy"/>
+      </PolicyRef>
+    </PasswordPolicyHolder>
+  </PasswordPolicies>
+  <Schemas>
+    <Schema  displayAttribute="NAME" groupAttribute="GROUPS"  identityAttribute="NAME" includePermissions="true" instanceAttribute=""  nativeObjectType="USER" objectType="account" permissionsRemediationModificationType="None">
+      <AttributeDefinition multi="true" name="CLASSES" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CATEGORIES" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_MAXLIFE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_KEY_VER" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_ENCRYPT_DES" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_ENCRYPT_DES3" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_ENCRYPT_DESD" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_ENCRYPT_A128" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_ENCRYPT_A256" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="KERB_KEY_FROM" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATE_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OWNER_ID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADSP" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SPECIAL" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OPER" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REVOKE" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GRPACC" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWD_INTERVAL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWD_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PROGRAMMER" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DEFGRP_ID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LASTJOB_TIME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LASTJOB_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="INSTALL_DATA" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="UAUDIT" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AUDITOR" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NOPWD" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OIDCARD" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWD_GEN" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REVOKE_CNT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MODEL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SECLEVEL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REVOKE_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="RESUME_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_SUN" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_MON" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_TUE" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_WED" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_THU" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_FRI" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCESS_SAT" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="START_TIME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="END_TIME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SEC_LABELS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ATTRIBS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWDENV_EXISTS" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PWD_ASIS" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PHR_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PHR_GEN" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CERT_SEQN" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PPHENV_EXISTS" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="ASSOCIATED_MAPPING" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CSDATA_CUSTOM" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LNOTES_SHORTNAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CICS_OP_CLASSES" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="GROUPS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OVM_UID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OVM_HOME_PATH" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OVM_PROGRAM" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OVM_FSROOT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PRIMARY_LANGUAGE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SECONDARY_LANGUAGE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CICS_RSL_KEY" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LDAP_HOST" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LDAP_BIND_DN" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_IC" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_CONSOLE_NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_CTL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_MSGRECVR" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_NGMFADMN" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_NGMFVSPN" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NDS_UNAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CICS_OPIDENT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CICS_OPPRTY" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CICS_NOFORCE" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CICS_TIMEOUT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DCE_UUID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DCE_NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DCE_HOMECELL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DCE_HOMEUUID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DCE_AUTOLOGIN" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CERTIFICATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CICS_TSL_KEY" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_ACCOUNT_NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_COMMAND" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_DEST" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_HOLD_CLASS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_JOB_CLASS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_LOGIN_PROC" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_LOGIN_SIZE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_MSG_CLASS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_LOGON_MAX" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_PERF_GROUP" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_SYSOUT_CLASS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_USER_DATA" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_UNIT_NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TSO_SECLABEL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="DFP_DATA_RECORDS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="AREA_NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="BUILDING" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DEPARTMENT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ROOM" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS1" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS2" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS3" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS4" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCOUNT_NUMBER" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_UID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_HOME_PATH" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_PROGRAM" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MAX_CPUTIME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MAX_ASSSIZE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MAX_FILEPROC" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MAX_PROC" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MAX_THREADS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MAX_MAP_STORAGE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_MEM_LIMIT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MVS_SHMEM_LIMIT" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NETVIEW_OPCLASS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EIM_LDAPPROFFILE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+    </Schema>
+    <Schema  displayAttribute="NAME"  identityAttribute="NAME" includePermissions="true" instanceAttribute=""  nativeObjectType="GROUP" objectType="group" permissionsRemediationModificationType="None">
+      <AttributeDefinition multi="true" name="SUBGROUPNAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="OMVS_GID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="CSDATA_CUSTOM" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+<!-- This makes the Account Group pop-up (from certs, cube view) look terrible.  Need to open UI enhancement in product...
+      <AttributeDefinition multi="true" name="MEMBERS" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+-->
+      <AttributeDefinition name="NAME" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SUPERIOR_GROUP" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CREATE_DATE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OWNER_ID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="UACC" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NOTERMUACC" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="INSTALL_DATA" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="GROUP_MODEL" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="UNIVERSAL" remediationModificationType="None" type="boolean">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="OVM_GID" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+      <AttributeDefinition multi="true" name="TME_ROLE" remediationModificationType="None" type="string">
+        <Description></Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+</Application>

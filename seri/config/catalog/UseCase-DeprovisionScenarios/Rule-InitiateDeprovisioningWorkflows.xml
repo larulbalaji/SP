@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Account Provisioning - Initiate Deprovisioning Workflows" type="Workflow">
+  <Description>Loop over every account and perform the proper deprovisioning scenario according to the deprovisioning data for that application.</Description>
+  <Source><![CDATA[
+import sailpoint.object.WorkflowLaunch;
+import sailpoint.api.Workflower;
+import sailpoint.api.WorkflowSession;
+import sailpoint.api.IdentityLifecycler;
+import java.util.Iterator;
+import sailpoint.object.Filter;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Request;
+import java.util.Date;
+import java.util.Calendar;
+import sailpoint.api.Terminator;
+import sailpoint.tools.xml.XMLObjectFactory;
+import sailpoint.tools.xml.XMLReferenceResolver;
+import sailpoint.object.*;
+import sailpoint.api.*;
+
+// Expect: java.lang.String applicationName
+// Expect: java.lang.String identityName
+// Expect: java.lang.String nativeIdentity
+// Expect: java.util.Map accountDeprovisioningMap
+// Expect: java.lang.String userName
+// Expect: sailpoint.object.IdentityTrigger trigger
+// Expect: java.lang.String trace
+// Expect: sailpoint.object.ProvisioningPlan plan
+// Expect: sailpoint.object.ProvisioningProject project
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Rule.AcctProv.InitiateDeprovisioningWorkflows");
+
+serilog.debug("identityName="+identityName);
+Identity identObj = context.getObjectByName(Identity.class,identityName);
+List links = identObj.getLinks();
+String workflowName = null;   		
+
+//loop over every account and perform the proper deprovisioning scenario according to the deprovisioning map we created when we inititialized the workflow.
+//one or more flows can be initiated, depending on what in the world you are doing to the account. Renames/moves are treated separate from disables and deleted on purpose 
+//as certain applications may only support certain functions directly and we dont want to wait for a rename before we can disable the account or vice versa.	
+
+for(Link aLink : links) {
+  String appName=aLink.getApplication().getName();
+  serilog.debug("Got link for "+appName);
+  Map accountMap = (Map)accountDeprovisioningMap.get(appName);
+  /** Create the plan for the identity and stick the requests on it **/
+  Attributes args = new Attributes();
+  // pass in the display name to avoid having to do a lookup
+  args.put("identityName", identityName);
+  args.put("doRefresh", true);
+  args.put("identityDisplayName", identObj.getName());
+  args.put("nativeIdentity", aLink.getNativeIdentity());
+  args.put("applicationName", appName);
+  String deprovScenario=(String)accountMap.get("accountDeprovisioningScenario");
+  args.put("accountDeprovisionScenario", deprovScenario);
+  
+  serilog.debug("Scenario for "+appName+" is "+deprovScenario);
+  if(deprovScenario!= null) {
+    
+    // Common args for all scenarios
+    args.put("userName", userName);
+    args.put("trigger", trigger);
+    args.put("trace", trace);
+    args.put("plan", plan);
+    args.put("project",project);
+
+    args.put("accountDeprovisioningLinkRule", accountMap.get("accountDeprovisioningLinkRule"));
+    args.put("accountDeprovisioningPlanRule", accountMap.get("accountDeprovisioningPlanRule"));
+    args.put("accountDeprovisioningPostProvRule", accountMap.get("accountDeprovisioningPostProvRule")); 
+
+    String caseName=null;
+    workflowName=null;
+
+    if("Disable Account Immediately".equals(deprovScenario)) {
+      workflowName="Lifecycle Event - Terminate Disable Accounts";
+      caseName="Deprovision - Disable:  "+ aLink.getNativeIdentity();
+    }
+    else if("Remove Entitlements and Disable Account Immediately".equals(deprovScenario)) {
+      workflowName="Lifecycle Event - Terminate Disable Accounts";
+      caseName="Deprovision - Disable:  "+ aLink.getNativeIdentity();
+      args.put("removeEntitlements", Boolean.TRUE);
+    }
+    else  if("Disable Account Immediately, Wait, then Delete".equals(deprovScenario)) {
+      workflowName="Lifecycle Event - Terminate Disable Accounts";
+      caseName="Deprovision - Disable, Delete:  "+  aLink.getNativeIdentity();
+      args.put("daysToWaitForDeletion", accountMap.get("daysToWaitForDeletion"));
+    }
+    else  if("Delete Account Immediately".equals(deprovScenario)) {
+      workflowName="Lifecycle Event - Terminate Delete Accounts";
+      caseName="Deprovision - Delete:  "+ aLink.getNativeIdentity();
+    }
+    /*
+    if(accountMap.get("moveAccountOnDeprovisioning") || accountMap.get("deprovisionedAccountsPreSuffix")!= null) {
+      workflowName="Lifecycle Event - Terminate Rename-Move Accounts";
+      caseName="Reactivation";
+
+      args.put("moveAccountOnDeprovisioning", accountMap.get("moveAccountOnDeprovisioning"));                
+      args.put("deprovisionedAccountsContainer", accountMap.get("deprovisionedAccountsContainer"));
+      args.put("renameDeprovisionedAccounts", accountMap.get("renameDeprovisionedAccounts"));                
+      args.put("deprovisionedAccountsPreSuffix", accountMap.get("deprovisionedAccountsPreSuffix"));
+    }
+    */
+
+    if (workflowName!=null) {
+      Workflow wf = (Workflow) context.getObjectByName(Workflow.class,workflowName);
+      WorkflowLaunch wflaunch = new WorkflowLaunch();
+      wflaunch.setWorkflowName(wf.getName());
+      wflaunch.setWorkflowRef(wf.getName());
+      wflaunch.setVariables(args);
+
+      //Create Workflower and launch workflow from WorkflowLaunch
+      Workflower workflower = new Workflower(context);
+      WorkflowLaunch launch = workflower.launch(wflaunch);
+      // print workflowcase ID (example only; might not want to do this in the task)
+      String workFlowId = launch.getWorkflowCase().getId();
+      serilog.debug("Finished:");
+      serilog.debug("\twf="+workflowName);
+      serilog.debug("\tcaseName="+caseName);
+      serilog.debug("\tworkFlowId: "+workFlowId);
+    }
+  }
+}
+  ]]></Source>
+</Rule>
+

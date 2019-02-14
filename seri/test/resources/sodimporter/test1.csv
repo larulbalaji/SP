@@ -1,0 +1,6 @@
+,,L1,L2,L3,L4
+Label1,L1,,x,,
+Label2,L2,,,x,TRUE
+Label3,L3,,,,yes
+Label4,L4,,,,
+,,,,,

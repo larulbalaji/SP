@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <SPRight displayName="SensitiveDataRight" name="SensitiveDataUsersRight"/>
+  <SPRight displayName="SensitiveDataUserRESTAllow" name="SensitiveDataUserRESTAllow"/>
+  <SPRight displayName="SensitiveDataUsersPluginRight" name="SensitiveDataUsersPluginRight"/>
+    <Capability displayName="SensitiveDataUsersWidget" name="SensitiveDataUsersWidget">
+        <Description>Allow access to Sensitive Data Users Plugin</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="SensitiveDataUsersRight"/>
+            <Reference class="sailpoint.object.SPRight" name="SensitiveDataUserRESTAllow"/>
+            <Reference class="sailpoint.object.SPRight" name="SensitiveDataUsersPluginRight"/>
+        </RightRefs>
+    </Capability>
+</sailpoint>

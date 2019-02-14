@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name="include" value="QuickLink-ProbableOwner.xml"/>
+  <ImportAction name="include" value="Rule-POFormValidation.xml"/>
+  <ImportAction name="include" value="Rule-RetrieveManagerPOMap.xml"/>
+  <ImportAction name="include" value="Workflow-ProbableManagerOwnerDynamic.xml"/>
+</sailpoint>

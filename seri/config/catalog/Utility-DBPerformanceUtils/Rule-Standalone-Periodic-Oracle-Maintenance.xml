@@ -1,0 +1,270 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<Rule language="beanshell" name="Periodic Oracle Maintenance">
+  <Source><![CDATA[
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.Level;
+import org.apache.commons.logging.Log;
+import org.apache.bsf.BSFException;
+
+import java.util.*;
+
+import sailpoint.object.*;
+import sailpoint.tools.GeneralException;
+import sailpoint.tools.Message;
+import sailpoint.api.SailPointContext;
+import sailpoint.api.Scheduler;
+import sailpoint.Version;
+import sailpoint.server.Environment;
+import sailpoint.tools.Util;
+
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.CallableStatement;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+
+// Note: only force this to debug when editing.  Otherwise let log4j set it.
+Logger log = Logger.getLogger("sailpoint.services.PeriodicOracleMaintenance");
+
+// Use a StringBuilder to accumulate the large amount of output this 
+// task produces.  The output is then printed at the end of the run.
+// This helps support older (pre-6.3) forms of output for the rule.
+StringBuilder sb = new StringBuilder();
+
+// Keep a flag around to identify whether this rule is being run inside a Task
+// context or whether it is being run stand-alone from the console ore Debug 
+// page.  For 6.3 and newer installs we can use the presence of the variable 
+// 'taskResult' to determine if we are running in task context.
+boolean inTaskContext = false;
+if ((void != taskResult) && (null != taskResult)) {   
+  inTaskContext = true;    
+} else {
+   // We are running from the console, turn on debugging so the user
+   // can see what the script is doing and what is going on.
+   log.setLevel((Level) Level.DEBUG);
+}  
+
+// Set some flags to cover our default modes of operation. Run both!
+boolean runGatherStatistics = false;
+boolean runIndexRebuilds    = false;
+
+// Check out the configuration passed in from the task config object.
+// The user interface can override whether we enable debugging and
+// it allows the user to choose to just update statistics or rebuild
+// indexes or both. 
+if (inTaskContext) {
+ 
+   String doLog4jDebug       = config.get("doLog4jDebug");
+   String doGatherStatistics = config.get("doGatherStatistics");
+   String doIndexRebuilds    = config.get("doIndexRebuilds");
+   System.out.println(doGatherStatistics);
+   System.out.println(doIndexRebuilds);
+   
+   if (null != doLog4jDebug) {
+      if (Util.otob(doLog4jDebug)) {
+         // This setting can be used from the UI to override log4j settings.
+         log.setLevel((Level) Level.DEBUG);      
+      } else {
+         log.setLevel((Level) Level.WARN);
+      }  
+   }  
+   
+   if (null != doGatherStatistics) {
+      log.debug("got doGatherStatistics: " + doGatherStatistics);
+      runGatherStatistics = Util.otob(doGatherStatistics);   
+   } else {
+      runGatherStatistics = false;
+   }
+
+   if (null != doIndexRebuilds) {
+      log.debug("got doIndexRebuilds: " + doIndexRebuilds);
+      runIndexRebuilds = Util.otob(doIndexRebuilds);   
+   } else {
+      runIndexRebuilds = false;
+   }
+
+}
+
+// If we are launched from the UI and have debugging enabled log what all
+// was passed into this rule to the log file.  
+if ((inTaskContext) && (log.isDebugEnabled())) {
+   // Beanshell has a "this.variables" array that we can access.
+   for (int i = 0 ; i < this.variables.length ; i++) {
+      String name = this.variables[i];
+      Object value = eval(name);
+      if (void == value) {
+         log.debug("arg: " + name + " = void");
+      } else if (null == value) {
+         log.debug("arg: " + name + " = null");
+      } else {
+         log.debug("arg: " + name + ": " + value.getClass().getSimpleName() + " = " + value);
+      }       
+   }
+} 
+
+// Okay, now on to the dirty work of actually reebuilding indexes and stats.
+// Get a connection to our database and find all the SPT_ tables.	
+Connection jdbcConnection = context.getConnection();
+DatabaseMetaData md = jdbcConnection.getMetaData();
+String[] types = {"TABLE"};
+ResultSet rs = md.getTables(null, null, "SPT%", types);
+ResultSetMetaData rsmd = rs.getMetaData();
+
+int columnCount = rsmd.getColumnCount();
+HashMap nameToColumnNumberMap = new HashMap();
+
+// Iterate through the result set metadata and see what column names we have.
+// The column count starts from 1 for some odd reason here.
+for (int i = 1; i < columnCount + 1; i++ ) {
+  String columnName = rsmd.getColumnName(i);
+  nameToColumnNumberMap.put(columnName, i);     
+}
+
+int gatherStatsCounter = 0; 	 
+if (runGatherStatistics) while (rs.next()) { 
+
+   String tableName    = rs.getString(nameToColumnNumberMap.get("TABLE_NAME")); 
+   String tableCatalog = rs.getString(nameToColumnNumberMap.get("TABLE_CAT")); 
+   String tableSchema  = rs.getString(nameToColumnNumberMap.get("TABLE_SCHEM"));
+   
+   String progMsg = "Gathering stats on table: " + tableSchema + "." + tableName + "\n";
+   log.debug(progMsg);
+   if (inTaskContext) {       
+       taskResult.setProgress(progMsg);
+       context.saveObject(taskResult);
+       context.commitTransaction();	   
+   } else {   
+       sb.append(progMsg);
+   }   
+   
+   // Build out the 'GATHER STATS' command.  Prefix, body arguments and suffix.
+   String gsCommand = "dbms_stats.gather_table_stats('";
+   String gsSuffix  =  "',cascade=>TRUE)";   
+   String gatherStats = gsCommand + tableSchema + "','" + tableName + gsSuffix;
+   
+   progMsg = "  " + gatherStats + "\n";
+   log.debug(progMsg);
+   if (inTaskContext) {       
+       // do nothing; don't show the DDL on the progress bar.	   
+   } else {   
+       sb.append(progMsg);
+   }
+   
+   // Execute the statistics update command.
+   // Statement stmt = jdbcConnection.createStatement();
+   CallableStatement cs = jdbcConnection.prepareCall("{call " + gatherStats + " }");
+   
+   try {
+      
+      System.out.println("Executing statistics update for: " + tableName);
+      cs.execute();      
+	
+   } catch (java.sql.SQLSyntaxErrorException ex) {
+      log.error(ex);
+      
+      if (inTaskContext) {       
+         taskResult.addMessage(new Message(ex.toString(), null));	   
+      } else {   
+         sb.append(progMsg);
+      }     
+	  	   
+   } finally {      
+      // Close the SQL Statement regardless of the exceptions seen.      
+      cs.close();
+   }
+   
+   gatherStatsCounter++;
+
+}
+
+String progMsg = "Processed " + gatherStatsCounter + " statistics updates.";
+if (inTaskContext) {       
+   taskResult.addMessage(new Message(progMsg, null));	   
+} else {   
+   sb.append(progMsg + "\n");
+}
+
+int indexsUpdatesCounter = 0;
+if (runIndexRebuilds) {
+
+   String[] types = {"TABLE"};
+   ResultSet rs = md.getTables(null, null, "SPT%", types);
+   ResultSetMetaData rsmd = rs.getMetaData();
+   
+   while (rs.next()) { 
+
+      String tableName    = rs.getString(nameToColumnNumberMap.get("TABLE_NAME")); 
+      String tableSchema  = rs.getString(nameToColumnNumberMap.get("TABLE_SCHEM"));      
+      String fullName = tableSchema + "." + tableName;
+      
+      String statMsg = "Retrieving indexes for: " + fullName;      
+      log.debug(statMsg);
+      if (inTaskContext) {       
+         taskResult.setProgress(statMsg);
+         context.saveObject(taskResult);
+         context.commitTransaction();	   
+      }
+      
+      // Get a list of all the indexes for this table
+      ResultSet indexList = md.getIndexInfo(null, null, tableName, false, false);
+      while(indexList.next()) {
+         String idxName   = indexList.getString("INDEX_NAME");
+         String idxColumn = indexList.getString("COLUMN_NAME");         
+         if ((null != idxName) && (!"null".equals(idxName))) {
+         
+            statMsg = "Rebuilding index: " + fullName + "." + idxName;
+            log.debug(statMsg);
+            if (inTaskContext) {       
+               taskResult.setProgress(statMsg);
+               context.saveObject(taskResult);
+               context.commitTransaction();	   
+            }
+                     
+            String rebuildSql = "ALTER INDEX " + idxName +" REBUILD ONLINE";
+            log.debug("  " + rebuildSql);
+                                    
+            PreparedStatement statement = jdbcConnection.prepareStatement(rebuildSql);
+            
+            try {
+              statement.executeUpdate();
+            } catch (Exception ex) {
+               log.error(ex);
+               if (inTaskContext) {       
+                  taskResult.addMessage(new Message(ex.toString(), null));               	   
+               }              
+            } finally {
+               statement.close();
+            }
+                        
+            indexsUpdatesCounter++;         
+         }                   
+         
+      }
+      indexList.close();            
+   } 
+
+}
+
+String progMsg = "Processed " + indexsUpdatesCounter + " index rebuilds.";
+if (inTaskContext) {       
+   taskResult.addMessage(new Message(progMsg, null));	   
+} else {   
+   sb.append(progMsg + "\n");
+}
+
+
+if (inTaskContext) {       
+   return "Success";	   
+}
+return sb.toString();     
+
+]]></Source>
+</Rule>
+</sailpoint>

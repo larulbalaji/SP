@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="dev.tomcat">
+
+    <!--
+       Tomcat specfic defs, tomcat targets will be used if you have the CATALINA_HOME env var set.
+       -->
+	   <!-- deploy and undeploy have been promoted to build.xml -->
+       <taskdef name="list" classname="org.apache.catalina.ant.ListTask">
+           <classpath>
+               <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+           </classpath>
+       </taskdef>
+       <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask">
+           <classpath>
+               <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+           </classpath>
+       </taskdef>
+       <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask">
+           <classpath>
+               <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+           </classpath>
+       </taskdef>
+       <taskdef name="start" classname="org.apache.catalina.ant.StartTask">
+           <classpath>
+               <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+           </classpath>
+       </taskdef>
+       <taskdef name="stop" classname="org.apache.catalina.ant.StopTask">
+           <classpath>
+               <pathelement location="${basedir}/lib/catalina-ant.jar"/>
+           </classpath>
+       </taskdef>
+
+    <target name="tomcat.cycle" depends="tomcat.context.status">
+        <if>
+            <isset property="context.running"></isset>
+            <then>
+                <reload url="${manager.url}" username="${manager.login}" password="${manager.pw}" path="${iiqpath}"/>
+                 <!--<stop url="${manager.url}" username="${manager.login}" password="${manager.pw}" path="${iiqpath}"/>-->
+                 <!--<start url="${manager.url}" username="${manager.login}" password="${manager.pw}" path="${iiqpath}"/>-->
+            </then>
+            <else>
+                <fail>
+                    No running instance of iiq on tomcat was found.
+                </fail>
+            </else>
+        </if>
+
+
+    </target>
+
+	<target name="tomcat.start" depends="init-properties">
+        <iiq.start.stop action="start"/>
+	</target>		
+	
+	<target name="tomcat.stop" depends="init-properties">
+        <iiq.start.stop action="stop"/>
+	</target>		
+	
+     <target name="tomcat.context.status">
+        <iiq.start.stop action="start"/>
+		<property name="running" value="${iiqpath}:running"/>
+		<property name="stopped" value="${iiqpath}:stopped"/>
+
+		<list url="${manager.url}" username="${manager.login}" password="${manager.pw}"
+			outputproperty="ctx.status">
+		</list>
+
+		<condition property="context.running">
+			<contains string="${ctx.status}" substring="${running}"/>
+		</condition>
+		<condition property="context.stopped">
+			<contains string="${ctx.status}" substring="${stopped}"/>
+		</condition>
+		<condition property="context.notInstalled">
+			<and>
+				<isfalse value="${context.running}"/>
+				<isfalse value="${context.stopped}"/>
+			</and>
+		</condition>
+		<condition property="context.deployable">
+			<or>
+				<istrue value="${context.notInstalled}"/>
+				<and>
+					<istrue value="${context.running}"/>
+					<istrue value="${mgr.update}"/>
+				</and>
+				<and>
+					<istrue value="${context.stopped}"/>
+					<istrue value="${mgr.update}"/>
+				</and>
+			</or>
+		</condition>
+		<condition property="context.undeployable">
+			<or>
+				<istrue value="${context.running}"/>
+				<istrue value="${context.stopped}"/>
+			</or>
+		</condition>
+         <echo>
+             IIQ Context Status ${line.separator}
+             context.undeployable - ${context.undeployable}
+             context.stopped - ${context.stopped}
+             context.running - ${context.running}
+             context.notInstalled - ${context.notInstalled}
+         </echo>
+	</target>
+
+</project>

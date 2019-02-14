@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='Workgroups.xml'/>
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-I18nLibrary.xml'/>
+  <ImportAction name='include' value='Rule-Correlation-EmployeeID.xml'/>
+  <ImportAction name='include' value='Rule-IdentityCreation-HumanResources.xml'/>
+
+  <!-- Return IIQDisabled=true when term=true so UI will show correct value for "Status" column -->
+  <ImportAction name='include' value='Rule-Customization-HumanResources.xml'/>
+
+  <ImportAction name='include' value='Application-HR.xml'/>
+
+  <!-- Merge in the extended identity attributes that map to the HR apps we're importing  -->
+  <ImportAction name='include' value='ObjectConfig-Identity.xml'/>
+
+  <!-- Merge in update to identityViewAttributes to reflect the extended identity attributes we've added -->
+  <ImportAction name='include' value='UIConfig-SERI.xml'/>
+
+  <ImportAction name='include' value='TaskDefinition-AggregateHRM.xml'/>
+  <ImportAction name='include' value='TaskDefinition-DeltaAggregation.xml'/>
+
+  <!-- Import Identity Refresh task for performing manager correlation based on HR sources -->
+  <ImportAction name='include' value='TaskDefinition-IdentityRefresh-ManagerCorrelation.xml'/>
+
+  <ImportAction name='include' value='LocalizedAttribute-HR.xml'/>
+  
+  <!-- Import rule used to identify 'userType' as 'Employee' or 'Contractor' -->
+  <ImportAction name='include' value='/seri/xml/Rule/Rule-IdentityAttribute-EmployeeTypeDeterminer.xml'/>
+
+  <!-- Import FTO-related artifacts -->
+  <ImportAction name='include' value='Workflow-DisableAllAccounts.xml'/>
+  <ImportAction name='include' value='Workflow-EnableAllAccounts.xml'/>
+  <ImportAction name='include' value='Rule-FTOChangeRule.xml'/>
+  
+</sailpoint>

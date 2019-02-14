@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+         <Map>
+	         <entry key="scopePathsDenormalized">
+	           <value>
+	             <Boolean>true</Boolean>
+	           </value>
+	         </entry>
+	         <entry key="scopeTreeUIDisplayLimit" value="50"/>
+	         <entry key="scopingEnabled">
+	           <value>
+	             <Boolean>true</Boolean>
+	           </value>
+	         </entry>
+		     <entry key="identityControlsAssignedScope">
+		        <value>
+		          <Boolean>true</Boolean>
+		        </value>
+		     </entry>
+         </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>

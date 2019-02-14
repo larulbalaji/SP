@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+ <ImportAction name='include' value='ObjectConfig-Application.xml'/>
+ <ImportAction name='include' value='Rule-InitiateLOAReturnWorkflows.xml'/>
+ <ImportAction name='include' value='Rule-InitiateLOAWorkflows.xml'/>
+ <ImportAction name='include' value='Rule-ParseApplicationLOAPolicies.xml'/>
+ <ImportAction name='include' value='Rule-ParseApplicationLOAReturnPolicies.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-LOAAccount.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-LOADisableAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-LOAReturnAccount.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-LOAReturnEnableAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-LOAReturnRuleAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-LOARuleAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-Test-LOARule.xml'/>
+</sailpoint>

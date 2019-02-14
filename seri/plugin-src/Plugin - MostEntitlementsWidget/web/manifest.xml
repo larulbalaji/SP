@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE Plugin PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Plugin displayName="MostEntitlementsWidget" minSystemVersion="7.1" name="mostentitlements" rightRequired="mostentitlementsRight" version="1.0">
+  <Attributes>
+    <Map>
+      <entry key="minUpgradableVersion" value="0.1"/>
+      <entry key="settings">
+        <value>
+          <List>
+            <Setting dataType="int" defaultValue="25" helpText="This value limits the number of identities returned to the widget" label="Limit" name="limit"/>
+          </List>
+        </value>
+      </entry>
+        <entry key="snippets">
+        <value>
+          <List>
+            <Snippet regexPattern=".*\/home\.?(jsf|xhtml)" rightRequired="MostEntitlementUsersPluginRight">
+              <Scripts>
+                <String>ui/js/AbstractListCtrl.js</String>
+                <String>ui/js/MostEntitlementsUser.js</String>
+                <String>ui/js/MostEntitlementsUserService.js</String>
+                <String>ui/js/MostEntitlementsUserWidgetDirective.js</String>
+                <String>ui/js/MostEntitlementsUserWidgetDirectiveCtrl.js</String>
+              </Scripts>
+              <StyleSheets>
+                <String>ui/css/seri-widget.css</String>
+              </StyleSheets>
+            </Snippet>
+          </List>
+        </value>
+      </entry>
+      <entry key="restResources">
+        <value>
+          <List>
+            <String>sailpoint.plugin.mostentitlements.rest.MostEntitlementsResource</String>
+          </List>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+</Plugin>

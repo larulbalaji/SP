@@ -1,0 +1,157 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+
+
+  <EmailTemplate name="LCM Manager Termination Notify">
+    <Description>
+      Email Template for notifying about user terminations.
+    </Description>
+    <Body>
+      <![CDATA[
+        <html>
+          <img src="http://localhost:8080/identityiq/images/DemoHeader.jpg" alt="SailPoint Technologies"/>
+          <br><br>
+          This is an automated email alert from IdentityIQ Lifecycle Manager (LCM).
+          <br><br>
+          <font color="FF0000"><b>Employee $userName has been terminated.</b></font>
+          <br><br>
+          This person has been detected to have been on your team, reporting directly to you.
+          <br><br>
+          The group of affected Application Owners have been notified as well, so they will be
+          prepared to assist with the off-boarding process.
+          <br><br>
+          <i>Sincerely,</i>
+          <br>
+          <i>Corporate Security and Compliance Office</i>
+          <br><br>
+          <center><img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/></center>
+        </html>
+      ]]>
+    </Body>
+    <Subject>Team Member termination of $userName</Subject>
+  </EmailTemplate>
+  
+  <EmailTemplate name="LCM Manager Termination Notify Becthel Other Employee">
+    <Description>
+      Email Template for notifying about user terminations.
+    </Description>
+    <Body>
+      <![CDATA[
+        <html>
+          <img src="http://localhost:8080/identityiq/images/DemoHeader.jpg" alt="SailPoint Technologies"/>
+          <br><br>
+          This is an automated email alert from IdentityIQ Lifecycle Manager (LCM).
+          <br><br>
+          <font color="FF0000"><b>Employee $identityName has been terminated.</b></font>
+          <br><br>
+          This person has been detected to have been on your team, reporting directly to you.
+          <br><br>
+          The group of affected Application Owners have been notified as well, so they will be
+          prepared to assist with the off-boarding process.
+          <br><br>
+          <i>Sincerely,</i>
+          <br>
+          <i>Corporate Security and Compliance Office</i>
+          <br><br>
+          <center><img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/></center>
+        </html>
+      ]]>
+    </Body>
+    <Subject>Team Member termination of $identityName</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="Terminated Identity Administrator Alert">
+    <Description>
+      Email Template for notifying IIQ admin team about termination of identity who is 
+      app owner and/or workgroup member
+    </Description>
+    <Body>
+      <![CDATA[
+      <html>
+        <br>
+        This is an automated notification from IdentityIQ.<br><br>
+        $userName has been terminated.  This individual is an administrative user and may have<br>
+        responsibility for one or more applications as well as be a member of one or more work groups.<br>
+        See below for details.<br><br>
+        <b>Directly Owned Applications:</b>  $ownedApps<br>
+        <br>
+        <b>Workgroup Membership:</b>  $workgroups<br>
+        <br>
+        Please make appropriate modifications to the affected resourcees.<br><br>
+        Sincerely,<br>
+        Identity Governance Team
+      </html>
+      ]]>
+    </Body>
+    <Subject>Terminated Identity Administrator Alert</Subject>
+  </EmailTemplate>
+
+  <EmailTemplate name="LCM Application Owner Termination Notify">
+    <Description>
+      Email Template for notifying about user terminations.
+    </Description>
+    <Body>
+      <![CDATA[
+        <html>
+          <img src="http://localhost:8080/identityiq/images/DemoHeader.jpg" alt="SailPoint Technologies"/>
+          <br><br>
+          Hello $appOwnerName,
+          <br><br>
+          This is an automated change-detection email alert from IdentityIQ Lifecycle Manager (LCM).
+          <br><br>
+          <b>Employee $userName has been terminated.</b>
+          <br><br>
+          This user has been detected to have an account in your application, <b>$appName</b>.
+          <br><br>
+          According to our records, your application is not automatically provisioned.  Please take
+          the necessary steps to <b>disable</b> this user's account, in accordance with corporate policies.
+          <br><br>
+          <i>Sincerely,</i>
+          <br>
+          <i>Corporate Security and Compliance Office</i>
+          <br><br>
+          <center><img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/></center>
+        </html>
+      ]]>
+    </Body>
+    <Subject>Employee Termination affecting your Application</Subject>
+  </EmailTemplate>
+
+
+  <EmailTemplate name="LCM Application Owner Termination Notify - Provisioned">
+    <Description>
+      Email Template for notifying about user terminations.
+    </Description>
+    <Body>
+      <![CDATA[
+        <html>
+          <img src="http://localhost:8080/identityiq/images/DemoHeader.jpg" alt="SailPoint Technologies"/>
+          <br><br>
+          Hello $appOwnerName,
+          <br><br>
+          This is an automated change-detection email alert from IdentityIQ Lifecycle Manager (LCM).
+          <br><br>
+          <b>Employee $userName has been terminated.</b>
+          <br><br>
+          This user has been detected to have an account in your application, <b>$appName</b>.
+          <br><br>
+          Based upon corporate policy, <font color="FF0000"><b><i>the SailPoint Provisioning Engine has automatically
+          <u>disabled</u> this account in your application.</i></b></font>
+          <br>
+          You are being notified so that you are aware of this automated response.
+          <br><br>
+          <i>Sincerely,</i>
+          <br>
+          <i>Corporate Security and Compliance Office</i>
+          <br><br>
+          <center><img src="http://localhost:8080/identityiq/images/ProtectedByIdentityIQ.gif" alt="SailPoint IdentityIQ"/></center>
+        </html>
+      ]]>
+    </Body>
+    <Subject>Employee Termination affecting your Application</Subject>
+  </EmailTemplate>
+
+
+</sailpoint>

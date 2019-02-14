@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC
+                "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<!-- (c) Copyright 2008 SailPoint Technologies, Inc., All Rights Reserved. -->
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:sp="http://sailpoint.com/ui">
+<body>
+
+<ui:composition>
+
+    <script type="text/javascript">
+      <!--//--><![CDATA[//><!--
+        helpKey = 'APPLICATION';
+
+        function getFieldValue(field) {
+            var val = null;
+            var fileName = $(field);
+            if ( fileName ) {
+               val = fileName.value;
+            }
+            return val;
+        }
+        Ext.onReady(function () {
+// kmj error here?           Ext.QuickTips.init();
+
+           // This is our validation hook
+           Page.on('beforeSave', function() {
+               var domain = getFieldValue('editForm:endpoint');
+               Validator.validateNonBlankString(domain, "Endpoint cannot be null!");
+               if(domain.indexOf("//")>-1) {
+                 host=domain.substring(domain.indexOf("//")+2);
+                 if(colon>-1 && slash>-1) {
+                    if(colon<slash)
+                      host=host.substring(0,colon);
+                    else 
+                      host=host.substring(0,slash);
+                 }
+                 $('editForm:host').value=host;
+               }
+               var fileName = getFieldValue('editForm:stylesheet');
+               Validator.validateNonBlankString(fileName, "Stylesheet cannot be null!");
+               var errors = Validator.getErrors();
+               if (errors && errors.length > 0) {
+                   var errorDivTop = $('formErrorsTop');
+                   var errorDivBottom = $('formErrorsBottom');
+                   Validator.displayErrors(errorDivBottom); 
+                   Validator.displayErrors(errorDivTop); 
+                   return false;
+               }
+               //return false will kill cancel the save
+               return true;
+           });
+
+           var accountPanel = new Ext.Panel({
+               title : '#{sp:escapeJavascript(msgs.con_form_delimited_account)}',
+               contentEl: 'accountSettings'
+           }); 
+
+           var groupPanel = new Ext.Panel({
+               title : '#{sp:escapeJavascript(msgs.con_form_delimited_group)}',
+               contentEl: 'groupSettings'
+           }); 
+
+        });
+
+       //--><!]]>
+    </script>
+    <f:view>
+
+      <div class="spContent">
+        <h:outputText styleClass="sectionHeader" value="SOAP Connector Configuration"/>
+        <div id='formErrorsTop' class="formError" style="display:none"/>
+      <div id="soapConnectionSettings">
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol' valign="center">
+              <h:outputText style='padding:5px' value="Endpoint"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+
+            <td class="certScheduleHelpCol" valign="middle">
+              <h:graphicImage id="imgHlpHostName" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="Endpoint"/>
+
+            </td>
+            <td valign="center">
+              <h:inputText id="endpoint"
+                           value="#{applicationObject.attributes['endpoint']}"
+                           size="80"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            <h:inputHidden id="host"
+                  value="#{applicationObject.attributes['host']}"/>
+                   
+            </td>
+          </tr>
+
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="Stylesheet"/>
+              <h:outputText styleClass="requiredText" value="*"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpPort" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="Stylesheet to translate Prov plan to soap"/>
+            </td>
+            <td>
+              <h:inputText id="stylesheet"
+                       value="#{applicationObject.attributes['stylesheet']}"
+                           size="20"
+                           disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"
+                           readonly="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          
+        </table>
+    </div>
+            <!-- Filtering -->
+        <br/><h:outputText styleClass="sectionHeader" value="Application features"/><br/>
+        <table class="spTable" style="border:0px" cellspacing="0">
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="List only returns IDs"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpListOnlyIDs_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_filterEmpty}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes['listOnlyIDs']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="Supports updates"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpSupportsUpdates_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_filterEmpty}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes['supportsUpdates']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplicationObject')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="Supports create"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpSupportsCreate_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_filterEmpty}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes['supportsCreate']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="Supports delete"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpSupportsDelete_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_filterEmpty}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes['supportsDelete']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+          <tr>
+            <td class='titleColumn certScheduleTitleCol'>
+              <h:outputText style='padding:5px' value="Supports input paging"/>
+            </td>
+            <td class="certScheduleHelpCol">
+              <h:graphicImage id="imgHlpSupportsPaging_#{nameSpace}" styleClass="helpIcon" url="/images/icons/dashboard_help_16.png" 
+                              alt="#{msgs.con_help_delimited_filterEmpty}"/>
+            </td>
+            <td>
+              <h:selectBooleanCheckbox value="#{applicationObject.attributes['supportsPaging']}"
+                                       disabled="#{!sp:hasRight(facesContext, 'ManageApplication')}"/>
+            </td>
+          </tr>
+        </table>
+    
+      </div>
+
+
+      <div style="display:none; border:0px">
+        <div id="groupSettings" class='spContent'>
+          <ui:include src="delimitedAttributesInclude.xhtml">
+      <ui:param name="nameSpace" value="group"/>
+            <ui:param name="schemaType" value="group."/>
+          </ui:include>
+         </div>
+      </div>
+
+      <div class="spContent">
+        <h:outputText class="sectionHeader" value="#{msgs.con_form_delimited_rules}"/>
+      
+        <!--a4j:outputPanel id="connectorRulesPanel">
+        <table class="spTable width100" style="border:0px" cellspacing="0">
+  
+        </table>
+        
+        <a4j:commandButton id="refreshConnectorRulesButton"
+                           style="display:none"
+                           immediate="true"
+                           reRender="connectorRulesPanel"/>
+        
+        </a4j:outputPanel-->
+      </div>
+      <div id='formErrorsBottom' class="formError" style="display:none"/>
+    </f:view>
+</ui:composition>
+
+</body>
+</html>

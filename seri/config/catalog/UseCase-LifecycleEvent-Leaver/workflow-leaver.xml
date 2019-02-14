@@ -1,0 +1,348 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  libraries="Identity,IdentityRequest"  name="Lifecycle Event - Terminate" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event" transient="true">
+    <Description>
+      The IdentityChangeEvent.  It can be used to build
+      the provisioning plan, but does not need to be
+      persisted with the case, so marked as transient.
+    </Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName">
+    <Description>
+      The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.
+    </Description>
+  </Variable>
+  <Variable name="plan">
+    <Description>The provisioning plan, which is built by a service method. </Description>
+  </Variable>
+  <Variable initializer="string:false" name="optimisticProvisioning">
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+  <Variable initializer="string:true" name="foregroundProvisioning">
+    <Description>
+      Normally provisioning is done in a step that uses the "background"
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to 
+      see the resutls of the request.
+    </Description>
+  </Variable>
+  <Variable initializer="string:spadmin" input="true" name="fallbackApprover">
+    <Description>
+      A String that specifies the name of the Identity that will 
+      be assigned any approvals where the owner of the approver 
+      can't be resolved. Example if the scheme is "owner" and the 
+      application doesn't specify and owner.
+    </Description>
+  </Variable>
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>
+      String version of sailpoint.object.Source to indicate
+      where the request originated.  Defaults to LCM.
+    </Description>
+  </Variable>
+  <Variable initializer="string:false" input="true" name="trace">
+    <Description>
+      Used for debugging this workflow and when set to true trace
+      will be sent to stdout.
+    </Description>
+  </Variable>
+  <Variable name="project">
+    <Description>
+      ProvisioningProject which is just a compiled version of the ProvisioningPlan.
+    </Description>
+  </Variable>
+  <Variable name="identityRequestId" output="true">
+    <Description>
+       The sequence id of the Identity request object which is stored in 
+       the name field of the identity request.
+    </Description>
+  </Variable>
+  <Variable name="cart" output="true">
+    <Description>
+       This variable includes all ApprovalItems that are part of 
+       the request process and is updated during the AfterScript
+       of the approval process by assimilating the decisions 
+       and comments from the Approvals copy of the ApprovalItem.
+    </Description>
+  </Variable>
+  <Variable initializer="script:getIdentityProperty(identityName, &quot;displayName&quot;)" name="userName">
+    <Description>The display name of the identity.</Description>
+  </Variable>
+  <Variable initializer="string:OU=Disabled,OU=Demo,DC=sailpointdemo,DC=com" name="disableContainer"/>
+  <Description>Disable all accounts when an employee leaves the company.</Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule"  name="SP Util Rule Library"/>
+    <Reference class="sailpoint.object.Rule"  name="Demo - Workflow RuleLibrary"/>
+  </RuleLibraries>
+  
+  <Step action="script:System.out.println(message);" icon="Start" name="start" posX="10" posY="20">
+    <Arg name="message" value="string:Starting LCM Termination Workflow!"/>
+    <Transition to="Identity Administrator Alert">
+      <Script>
+        <Source><![CDATA[
+// Find out if this person owns any apps or is a member of workgroups
+//
+String ownedApps = getListOfOwnedApplications(identityName);
+String workgroups = getWorkgroupMembership(identityName);
+workflow.put("ownedApps", ownedApps);
+workflow.put("workgroups", workgroups);
+return (ownedApps != null || workgroups.length() > 0);
+	]]>	</Source>
+      </Script>
+    </Transition>
+    <Transition to="Notify Application Owners"/>
+  </Step>
+  
+  <Step action="call:sendEmail" icon="Email" name="Identity Administrator Alert" posX="74" posY="127">
+    <Arg name="template" value="string:Terminated Identity Administrator Alert"/>
+    <Arg name="to" value="string:iiq-admins@demoexample.com"/>
+    <Description>Notify IIQ Admin Team that terminated identity is also an app owner on one or more apps</Description>
+    <Transition to="Notify Application Owners"/>
+  </Step>
+  
+  <Step icon="Email" name="Notify Application Owners" posX="203" posY="16">
+    <Description>Notify the affected Application Owners of the Termination event.</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+import sailpoint.object.Application;
+import sailpoint.object.Attributes;
+import sailpoint.object.Link;
+import sailpoint.tools.GeneralException;
+import sailpoint.object.EmailOptions;
+import sailpoint.object.EmailTemplate;
+import sailpoint.object.IntegrationConfig;
+import sailpoint.object.ManagedResource;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+
+Identity identity = (Identity) context.getObject(Identity.class, identityName);
+
+// Extract Application Accounts and Application Owners
+//
+List links = identity.getLinks();
+System.out.println("");
+System.out.println("*************************************************");
+System.out.println("JML Event   : Termination (Leaver) Detected");
+System.out.println("User Name   : " + identityName);
+System.out.println("Mngr Email  : " + getManagersEmail(identityName));
+
+if (links != null) {
+	System.out.println("User Details: has links");
+
+    for (int i=0; i < links.size(); i++) {
+    	System.out.println("---------------------------------------------");
+        System.out.println("User Links  : Link #" + i);
+
+        Link link = (Link) links.get(i);
+        Application app = link.getApplication();
+
+        String appName = app.getName();
+        Identity appOwner = app.getOwner();
+        String appOwnerName = appOwner.getName();
+        String appOwnerMail = appOwner.getEmail();
+
+        System.out.println("Application : " + appName);
+        System.out.println("App-Own Name: " + appOwnerName);
+        System.out.println("App-Own Mail: " + appOwnerMail);
+
+        // Skip Sending Email if app is Authoritative Application
+        //
+        if (app.isAuthoritative()) {
+            System.out.println("Application is authoritative...skipping email to Application Owner");
+        } else {
+            String et = "";
+            if (appName.equals("Asset Tracking")) {
+	         	et = "LCM Application Owner Termination Notify - Asset";
+            } else if (app.getFeaturesString().contains("PROVISIONING")) {
+                et = "LCM Application Owner Termination Notify - Provisioned";
+            } else {
+                et = "LCM Application Owner Termination Notify";
+            }
+ 
+            EmailTemplate template = (EmailTemplate) context.getObject(EmailTemplate.class, et);
+
+            Map mailArgs = new HashMap();
+            mailArgs.put("userName", getIdentityProperty(identityName, "displayName"));
+            mailArgs.put("appName", appName);
+            mailArgs.put("appOwnerName", appOwnerName);
+   
+            EmailOptions options = new EmailOptions(appOwnerMail,mailArgs);
+   
+            options.setSendImmediate(true);
+            options.setNoRetry(true);
+   
+            try {
+            	context.sendEmailNotification(template, options);
+            }  catch (Exception e) {
+                System.out.println("Error Sending Email: " + e);
+            }
+        }
+    }
+} else {
+    System.out.println("User Details: has NO links");
+}
+System.out.println("*************************************************")]]>;
+	  </Source>
+    </Script>
+    <Transition to="Notify Manager"/>
+  </Step>
+  
+  <Step action="call:sendEmail" icon="Email" name="Notify Manager" posX="331" posY="16">
+    <Arg name="template" value="string:LCM Manager Termination Notify"/>
+    <Arg name="to" value="script:getManagersEmail(identityName)"/>
+    <Description>Notify the person's Manager of the Termination event.</Description>
+    <Transition to="Build Provisioning Plan"/>
+  </Step>
+  
+  <Step name="Build Provisioning Plan" posX="331" posY="115" resultVariable="plan">
+    <Description>Create a plan based on configured settings</Description>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.*;
+import sailpoint.object.ProvisioningPlan;
+import java.util.*;
+
+			      
+/****************************************************************************
+ * Calculate provisioning plan for the terminate event
+****************************************************************************/			
+plan = getDisablePlan (context, identityName);		
+
+/****************************************************************************
+ * Avoid locking when calling LCM Provisioning.  
+****************************************************************************/	
+Identity cube = context.getObjectByName(Identity.class, identityName);
+if(cube.getLock() != null) {	
+	cube.setLock(null);
+	context.saveObject(cube);
+	context.commitTransaction();
+}  
+			   
+System.out.println ("Term Plan is: " + plan.toXml());
+return plan;
+	]]>  </Source>
+    </Script>
+    <Transition to="Call LCM Provisoning" when="script: plan != null &amp;&amp; !plan.isEmpty()"/>
+    <Transition to="end"/>
+  </Step>
+  
+  <Step icon="Task" name="Call LCM Provisoning" posX="500" posY="8">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="notificationScheme" value="string:none"/>
+    <Arg name="approvalMode" value="string:parallel"/>
+    <Arg name="approvalScheme" value="string:none"/>
+    <Arg name="doRefresh" value="string:false"/>
+    <Arg name="policyScheme" value="string:none"/>
+    <Arg name="trace" value="string:false"/>
+    <Description>
+    	Call the standard subprocess to initialize the request, this includes
+        auditing, building the approvalset, compiling the plan into 
+        project and checking policy violations.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow"  name="LCM Provisioning"/>
+    </WorkflowRef>
+    <Transition to="AD Rename"/>
+  </Step>
+
+  <Step name="AD Rename" posX="666" posY="10" resultVariable="ADRenameResult">
+    <Description>Create a plan based on configured settings</Description>
+    <Script>
+      <Source><![CDATA[ 
+import sailpoint.object.*;
+import sailpoint.object.ProvisioningPlan;
+import java.util.*;
+		
+Identity cube = context.getObjectByName(Identity.class, identityName);
+List links = cube.getLinks();
+if (links == null || links.size() < 1) { 
+  System.out.println("No Links ");
+  return false;
+} else {
+	for (Link link : links) {
+	Application app = link.getApplication();
+	String appName = app.getName();
+	String appType = app.getType();
+	// Our AD connector supports a rename operation (move).  IIQ does not yet understand rename.  
+	// Move the link instead of waiting for a re-aggregation.
+	if (appType.compareTo("Active Directory - Direct") == 0) {
+		String newDN = "CN=" + link.getDisplayName() + ",OU=Disabled,OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+    	System.out.println("Renaming: " + link.getNativeIdentity() + "  to: " + newDN);
+    	link.setNativeIdentity(newDN);
+    	link.setAttribute("distinguishedName",newDN);
+    	context.saveObject(link);
+    	context.saveObject(cube);
+    	context.commitTransaction();
+    }
+}
+	return true;
+}    ]]>  
+	  </Source>
+    </Script>
+    <Transition to="Schedule Account Delete Workflow"/>
+  </Step>
+  
+  <Step action="call:scheduleWorkflowEvent" icon="Task" name="Schedule Account Delete Workflow" posX="805" posY="10">
+    <Arg name="workflow" value="string:Account Delete Workflow"/>
+    <Arg name="owner" value="ref:identityName"/>
+    <Arg name="requestName" value="script:return (&quot;Future Account Deletion Event Scheduled for: &quot; + identityName);"/>
+    <Arg name="scheduleDate">
+      <Script>
+        <Source><![CDATA[
+import java.util.*;
+Calendar calendar = Calendar.getInstance();  
+calendar.add(Calendar.DATE, 30);
+Date sunsetDate = calendar.getTime();
+return (sunsetDate);
+	]]>	</Source>
+      </Script>
+    </Arg>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="futureDate">
+      <Script>
+        <Source><![CDATA[import java.util.*;
+          Calendar calendar = Calendar.getInstance();  
+          calendar.add(Calendar.DATE, 30);
+          Date nextCheck = calendar.getTime();
+          return (nextCheck);]]></Source>
+      </Script>
+    </Arg>
+    <Arg name="sponsor" value="string:spadmin"/>
+    <Arg name="sunsetDate">
+      <Script>
+        <Source><![CDATA[import java.util.*;
+          Calendar calendar = Calendar.getInstance();  
+          calendar.add(Calendar.DATE, 30);
+          Date sunsetDate = calendar.getTime();
+          return (sunsetDate);]]></Source>
+      </Script>
+    </Arg>
+    <Arg name="identityDisplayName" value="ref:identityName"/>
+    <!-- workaround for Bug #27980 -->
+    <Arg name="catchExceptions" value="true"/>
+    
+    <Transition to="end"/>
+  </Step>
+  
+  <Step icon="Stop" name="end" posX="397" posY="236"/>
+</Workflow>

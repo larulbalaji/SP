@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="emailTemplate-transfer.xml"/>
+    <ImportAction name="include" value="subprocess-transfer-request-notification.xml"/>
+    <ImportAction name="include" value="workflow-transfer-entitlementCleanup.xml"/>
+    <ImportAction name="include" value="Workflow-LifecycleEvent-TransferIdentityinc.xml"/>
+    <ImportAction name='include' value='../Resource-SecurityIQ/RuleLibrary-SecurityIQConfiguration.xml'/>
+    <ImportAction name="include" value="/seri/xml/Rule/RuleLibrary-Demo-Workflow.xml"/>
+    <ImportAction name="include" value="/seri/xml/Rule/RuleLibrary-Util.xml"/>
+    <ImportAction name="include" value="IdentityTrigger-TransferProcessor3.xml"/>
+    <ImportAction name="include" value="TaskDefinition-ProcessEvents-ProcessHRTransfer.xml"/>
+    <ImportAction name="include" value="TaskDefinition-ProcessHRChanges.xml"/>    
+</sailpoint>

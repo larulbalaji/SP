@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.reporting.LiveReportExecutor" name="Task Result Status Report" progressMode="Percentage" resultAction="Rename" subType="Identity and User Reports" template="true" type="LiveReport">
+  <Attributes>
+    <Map>
+      <entry key="report">
+        <value>
+          <LiveReport title="User Account Attributes Report">
+            <DataSource objectType="sailpoint.object.TaskResult" type="Filter">
+              <QueryParameters>
+                <Parameter argument="completionStatus" property="completionStatus"/>
+                <Parameter argument="completed" property="completed" valueClass="daterange"/>
+              </QueryParameters>
+            </DataSource>
+		    <ReportForm>
+            	<Reference class="sailpoint.object.Form" name="Task Result Report Search Fields"/>
+            </ReportForm>
+            <Columns>
+              <ReportColumnConfig field="name" header="Task Name" property="name" sortable="false" width="50"/>
+              <ReportColumnConfig field="completed" header="Completed Date" property="completed" sortable="true" width="50"/>
+              <ReportColumnConfig field="completionStatus" header="Result" property="completionStatus" sortable="true" width="50"/>
+              <ReportColumnConfig field="signoff" header="SignOff" property="signoff" sortable="true" width="50">
+                <RenderScript>
+				  <Source>
+				    import sailpoint.object.*;
+				    // System.out.println ("value: " + value);
+				    if (null == value) return "None";
+				    return value;
+				  </Source>
+				</RenderScript>	
+              </ReportColumnConfig>
+              <ReportColumnConfig field="owner" header="Owner" property="owner.name" sortable="true" width="110"/>
+              <ReportColumnConfig field="terminated" header="Terminated" property="terminated" sortable="true" width="110"/> 
+            </Columns>
+          </LiveReport>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Description>Displays task result information</Description>
+  <Signature>
+    <Inputs>
+      <Argument name="completionStatus" required="true" multi='true' type="sailpoint.object.TaskResult.CompletionStatus">
+        <Description>Completion Status</Description>
+      </Argument>
+      <Argument name="completed"  type="date">
+        <Description>rept_input_cert_report_create_dt</Description>
+      </Argument>
+ 
+    </Inputs>
+  </Signature>
+  <RequiredRights>
+    <Reference class="sailpoint.object.SPRight" name="FullAccessApplicationAccountAttributesReport"/>
+  </RequiredRights>
+</TaskDefinition>

@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<TaskDefinition  executor="sailpoint.seri.task.SODListImporterExecutor" name="Import List SOD Definitions" template="true" type="Generic">
+  <Description>Template for SOD list definition Imports</Description>
+  <Signature>
+    <Inputs>
+      <Argument name="filename" type="string" required="true">
+        <Prompt>Filename</Prompt>
+      </Argument>
+      <Argument name="fileType" type="string" required="true">
+        <Prompt>File type (XLS or CSV)</Prompt>
+      </Argument>
+      <Argument name="sheetName" type="string">
+        <Prompt>Sheet name (only for XLS)</Prompt>
+      </Argument>
+      <Argument name="leftCol" type="int" required="true">
+        <Prompt>Left column number</Prompt>
+      </Argument>
+      <Argument name="rightCol" type="int" required="true">
+        <Prompt>Right column number</Prompt>
+      </Argument>
+      <Argument name="startRow" type="int" required="true">
+        <Prompt>Start Row</Prompt>
+      </Argument>
+      <Argument name="generateRoles" type="boolean">
+        <Prompt>Generate Role Definitions</Prompt>
+      </Argument>
+      <Argument name="roleType" type="string" required="true">
+        <Prompt>Role type (IT or Business, or entitlement for entitlements)</Prompt>
+      </Argument>
+      <Argument name="singlePolicy" type="boolean">
+        <Prompt>Single Policy, Multiple Rules</Prompt>
+      </Argument>
+      <Argument name="singlePolicyName" type="string">
+        <Prompt>Name for Single Policy (if checked)</Prompt>
+      </Argument>
+      <Argument name="entitlementApp" type="string">
+        <Prompt>Application containing entitlements (if using entitlements)</Prompt>
+      </Argument>
+      <Argument name="entitlementAttr" type="string">
+        <Prompt>Entitlement attribute (if using entitlements)</Prompt>
+      </Argument>
+      <Argument name="entitlementsSeparate" type="boolean">
+        <Prompt>Entitlements separate from pairs?</Prompt>
+      </Argument>
+      <Argument name="entFilename" type="string" required="true">
+        <Prompt>Entitlement Filename</Prompt>
+      </Argument>
+      <Argument name="entFileType" type="string" required="true">
+        <Prompt>Entitlement File type (XLS or CSV)</Prompt>
+      </Argument>
+      <Argument name="entSheetName" type="string">
+        <Prompt>Entitlement Sheet name (only for XLS)</Prompt>
+      </Argument>
+      <Argument name="entRefCol" type="int" required="true">
+        <Prompt>Entitlement Reference Column (name from first sheet)</Prompt>
+      </Argument>
+      <Argument name="entValueCol" type="int" required="true">
+        <Prompt>Entitlement Value Column (entitlement name in this sheet)</Prompt>
+      </Argument>
+      <Argument name="entStartRow" type="int" required="true">
+        <Prompt>First Row for entitlements</Prompt>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="rolesCreated" type="int">
+        <Prompt>Roles created</Prompt>
+      </Argument>
+      <Argument name="rolesSkipped" type="int">
+        <Prompt>Roles skipped (existing)</Prompt>
+      </Argument>
+      <Argument name="sodsCreated" type="int">
+        <Prompt>SOD Policies created</Prompt>
+      </Argument>
+      <Argument name="sodsUpdated" type="int">
+        <Prompt>SOD Policies updated</Prompt>
+      </Argument>
+    </Returns>
+  </Signature>
+</TaskDefinition>
+</sailpoint>

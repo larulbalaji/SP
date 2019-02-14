@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+    <SPRight displayName="UpdateViewAttributesPluginRight" name="UpdateViewAttributesPluginRight">
+        <Description>Access to use the Hello World Plugin</Description>
+    </SPRight>
+    <SPRight displayName="UpdateViewAttributesPluginRestServiceAllow" name="UpdateViewAttributesPluginRestServiceAllow">
+        <Description>Allow access to Update View Attributes Plugin REST Service</Description>
+    </SPRight>
+
+    <Capability displayName="UpdateViewAttributesPluginRestServiceAccess" name="UpdateViewAttributesPluginRestServiceAccess">
+        <Description>Allow access to Update View Attributes Plugin REST Service</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="UpdateViewAttributesPluginRestServiceAllow"/>
+        </RightRefs>
+    </Capability>
+    
+    <Capability displayName="UpdateViewAttributesPluginCapability" name="UpdateViewAttributesPluginCapability">
+        <Description>Allow access to Update View Attributes Plugin</Description>
+        <RightRefs>
+            <Reference class="sailpoint.object.SPRight" name="UpdateViewAttributesPluginRight"/>
+        </RightRefs>
+    </Capability>
+
+</sailpoint>
+

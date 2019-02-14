@@ -1,0 +1,40 @@
+{
+	"id": "UID Priority",
+	"type": "lower",
+	"attributes": {
+		"input": {
+			"type": "firstValid",
+			"attributes": {
+				"values": [
+					{
+						"attributes": {
+							"attributeName": "sAMAccountName",
+							"sourceName": "Active Directory"
+						},
+						"type": "accountAttribute"
+					},
+					{
+						"attributes": {
+							"attributeName": "userid",
+							"sourceName": "OrangeHRM"
+						},
+						"type": "accountAttribute"
+					},
+					{
+						"attributes": {
+							"attributeName": "WORKER_DESCRIPTOR",
+							"sourceName": "Workday"
+						},
+						"type": "accountAttribute"
+					},
+					{
+						"attributes": {
+							"value": "(none)"
+						},
+						"type": "static"
+					}
+				]
+			}
+		}
+	}
+}

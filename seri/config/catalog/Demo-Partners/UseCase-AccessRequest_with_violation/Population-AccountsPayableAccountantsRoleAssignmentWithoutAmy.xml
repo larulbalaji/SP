@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE GroupDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<GroupDefinition   indexed="true" name="Accounts Payable Accountants Role assignment without Amy" private="true">
+  <Description>Accounts Payable Analysts without Amy</Description>
+  <GroupFilter>
+    <CompositeFilter operation="AND">
+      <Filter ignoreCase="true" operation="NE" property="lastname" value="Cox"/>
+      <CompositeFilter operation="OR">
+        <Filter operation="EQ" property="jobTitle" value="Accounts Payable Analyst"/>
+        <Filter operation="EQ" property="oldJobTitle" value="Accounts Payable Analyst"/>
+        <Filter operation="EQ" property="jobTitle" value="AP Accounting Manager"/>
+        <Filter operation="EQ" property="oldJobTitle" value="AP Accounting Manager"/>
+      </CompositeFilter>
+    </CompositeFilter>
+  </GroupFilter>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="Jerry.Bennett"/>
+  </Owner>
+</GroupDefinition>

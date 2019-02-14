@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <ImportAction name="include" value="Workflow-HelpDeskVerifyUser.xml" />
+  <ImportAction name="include" value="Form-IsVerified.xml" />
+  <ImportAction name="include" value="Form-AQVerifyIdentity.xml" />
+  <ImportAction name="include" value="QuickLink-HelpDeskVerify.xml" />
+</sailpoint>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <GroupFactory  enabled="true" factoryAttribute="region"  name="Region"/>
+  <GroupFactory  enabled="true" factoryAttribute="department"  name="Department"/>
+  <GroupFactory enabled="true" factoryAttribute="jobTitle" name="Job Title"/>
+</sailpoint>

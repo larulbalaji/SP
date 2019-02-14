@@ -1,0 +1,50 @@
+# Database creation script for assetDB
+CREATE DATABASE IF NOT EXISTS assetsdb CHARACTER SET utf8;
+
+GRANT ALL PRIVILEGES ON assetsdb.*
+    TO 'identityiq' IDENTIFIED BY 'identityiq';
+GRANT ALL PRIVILEGES ON assetsdb.*
+    TO 'identityiq'@'%' IDENTIFIED BY 'identityiq';
+GRANT ALL PRIVILEGES ON assetsdb.*
+    TO 'identityiq'@'localhost' IDENTIFIED BY 'identityiq';
+
+USE assetsdb;
+
+DROP TABLE IF EXISTS accounts;
+  
+CREATE TABLE accounts 
+(
+  user_id VARCHAR(120) NOT NULL,
+  user_firstname VARCHAR(200),
+  user_lastname VARCHAR(200),
+  user_org_id VARCHAR(50),
+  user_department VARCHAR(200),
+  user_email VARCHAR(400),
+  user_manager_id VARCHAR(120),
+  user_disabled VARCHAR(1),
+  user_phone VARCHAR(50),
+  PRIMARY KEY (user_id ) 
+) Engine=InnoDB;  
+  
+
+DROP TABLE IF EXISTS accounts_assets;
+CREATE TABLE accounts_assets 
+(
+  user_id VARCHAR(120) NOT NULL,
+  asset_id VARCHAR(120) NOT NULL
+ ) Engine=InnoDB;
+
+DROP TABLE IF EXISTS assets;
+ CREATE TABLE assets 
+ (
+  asset_id VARCHAR(120) NOT NULL,
+  asset_brand VARCHAR(100),
+  asset_name VARCHAR(200) NOT NULL,
+  asset_type VARCHAR(100),
+  asset_model VARCHAR(100),
+  asset_prod_date VARCHAR(20),
+  asset_serialno VARCHAR(100),
+  asset_description VARCHAR(512),
+  asset_color VARCHAR(100),
+  PRIMARY KEY (asset_id)
+) Engine=InnoDB;

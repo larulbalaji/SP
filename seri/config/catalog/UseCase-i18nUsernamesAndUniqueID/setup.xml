@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+   <!--  
+   Does not work. Somehow IIQ ignores this and requires a correlationRule for this scenario 
+   <ImportAction name="include" value="CorrelationConfig-EmployeeIDCorrelation.xml"/>
+    -->
+    <ImportAction name="include" value="PasswordPolicy-SERI-DefaultPasswordPolicy.xml"/>
+    <ImportAction name="include" value="Rule-I18nLibrary.xml"/>
+    <ImportAction name="include" value="Rule-FieldValue-UniqueUsername-I18n.xml"/>
+    <ImportAction name="include" value="Rule-IdentityCreation-UniqueUsername-I18n-setEmail.xml"/>    
+    <ImportAction name="include" value="Rule-GeneratePasswordFromPolicy.xml"/>  
+    <ImportAction name="include" value="Form-NewIdentityCreation-FilterManagers.xml"/>
+    <ImportAction name="include" value="ObjectConfig-Sysconfig-createIdentityForm.xml"/>    
+    <ImportAction name="include" value="Rule-ADdnNamer.xml"/>  
+    <ImportAction name="include" value="Rule-Correlation-EmployeeID.xml"/>  
+    <ImportAction name="include" value="Application-HR.xml"/>     
+</sailpoint>	

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow configForm="Provisioning Workflow Config Form" explicitTransitions="true" handler="sailpoint.api.StandardWorkflowHandler" libraries="Identity,BatchRequest" name="SERI - LCM Create and Update Wrapper" taskType="LCM" type="LCMIdentity">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity we&amp;#39;re supposed to update.</Description>
+  </Variable>
+  <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName">
+    <Description>The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.</Description>
+  </Variable>
+  <Variable input="true" name="plan">
+    <Description>The provisioning plan ready to execute.</Description>
+  </Variable>
+  <Variable input="true" name="flow">
+    <Description>The name of the LCM flow that launched this workflow.
+
+      This is one of these two values:
+
+      IdentityCreateRequest
+      IdentityEditRequest</Description>
+  </Variable>
+  <Variable initializer="true" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Description>This is a wrapper workflow for the LCM Create &amp; Update workflow.
+It allows performing actions before and/or after the call to the standard workflow
+It is designed to be called ONLY for Identity Creation</Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="Approval Library"/>
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="28" posY="10">
+    <Transition to="Pre LCM actions"/>
+  </Step>
+  <Step icon="Default" name="Pre LCM actions" posX="118" posY="10">
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LCM Create and Update Wrapper.Pre LCM");
+
+// INSERT PRE LCM C&U actions here
+
+        ]]></Source>
+    </Script>
+    <Transition to="Call LCM Create and Update"/>
+  </Step>
+  <Step icon="Task" name="Call LCM Create and Update" posX="248" posY="10">
+    <Arg name="approvalScheme"/>
+    <Arg name="fallbackApprover"/>
+    <Arg name="endOnManualWorkItems"/>
+    <Arg name="userEmailTemplate"/>
+    <Arg name="policiesToCheck"/>
+    <Arg name="workItemPriority"/>
+    <Arg name="project"/>
+    <Arg name="identityRequestId"/>
+    <Arg name="source"/>
+    <Arg name="identityDisplayName" value="ref:identityDisplayName"/>
+    <Arg name="foregroundProvisioning"/>
+    <Arg name="approvalMode"/>
+    <Arg name="batchRequestItemId"/>
+    <Arg name="trace" value="ref:trace"/>
+    <Arg name="doRefresh"/>
+    <Arg name="endOnProvisioningForms"/>
+    <Arg name="approverElectronicSignature"/>
+    <Arg name="plan" value="ref:plan"/>
+    <Arg name="flow" value="ref:flow"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="notificationScheme"/>
+    <Arg name="approvalSet"/>
+    <Arg name="policyViolations"/>
+    <Arg name="policyScheme"/>
+    <Arg name="approvalForm"/>
+    <Arg name="requesterEmailTemplate"/>
+    <Arg name="approvalEmailTemplate"/>
+    <Arg name="ticketManagementApplication"/>
+    <Arg name="optimisticProvisioning"/>
+    <Arg name="securityOfficerEmailTemplate"/>
+    <Arg name="securityOfficerName"/>
+    <Arg name="managerEmailTemplate"/>
+    <Arg name="ticketId"/>
+    <Description>Call the LCM Create and Update workflow with the plan that was updated.</Description>
+    <WorkflowRef>
+      <Reference class="sailpoint.object.Workflow" name="LCM Create and Update"/>
+    </WorkflowRef>
+    <Transition to="Post LCM actions"/>
+  </Step>
+  <Step icon="Default" name="Post LCM actions" posX="383" posY="9">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LCM Create and Update Wrapper.Post LCM");
+
+serilog.debug("Updating correlated flags");
+Identity createdIdentity = context.getObjectByName(Identity.class, identityName);
+if (createdIdentity != null) {
+    createdIdentity.setLock(null);
+    createdIdentity.setCorrelated(true);
+    createdIdentity.setCorrelatedOverridden(true);
+    context.saveObject(createdIdentity);
+    context.commitTransaction();
+} else {
+    serilog.error("Identity not found");
+}
+        ]]></Source>
+    </Script>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Stop" name="end" posX="486" posY="8"/>
+</Workflow>

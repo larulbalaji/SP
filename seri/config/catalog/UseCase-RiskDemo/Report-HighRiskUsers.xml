@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition formPath="/analyze/reports/userreportargs.xhtml" name="High Risk Users" resultAction="Rename" subType="Risk Reports" type="LiveReport">
+  <Attributes>
+    <Map>
+      <entry key="disableDetail" value="false"/>
+      <entry key="disableSummary" value="false"/>
+      <entry key="groupDefinitions">
+        <value>
+          <List>
+            <String>High risk users</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="reportColumnOrder" value="username, manager, risk, roleRisk, entitlementRisk, policyRisk, certRisk"/>
+    </Map>
+  </Attributes>
+  <Description>A detailed view of the risk associated with all high risk users</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition"  name="Identity Risk Live Report"/>
+  </Parent>
+  <Signature>
+    <Inputs>
+      <Argument multi="true" name="groupDefinitions" type="string">
+        <Description>rept_input_user_report_group_definition</Description>
+      </Argument>
+      <Argument name="capabilities" type="string">
+        <Description>rept_input_user_report_capabilities</Description>
+      </Argument>
+      <Argument name="lastLoginStart" type="date">
+        <Description>rept_input_user_report_last_login</Description>
+      </Argument>
+      <Argument name="lastLoginEnd" type="date">
+        <Description>rept_input_user_report_last_login</Description>
+      </Argument>
+      <Argument name="lastRefreshStart" type="date">
+        <Description>rept_input_user_report_last_refresh</Description>
+      </Argument>
+      <Argument name="lastRefreshEnd" type="date">
+        <Description>rept_input_user_report_last_refresh</Description>
+      </Argument>
+      <Argument multi="true" name="identityBusinessRoles" type="Bundle">
+        <Description>rept_input_user_report_biz_roles</Description>
+      </Argument>
+      <Argument multi="true" name="identityApplications" type="Application">
+        <Description>rept_input_user_report_apps</Description>
+      </Argument>
+      <Argument name="_attr_firstname" type="string"/>
+      <Argument name="_attr_lastname" type="string"/>
+      <Argument name="_attr_displayName" type="string"/>
+      <Argument name="_attr_email" type="string"/>
+      <Argument name="_attr_manager" type="sailpoint.object.Identity"/>
+      <Argument name="_attr_inactive" type="boolean"/>
+      <Argument name="_attr_department" type="string"/>
+      <Argument multi="true" name="_attr_costCenter" type="string"/>
+      <Argument name="_attr_region" type="string"/>
+      <Argument name="_attr_jobTitle" type="string"/>
+      <Argument name="_attr_location" type="string"/>
+      <Argument name="_attr_employeeId" type="string"/>
+      <Argument name="_attr_employeeType" type="string"/>
+      <Argument name="_attr_terminationDate" type="string"/>
+      <Argument multi="true" name="_attr_costCenter" type="string"/>
+    </Inputs>
+  </Signature>
+</TaskDefinition>

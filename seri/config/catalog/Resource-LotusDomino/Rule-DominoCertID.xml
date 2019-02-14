@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell"  name="Domino - Cert ID" type="FieldValue">
+  <Description>This rule can be used to generate a field value (eg - an account name) using data from the given Identity.</Description>
+  <Signature returnType="String"/>
+  <Source><![CDATA[
+	
+String org = identity.getAttribute("ORG");
+System.out.println ("Org is: " + org);
+if (org == null) 
+    return ("C:\\IBM\\Lotus\\Domino\\data\\cert.id");
+
+if (org.equals("ABC")) 
+    return ("C:\\abc.id");
+else if (org.equals("DEF"))
+    return ("C:\\def.id");
+else 
+    return ("C:\\IBM\\Lotus\\Domino\\data\\cert.id");
+
+	
+  ]]></Source>
+</Rule>

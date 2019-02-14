@@ -1,0 +1,56 @@
+<font color="white" size="1">User Name:  %File Server|User Name% IP Address:  %File Server|IP Address% Domain Name:  %File Server|Domain Name% Object Type:  %File Server|Object Type% Object Name:  %File Server|Object Name% Action Type:  %File Server|Action Type% New Name:  %File Server|New Name% Path:  %File Server|Path% File Extension:  %File Server|File Extension% Classification Category:  %File Server|Classification Category% New Path:  %File Server|New Path% Server Name:  %File Server|Server Name% Permission Subject:  %File Server|Permission Subject% Permission Type:  %File Server|Permission Type% ACL Type:  %File Server|ACL Type% Permission Inheritance:  %File Server|Permission Inheritance% Member Name:  %File Server|Member Name% Member Type:  %File Server|Member Type% </font>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td align="center"><table width="675" border="0" cellspacing="0" cellpadding="0" style="font-family:Arial,Helvetica,sans-serif;border:3px solid #3399cc"><tbody><tr><td><table style="width:669px" border="0" cellspacing="0" cellpadding="0"><tbody><tr style="height:50px"><td style="width:30px" rowspan="2">&nbsp;</td><td style="font-size:28pt;width:265px;color:#0193c7;font-style:italic;font-family:impact,sans-serif;text-align:left">
+
+SecurityIQ 
+
+<span style="color:#35c6e0">I</span><span style="color:#0193c7">I</span><span style="color:#ff922a">I</span></td><td style="font-size:28pt;width:494px;font-family:impact,sans-serif;text-align:right"><span style="color:#3399cc"></span>
+
+SIQ Admin Team
+
+<span style="color:#0193c7">
+
+Alert
+
+</span> </td><td style="width:30px" rowspan="2">&nbsp;</td></tr><tr><td colspan="2"><table style="width:609px" border="0" cellspacing="0" cellpadding="0"><tbody><tr style="height:30px"><td style="font-weight:bold;font-size:12pt;text-align:left">
+
+Control access to all your unstructured data.
+
+</td><td style="font-weight:bold;font-size:10pt;text-align:right">
+
+Provided by 
+
+<a href="http://www.sailpoint.com/" target="_blank" >
+
+SailPoint Technologies
+
+</a></td></tr></tbody></table></td></tr></tbody></table></td></tr><tr><td style="border-top:2px solid #3399cc;border-bottom:2px solid #3399cc;padding:5px 0px" valign="middle"><table width="669" border="0" cellspacing="0" cellpadding="0" style="font-family:Arial,Helvetica,sans-serif"><tbody><tr><td width="30">&nbsp;</td><td align="left" style="font-size:13px">&nbsp;</td><td align="right" style="font-size:13px"><b>
+
+NOTE: SIQ Admin Team Alert
+
+</b></td><td width="30">&nbsp;</td></tr></tbody></table></td></tr><tr><td><table width="669" border="0" cellspacing="0" cellpadding="0" style="font-family:Arial,Helvetica,sans-serif"><tbody><tr><td width="30">&nbsp;</td><td><table width="609" border="0" cellspacing="0" cellpadding="5" style="font-family:Arial,Helvetica,sans-serif"><tbody><tr><td align="center" style="font-size:17px;font-weight:bold;text-decoration:underline;color:#3399cc"></td></tr><tr><td><br>
+
+<!-- Content Table -->
+<table>
+<tr><td align="right">Time of Execution: </td><td>&nbsp;&nbsp;</td><td> <b> %TimeStamp% </b></td></tr>
+<tr><td align="right">User Name: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|User Name% </b></td></tr>
+<tr><td align="right">IP Address: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|IP Address% </b></td></tr>
+<tr><td align="right">Domain Name: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Domain Name% </b></td></tr>
+<tr><td align="right">Object Type: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Object Type% </b></td></tr>
+<tr><td align="right">Object Name: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Object Name% </b></td></tr>
+<tr><td align="right">Action Type: </td><td>&nbsp;&nbsp;</td><td><b><font color="red"> %File Server|Action Type% </font></b></td></tr>
+<tr><td align="right">New Name: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|New Name% </b></td></tr>
+<tr><td align="right">Path: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Path% </b></td></tr>
+<tr><td align="right">File Extension: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|File Extension% </b></td></tr>
+<tr><td align="right">Classification Category: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Classification Category% </b></td></tr>
+<tr><td align="right">New Path: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|New Path% </b></td></tr>
+<tr><td align="right">Server Name: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Server Name% </b></td></tr>
+<tr><td align="right">Permission Subject: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Permission Subject% </b></td></tr>
+<tr><td align="right">Permission Type: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Permission Type% </b></td></tr>
+<tr><td align="right">ACL Type: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|ACL Type% </b></td></tr>
+<tr><td align="right">Permission Inheritance: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Permission Inheritance% </b></td></tr>
+<tr><td align="right">Member Name: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Member Name% </b></td></tr>
+<tr><td align="right">Member Type: </td><td>&nbsp;&nbsp;</td><td><b> %File Server|Member Type% </b></td></tr>
+</table>
+
+<br><br></td><tr></tbody></table></td></tr><tr><td></td></tr><tr><td>&nbsp;</td></tr></tbody></table></td><td width="30">&nbsp;</td></tr></tbody></table></td></tr></tbody></table></td></tr></tbody></table>

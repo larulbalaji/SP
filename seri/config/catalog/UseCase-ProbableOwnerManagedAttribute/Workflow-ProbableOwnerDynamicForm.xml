@@ -1,0 +1,315 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Probable Owner Dynamic Form"
+  type="SERI" libraries="Identity,LCM,ManagedAttribute">
+  <Variable initializer="string:true" name="transient">
+    <Description>Set to false to cause workflow-related objects, such as approval
+      work items, to be saved in the database even if they are only
+      viewed by the person registering.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace">
+    <Description>Used for debugging this workflow and when set to true
+      trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Variable name="identityDisplayName">
+    <Description>The displayName of the identity being updated.</Description>
+  </Variable>
+
+  <Variable name="plan">
+    <Description>The ProvisioningPlan that gets generated from the form
+      input.</Description>
+  </Variable>
+  <Variable name="flow" initializer="string:Managed Attribute Owner Confirmation">
+    <Description>The ProvisioningPlan that gets generated from the form
+      input.</Description>
+  </Variable>
+
+  <Variable name="identityName" input="true">
+    <Description>The name of the identity we using.</Description>
+  </Variable>
+  
+  <Variable name="formName" />
+  <Variable name="ownerMap" type="java.util.Map"/>
+  <Variable name="workItemDecisionBasePath"/>
+  <Variable name="groupModel"/>
+  <Variable name="plans"/> 
+  <Variable name="changeOwnerMap" initializer="null"/> 
+  <Variable name="groupDN"/> 
+  <Variable name="newOwnerID"/> 
+  <Variable name="newManagedByDN"/> 
+  <Variable name="removeKey"/>
+  
+
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule" name="Approval Library" />
+    <Reference class="sailpoint.object.Rule" name="LCM Workflow Library" />
+  </RuleLibraries>
+
+  <Step icon="Start" name="Start" posX="34" posY="26">
+    <Transition to="Get User ID" />
+  </Step>
+  
+  <Step icon="Default" name="Get User ID" posX="35" posY="143">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+// Expect: java.lang.String quickLinkIdentityId
+
+//Quicklinks User Select passes in the Identity ID rather than the identityName
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableOwner.GetUserID");
+
+Identity aUser = context.getObjectById(Identity.class, quickLinkIdentityId);
+serilog.debug("ProbableOwner :: User Id resolves to " + aUser.getName());
+workflow.put("identityName", aUser.getName());
+
+      ]]></Source>
+    </Script>
+    <Transition to="Retrive Probable Owner Map" />
+  </Step>
+
+  <Step action="rule:MARetrievalPO" icon="Default" name="Retrive Probable Owner Map" posX="153" posY="143" resultVariable="ownerMap">
+    <Arg name='ownerName' value='ref:identityName'/> 
+    <Arg name='appName' value='string:Active Directory'/> 
+    <Transition to="Build Probable Owner Form"/>
+  </Step>
+  
+  <Step icon="Default" name="Build Probable Owner Form" posX="293" posY="142" resultVariable="attrForm">
+    <Script>
+      <Source><![CDATA[
+
+import sailpoint.object.Field;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Button;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Script;
+import sailpoint.object.Rule;
+import sailpoint.object.DynamicValue;
+import java.util.Collection;
+import java.util.HashSet;
+import sailpoint.tools.MapUtil;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableOwner.BuildForm");
+
+Form frm=new Form();
+frm.put("pageTitle", "Probable Owner Form for Managed Attributes");
+frm.setName("Form - Probable Owner");
+workflow.put("formName",frm.getName());
+
+// Having issues with duplicate form names
+Form oldForm = context.getObjectByName(Form.class,frm.getName());
+if (oldForm != null) {
+  context.removeObject(oldForm);
+  context.commitTransaction();
+}
+
+//Default next and cancel buttons
+List buttons=new ArrayList();
+buttons.add(new Button("Next", "next"));
+buttons.add(new Button("Cancel", "cancel"));
+frm.setButtons(buttons);
+
+Section sect=new Section();
+sect.setColumns(2);
+
+List allowedValues = new ArrayList();
+allowedValues.add("Yes");
+allowedValues.add("No");
+
+// Build out the form
+serilog.debug("POP :: ownerMap = " + ownerMap);
+for (String key : ownerMap.keySet()) {
+
+  Field maField = new Field();
+  maField.setType("radio");
+  maField.setName(key);
+  maField.setDisplayName("Are you Still Owner for: " + key);
+  maField.setHelpKey("Do you still own the Managed Attribute: " + key);
+  maField.setDefaultValue("Yes");
+  maField.setRequired(true);
+  maField.setAllowedValues(allowedValues);
+  
+  Field decisionField = new Field();
+  decisionField.setType("identity");
+  decisionField.setFilterString("managerStatus == true");
+  decisionField.setName(key + "-newOwner");
+  decisionField.setDisplayName("If not owner, please specify a replacement");
+  decisionField.setAttribute("valueProperty","name");
+  decisionField.setValue("I-AM-Owner");
+  String validationRuleName = "PO Form Validation";
+	Rule rule = wfcontext.getSailPointContext().getObject(Rule.class, validationRuleName);
+	decisionField.setValidationRule(rule);
+
+  sect.add(maField);
+  sect.add(decisionField);
+}
+
+//Add the section to the form
+frm.add(sect);
+
+// Save the dynamic form object inside IIQ repository.
+context.saveObject(frm);
+context.commitTransaction();
+
+return frm;
+      ]]></Source>
+    </Script>
+    <Transition to="Approve Ownership" />
+  </Step>
+
+  <Step icon="Approval" name="Approve Ownership" posX="443" posY="140">
+    <Approval name="Edit Attributes" owner="script:return identityName;"
+      return="workItemDecisionBasePath" send="launcher,decisions">
+      <Arg name="workItemType" value="string:Form" />
+      <Arg name="workItemDescription" value="string:Ownership Approval Process" />
+      <Arg name="workItemForm" value="ref:formName" />
+      <Arg name="workItemFormBasePath" value="string:workItemDecisionBasePath"/>
+
+      <AfterScript>
+        <Source><![CDATA[
+import sailpoint.object.Form.FieldIterator;
+import sailpoint.object.Form;
+import sailpoint.object.Field; 
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableOwner.ApproveOwnership.AfterScript");
+serilog.debug("Decisions :: AfterScript :: workItemDecisionBasePath = \n" + workItemDecisionBasePath);
+
+// Change the map to be easily used in a loop
+Map changeOwnerMap = new HashMap();
+for (Map.Entry entry : workItemDecisionBasePath.entrySet()) {
+  serilog.debug("Decision: "+entry.getKey()+" = "+entry.getValue());
+  if (!entry.getKey().contains("-newOwner")) {
+    if (entry.getValue().equals("No")) {
+      changeOwnerMap.put(entry.getKey(),workItemDecisionBasePath.get(entry.getKey() + "-newOwner"));
+    }
+  }
+}
+workflow.put("changeOwnerMap",changeOwnerMap);
+        ]]></Source>
+      </AfterScript>
+    </Approval>
+    <Transition to="Loop And Provison Changes" />
+  </Step>
+
+  <Step name="Loop And Provison Changes" posX="598" posY="21" resultVariable="plan">
+    <Description>For each user create - create a plan based on the roles selected</Description>
+    <Script>
+      <Source><![CDATA[
+
+import sailpoint.object.Filter;
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+import sailpoint.object.ManagedAttribute;
+import sailpoint.object.QueryOptions;
+
+String groupDN = null;
+String newOwnerID = null;
+String newManagedByDN = null;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableOwner.LoopAndProvisionChanges");
+// Process each entry in the map one at a time.  Loop until map is empty
+for (Map.Entry entry : changeOwnerMap.entrySet()) {
+  // serilog.debug ("key: " +  entry.getKey() + "  value: " + entry.getValue());
+
+  QueryOptions ops = new QueryOptions();
+  ops.setIgnoreCase(true);
+  ops.addFilter(Filter.ignoreCase(Filter.eq("displayName",entry.getKey())));
+  ops.addFilter(Filter.eq("application.name", "Active Directory"));
+  ManagedAttribute ma = context.getUniqueObject(ManagedAttribute.class, Filter.and(ops.getRestrictions()));
+  if (ma != null) groupDN = ma.getValue();
+
+  Identity identity = context.getObjectByName(Identity.class, entry.getValue());
+  if (identity != null) newOwnerID = identity.getId();
+
+	List accountsManager = identity.getLinksByAppIdOrName(null,"Active Directory");
+  if(!accountsManager.isEmpty()) {
+    Link accountManager = (Link) accountsManager.get(0);
+    newManagedByDN = (String) accountManager.getAttribute("distinguishedName");
+  }
+
+	workflow.put("groupDN",groupDN);
+	workflow.put("newOwnerID",newOwnerID);
+	workflow.put("newManagedByDN",newManagedByDN);
+	workflow.put("removeKey",entry.getKey());
+
+	break;
+
+}
+	   ]]></Source>
+    </Script>
+    <Transition to="end">
+      <Script>
+        <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.ProbableOwner.LoopAndProvisionChanges.toEnd");
+if (changeOwnerMap.size() == 0) {
+  serilog.debug ("Done iterating over changes"); 
+  return true;
+} else {
+  changeOwnerMap.remove(removeKey);
+  workflow.put("changeOwnerMap",changeOwnerMap);
+  return false;
+}
+        ]]></Source>
+      </Script>
+    </Transition>
+
+    <Transition to="Build Group Changes"/>
+  </Step>
+		
+  <Step name='Build Group Changes' icon='Task' posX="872" posY="161" resultVariable="plans">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.Operation;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.ObjectRequest;
+import sailpoint.object.ProvisioningPlan.ObjectOperation;
+
+ProvisioningPlan plan = new ProvisioningPlan();
+
+/******Testing**************************
+//String groupDN = "CN=Normie,OU=Groups,OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+//String amandaDN = "CN=Amanda Ross,OU=London,OU=Europe,OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+//String jerryDN = "CN=Jerry Bennett,OU=Brussels,OU=Europe,OU=Demo,DC=seri,DC=sailpointdemo,DC=com";
+//String newOwner = "Jerry.Bennett";
+********************************************/
+String applicationName = "Active Directory";
+
+// Testing
+// Construct Managed Attribute ObjectRequet
+ObjectRequest objReq = new ObjectRequest();
+objReq.setOp(ObjectOperation.Modify);
+objReq.setType("group");
+objReq.setApplication(applicationName);
+objReq.setNativeIdentity(groupDN);
+objReq.add(new AttributeRequest("sysOwner", ProvisioningPlan.Operation.Set, newOwnerID));
+objReq.add(new AttributeRequest("managedBy", ProvisioningPlan.Operation.Set,newManagedByDN ));
+
+plan.addObjectRequest(objReq);
+		
+List plans = new ArrayList();
+plans.add(plan);
+return plans;
+      ]]></Source>
+    </Script>
+    <Transition to='Execute Plans'/>
+  </Step>
+  
+
+  <Step name='Execute Plans' icon='Task' action='call:executeManageAttributePlans' posX="600" posY="161">
+    <Arg name='plans' value='ref:plans'/>  
+    <!-- groupWorkflow and identityWorkflow can be specified here to override default workflows -->
+    <!-- run perform maintenance to push request out.  By default runs every 5 minutes -->
+    <Arg name='flow' value='EntitlementRequest'/>  
+    <Arg name='approvalScheme' value='none'/>  
+    <Arg name='notificationScheme' value='none'/>  
+    <Arg name='doRefresh' value='true'/>  
+    <Arg name='policyScheme' value='none'/>  
+    <Arg name='trace' value='false'/>
+    <Transition to='Loop And Provison Changes'/> 
+  </Step>
+  
+  <Step icon="Stop" name="end" posX="858" posY="15"/>
+</Workflow>

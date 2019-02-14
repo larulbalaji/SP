@@ -1,0 +1,135 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint><Rule language="beanshell" name="Rule- Remove Review Required" type="Workflow">
+  <Description>A rule used by a Workflow to determine a step action or variable value.
+    
+    Note that an Attributes map of all variables from the current WorkflowContext,
+    merged with the arguments from the Step, is also passed into the workflow rule.</Description>
+<Signature returnType="Object">
+<Inputs>
+<Argument type="wfcontext">
+<Description>
+The current WorkflowContext.
+</Description>
+</Argument><Argument type="handler">
+<Description>
+The workflow handler associated with the current WorkflowContext.
+</Description>
+</Argument><Argument type="workflow">
+<Description>
+The current Workflow definition.
+</Description>
+</Argument><Argument type="step">
+<Description>
+The current Step.
+</Description>
+</Argument><Argument type="approval">
+<Description>
+The current Approval.
+</Description>
+</Argument><Argument type="item">
+<Description>
+The WorkItem being processed.
+</Description>
+</Argument></Inputs>
+<Returns>
+<Argument type="Object">
+<Description>
+The result of the workflow rule; dependent on the rule itself.
+</Description>
+</Argument></Returns>
+</Signature>
+<!--ReferencedRules>
+  <Reference class="sailpoint.object.Rule" name=""/>
+</ReferencedRules-->
+  <Source><![CDATA[
+import sailpoint.object.Application;
+import sailpoint.object.Form;
+import sailpoint.object.Form.Section;
+import sailpoint.object.Field;
+import sailpoint.object.QueryOptions;
+
+
+// Toggle this value to check all apps
+boolean doAllApps = false;
+
+// If doAllApps is false, then we just process this app.
+String appName = "Active Directory";
+
+
+if (doAllApps) {
+   QueryOptions qo = new QueryOptions();
+   Iterator it = context.search(Application.class,qo);
+   while (it.hasNext()) {
+      Application app = (Application) it.next();
+      System.out.println("Application " + app.getName());
+      boolean dirtyapp = false;
+      if (app != null) {
+         List provForms = app.getProvisioningForms();
+         if (provForms != null) {
+            for (Form form : provForms) {
+               System.out.println("\tForm " + form.getName());
+               List sections = form.getSections();
+               if (sections != null) {
+                  for (Section section : sections) {
+                     List fields = section.getFields();
+                     if (fields != null) {
+                        for (Field field : fields) {
+                        //System.out.println("\t" + field.getName());
+                           if (field.isReviewRequired()) {
+                              System.out.println("\t\tUnsetting ReviewRequired on " + field.getName());
+                              dirtyapp = true;
+                              field.setReviewRequired(false);
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+        }
+     }
+     if (dirtyapp) {
+       context.saveObject(app);
+       context.commitTransaction();
+     }
+  }
+  sailpoint.tools.Util.flushIterator(it);
+} else {
+   Application app = context.getObjectByName(Application.class,appName);
+   boolean dirtyapp = false;
+   if (app != null) {
+      System.out.println("Application " + app.getName());
+      List provForms = app.getProvisioningForms();
+      if (provForms != null) {
+         for (Form form : provForms) {
+            System.out.println("\tForm " + form.getName());
+            List sections = form.getSections();
+            if (sections != null) {
+               for (Section section : sections) {
+                  List fields = section.getFields();
+                  if (fields != null) {
+                     for (Field field : fields) {
+                        //System.out.println("\t" + field.getName());
+                        if (field.isReviewRequired()) {
+                           System.out.println("\t\tUnsetting ReviewRequired on " + field.getName());
+                           dirtyapp = true;
+                           field.setReviewRequired(false);
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+   
+   if (dirtyapp) {
+      context.saveObject(app);
+      context.commitTransaction();
+   }
+}
+   
+
+  ]]></Source>
+</Rule>
+</sailpoint>

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <AuditConfig name='AuditConfig'>
+      <AuditActions>
+        <AuditAction displayName='SecurityIQ Alert' enabled='true' name='SIQ-Alert' />
+        <AuditAction displayName='SecurityIQ Single User Cert' enabled='true' name='SIQ-SingleUserCert' />
+        <AuditAction displayName='SecurityIQ Disable User' enabled='true' name='SIQ-DisableUser' />
+      </AuditActions>
+    </AuditConfig>
+  </ImportAction>
+</sailpoint>

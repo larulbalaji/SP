@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <Scope displayName="AMS" name="AMS" >
+    <AssignedScope>
+      <Reference class="sailpoint.object.Scope" name="AMS"/>
+    </AssignedScope>
+  </Scope>
+  <Scope displayName="APAC" name="APAC">
+    <AssignedScope>
+      <Reference class="sailpoint.object.Scope" name="APAC"/>
+    </AssignedScope>
+  </Scope>
+  <Scope displayName="EMEA" name="EMEA">
+    <AssignedScope>
+      <Reference class="sailpoint.object.Scope" name="EMEA"/>
+    </AssignedScope>
+  </Scope>
+</sailpoint>

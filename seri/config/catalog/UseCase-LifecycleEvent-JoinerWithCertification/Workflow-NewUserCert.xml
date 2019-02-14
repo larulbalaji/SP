@@ -1,0 +1,126 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"   name="New User Certification"  type="IdentityLifecycle">
+  <Variable initializer="string:false" name="trace">
+    <Description>Used for debugging this workflow and when set to true trace
+      will be sent to stdout.</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The new identity</Description>
+  </Variable>
+  <Description>Workflow to initiate certification of an individual identity. The workflow is triggered by a Create Lifecycle Event.</Description>
+  <Step icon="Start" name="Start" posX="49" posY="129">
+    <Transition to="Refresh Identity"/>
+  </Step>
+  <Step name="Generate Certification For New User" posX="264" posY="130">
+    <Description>Generate a certification for the user captured by the create event</Description>
+    <Script>
+      <Source><![CDATA[
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import sailpoint.object.Identity;
+import sailpoint.object.PolicyViolation;       
+import sailpoint.api.CertificationScheduler;
+import sailpoint.web.certification.CertificationScheduleDTO;
+import sailpoint.object.CertificationDefinition;
+import sailpoint.object.TaskSchedule;
+import sailpoint.object.Certification;
+import sailpoint.object.CertificationSchedule;
+import sailpoint.object.Tag;
+import sailpoint.tools.Util;
+
+// Get the identity causing the violation          
+Identity requestor = context.getObject(Identity.class, launcher);       
+Identity identity = (Identity) context.getObject(Identity.class, identityName);
+
+// Define manager object
+Identity manager;
+
+// Get the manager's identity
+String managerId   = identity.getAttribute("manager");
+if(null != managerId) {
+  manager = (Identity) context.getObject(Identity.class, managerId);
+} else {   
+  manager = (Identity) context.getObject(Identity.class, "spadmin");
+}
+
+// Build and configure a certification schedule          
+CertificationScheduler scheduler = new CertificationScheduler(context);
+CertificationSchedule schedule = scheduler.initializeScheduleBean(requestor, Certification.Type.Identity);
+schedule.setRunNow(true);
+
+// Build the certification definition
+CertificationDefinition definition = schedule.getDefinition();
+definition.setCertifierSelectionType(CertificationDefinition.CertifierSelectionType.Manual);
+
+// Set the cert names
+definition.setNameTemplate("New User Review of " + identity.getDisplayName() + " for " + manager.getDisplayName());
+definition.setShortNameTemplate("New User Review of " + identity.getDisplayName());
+definition.setName("New User Review : " + identity.getDisplayName() + " [" + new Date().toString() + "]");
+
+// Define the name or id of the Tag we are looking for or the new Tag to be created
+String idOrName = "New User Certification";
+
+// Get the Tag and if it does not exist, create it
+Tag tag = context.getObjectByName(Tag.class, idOrName);
+if (null == tag) {
+  tag = new Tag(idOrName);
+  context.saveObject(tag);
+  context.commitTransaction();
+}
+
+// Lets see what we got.... 
+// System.out.println("\n\n\nTag: " + tag.getName() + "\n\n\n");
+
+// Set the tag in the certification
+List tags = new ArrayList();
+tags.add(tag);
+definition.setTags(tags);
+
+
+// Set the behaviour
+definition.setProcessRevokesImmediately(true);
+definition.setAllowItemDelegation(true);
+definition.setIncludePolicyViolations(false);
+definition.setAutomaticClosingEnabled(true);
+definition.setAutomaticClosingSigner(manager);
+definition.setDisplayEntitlementDescriptions(true);
+definition.setAutomateSignoffPopup(true);
+definition.setElectronicSignatureRequired(true);
+definition.setElectronicSignatureName("RiskCertificationSigning");
+definition.setCertPageListItems(Util.atob("false"));
+
+// Set the target identity in the cert
+List identities = new ArrayList();
+identities.add(identity.getName());
+definition.setIdentitiesToCertify(identities);
+definition.setCertifierName(manager.getName());
+
+// Figure out the cert owner
+Identity certGroupOwner = context.getObjectByName(Identity.class, "IT Security");
+if (null == certGroupOwner) {
+         certGroupOwner = context.getObjectByName(Identity.class, "spadmin");
+}
+
+definition.setCertificationOwner(certGroupOwner);
+definition.setCertificationNameTemplate("Event-Initiated Access Review : " + identity.getDisplayName());
+
+// Schedule it
+TaskSchedule taskSchedule = scheduler.saveSchedule(schedule, false);
+
+// Log that risk cert was started
+System.out.println("New User Event Workflow: Cert initiated for identity " + identity.getDisplayName() + " manager " + manager.getDisplayName());
+        ]]></Source>
+      </Script>
+    <Transition to="end"/>
+  </Step>
+  <Step icon="Stop" name="end" posX="490" posY="128"/>
+  <Step action="call:refreshIdentity" icon="Default" name="Refresh Identity" posX="179" posY="9">
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="correlateEntitlements" value="string:true"/>
+    <Arg name="provision" value="string:true"/>
+    <Description>Refreshes the new identity to ensure all business roles have been assigned, etc. before the new user certification is created.</Description>
+    <Transition to="Generate Certification For New User"/>
+  </Step>
+</Workflow>

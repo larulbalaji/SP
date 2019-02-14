@@ -1,0 +1,872 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+
+<EmailTemplate name="SERI - Notify Transfer">
+  <Description>
+      *******************************************************************************
+      *   This is the advanced Email Template for the Help Desk Notification flow.
+      *
+      *   To tie this into the Help Desk Executor flow, add the name of the 
+      *   Email Template to the Configuration Object, "POC Configuration Data" in
+      *   the attribute called "helpDesk-EmailTemplate".
+      *******************************************************************************
+  </Description>
+  <Body>
+    <![CDATA[
+    <html>
+      <img src="http://localhost:8080/identityiq/images/CustHeader.gif" width="480" height="75" alt="IdentityIQ" />
+      <br><br>
+      A transfer event has occured for user, <b>$firstName $lastName</b>.  Per corporate policy, 
+      <b>$firstName $lastName</b> will be allowed to keep his/her old assignments for 28 days. 
+      When the 28 days expire, the following roles and entitlements will be sunset.   If you 
+      have a problem with this contact your friendly Security Officer.  <br>
+      <br>
+      <b><u>User Profile Details</u></b><br>
+      <UL>
+        <LI>Full Name: $firstName $lastName<br>
+        <LI>Employee ID: $userId<br>
+        <LI>Application: $application<br>
+      </UL>
+      <br> 
+
+      #foreach ($acctReq in $ProvisioningPlan.getAccountRequests())
+      <b><u>Application: $acctReq.getApplication().  Account ID: $acctReq.getNativeIdentity()</u></b>
+      
+      #foreach ($attrReq in $acctReq.getAttributeRequests())
+      <UL>
+        <LI>Operation: $attrReq.getOperation()<br>
+        <LI>Attribute: $attrReq.getName()<br>
+        <LI>Value(s): $attrReq.getValue()<br>
+        #if ($attrReq.getRemoveDate())
+        <LI>Sunset Date: $attrReq.getRemoveDate()<br>
+		#end
+      </UL>
+      #end
+      #end
+      <br>
+      Regards,<br>
+      The IdentityIQ Administration Team<br>
+
+      <center>
+         <img src="http://localhost:8080/identityiq/images/IdentityIQLogo.png" alt="SailPoint IdentityIQ"/>
+      </center>
+    </html>
+    ]]>
+  </Body>
+  <Subject>IdentityIQ Transfer Notice For $firstName $lastName - Help Desk Notification </Subject>
+</EmailTemplate>
+
+
+
+
+<EmailTemplate name="Transfer Notification - User">
+  <Body>
+<![CDATA[
+  <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+
+#background-table { background-color: #ececec; }
+/* Webkit Elements */
+
+/* TO CHANGE TOP HEADER BACKGROUND COLOR */
+#top-bar { border-radius:6px 6px 0px 0px; -moz-border-radius: 6px 6px 0px 0px; -webkit-border-radius:6px 6px 0px 0px; -webkit-font-smoothing: antialiased; background-color: #323231; color: #e7cba3; }
+
+/* CHANGE COLOR OF TEXT IN HEADER */
+#top-bar a { font-weight: bold; color: #e7cba3; text-decoration: none;}
+
+#footer { border-radius:0px 0px 6px 6px; -moz-border-radius: 0px 0px 6px 6px; -webkit-border-radius:0px 0px 6px 6px; -webkit-font-smoothing: antialiased; }
+/* Fonts and Content */
+body, td { font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+.header-content, .footer-content-left, .footer-content-right { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; }
+/* Prevent Webkit and Windows Mobile platforms from changing default font sizes on header and footer. */
+.header-content { font-size: 12px; color: #e7cba3; }
+.header-content a { font-weight: bold; color: #e7cba3; text-decoration: none; }
+#headline p { color: #e7cba3; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; font-size: 24px; text-align: center; margin-top:0px; margin-bottom:30px; }
+
+/* HEADLINE COLOR */
+#headline p a { color: #e7cba3; text-decoration: none; }
+
+/*CONTENT HEADER TITLE COLOR */
+.article-title { font-size: 18px; line-height:24px; color: #9a9661; font-weight:bold; margin-top:0px; margin-bottom:18px; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+
+.article-title a { color: #9a9661; text-decoration: none; }
+.article-title.with-meta {margin-bottom: 0;}
+.article-meta { font-size: 13px; line-height: 20px; color: #ccc; font-weight: bold; margin-top: 0;}
+
+/* CONTENT TEXT COLOR */
+.article-content { font-size: 13px; line-height: 18px; color: #444444; margin-top: 0px; margin-bottom: 18px; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+
+.article-content a { color: #00FFB0; font-weight:bold; text-decoration:none; }
+.article-content img { max-width: 100% }
+.article-content ol, .article-content ul { margin-top:0px; margin-bottom:18px; margin-left:19px; padding:0; }
+.article-content li { font-size: 13px; line-height: 18px; color: #444444; }
+.article-content li a { color: #00FFB0; text-decoration:underline; }
+.article-content p {margin-bottom: 15px;}
+
+/* FOOTER TEXT COLOR */
+.footer-content-left { font-size: 10px; line-height: 8px; color: #000000; margin-top: 0px; margin-bottom: 15px; }
+
+
+.footer-content-left a { color: #e7cba3; font-weight: bold; text-decoration: none; }
+.footer-content-right { font-size: 8px; line-height: 10px; color: #000000; margin-top: 0px; margin-bottom: 15px; }
+.footer-content-right a { color: #e7cba3; font-weight: bold; text-decoration: none; }
+#footer { font-size: 10px; background-color: #323231; color: #CCCCCC; }  
+#footer a { color: #e7cba3; text-decoration: none; font-weight: bold; }
+#permission-reminder { white-space: normal; }
+#street-address { color: #e7cba3; white-space: normal; }
+
+/* Quick cheats */
+j {font-weight:bold; }
+ja {font-weight: bold; color: RED;}
+
+</style>
+<!--[if gte mso 9]>
+<style _tmplitem="826" >
+.article-content ol, .article-content ul {
+   margin: 0 0 0 24px;
+   padding: 0;
+   list-style-position: inside;
+}
+</style>
+<![endif]--></head><body><table id="background-table" border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tbody><tr>
+		<td align="center" bgcolor="#ececec">
+        	<table class="w640" style="margin:0 10px;" border="0" cellpadding="0" cellspacing="0" width="640">
+            	<tbody><tr><td class="w640" height="20" width="640"></td></tr>
+                
+            	<tr>
+                	<td class="w640" width="640">
+                        <table id="top-bar" class="w640" bgcolor="#00FFB0" border="0" cellpadding="0" cellspacing="0" width="640">
+    <tbody><tr>
+        <td class="w15" width="15"></td>
+        <td class="w325" align="left" valign="middle" width="350">
+            <table class="w325" border="0" cellpadding="0" cellspacing="0" width="350">
+                <tbody><tr><td class="w325" height="8" width="350"></td></tr>
+            </tbody></table>
+            <div class="header-content">Identity Access Management </span></div>
+			<table class="w325" border="0" cellpadding="0" cellspacing="0" width="350">
+                <tbody><tr><td class="w325" height="8" width="350"></td></tr>
+            </tbody></table>
+        </td>
+        <td class="w30" width="30"></td>
+        <td class="w255" align="right" valign="middle" width="255">
+            <table class="w255" border="0" cellpadding="0" cellspacing="0" width="255">
+                <tbody><tr><td class="w255" height="8" width="255"></td></tr>
+            </tbody></table>
+            <table border="0" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+        
+        <td class="w10" width="10"></td>
+     <!--   <td valign="middle"><forwardtoafriend lang="en"><img src="https://img.createsend1.com/img/templatebuilder/forward-glyph.png" alt="Forward icon"="" border="0" height="14" width="19"></forwardtoafriend></td> -->
+        <td width="3"></td>
+        <td valign="middle"><div class="header-content">IdentityIQ</div></td>
+        
+    </tr>
+</tbody></table>
+            <table class="w255" border="0" cellpadding="0" cellspacing="0" width="255">
+                <tbody><tr><td class="w255" height="8" width="255"></td></tr>
+            </tbody></table>
+        </td>
+        <td class="w15" width="15"></td>
+    </tr>
+</tbody></table>
+                        
+                    </td>
+                </tr>
+                <tr>
+			<!-- CHANGE BACKGROUND COLOR OF MAIN HEADER HEADLINE -->	
+                <td id="header" class="w640" align="center" bgcolor="#00BBF0" width="640">
+    
+    <table class="w640" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody>
+		<tr>
+		<td class="w30" width="30">
+		</td>
+		<td class="w580" height="15" width="580">
+		</td><td class="w30" width="30">
+		</td>
+		</tr>
+        <tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" width="580">
+                <div id="headline" align="center">
+                    <p>
+                        <strong><singleline label="Title">IdentityIQ Transfer Notice For $identityDisplayName</singleline></strong>
+                    </p>
+                </div>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+    </tbody></table>
+    
+    
+</td>
+	</tr>
+	
+	<tr><td class="w640" bgcolor="#ffffff" height="30" width="640"></td></tr>
+	<tr ><td class="w640" bgcolor="#ffffff" width="640">
+    <table class="w640" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody><tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" width="580">
+                <repeater>				
+                    <layout label="Text only">
+                        <table class="w580" border="0" cellpadding="0" cellspacing="0" width="580">
+                            <tbody><tr>
+                                <td class="w580" width="580">
+                                    <div class="article-content" align="left">
+                                        <multiline label="Description">
+                                        
+                                        
+ $identityDisplayName, <br/><br/>
+ An automated life cycle event has triggered a transfer event.   If you believe you have been transferred in error please contact your old supervisor 
+  <b>$oldManager</b> or your HR representative immediately.<br/><br/>
+
+#if ($dateAfterTransfer)
+ Access related to previous job duties will be allowed until $dateAfterTransfer.<br/>
+#end
+  </multiline>
+  
+  
+
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr><td class="w580" height="10" width="580"></td></tr>
+                        </tbody></table>
+                    </layout>
+                    <layout label="Text with full-width image">
+                        <table class="w580" border="0" cellpadding="0" cellspacing="0" width="580">
+                            <tbody>
+							<tr>
+                                <td class="w580" width="580">
+                                </td>
+                            </tr>						
+                       </tbody></table>
+                    </layout>
+                </repeater>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+    </tbody></table>
+</td></tr>
+
+			<!-- CHANGE THE BACKGROUND COLOR FOR THE TOP FOOTER (OPTIONAL) -->
+                <tr><td class="w640" bgcolor="#ffffff" height="15" width="640"></td></tr>
+                
+                <tr>
+                <td class="w640" width="640">
+			<!-- CHANGE THE BACKGROUND COLOR OF THE BOTTOM FOOTER -->
+    <table  class="w640" bgcolor="#F4F4F4" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody><tr><td class="w30" width="30"></td><td class="w580 h0" height="20" width="360"></td><td class="w0" width="60"></td><td class="w0" width="160"></td><td class="w30" width="30"></td></tr>
+        <tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" valign="top" width="700">
+            <span class="hide"><p  class="footer-content-left" align="left"><span></span></p></span>
+            <p class="footer-content-left" align="left"><preferences lang="en">If you have received this email in error, please immediately delete this email from your system. </preferences> </p>
+            </td>
+            <td class="hide w0" width="60"></td>
+            <td class="hide w0" valign="top" width="200">
+            <p  class="footer-content-right" align="right"></p>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+        <tr><td class="w30" width="30"></td><td class="w580 h0" height="15" width="360"></td><td class="w0" width="60"></td><td class="w0" width="160"></td><td class="w30" width="30"></td></tr>
+    </tbody></table>
+</td>
+                </tr>
+				
+                <tr><td class="w640" height="60" width="640"></td></tr>
+            </tbody></table>
+        </td>
+	</tr>   
+	
+</tbody></table></body></html>   
+    ]]>   
+    </Body>
+  <Description>
+      Email Template for notifying approvers when they need to approve a request made through LCM.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="dateAfterTransfer" type="string">
+        <Description>The number of days after termination that user accounts should be deleted.</Description>
+      </Argument>
+      <Argument name="oldManager" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+      <Argument name="identityDisplayName" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+      <Argument name="rolesEnabled" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Subject>IdentityIQ Transfer Notice For $identityDisplayName - User Notification</Subject>
+</EmailTemplate>
+
+
+<EmailTemplate name="Transfer Notification - Old Manager">
+  <Body>
+<![CDATA[
+  <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+
+#background-table { background-color: #ececec; }
+/* Webkit Elements */
+
+/* TO CHANGE TOP HEADER BACKGROUND COLOR */
+#top-bar { border-radius:6px 6px 0px 0px; -moz-border-radius: 6px 6px 0px 0px; -webkit-border-radius:6px 6px 0px 0px; -webkit-font-smoothing: antialiased; background-color: #323231; color: #e7cba3; }
+
+/* CHANGE COLOR OF TEXT IN HEADER */
+#top-bar a { font-weight: bold; color: #e7cba3; text-decoration: none;}
+
+#footer { border-radius:0px 0px 6px 6px; -moz-border-radius: 0px 0px 6px 6px; -webkit-border-radius:0px 0px 6px 6px; -webkit-font-smoothing: antialiased; }
+/* Fonts and Content */
+body, td { font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+.header-content, .footer-content-left, .footer-content-right { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; }
+/* Prevent Webkit and Windows Mobile platforms from changing default font sizes on header and footer. */
+.header-content { font-size: 12px; color: #e7cba3; }
+.header-content a { font-weight: bold; color: #e7cba3; text-decoration: none; }
+#headline p { color: #e7cba3; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; font-size: 24px; text-align: center; margin-top:0px; margin-bottom:30px; }
+
+/* HEADLINE COLOR */
+#headline p a { color: #e7cba3; text-decoration: none; }
+
+/*CONTENT HEADER TITLE COLOR */
+.article-title { font-size: 18px; line-height:24px; color: #9a9661; font-weight:bold; margin-top:0px; margin-bottom:18px; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+
+.article-title a { color: #9a9661; text-decoration: none; }
+.article-title.with-meta {margin-bottom: 0;}
+.article-meta { font-size: 13px; line-height: 20px; color: #ccc; font-weight: bold; margin-top: 0;}
+
+/* CONTENT TEXT COLOR */
+.article-content { font-size: 13px; line-height: 18px; color: #444444; margin-top: 0px; margin-bottom: 18px; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+
+.article-content a { color: #00BBF0; font-weight:bold; text-decoration:none; }
+.article-content img { max-width: 100% }
+.article-content ol, .article-content ul { margin-top:0px; margin-bottom:18px; margin-left:19px; padding:0; }
+.article-content li { font-size: 13px; line-height: 18px; color: #444444; }
+.article-content li a { color: #00BBF0; text-decoration:underline; }
+.article-content p {margin-bottom: 15px;}
+
+/* FOOTER TEXT COLOR */
+.footer-content-left { font-size: 10px; line-height: 8px; color: #000000; margin-top: 0px; margin-bottom: 15px; }
+
+
+.footer-content-left a { color: #e7cba3; font-weight: bold; text-decoration: none; }
+.footer-content-right { font-size: 8px; line-height: 10px; color: #000000; margin-top: 0px; margin-bottom: 15px; }
+.footer-content-right a { color: #000000; font-weight: bold; text-decoration: none; }
+#footer { font-size: 10px; background-color: #00BBF0; color: #CCCCCC; }  
+#footer a { color: #e7cba3; text-decoration: none; font-weight: bold; }
+#permission-reminder { white-space: normal; }
+#street-address { color: #e7cba3; white-space: normal; }
+
+/* Quick cheats */
+j {font-weight:bold; }
+ja {font-weight: bold; color: RED;}
+
+</style>
+<!--[if gte mso 9]>
+<style _tmplitem="826" >
+.article-content ol, .article-content ul {
+   margin: 0 0 0 24px;
+   padding: 0;
+   list-style-position: inside;
+}
+</style>
+<![endif]--></head><body><table id="background-table" border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tbody><tr>
+		<td align="center" bgcolor="#ececec">
+        	<table class="w640" style="margin:0 10px;" border="0" cellpadding="0" cellspacing="0" width="640">
+            	<tbody><tr><td class="w640" height="20" width="640"></td></tr>
+                
+            	<tr>
+                	<td class="w640" width="640">
+                        <table id="top-bar" class="w640" bgcolor="#323231" border="0" cellpadding="0" cellspacing="0" width="640">
+    <tbody><tr>
+        <td class="w15" width="15"></td>
+        <td class="w325" align="left" valign="middle" width="350">
+            <table class="w325" border="0" cellpadding="0" cellspacing="0" width="350">
+                <tbody><tr><td class="w325" height="8" width="350"></td></tr>
+            </tbody></table>
+            <div class="header-content">Identity Access Management </span></div>
+			<table class="w325" border="0" cellpadding="0" cellspacing="0" width="350">
+                <tbody><tr><td class="w325" height="8" width="350"></td></tr>
+            </tbody></table>
+        </td>
+        <td class="w30" width="30"></td>
+        <td class="w255" align="right" valign="middle" width="255">
+            <table class="w255" border="0" cellpadding="0" cellspacing="0" width="255">
+                <tbody><tr><td class="w255" height="8" width="255"></td></tr>
+            </tbody></table>
+            <table border="0" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+        
+        <td class="w10" width="10"></td>
+     <!--   <td valign="middle"><forwardtoafriend lang="en"><img src="https://img.createsend1.com/img/templatebuilder/forward-glyph.png" alt="Forward icon"="" border="0" height="14" width="19"></forwardtoafriend></td> -->
+        <td width="3"></td>
+        <td valign="middle"><div class="header-content">IdentityIQ</div></td>
+        
+    </tr>
+</tbody></table>
+            <table class="w255" border="0" cellpadding="0" cellspacing="0" width="255">
+                <tbody><tr><td class="w255" height="8" width="255"></td></tr>
+            </tbody></table>
+        </td>
+        <td class="w15" width="15"></td>
+    </tr>
+</tbody></table>
+                        
+                    </td>
+                </tr>
+                <tr>
+			<!-- CHANGE BACKGROUND COLOR OF MAIN HEADER HEADLINE -->	
+                <td id="header" class="w640" align="center" bgcolor="#00BBF0" width="640">
+    
+    <table class="w640" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody>
+		<tr>
+		<td class="w30" width="30">
+		</td>
+		<td class="w580" height="15" width="580">
+		</td><td class="w30" width="30">
+		</td>
+		</tr>
+        <tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" width="580">
+                <div id="headline" align="center">
+                    <p>
+                        <strong><singleline label="Title">IdentityIQ Transfer Notice For $identityDisplayName</singleline></strong>
+                    </p>
+                </div>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+    </tbody></table>
+    
+    
+</td>
+	</tr>
+	
+	<tr><td class="w640" bgcolor="#ffffff" height="30" width="640"></td></tr>
+	<tr ><td class="w640" bgcolor="#ffffff" width="640">
+    <table class="w640" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody><tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" width="580">
+                <repeater>				
+                    <layout label="Text only">
+                        <table class="w580" border="0" cellpadding="0" cellspacing="0" width="580">
+                            <tbody><tr>
+                                <td class="w580" width="580">
+                                    <div class="article-content" align="left">
+                                        <multiline label="Description">
+                                        
+                                        
+$oldManager <br/><br/>
+ You have been identified as the previous supervisor of $identityDisplayName. If you are not the previous supervisor for this person, contact your HR representative immediately.<br/><br/>
+
+#if ($dateAfterTransfer)
+ Access for $identityDisplayName related to his previous job duties will be allowed until $dateAfterTransfer.
+#end
+
+      Per corporate policy, 
+      <b>$identityDisplayName</b> will be allowed to keep his/her old assignments for 28 days. 
+      When the 28 days expire, the following access will be sunset.  If you would like to be 
+      proactive and IT friendly, you can use the assgined Previous Manager Transfer certification to 
+      delete the following:<br><br>
+
+
+#foreach ($acctReq in $ProvisioningPlan.getAccountRequests())
+      <b><u>Application: $acctReq.getApplication().  Account ID: $acctReq.getNativeIdentity()</u></b>
+        
+  #foreach ($attrReq in $acctReq.getAttributeRequests())
+    #if($attrReq.getName() != "hrEvent" && $attrReq.getOperation() == "Remove")
+      <UL>
+        <LI>Operation: $attrReq.getOperation()<br>
+        <LI>Attribute: $attrReq.getName()<br>
+        <LI>Value(s): $attrReq.getValue()<br>
+        #if ($attrReq.getRemoveDate())
+        <LI>Sunset Date: $attrReq.getRemoveDate()<br>
+		#end
+      </UL>
+    #end
+  #end
+#end
+
+  </multiline>
+  
+  
+
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr><td class="w580" height="10" width="580"></td></tr>
+                        </tbody></table>
+                    </layout>
+                    <layout label="Text with full-width image">
+                        <table class="w580" border="0" cellpadding="0" cellspacing="0" width="580">
+                            <tbody>
+							<tr>
+                                <td class="w580" width="580">
+                                </td>
+                            </tr>						
+                       </tbody></table>
+                    </layout>
+                </repeater>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+    </tbody></table>
+</td></tr>
+
+			<!-- CHANGE THE BACKGROUND COLOR FOR THE TOP FOOTER (OPTIONAL) -->
+                <tr><td class="w640" bgcolor="#ffffff" height="15" width="640"></td></tr>
+                
+                <tr>
+                <td class="w640" width="640">
+			<!-- CHANGE THE BACKGROUND COLOR OF THE BOTTOM FOOTER -->
+    <table  class="w640" bgcolor="#F4F4F4" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody><tr><td class="w30" width="30"></td><td class="w580 h0" height="20" width="360"></td><td class="w0" width="60"></td><td class="w0" width="160"></td><td class="w30" width="30"></td></tr>
+        <tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" valign="top" width="700">
+            <span class="hide"><p  class="footer-content-left" align="left"><span></span></p></span>
+            <p class="footer-content-left" align="left"><preferences lang="en">If you have received this email in error, please immediately delete this email from your system. </preferences> </p>
+            </td>
+            <td class="hide w0" width="60"></td>
+            <td class="hide w0" valign="top" width="200">
+            <p  class="footer-content-right" align="right"></p>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+        <tr><td class="w30" width="30"></td><td class="w580 h0" height="15" width="360"></td><td class="w0" width="60"></td><td class="w0" width="160"></td><td class="w30" width="30"></td></tr>
+    </tbody></table>
+</td>
+                </tr>
+				
+                <tr><td class="w640" height="60" width="640"></td></tr>
+            </tbody></table>
+        </td>
+	</tr>   
+	
+</tbody></table></body></html>  
+]]>  
+    </Body>
+  <Description>
+      Email Template for notifying approvers when they need to approve a request made through LCM.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="dateAfterTransfer" type="string">
+        <Description>The number of days after termination that user accounts should be deleted.</Description>
+      </Argument>
+      <Argument name="newManagerDisplayName" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+      <Argument name="identityDisplayName" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+      <Argument name="rolesEnabled" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Subject>IdentityIQ Transfer Notice For $identityDisplayName - Previous Manager Notification</Subject>
+</EmailTemplate>
+
+
+<EmailTemplate name="Transfer Notification - New Manager">
+  <Body>
+<![CDATA[
+ <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+
+#background-table { background-color: #ececec; }
+/* Webkit Elements */
+
+/* TO CHANGE TOP HEADER BACKGROUND COLOR */
+#top-bar { border-radius:6px 6px 0px 0px; -moz-border-radius: 6px 6px 0px 0px; -webkit-border-radius:6px 6px 0px 0px; -webkit-font-smoothing: antialiased; background-color: #323231; color: #e7cba3; }
+
+/* CHANGE COLOR OF TEXT IN HEADER */
+#top-bar a { font-weight: bold; color: #e7cba3; text-decoration: none;}
+
+#footer { border-radius:0px 0px 6px 6px; -moz-border-radius: 0px 0px 6px 6px; -webkit-border-radius:0px 0px 6px 6px; -webkit-font-smoothing: antialiased; }
+/* Fonts and Content */
+body, td { font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+.header-content, .footer-content-left, .footer-content-right { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; }
+/* Prevent Webkit and Windows Mobile platforms from changing default font sizes on header and footer. */
+.header-content { font-size: 12px; color: #e7cba3; }
+.header-content a { font-weight: bold; color: #e7cba3; text-decoration: none; }
+#headline p { color: #e7cba3; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; font-size: 24px; text-align: center; margin-top:0px; margin-bottom:30px; }
+
+/* HEADLINE COLOR */
+#headline p a { color: #e7cba3; text-decoration: none; }
+
+/*CONTENT HEADER TITLE COLOR */
+.article-title { font-size: 18px; line-height:24px; color: #9a9661; font-weight:bold; margin-top:0px; margin-bottom:18px; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+
+.article-title a { color: #9a9661; text-decoration: none; }
+.article-title.with-meta {margin-bottom: 0;}
+.article-meta { font-size: 13px; line-height: 20px; color: #ccc; font-weight: bold; margin-top: 0;}
+
+/* CONTENT TEXT COLOR */
+.article-content { font-size: 13px; line-height: 18px; color: #444444; margin-top: 0px; margin-bottom: 18px; font-family: 'Helvetica Neue', Arial, Helvetica, Geneva, sans-serif; }
+
+.article-content a { color: #F4F4F4; font-weight:bold; text-decoration:none; }
+.article-content img { max-width: 100% }
+.article-content ol, .article-content ul { margin-top:0px; margin-bottom:18px; margin-left:19px; padding:0; }
+.article-content li { font-size: 13px; line-height: 18px; color: #444444; }
+.article-content li a { color: #F4F4F4; text-decoration:underline; }
+.article-content p {margin-bottom: 15px;}
+
+/* FOOTER TEXT COLOR */
+.footer-content-left { font-size: 10px; line-height: 8px; color: #000000; margin-top: 0px; margin-bottom: 15px; }
+
+
+.footer-content-left a { color: #e7cba3; font-weight: bold; text-decoration: none; }
+.footer-content-right { font-size: 8px; line-height: 10px; color: #000000; margin-top: 0px; margin-bottom: 15px; }
+.footer-content-right a { color: #e7cba3; font-weight: bold; text-decoration: none; }
+#footer { font-size: 10px; background-color: #323231; color: #CCCCCC; }  
+#footer a { color: #e7cba3; text-decoration: none; font-weight: bold; }
+#permission-reminder { white-space: normal; }
+#street-address { color: #e7cba3; white-space: normal; }
+
+/* Quick cheats */
+j {font-weight:bold; }
+ja {font-weight: bold; color: RED;}
+
+</style>
+<!--[if gte mso 9]>
+<style _tmplitem="826" >
+.article-content ol, .article-content ul {
+   margin: 0 0 0 24px;
+   padding: 0;
+   list-style-position: inside;
+}
+</style>
+<![endif]--></head><body><table id="background-table" border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tbody><tr>
+		<td align="center" bgcolor="#ececec">
+        	<table class="w640" style="margin:0 10px;" border="0" cellpadding="0" cellspacing="0" width="640">
+            	<tbody><tr><td class="w640" height="20" width="640"></td></tr>
+                
+            	<tr>
+                	<td class="w640" width="640">
+                        <table id="top-bar" class="w640" bgcolor="#F4F4F4" border="0" cellpadding="0" cellspacing="0" width="640">
+    <tbody><tr>
+        <td class="w15" width="15"></td>
+        <td class="w325" align="left" valign="middle" width="350">
+            <table class="w325" border="0" cellpadding="0" cellspacing="0" width="350">
+                <tbody><tr><td class="w325" height="8" width="350"></td></tr>
+            </tbody></table>
+            <div class="header-content">Identity Access Management </span></div>
+			<table class="w325" border="0" cellpadding="0" cellspacing="0" width="350">
+                <tbody><tr><td class="w325" height="8" width="350"></td></tr>
+            </tbody></table>
+        </td>
+        <td class="w30" width="30"></td>
+        <td class="w255" align="right" valign="middle" width="255">
+            <table class="w255" border="0" cellpadding="0" cellspacing="0" width="255">
+                <tbody><tr><td class="w255" height="8" width="255"></td></tr>
+            </tbody></table>
+            <table border="0" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+        
+        <td class="w10" width="10"></td>
+     <!--   <td valign="middle"><forwardtoafriend lang="en"><img src="https://img.createsend1.com/img/templatebuilder/forward-glyph.png" alt="Forward icon"="" border="0" height="14" width="19"></forwardtoafriend></td> -->
+        <td width="3"></td>
+        <td valign="middle"><div class="header-content">IdentityIQ</div></td>
+        
+    </tr>
+</tbody></table>
+            <table class="w255" border="0" cellpadding="0" cellspacing="0" width="255">
+                <tbody><tr><td class="w255" height="8" width="255"></td></tr>
+            </tbody></table>
+        </td>
+        <td class="w15" width="15"></td>
+    </tr>
+</tbody></table>
+                        
+                    </td>
+                </tr>
+                <tr>
+			<!-- CHANGE BACKGROUND COLOR OF MAIN HEADER HEADLINE -->	
+                <td id="header" class="w640" align="center" bgcolor="#00BBF0" width="640">
+    
+    <table class="w640" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody>
+		<tr>
+		<td class="w30" width="30">
+		</td>
+		<td class="w580" height="15" width="580">
+		</td><td class="w30" width="30">
+		</td>
+		</tr>
+        <tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" width="580">
+                <div id="headline" align="center">
+                    <p>
+                        <strong><singleline label="Title">IdentityIQ Transfer Notice For $identityDisplayName</singleline></strong>
+                    </p>
+                </div>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+    </tbody></table>
+    
+    
+</td>
+	</tr>
+	
+	<tr><td class="w640" bgcolor="#ffffff" height="30" width="640"></td></tr>
+	<tr ><td class="w640" bgcolor="#ffffff" width="640">
+    <table class="w640" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody><tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" width="580">
+                <repeater>				
+                    <layout label="Text only">
+                        <table class="w580" border="0" cellpadding="0" cellspacing="0" width="580">
+                            <tbody><tr>
+                                <td class="w580" width="580">
+                                    <div class="article-content" align="left">
+                                        <multiline label="Description">
+
+
+                            
+                                        
+ $newManager <br/><br/>
+ You have been identified as the new supervisor of $identityDisplayName. If you are not the new supervisor for this person, contact your HR representative immediately.<br/><br/>
+
+
+#if ($dateAfterTransfer)
+ Access for $identityDisplayName related to his previous job duties will be allowed until $dateAfterTransfer.
+#end
+
+      
+      With the transfer in place, <b>$identityDisplayName</b> will be provisoned the following new assignments. <br><br>
+
+
+#foreach ($acctReq in $ProvisioningPlan.getAccountRequests())
+  #if( $acctReq.getApplication() == "IIQ" )
+      <b><u>Application: $acctReq.getApplication().  Account ID: $acctReq.getNativeIdentity()</u></b>
+
+    #foreach ($attrReq in $acctReq.getAttributeRequests())
+      #if($attrReq.getName() != "hrEvent" && $attrReq.getOperation() == "Add")
+      <UL>
+        <LI>Operation: $attrReq.getOperation()<br>
+        <LI>Attribute: $attrReq.getName()<br>
+        <LI>Value(s): $attrReq.getValue()<br>
+        #if ($attrReq.getRemoveDate())
+        <LI>Sunset Date: $attrReq.getRemoveDate()<br>
+		#end
+      </UL>
+      #end
+    #end
+  #end
+#end
+
+
+  </multiline>
+                              </div>
+                                </td>
+                            </tr>
+                            <tr><td class="w580" height="10" width="580"></td></tr>
+                        </tbody></table>
+                    </layout>
+                    <layout label="Text with full-width image">
+                        <table class="w580" border="0" cellpadding="0" cellspacing="0" width="580">
+                            <tbody>
+							<tr>
+                                <td class="w580" width="580">
+                                </td>
+                            </tr>						
+                       </tbody></table>
+                    </layout>
+                </repeater>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+    </tbody></table>
+</td></tr>
+
+			<!-- CHANGE THE BACKGROUND COLOR FOR THE TOP FOOTER (OPTIONAL) -->
+                <tr><td class="w640" bgcolor="#ffffff" height="15" width="640"></td></tr>
+                
+                <tr>
+                <td class="w640" width="640">
+			<!-- CHANGE THE BACKGROUND COLOR OF THE BOTTOM FOOTER -->
+    <table  class="w640" bgcolor="#F4F4F4" border="0" cellpadding="0" cellspacing="0" width="640">
+        <tbody><tr><td class="w30" width="30"></td><td class="w580 h0" height="20" width="360"></td><td class="w0" width="60"></td><td class="w0" width="160"></td><td class="w30" width="30"></td></tr>
+        <tr>
+            <td class="w30" width="30"></td>
+            <td class="w580" valign="top" width="700">
+            <span class="hide"><p  class="footer-content-left" align="left"><span></span></p></span>
+            <p class="footer-content-left" align="left"><preferences lang="en">If you have received this email in error, please immediately delete this email from your system. </preferences> </p>
+            </td>
+            <td class="hide w0" width="60"></td>
+            <td class="hide w0" valign="top" width="200">
+            <p  class="footer-content-right" align="right"></p>
+            </td>
+            <td class="w30" width="30"></td>
+        </tr>
+        <tr><td class="w30" width="30"></td><td class="w580 h0" height="15" width="360"></td><td class="w0" width="60"></td><td class="w0" width="160"></td><td class="w30" width="30"></td></tr>
+    </tbody></table>
+</td>
+                </tr>
+				
+                <tr><td class="w640" height="60" width="640"></td></tr>
+            </tbody></table>
+        </td>
+	</tr>   
+	
+</tbody></table></body></html> 
+]]>        
+    </Body>
+  <Description>
+      Email Template for notifying approvers when they need to approve a request made through LCM.
+      Note that in addition to the declared arguments, all workflow variables,
+      Step arguments, and Approval arguments defined in the Workflow are
+      also available.
+    </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="dateAfterTransfer" type="string">
+        <Description>The number of days after termination that user accounts should be deleted.</Description>
+      </Argument>
+      <Argument name="newManagerDisplayName" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+      <Argument name="identityDisplayName" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+      <Argument name="rolesEnabled" type="string">
+        <Description>The display name of the Identity that is being changed.</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Subject>IdentityIQ Transfer Notice For $identityDisplayName - New Manager Notification</Subject>
+</EmailTemplate>
+
+
+
+
+</sailpoint>

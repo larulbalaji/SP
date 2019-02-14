@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <ObjectConfig name="ManagedAttribute">
+      <ObjectAttribute displayName="Requires scope" editMode="Permanent" name="scopeRequired" type="boolean">
+        <DefaultValue>
+          <Boolean/>
+        </DefaultValue>
+        <Description>This flag indicates that a scope must be selected when the entitlement is requested</Description>
+      </ObjectAttribute>
+      <ObjectAttribute displayName="Accepts multiple scopes" editMode="Permanent" name="scopeMulti" type="boolean">
+        <DefaultValue>
+          <Boolean/>
+        </DefaultValue>
+        <Description>This flag indicates that multiple scopes can be selected when the entitlement is requested</Description>
+      </ObjectAttribute>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

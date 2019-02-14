@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition executor="sailpoint.reporting.LiveReportExecutor" name="SQL Query Executor" progressMode="Percentage" resultAction="Rename" subType="Generic reports" template="true" type="LiveReport">
+  <Attributes>
+    <Map>
+      <entry key="report">
+        <value>
+          <LiveReport title="### CHANGE ME ###">
+            <DataSource dataSourceClass="sailpoint.seri.reporting.datasource.SqlQueryDataSource" type="Java">
+              <QueryParameters>
+                <Parameter argument="normalisedQuery" />
+                <Parameter argument="query" />
+              </QueryParameters>
+            </DataSource>
+            <ExtendedColumnRule>
+              <Reference class="sailpoint.object.Rule" name="SQL Query Executor Extended Column Rule"/>
+            </ExtendedColumnRule>
+            <ReportForm>
+              <Reference class="sailpoint.object.Form" name="SQL Query Executor Report Form"/>
+            </ReportForm>
+            <Columns>
+              <ReportColumnConfig field="id" header="Line number" />
+            </Columns>
+          </LiveReport>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Description>A report that can execute a SQL Query and render the results in a dynamic table</Description>
+  <Signature>
+    <Inputs>
+      <Argument multi="false" name="normalisedQuery" type="String"/>
+      <Argument multi="false" name="query" type="String"/>
+    </Inputs>
+  </Signature>
+</TaskDefinition>

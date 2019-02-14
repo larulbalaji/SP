@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="Application-EPIC.xml"/>
+    <ImportAction name="include" value="CorrelationConfig-EPIC.xml"/>
+    <ImportAction name="include" value="Rule-JDBCBuildMap-EPIC.xml"/>
+    <ImportAction name="include" value="Rule-JDBCOperationProvisioningCreate-EPIC.xml"/>
+    <ImportAction name="include" value="Rule-JDBCOperationProvisioningDisable-EPIC.xml"/>
+    <ImportAction name="include" value="Rule-JDBCOperationProvisioningEnable-EPIC.xml"/>
+    <ImportAction name="include" value="Rule-JDBCOperationProvisioningModify-EPIC.xml"/>
+    <ImportAction name="include" value="Rule-LinkAttribute-EPICBreakTheGlass.xml"/>
+    <ImportAction name="include" value="TaskDefinition-AccountAgg-EPIC.xml"/>
+    <ImportAction name="include" value="TaskDefinition-AccountGroupAgg-EPIC.xml"/>
+</sailpoint>

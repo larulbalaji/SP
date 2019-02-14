@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="EPIC-RuleJDBCOperationProvisioningDisable" type="JDBCOperationProvisioning">
+  <Description>This rule is used by the JDBC connector to do provisioning of the data .</Description>
+  <Signature returnType="ProvisioningResult">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>The application whose data file is being processed.</Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>The Schema currently in use.</Description>
+      </Argument>
+      <Argument name="connection">
+        <Description>A connection object to connect to database.</Description>
+      </Argument>
+      <Argument name="plan">
+        <Description>The ProvisioningPlan created against the logical application.</Description>
+      </Argument>
+      <Argument name="request">
+        <Description>The ProvisioningRequest created against the logical application.</Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>A Provisioning Result object is desirable to return the status.IT can be a new object or part of  Provisioning Plan</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+import java.sql.PreparedStatement;
+import sailpoint.object.Identity;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningResult;
+boolean bProvisioningResultCommitted = true;
+String appName = "EPIC";
+
+serilog = org.apache.commons.logging.LogFactory.getLog("SERI.Rule.EPIC-JDBCOperationProvisioningDisable");
+  
+serilog.debug(appName+"-JDBCOperationProvisioningDisable"+"\n"+plan.toXml());
+List accounts = plan.getAccountRequests(appName);
+if (accounts==null) {serilog.debug("Account Request list is null"); bProvisioningResultCommitted=false;}
+if (bProvisioningResultCommitted)
+{
+  for (AccountRequest account : accounts)
+  {
+    Identity user = plan.getIdentity();
+    String username = user.getDisplayName();
+    try
+    {
+      PreparedStatement statement = connection.prepareStatement("update UserTable set BlockStatus='Disabled' where Name=?");
+      statement.setString(1, username);
+      statement.executeUpdate();
+      serilog.debug("Completed: Disabled "+username+" on "+appName);
+    }
+    catch (Exception e)
+    {
+      bProvisioningResultCommitted=false;
+      serilog.debug("Error: Failed Disable "+username+" on "+appName);
+    }
+  }
+}
+
+if (bProvisioningResultCommitted) {
+    return ProvisioningResult.STATUS_COMMITTED;
+}
+
+return ProvisioningResult.STATUS_FAILED;
+]]></Source>
+</Rule>

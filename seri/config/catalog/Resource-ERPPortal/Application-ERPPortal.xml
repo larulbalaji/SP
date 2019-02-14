@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.OpenConnectorAdapter"  featuresString="PROVISIONING, ENABLE, ACCOUNT_ONLY_REQUEST"   name="ERP Portal" profileClass="" type="SOAPConnector">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig"  name="ERP Correlation"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1368392743142</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1368392742334</Date>
+        </value>
+      </entry>
+      <entry key="afterProvisioningRule"/>
+      <entry key="authSearchAttributes">
+        <value>
+          <List>
+            <String>UserID</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="beforeProvisioningRule"/>
+      <entry key="compositeDefinition"/>
+      <entry key="connectorClass" value="sailpoint.seri.openconnector.SOAPConnector"/>
+      <entry key="endpoint" value="http://seri.sailpointdemo.com/ERPPortal/services/SOAPStorePort"/>
+      <entry key="group.columnNames"/>
+      <entry key="group.commentCharacter"/>
+      <entry key="group.delimiter"/>
+      <entry key="group.file"/>
+      <entry key="group.fileEncoding"/>
+      <entry key="group.filterEmptyRecords">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.filterString"/>
+      <entry key="group.hasHeader">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.indexColumn"/>
+      <entry key="group.isSortedByIndexColumn">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.mergeColumns"/>
+      <entry key="group.mergeRows">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="group.numberOfLinesToSkip"/>
+      <entry key="group.regularExpression"/>
+      <entry key="group.stopIfLineHasWrongColumnLength">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="host" value="seri.sailpointdemo.com"/>
+      <entry key="listOnlyIDs">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="stylesheet" value="WEB-INF/config/seri/catalog/Resource-ERPPortal/UserStore.xslt"/>
+      <entry key="supportsCreate">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="supportsDelete">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="supportsPaging">
+        <value>
+          <Boolean></Boolean>
+        </value>
+      </entry>
+      <entry key="supportsUpdates">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="SOAPConnec"/>
+      <entry key="accountDeprovisionScenario" value="Do Nothing"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <Schemas>  
+    <Schema  groupAttribute=""  identityAttribute="username" instanceAttribute=""  nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="acct_lastLogin" remediationModificationType="None" type="string">
+        <Description>Last Login date</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="app_inactive" remediationModificationType="None" type="string">
+        <Description>Inactive Account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="app_privileged" remediationModificationType="None" type="string">
+        <Description>Privileged Account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="app_service" remediationModificationType="None" type="string">
+        <Description>Service Account</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="dbId" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="employeeId" remediationModificationType="None" type="string">
+        <Description>Employeed ID</Description>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="groupmbr" remediationModificationType="None" type="string"/>
+      <AttributeDefinition name="username" remediationModificationType="None" type="string"/>
+    </Schema>
+  </Schemas>
+  <Templates> 
+    <Template name="account" usage="Create">
+      <Field displayName="User ID" name="username" required="true" type="string">
+        <RuleRef>
+          <Reference class="sailpoint.object.Rule"  name="Provisioning Policy Field - Initial plus Last Name"/>
+        </RuleRef>
+      </Field>
+      <Field displayName="Given Name" name="firstname" required="true" type="string">
+        <Script>
+          <Source>return identity.getFirstname()</Source>
+        </Script> 
+      </Field> 
+      <Field displayName="Surname" name="lastname" required="true" type="string">
+        <Script>
+          <Source>return identity.getLastname()</Source>
+        </Script>
+      </Field>
+      <Field name="employeeId" type="string">
+        <Script>
+          <Source>return identity.getAttribute("employeeId")</Source>
+        </Script>
+      </Field>
+    </Template>
+  </Templates>
+</Application>

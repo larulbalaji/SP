@@ -1,0 +1,354 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint> <!--
+  -  An example PeopleSoft HRMS Modify rule that can be used to 
+  -  modify  Email address,Phone and samAccountName.
+  -  In order to modify Email, Phone and samAccountName these attributes
+  -  must be present for the employee and must be valid on today's date
+  -  On selection of Global Provisioning Rule the type of Rule should be changed to "PeopleSoftHRMSProvision",
+  -  and on selection of By Operation Rule , the type of Rule should be changed to "PeopleSoftHRMSOperationProvisioning".
+ -->
+  <Rule language="beanshell" name="PeopleSoft HRMS Modify Rule" type="PeopleSoftHRMSOperationProvisioning">
+  <Description>This rule is used by the PeopleSoft HRMS connector for provisioning
+    of the data .</Description>
+  <Signature returnType="ProvisioningResult">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query
+          the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>The application being processed.</Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>The Schema currently in use.</Description>
+      </Argument>
+      <Argument name="plan">
+        <Description>The ProvisioningPlan created against the PeopleSofthrms
+          application.</Description>
+      </Argument>
+      <Argument name="request">
+        <Description>The ProvisioningRequest created against the PeopleSoft HRMS
+          application.</Description>
+      </Argument>
+      <Argument name="connector">
+        <Description>The PeopleSofthrms connector that is being used to communicate
+          with PeopleSofthrms. This class is here for convenience as there are many
+          utility methods that make calling Function Modules and doing table
+          lookup easier.</Description>
+      </Argument>
+      <Argument name="session">
+                <Description>The session object.</Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>A Provisioning Result object is desirable to return the
+          status.IT can be a new object or part of Provisioning Plan</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>
+       <![CDATA[
+      import sailpoint.object.ProvisioningResult;
+      import sailpoint.object.ProvisioningPlan.AccountRequest.Operation;
+      import sailpoint.object.ProvisioningPlan.ObjectOperation;
+      import sailpoint.connector.peoplesoftv2.PeopleSoftAPI.ComponentInterface;
+      import sailpoint.object.ProvisioningPlan.AccountRequest;
+      import sailpoint.object.ProvisioningPlan.AttributeRequest;
+      import java.util.HashMap;
+      import sailpoint.connector.peoplesoftv2.PeopleSoftAPI;
+      import sailpoint.tools.Util;
+      import sailpoint.connector.ConnectorException;
+      import sailpoint.object.ResourceObject;
+      
+         //Variables to read Plan operation
+         AccountRequest req = null;
+         Operation operation = null;
+         String failedOperations = null;
+         boolean error = false;
+         boolean isReset = false;
+
+         ProvisioningResult result = new ProvisioningResult();
+         List<AccountRequest> accountRequests = plan.getAccountRequests();
+         int size = accountRequests.size();
+         ComponentInterface ci = null;
+         String objectType = "account";
+
+         if(log.isDebugEnabled())
+           log.debug(plan.toXml());
+
+          //This method is used for validating NULL values
+          public boolean checkIfNull(Object value , String attrName) {
+              boolean isError = false;
+              if(null == value){
+                   error = true;
+                   isError = true;
+                   if (log.isErrorEnabled() )
+                        log.error(attrName +" Field cannot be blank");
+               }
+               return isError;
+          }
+
+          //This method is used for initializing Component Interface
+          public boolean initCI(String accNativeIdentity) {
+             //provide CI name to get handle of the CI
+             //In this example 'CI_PERSONAL_DATA' is component interface provided out of box by PeopleSoft HRMS
+             //which is used for updating personal data.
+              ci = connector.getCIHandle("CI_PERSONAL_DATA");
+
+            //first set the property 'KEYPROP_EMPLID' with the corresponding EMPLID
+              ci.setPropertyByName("KEYPROP_EMPLID", accNativeIdentity);
+              boolean userExists = false;
+
+            // Get the employee record
+             if (null != ci) {
+                userExists = ci.get();
+            }
+            return userExists;
+          }
+            
+          //This function will modify the email address if recieved in the plan
+          public void doProvision() {
+             HashMap emailObj = new HashMap();
+             HashMap phoneObj = new HashMap();
+             HashMap iMChatObj = new HashMap();
+             List<AccountRequest> accReqList = plan.getAccountRequests();
+             String accNativeIdentity = null;
+             String emailCollAttribute = null;
+             String phoneCollAttribute = null;
+             String iMChatCollAttribute = null;
+             
+             if (!Util.isEmpty(accReqList)) {
+                 int accReqListSize = accReqList.size();
+                 for( AccountRequest accReq : accReqList ) {
+                     if ( accReq.getApplication().equals( application.getName() ) ) {
+                        accNativeIdentity = accReq.getNativeIdentity();
+                        //Get the requests by passing schema attributes
+                        AttributeRequest emailAttribReq = accReq.getAttributeRequest("EMAIL_ADDR");
+                        AttributeRequest phoneAttribReq = accReq.getAttributeRequest("PHONE");
+
+                        //MCF_IMUSERID is mapped with Network ID on the peopleSoft portal
+                        //As Network ID is not provided OOTB, The "MCF_IMUSERID" need to be added in schema attribute of PeopleSoft HCM Database.
+                        //The "MCF_IMUSERID" attribute can be mapped with samAccountName .Need to retrieve the NetworkID using BuildMap rule.
+                        AttributeRequest networkIDAttribReq = accReq.getAttributeRequest("MCF_IMUSERID");
+
+                        //BIRTHPLACE is a non-collection attriute
+                        AttributeRequest simpleAttribReq = accReq.getAttributeRequest("BIRTHPLACE");
+
+                       try {
+                        boolean userExists = initCI(accNativeIdentity);
+
+                        if(userExists) {
+                             if ( null != emailAttribReq) {
+                               Object emailValue = emailAttribReq.getValue();
+                               String attrName = emailAttribReq.getName();
+                               boolean isNull = checkIfNull(emailValue, attrName);
+                               if(!isNull){
+                                  updateEmail(emailCollAttribute,emailObj,ci,emailValue,emailAttribReq);
+                                  result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+                               }
+                               //Reset the component interface. This is required between some operations
+                               //to make sure old data is not in the component interface.
+                               connector.resetCI();
+                               isReset = true;
+                             }
+                             if ( null != phoneAttribReq) {
+                               //If Component Interface is reset then only call the initCI function for
+                               //initializing the CI again
+                               if (isReset) {
+                                 initCI(accNativeIdentity);
+                               }
+                               Object phoneValue = phoneAttribReq.getValue();
+                               String attrName = phoneAttribReq.getName();
+                               boolean isNull = checkIfNull(phoneValue, attrName);
+                               if(!isNull){
+                                 updatePhone(phoneCollAttribute,phoneObj,ci,phoneValue,phoneAttribReq);
+                                 result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+                               }
+                               connector.resetCI();
+                               isReset = true;
+                             } 
+                             if (null != networkIDAttribReq) {
+                                if (isReset) {
+                                    initCI(accNativeIdentity);
+                                }
+                                Object networkID = networkIDAttribReq.getValue();
+                                String attrName = networkIDAttribReq.getName();
+                                boolean isNull = checkIfNull(networkID, attrName);
+                                if(!isNull){
+                                  updateNetworkID(iMChatCollAttribute,iMChatObj,ci,networkID,networkIDAttribReq);
+                                  result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+                                }
+                                connector.resetCI();
+                                isReset = true;
+                             }
+                             //code for updating non-collection attribute
+                             if (null != simpleAttribReq) {
+                                if (isReset) {
+                                    initCI(accNativeIdentity);
+                                }
+                                Object value = simpleAttribReq.getValue();
+                                String attrName = simpleAttribReq.getName();
+                                String propertyName = "PROP_BIRTHPLACE";
+                                boolean isNull = checkIfNull(value, attrName);
+                                //Caliing updateNonCollectionAttributes method of connector
+                                if(!isNull){
+                                  connector.updateNonCollectionAttributes(ci, propertyName, value);
+                                  result.setStatus(ProvisioningResult.STATUS_COMMITTED);
+                                }
+                                connector.resetCI();
+                                isReset = true;
+                             }
+                        } else {
+                                error = true;
+                                ProvisioningResult result = new ProvisioningResult();
+                                result.setStatus(ProvisioningResult.STATUS_FAILED);
+                                result.addError("User does not exist " + accNativeIdentity );
+                         }
+                      } catch (Exception e) {
+                        result.setStatus(ProvisioningResult.STATUS_FAILED);
+                        result.addError(e.getMessage());
+                        if (log.isErrorEnabled() )
+                            log.error(plan.toXml());
+                       }
+                     }
+                 }
+             }
+         }
+
+         //This function will update the email address
+          /* 'COLL_EMAIL_ADDRESSES' is a collection attribute needed for updating email.
+             This collection attribute consist of 3 sub attributes :PROP_EMAIL_ADDR,KEYPROP_E_ADDR_TYPE,PROP_PREF_EMAIL_FLAG
+             A map is created,where these three attributes are passed as key with their corresponding values.
+             BUSN,CAMP and HOME ane types of email which corresponds to type business, campus and home respectively.
+             If email is primary then value is 'Y' and 'N' if email is not primary
+             Only one email can be primary at a time.
+         */
+         public void updateEmail(String emailCollection,HashMap emailObj,ComponentInterface ci, Object emailValue, AttributeRequest req) {
+
+                String type = "KEYPROP_E_ADDR_TYPE";
+                boolean isUpdated = false;
+                ProvisioningResult provisioningResult = new ProvisioningResult();
+                emailCollection = "COLL_EMAIL_ADDRESSES";
+                emailObj.put("PROP_EMAIL_ADDR", emailValue);
+                emailObj.put("KEYPROP_E_ADDR_TYPE", "BUSN");
+                emailObj.put("PROP_PREF_EMAIL_FLAG", "Y");
+                //calling updateCollectionAttributes method of connector
+                try {
+                   isUpdated = connector.updateCollectionAttributes(emailCollection, emailObj, ci, type );
+                } catch(Exception e) {
+                    error = true;
+                    provisioningResult.setStatus(ProvisioningResult.STATUS_FAILED);
+                    provisioningResult.addError(e.getMessage());
+                    req.setResult(provisioningResult);  
+                    if (log.isErrorEnabled() )
+                        log.error(plan.toXml());
+                }
+                if(isUpdated) {
+                     provisioningResult.setStatus( ProvisioningResult.STATUS_COMMITTED );
+                }
+         }
+         //This function will update the phone number
+          /* 'COLL_PERSONAL_PHONE' is a collection attribute needed for updating phone number.
+             This collection attribute consist of 3 sub attributes :PROP_PHONE,KEYPROP_PHONE_TYPE,PROP_PREF_PHONE_FLAG
+             A map is created, where these three attributes are passed as key with their corresponding values.
+             BUSN,CAMP and HOME ane some of the types of phone numbers which corresponds to type business, campus and home respectively.
+             If phone number is primary then value is 'Y' and 'N' if phone number is not primary
+             Only one phone number can be primary at a time.
+         */
+         public void updatePhone(String phoneCollection,HashMap phoneObj,ComponentInterface ci, Object phoneValue, AttributeRequest req) {
+
+                String type = "KEYPROP_PHONE_TYPE";
+                boolean isUpdated = false;
+                ProvisioningResult provisioningResult = new ProvisioningResult();
+                phoneCollection = "COLL_PERSONAL_PHONE";
+                phoneObj.put("PROP_PHONE", phoneValue);
+                phoneObj.put("KEYPROP_PHONE_TYPE", "BUSN");
+                phoneObj.put("PROP_PREF_PHONE_FLAG", "Y");
+                try {
+                    isUpdated = connector.updateCollectionAttributes(phoneCollection, phoneObj, ci, type);
+                } catch (Exception e) {
+                    error = true;
+                    provisioningResult.setStatus(ProvisioningResult.STATUS_FAILED);
+                    provisioningResult.addError(e.getMessage());
+                    req.setResult(provisioningResult);
+                    if (log.isErrorEnabled() )
+                        log.error(plan.toXml());
+                }
+                if(isUpdated) {
+                     provisioningResult.setStatus( ProvisioningResult.STATUS_COMMITTED );
+                }
+         }
+
+         /*  This function will update the Network ID 
+            'COLL_PERSON_IMCHAT' is a collection attribute needed for updating network id.
+             This collection attribute consist of 4 sub attributes :PROP_MCF_IMUSERID,KEYPROP_MCF_IM_PROTOCOL,KEYPROP_MCFIMDOMAIN and PROP_PREF_CHATID_FLAG
+             A map is created, where these three attributes are passed as key with their corresponding values.
+             GTAL,YAHO and MSN ane some of the protocols which corresponds to domains GTALK, YAHOO and MSN respectively.
+             PROP_PREF_CHATID_FLAG has value as 'Y' if corresponding chat id is preferred else it has value as 'N' 
+         */
+         public void updateNetworkID(String iMChatCollection,HashMap iMChatObj,ComponentInterface ci, Object networkID, AttributeRequest req) {
+
+                String type = "KEYPROP_MCF_IM_PROTOCOL";
+                boolean isUpdated = false;
+                ProvisioningResult provisioningResult = new ProvisioningResult();
+                iMChatCollection = "COLL_PERSON_IMCHAT";
+                iMChatObj.put("KEYPROP_MCF_IM_PROTOCOL", "GTAL");
+                iMChatObj.put("KEYPROP_MCFIMDOMAIN", "GTALK");
+                iMChatObj.put("PROP_MCF_IMUSERID", networkID);
+                iMChatObj.put("PROP_PREF_CHATID_FLAG", "Y");
+                try {
+                    isUpdated = connector.updateCollectionAttributes(iMChatCollection, iMChatObj, ci, type);
+                } catch (Exception e) {
+                    error = true;
+                    provisioningResult.setStatus(ProvisioningResult.STATUS_FAILED);
+                    provisioningResult.addError(e.getMessage());
+                    req.setResult(provisioningResult);
+                    if (log.isErrorEnabled() )
+                        log.error(plan.toXml());
+                }
+                if(isUpdated) {
+                     provisioningResult.setStatus( ProvisioningResult.STATUS_COMMITTED );
+                }
+         }
+       
+          // Logic to Read operation from Plan
+         for ( int i=0;i<size;i++ ) {
+              req=accountRequests.get(i);
+              operation=req.getOperation();
+              if( null!=operation ) {
+                failedOperations= ( null == failedOperations ) ? operation.toString() : failedOperations + "," +operation.toString();
+                 if( operation.toString().equals("Modify") ) {
+                     // call doProvision method
+                     doProvision();
+                 } else {
+                    error =true;
+                    ProvisioningResult provisioningResult = new ProvisioningResult();
+                    provisioningResult.setStatus(ProvisioningResult.STATUS_FAILED);
+                    provisioningResult.addError("Modify Provisioning Rule can not be used for " + failedOperations + " operation");
+                    req.setResult(provisioningResult);
+                 }
+             }
+              ResourceObject ro=connector.getObject(objectType, req.getNativeIdentity(), null);
+              if(null != ro)
+              result.setObject(ro);
+          }
+          if(error)  {
+            result.setStatus(ProvisioningResult.STATUS_FAILED);
+            result.addError("Operation failed.Please Check logs for more details.");
+         }
+         if (log.isDebugEnabled() )
+           log.debug(plan.toXml());
+         return result;
+     ]]>
+  </Source>
+</Rule>
+</sailpoint>

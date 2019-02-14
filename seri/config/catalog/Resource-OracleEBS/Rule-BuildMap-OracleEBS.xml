@@ -1,0 +1,130 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Oracle EBS - Aggregation Handler" type="BuildMap">
+  <Source>
+    <![CDATA[
+
+import sailpoint.connector.DelimitedFileConnector;
+import sailpoint.connector.Connector;
+import sailpoint.object.*;
+import sailpoint.tools.*;
+
+private String getIIQHome() {
+  String homePath = null;
+  
+  try {
+    homePath = Util.getApplicationHome();
+    //print(".....home = " + home);
+  } catch (Exception e) {
+    log.error("Unable to find IIQ home.");
+  }
+  
+  return homePath;
+}
+
+
+private Map buildRespCache(BufferedReader reader) throws IOException {
+  Map cache = new HashMap();
+
+  RFC4180LineIterator lines = new RFC4180LineIterator(reader);
+  if (lines != null) {
+
+    int num = 0;
+    RFC4180LineParser parser = new RFC4180LineParser(',');  
+    String line = null;
+    
+    // skip header
+    String skipped = lines.readLine();
+    
+    while ((line = lines.readLine()) != null) {
+
+      String resp = null;
+      String menu = null;
+      String dataGroup = null;
+      String requestGroup = null;
+      
+      List tokens = parser.parseLine(line);
+      if (tokens.size() >= 4) {
+
+        if (null != tokens.get(0)) {
+            resp = ((String)tokens.get(0)).trim();
+        }
+        if (null != tokens.get(1)) {
+            menu = ((String)tokens.get(1)).trim();
+        }
+        if (null != tokens.get(2)) {
+            dataGroup = ((String)tokens.get(2)).trim();
+        }
+        if (null != tokens.get(3)) {
+            requestGroup = ((String)tokens.get(3)).trim();
+        }
+        
+        Map cacheEntry = null;
+        if (!cache.containsKey(resp)) {
+          cacheEntry = new HashMap();
+          cacheEntry.put("menu", menu);
+          cacheEntry.put("data_group", dataGroup);
+          cacheEntry.put("request_group", requestGroup);
+        } else {
+          // placeholder for handling multi-valued responsibility attributes
+        }
+
+        cache.put(resp, cacheEntry);
+      }
+    }
+  }
+
+  return cache;
+}
+
+// The "state" parameter is passed into rule and gives us a place to stash 
+// things during an aggregation cycle
+//
+Map respCache = state.get("OracleEBS_RESP_CACHE");
+
+// If cache is null, build it
+//
+if (null == respCache) {
+
+  String respFilename = application.getAttributeValue("respFile");
+  if (null != respFilename) {
+    // file path is relative to IIQ home, so we need to prefix path for IIQ home to get absolute path
+    String iiqHome = getIIQHome();
+    BufferedInputStream pstream = new BufferedInputStream(new FileInputStream(new File(iiqHome + "/" + respFilename))); 
+    BufferedReader reader = new BufferedReader(new InputStreamReader(pstream));
+    respCache = buildRespCache(reader);
+    state.put("OracleEBS_RESP_CACHE", respCache);
+  } else {
+    throw new GeneralException("Oracle EBS Aggregation: respFile attribute missing from app def!");
+  }
+}
+
+// Use connector static method to get row into map of attributes
+//
+Map map = DelimitedFileConnector.defaultBuildMap(cols, record);
+
+// if we're doing Account Group Aggregation...
+//
+// IIQ 6.4 introduced multiple "group" schemas, so we have to test for specific
+// schema object type.
+//
+if (schema.getObjectType().compareTo("RESPONSIBILITY") == 0) {
+
+  // check permission cache for a hit
+  String resp = map.get("RESPONSIBILITY_NAME");
+  if (null != resp) {
+    Map entry = respCache.get(resp);
+    if (null != entry) {
+      map.put("MENU_NAME", entry.get("menu"));
+      map.put("DATA_GROUP_NAME", entry.get("data_group"));
+      map.put("REQUEST_GROUP_NAME", entry.get("request_group"));
+    }
+  }
+} else {
+  // do account aggregation stuff here....
+}
+
+return map;
+
+  ]]></Source>
+</Rule>

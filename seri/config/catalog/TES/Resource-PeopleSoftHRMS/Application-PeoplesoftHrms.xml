@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application authoritative="true" connector="sailpoint.connector.PeopleSoftHRMSConnector" featuresString="PROVISIONING, SYNC_PROVISIONING, SEARCH, MANAGER_LOOKUP, ENABLE" icon="enterpriseIcon" name="PeopleSoft HRMS" profileClass="" type="PeopleSoft HCM Database">
+  <Attributes>
+    <Map>
+      <entry key="SQL" value="SELECT Person.EMPLID,Person.NAME_PREFIX,Person.NAME_SUFFIX,Person.FIRST_NAME,Person.LAST_NAME, Person.MIDDLE_NAME,Person.NAME,Person.NAME_TITLE,Person.ADDRESS1,Person.ADDRESS2,Person.ADDRESS3, Person.BIRTHDATE, Person.CITY,Person.COUNTRY,Person.PREF_FIRST_NAME,Person.POSTAL, Person.HR_RESPONSIBLE_ID,Person.STATE,Email.E_ADDR_TYPE,Email.EMAIL_ADDR,Phone.PHONE_TYPE,Phone.PHONE FROM PS_PERSONAL_DATA Person LEFT OUTER JOIN (SELECT tempPerson.EMPLID,tempEmail.E_ADDR_TYPE,tempEmail.EMAIL_ADDR FROM PS_PERSONAL_DATA tempPerson LEFT OUTER JOIN PS_EMAIL_ADDRESSES tempEmail ON tempPerson.EMPLID = tempEmail.EMPLID WHERE tempEmail.E_ADDR_TYPE='BUSN') Email ON Person.EMPLID = Email.EMPLID LEFT OUTER JOIN (SELECT tempPerson.EMPLID,tempPhone.PHONE,tempPhone.PHONE_TYPE FROM PS_PERSONAL_DATA tempPerson LEFT OUTER JOIN PS_PERSONAL_PHONE tempPhone ON tempPerson.EMPLID = tempPhone.EMPLID WHERE tempPhone.PHONE_TYPE='BUSN') Phone ON Person.EMPLID = Phone.EMPLID AND Email.EMPLID = Phone.EMPLID WHERE Person.EMPLID&gt;? ORDER BY Person.EMPLID"/>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1486589382971</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1486589382847</Date>
+        </value>
+      </entry>
+      <entry key="chunkToFetch" value="1000"/>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="domainConnPassword" value="1:BA7QR5zdX15IdpDAUew1Hg=="/>
+      <entry key="domainPassMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="driverClass" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="encrypted" value="domainConnPassword,pspassword"/>
+      <entry key="exceptionToThrow">
+        <value>
+          <List>
+            <String>timed out</String>
+            <String>socket write error</String>
+            <String>Connection reset</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="getObjectSQL" value="SELECT Person.EMPLID,Person.NAME_PREFIX,Person.NAME_SUFFIX,Person.FIRST_NAME,Person.LAST_NAME, Person.MIDDLE_NAME,Person.NAME,Person.NAME_TITLE,Person.ADDRESS1,Person.ADDRESS2,Person.ADDRESS3, Person.BIRTHDATE, Person.CITY,Person.COUNTRY,Person.PREF_FIRST_NAME,Person.POSTAL, Person.HR_RESPONSIBLE_ID,Person.STATE,Email.E_ADDR_TYPE,Email.EMAIL_ADDR,Phone.PHONE_TYPE,Phone.PHONE FROM PS_PERSONAL_DATA Person LEFT OUTER JOIN (SELECT tempPerson.EMPLID,tempEmail.E_ADDR_TYPE,tempEmail.EMAIL_ADDR FROM PS_PERSONAL_DATA tempPerson LEFT OUTER JOIN PS_EMAIL_ADDRESSES tempEmail ON tempPerson.EMPLID = tempEmail.EMPLID WHERE tempEmail.E_ADDR_TYPE='BUSN') Email ON Person.EMPLID = Email.EMPLID LEFT OUTER JOIN (SELECT tempPerson.EMPLID,tempPhone.PHONE,tempPhone.PHONE_TYPE FROM PS_PERSONAL_DATA tempPerson LEFT OUTER JOIN PS_PERSONAL_PHONE tempPhone ON tempPerson.EMPLID = tempPhone.EMPLID WHERE tempPhone.PHONE_TYPE='BUSN') Phone ON Person.EMPLID = Phone.EMPLID AND Email.EMPLID = Phone.EMPLID WHERE Person.EMPLID = '$(identity)'"/>
+      <entry key="getSubSQL" value="SELECT  Job.EMPL_RCD,Job.PER_ORG,Job.DEPTID,Job.JOBCODE,Job.POSITION_NBR,Job.SUPERVISOR_ID,Job.HR_STATUS,Job.EMPL_STATUS, Job.ACTION,Job.ACTION_REASON,Job.LOCATION,Job.FULL_PART_TIME,Job.COMPANY,Job.EMPL_TYPE,Job.OFFICER_CD,Job.EMPL_CLASS,Job.ACCT_CD, Job.BUSINESS_UNIT,Job.REPORTS_TO,Job.TERMINATION_DT,Job.HIRE_DT, Job.JOB_INDICATOR,Job.EMPLID,Job.EFFDT FROM PS_JOB Job WHERE Job.EMPLID = '$(identity)' and Job.JOB_INDICATOR = 'P' AND Job.EFFDT = (SELECT MAX(Job1.EFFDT) FROM PS_JOB Job1 WHERE Job1.EMPLID = Job.EMPLID AND Job1.EMPL_RCD = Job.EMPL_RCD AND Job1.EFFDT &lt;= CURRENT_TIMESTAMP)  AND Job.EFFSEQ = (SELECT MAX(Job2.EFFSEQ) FROM PS_JOB Job2 WHERE Job2.EMPLID = Job.EMPLID AND Job2.EMPL_RCD = Job.EMPL_RCD AND Job2.EFFDT = Job.EFFDT)"/>
+      <entry key="host" value="10.0.4.3"/>
+      <entry key="jar_locations"/>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="password" value="1:Ah38+DEHFN+RT1XkJwuIlg=="/>
+      <entry key="peoplesofthrModifyProvisioningRule" value="PeopleSoft HRMS Modify Rule"/>
+      <entry key="port" value="9000"/>
+      <entry key="provisionRule" value="operationRule"/>
+      <entry key="pspassword" value="1:VtKktiP2gmiM9JycO9b+qw=="/>
+      <entry key="psuser" value="PS"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="PeopleSoft HR/HCM"/>
+      <entry key="url" value="jdbc:sqlserver://10.0.4.3:1433;databaseName=HCM92"/>
+      <entry key="user" value="sa"/>
+    </Map>
+  </Attributes>
+  <CreationRule>
+    <Reference class="sailpoint.object.Rule" name="PeopleSoft Creation"/>
+  </CreationRule>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="NAME" identityAttribute="EMPLID" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="EMPLID" type="string">
+        <Description>ID of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NAME_PREFIX" type="string">
+        <Description>Prefix of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NAME_TITLE" type="string">
+        <Description>Title of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NAME_SUFFIX" type="string">
+        <Description>Suffix of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="FIRST_NAME" type="string">
+        <Description>First Name of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PREF_FIRST_NAME" type="string">
+        <Description>Preferred first name of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="MIDDLE_NAME" type="string">
+        <Description>Middle Name of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LAST_NAME" type="string">
+        <Description>Last Name of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="NAME" type="string">
+        <Description>Name of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="BIRTHDATE" type="string">
+        <Description>BirthDate of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMAIL_ADDR" type="string">
+        <Description>Email Address of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PHONE" type="string">
+        <Description>Personal Phone of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS1" type="string">
+        <Description>Postal address1 of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS2" type="string">
+        <Description>Postal address2 of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ADDRESS3" type="string">
+        <Description>Postal address3 of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="CITY" type="string">
+        <Description>City of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="STATE" type="string">
+        <Description>State of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="POSTAL" type="string">
+        <Description>Postal pincode of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="COUNTRY" type="string">
+        <Description>Country of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPL_RCD" type="string">
+        <Description>Job employee record</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="PER_ORG" type="string">
+        <Description>Organization of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EFFDT" type="string">
+        <Description>Effective date of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPL_STATUS" type="string">
+        <Description>Employee status of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="DEPTID" type="string">
+        <Description>Department ID of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="COMPANY" type="string">
+        <Description>Company of the employee for current job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="JOBCODE" type="string">
+        <Description>Job Code of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="HR_STATUS" type="string">
+        <Description>HR status of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACTION" type="string">
+        <Description>Action code of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACTION_REASON" type="string">
+        <Description>Action reason of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="LOCATION" type="string">
+        <Description>Location of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="POSITION_NBR" type="string">
+        <Description>Position number of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="SUPERVISOR_ID" type="string">
+        <Description>Supervisior ID of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="FULL_PART_TIME" type="string">
+        <Description>Full part time of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPL_TYPE" type="string">
+        <Description>Employee type of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="OFFICER_CD" type="string">
+        <Description>Officer Code of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="EMPL_CLASS" type="string">
+        <Description>Employee class of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="ACCT_CD" type="string">
+        <Description>Account code of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="BUSINESS_UNIT" type="string">
+        <Description>Business unit of the job</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="HR_RESPONSIBLE_ID" type="string">
+        <Description>HR Responsible ID of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="HIRE_DT" type="string">
+        <Description>Hiring date of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="TERMINATION_DT" type="string">
+        <Description>Termination date of the employee</Description>
+      </AttributeDefinition>
+      <AttributeDefinition name="REPORTS_TO" type="string">
+        <Description>Reporting to of the employee</Description>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <ApplicationScorecard/>
+</Application>

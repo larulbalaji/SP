@@ -1,0 +1,211 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <QuickLink action="viewCertifications" category="Compliance" messageKey="quicklink_access_reviews" name="Access Reviews">
+    <Attributes>
+      <Map>
+        <entry key="displayText" value="true" />
+        <entry key="textScript">
+          <value>
+            <Script>
+              <Source><![CDATA[
+import sailpoint.object.Certification;
+import sailpoint.object.QueryOptions;
+import sailpoint.object.Filter;
+
+QueryOptions qo
+= new QueryOptions();
+List names = new 
+ArrayList();
+names.add(currentUser.getName());
+qo.addFilter(Filter.containsAll("certifiers", names));
+qo.addFilter(Filter.ne("phase", Certification.Phase.Staged));
+qo.addFilter(Filter.isnull("signed"));
+
+int count = context.countObjects(Certification.class, qo);
+return count;
+             ]]> </Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="dynamicScope-AccessReviews" />
+    </DynamicScopes>
+  </QuickLink>
+
+
+
+  <QuickLink action="listViolations" category="Compliance" messageKey="quicklink_policy_violations" name="Policy Violations">
+    <Attributes>
+      <Map>
+        <entry key="displayText" value="true" />
+        <entry key="ownerId">
+          <value>
+            <Script>
+              <Source>
+                return currentUser.getId();
+              </Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="textScript">
+          <value>
+            <Script>
+              <Source><![CDATA[
+                import sailpoint.object.PolicyViolation;
+                import sailpoint.object.QueryOptions;
+                import sailpoint.object.Filter;
+
+                //System.out.println("currentUser is = " + currentUser);
+
+                QueryOptions qo = new QueryOptions();
+                qo.addFilter(Filter.eq("owner", currentUser));
+                qo.addFilter(Filter.eq("status", PolicyViolation.Status.Open));
+                int count = context.countObjects(PolicyViolation.class, qo);
+                return count;
+              ]]></Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="dynamicScope-PolicyViolations" />
+    </DynamicScopes>
+  </QuickLink>
+
+
+
+  <QuickLink action="manageWorkItems" category="Tasks" messageKey="quicklink_approvals" name="Approvals">
+    <Attributes>
+      <Map>
+        <entry key="displayText" value="true" />
+        <entry key="textScript">
+          <value>
+            <Script>
+              <Source><![CDATA[
+                import sailpoint.object.WorkItem;
+                import sailpoint.object.QueryOptions;
+                import sailpoint.object.Filter;
+                import java.util.List;
+                import java.util.ArrayList;
+
+                QueryOptions qo = new QueryOptions();
+                List filters = new ArrayList();
+
+                filters.add(Filter.eq("owner", currentUser));
+
+                if (currentUser.getWorkgroups() != null && !currentUser.getWorkgroups().isEmpty())
+                {
+                filters.add(Filter.in("owner", currentUser.getWorkgroups()));
+                }
+
+                qo.addFilter(Filter.eq("type", "Approval"));
+                qo.addFilter(Filter.or(filters));
+
+                int count = context.countObjects(WorkItem.class, qo);
+                return count;
+
+    ]]>          </Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="workItemType" value="Approval" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="dynamicScope-Approvals" />
+    </DynamicScopes>
+  </QuickLink>
+
+
+
+  <QuickLink action="manageWorkItems" category="Tasks" messageKey="quicklink_signoffs" name="Signoffs">
+    <Attributes>
+      <Map>
+        <entry key="displayText" value="true" />
+        <entry key="textScript">
+          <value>
+            <Script>
+              <Source><![CDATA[
+                import sailpoint.object.WorkItem;
+                import sailpoint.object.QueryOptions;
+                import sailpoint.object.Filter;
+                import java.util.List;
+                import java.util.ArrayList;
+
+                QueryOptions qo = new QueryOptions();
+                List filters = new ArrayList();
+
+                filters.add(Filter.eq("owner", currentUser));
+
+                if (currentUser.getWorkgroups() != null && !currentUser.getWorkgroups().isEmpty())
+                {
+                filters.add(Filter.in("owner", currentUser.getWorkgroups()));
+                }
+
+                qo.addFilter(Filter.eq("type", "Signoff"));
+                qo.addFilter(Filter.or(filters));
+
+                int count = context.countObjects(WorkItem.class, qo);
+                return count;
+
+    ]]>          </Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="workItemType" value="Signoff" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="dynamicScope-signoffs" />
+    </DynamicScopes>
+  </QuickLink>
+
+
+
+  <QuickLink action="manageWorkItems" category="Tasks" messageKey="quicklink_work_items" name="Work Items">
+    <Attributes>
+      <Map>
+        <entry key="displayText" value="true" />
+        <entry key="textScript">
+          <value>
+            <Script>
+              <Source><![CDATA[
+
+                import sailpoint.object.WorkItem;
+                import sailpoint.object.QueryOptions;
+                import sailpoint.object.Filter;
+                import java.util.List;
+                import java.util.ArrayList;
+
+                QueryOptions qo = new QueryOptions();
+                List filters = new ArrayList();
+
+                filters.add(Filter.eq("owner", currentUser));
+
+                if (currentUser.getWorkgroups() != null && !currentUser.getWorkgroups().isEmpty())
+                {
+                filters.add(Filter.in("owner", currentUser.getWorkgroups()));
+                }
+
+                qo.addFilter(Filter.or(filters));
+
+                int count = context.countObjects(WorkItem.class, qo);
+                return count;
+
+    ]]>          </Source>
+            </Script>
+          </value>
+        </entry>
+        <entry key="workItemType" value="all" />
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope" name="dynamicScope-workItems" />
+    </DynamicScopes>
+  </QuickLink>
+</sailpoint>

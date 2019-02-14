@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="Active and non-orphaned Users" type="IdentitySelector">
+  <Description>This rule is used to select an Identity that is related to the given Identity</Description>
+  <Signature returnType="boolean">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="identity" type="Identity">
+        <Description>
+          The identity.
+        </Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="success">
+        <Description>
+            True if the selection was successful; false otherwise.
+        </Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source>return !"true".equals(identity.getAttribute("inactive")) &amp;&amp; identity.isCorrelated();
+</Source>
+</Rule>

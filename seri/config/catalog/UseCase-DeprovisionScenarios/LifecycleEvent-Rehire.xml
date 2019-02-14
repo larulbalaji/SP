@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IdentityTrigger PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IdentityTrigger attributeName="inactive" created="1371068166401" handler="sailpoint.api.WorkflowTriggerHandler"  name="Rehire" newValueFilter="false" oldValueFilter="true" type="AttributeChange">
+  <Owner>
+    <Reference class="sailpoint.object.Identity"  name="spadmin"/>
+  </Owner>
+  <HandlerParameters>
+    <Attributes>
+      <Map>
+        <entry key="workflow" value="Lifecycle Event - Reactivation"/>
+      </Map>
+    </Attributes>
+  </HandlerParameters>
+</IdentityTrigger>

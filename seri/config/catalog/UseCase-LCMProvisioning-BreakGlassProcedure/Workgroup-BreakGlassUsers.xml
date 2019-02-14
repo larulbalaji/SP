@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Identity PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Identity    name="Break Glass Users" workgroup="true">
+  <Attributes>
+    <Map>
+      <entry key="department"/>
+      <entry key="displayName" value="Break Glass Users"/>
+      <entry key="employeeId"/>
+      <entry key="employeeType"/>
+      <entry key="jobTitle"/>
+      <entry key="location"/>
+      <entry key="phone"/>
+      <entry key="region"/>
+      <entry key="terminationDate"/>
+    </Map>
+  </Attributes>
+  <Preferences>
+    <Map>
+      <entry key="workgroupNotificationOption">
+        <value>
+          <WorkgroupNotifationOption>Both</WorkgroupNotifationOption>
+        </value>
+      </entry>
+    </Map>
+  </Preferences>
+</Identity>

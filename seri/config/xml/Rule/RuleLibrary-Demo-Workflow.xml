@@ -1,0 +1,444 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<Rule language="beanshell" name="Demo - Workflow RuleLibrary">
+  <Description>
+  ================================================================================
+     SailPoint Demo Workflow Rule Library
+    
+          Contains a series of utility methods to be invoked from within a
+          variety of POC workflow processes.  The methods are organized
+          into sets or types, depending on the object they work on.
+ 
+          This Rule Library is here to help with workflow customization during a
+          POC and to help remove some of the visible complexity from the workflow.
+
+          Look at WEB-INF/config/workflowRules.xml for Rule Library methods you
+          get 'for free'.  Two that you will use often are:
+
+                String getManagersEmail(String name);
+                String getIdentityProperty(String identity, String property);
+
+     TODO:  Build Utilities around fishing data out of workflow objects, like:
+            Approval Sets, Provisioning Plans and the Project.
+  ================================================================================
+  </Description>
+  <Source>
+  <![CDATA[
+    
+      import java.util.ArrayList;
+      import java.util.List;
+      import java.util.Iterator;
+      import java.util.Map;
+      import java.util.HashMap;
+      import java.util.regex.Matcher;
+
+      import sailpoint.object.*;
+      import sailpoint.connector.*;
+      import sailpoint.api.*;
+      import sailpoint.tools.*;
+
+
+   // Constants, Limits and other Hard-Coded Settings
+   //================================================
+     /*public static*/ int DEFINE_ZERO = 0;
+     /*public static*/ int MIN_VALID_APP_NAME = 2;
+     /*public static*/ String DEFINE_EMPTY_STRING = "";
+     /*public static*/ boolean DEBUG_MODE = true;
+
+
+   //=====================================================================================
+   //                         CONFIGURATION OBJECT METHODS
+   //=====================================================================================
+   //
+   //    A small set of utility methods to act upon Configuration objects.
+   //
+   //    NOTE: The thinking with these is in a POC we might collect some
+   //          of the 'hard-coded' values into a single POC config object.
+   //
+   //=====================================================================================
+   //
+     public String getConfigSetting_String(String cobjName, String setting) {
+    
+        if(null != cobjName && null != setting) {
+          Configuration co = (Configuration) context.getObjectByName(Configuration.class, cobjName);
+          if(co != null) {
+              return co.getString(setting);
+           }
+        }
+        debugPrint("getConfigSetting_String(): Null argument or Config Object not found.  Return []");
+        return DEFINE_EMPTY_STRING;
+     }
+   //-------------------------------------------------------------------------
+     public boolean getConfigSetting_Boolean(String cobjName, String setting) {
+    
+        if(null != cobjName && null != setting) {
+          Configuration co = (Configuration) context.getObjectByName(Configuration.class, cobjName);
+          if(co != null) {
+              return co.getBoolean(setting);
+           }    
+        }
+        debugPrint("getConfigSetting_Boolean(): Null argument or Config Object not found.  Return false.");
+        return false;
+     }
+   //-------------------------------------------------------------------------
+     public List getConfigSetting_List(String cobjName, String setting) {
+    
+        if(null != cobjName && null != setting) {
+          Configuration co = (Configuration) context.getObjectByName(Configuration.class, cobjName);
+          if(co != null) {
+              return co.getList(setting);
+           }    
+        }
+        debugPrint("getConfigSetting_List(): Null argument or Config Object not found.  Return null.");
+        return null;
+     }
+   //-------------------------------------------------------------------------
+     public int getConfigSetting_Integer(String cobjName, String setting) {
+    
+        if(null != cobjName && null != setting) {
+          Configuration co = (Configuration) context.getObjectByName(Configuration.class, cobjName);
+          if(co != null) {
+              return co.getInteger(setting);
+           }    
+        }
+        debugPrint("getConfigSetting_Integer(): Null argument or Config Object not found.  Return 0.");
+        return DEFINE_ZERO;
+     }
+
+
+
+
+   //=====================================================================================
+   //                                ROLE METHODS
+   //=====================================================================================
+   //
+   //    A small set of utility methods to act upon Roles.
+   //
+   //=====================================================================================
+   //
+     public String getRoleAttribute_String(String roleName, String attrName) {
+
+        if(null != roleName && null != attrName) {
+          Bundle role = (Bundle) context.getObjectByName(Bundle.class, roleName);
+          if(role != null) {
+              return (String) role.getAttribute(attrName);
+           }
+        }
+        debugPrint("getRoleAttribute_String(): Null argument or Role not found.  Return []");
+        return DEFINE_EMPTY_STRING;
+     }
+   //-------------------------------------------------------------------------
+     public boolean getRoleAttribute_Boolean(String roleName, String attrName) {
+
+        if(null != roleName && null != attrName) {
+          Bundle role = (Bundle) context.getObjectByName(Bundle.class, roleName);
+          if(role != null) {
+              return (Boolean) role.getAttribute(attrName);
+           }
+        }
+        debugPrint("getRoleAttribute_Boolean(): Null argument or Role not found.  Return false");
+        return false;
+     }
+   //-------------------------------------------------------------------------
+     public int getRoleAttribute_Integer(String roleName, String attrName) {
+
+        if(null != roleName && null != attrName) {
+          Bundle role = (Bundle) context.getObjectByName(Bundle.class, roleName);
+          if(role != null) {
+              return (int) role.getAttribute(attrName);
+           }
+        }
+        debugPrint("getRoleAttribute_Integer(): Null argument or Role not found.  Return 0");
+        return DEFINE_ZERO;
+     }
+   //-------------------------------------------------------------------------
+     public String getRoleAttribute_Identity(String roleName, String attrName) {
+
+        if(null != roleName && null != attrName) {
+          Bundle role = (Bundle) context.getObjectByName(Bundle.class, roleName);
+          if(role != null) {
+              return (String) role.getAttribute(attrName);
+           }
+        }
+        debugPrint("getRoleAttribute_Identity(): Null argument or Role not found.  Return null");
+        return DEFINE_EMPTY_STRING;
+     }
+   //-------------------------------------------------------------------------
+     public Date getRoleAttribute_Date(String roleName, String attrName) {
+
+        if(null != roleName && null != attrName) {
+          Bundle role = (Bundle) context.getObjectByName(Bundle.class, roleName);
+          if(role != null) {
+              return (Date) role.getAttribute(attrName);
+           }
+        }
+        debugPrint("getRoleAttribute_Date(): Null argument or Role not found.  Return now");
+        Date now = new Date();
+        return now; 
+     }
+
+
+
+
+   //=====================================================================================
+   //                            APPLICATION METHODS
+   //=====================================================================================
+   //
+   //    A small set of utility methods to act upon Application objects.
+   //
+   //=====================================================================================
+   //
+     public String getApplAttribute_String(String appName, String attrName) {
+    
+        if(null != appName && null != attrName) {
+           Application app = (Application) context.getObject(Application.class, appName);
+           if(null != app) {
+              return app.getStringAttributeValue(attrName);
+           }    
+        }
+        debugPrint("getApplAttribute_String(): Null argument or Application not found.  Return []");
+        return DEFINE_EMPTY_STRING;
+     }
+   //-------------------------------------------------------------------------
+     public boolean getApplAttribute_Boolean(String appName, String attrName) {
+    
+        if(null != appName && null != attrName) {
+           Application app = (Application) context.getObject(Application.class, appName);
+           if(null != app) {
+              return app.getBooleanAttributeValue(attrName);
+           }    
+        }
+        debugPrint("getApplAttribute_Boolean(): Null argument or Application not found.  Return false");
+        return false; 
+     }
+   //-------------------------------------------------------------------------
+     public int getApplAttribute_Integer(String appName, String attrName) {
+    
+        if(null != appName && null != attrName) {
+           Application app = (Application) context.getObject(Application.class, appName);
+           if(null != app) {
+              return app.getIntAttributeValue(attrName);
+           }    
+        }
+        debugPrint("getApplAttribute_Integer(): Null argument or Application not found.  Return 0");
+        return 0; 
+     }
+   //-------------------------------------------------------------------------
+     public String getApplAttribute_Identity(String appName, String attrName) {
+     
+        if(null != appName && null != attrName) {
+           Application app = (Application) context.getObject(Application.class, appName);
+           if(null != app) {
+              return (String) app.getAttributeValue(attrName);
+           }    
+        }
+        debugPrint("getApplAttribute_Identity(): Null argument or Application not found.  Return null");
+        return DEFINE_EMPTY_STRING; 
+     }
+   //-------------------------------------------------------------------------
+     public Date getApplAttribute_Date(String appName, String attrName) {
+   
+        if(null != appName && null != attrName) {
+           Application app = (Application) context.getObject(Application.class, appName);
+           if(null != app) {
+              return app.getDateAttributeValue(attrName);
+           }    
+        }
+        debugPrint("getApplAttribute_Date(): Null argument or Application not found.  Return now");
+        Date now = new Date();
+        return now; 
+     }
+
+
+
+
+   //=====================================================================================
+   //                             IDENTITY METHODS
+   //=====================================================================================
+   //
+   //    A small set of utility methods to act upon Identity objects.
+   //
+   //=====================================================================================
+   //
+   // Is User a Manager...?
+   //
+   //    Returns true or false, based on the answer to this question.  
+   //-------------------------------------------------------------------------
+   //
+     public boolean isManager(String userName) {
+    
+        if(null != userName) {
+           Identity cube = (Identity) context.getObject(Identity.class, userName);
+           if(null != cube) {
+              return cube.getManagerStatus();
+           }    
+        }
+        return false;
+     }
+   //-------------------------------------------------------------------------
+   // Does User Own Any Applications...?
+   //
+   //    Returns true or false, based on the answer to this question.  
+   //-------------------------------------------------------------------------
+   //
+     public boolean doesUserOwnApplications(String userName) {
+
+        if(null != userName) {
+           String appList = getListOfOwnedApplications(userName);
+           if(null != appList && appList.length() > MIN_VALID_APP_NAME) {
+              return true;
+           } 
+        }
+        return false;
+     }
+   //-------------------------------------------------------------------------
+   // Get a List of Applications the User owns
+   //
+   //    Returns a CSV string of the applications the named user owns.  
+   //    Returns null if the user does not own any applications.
+   //-------------------------------------------------------------------------
+   //
+     public String getListOfOwnedApplications(String userName) {
+
+        String appList = null;
+
+        if(null != userName) {
+           Identity cube = (Identity) context.getObject(Identity.class, userName);
+           appList = getListOfOwnedApplications(cube);
+           debugPrint("getListOfOwnedApplications(): User [" + userName + "] owns these applications: " + appList);
+        } else {
+           debugPrint("getListOfOwnedApplications(): null identity name.");
+        }
+
+        return appList;
+     }
+
+   //-------------------------------------------------------------------------
+   // Get a List of Applications the User owns
+   //
+   //    Returns a CSV string of the applications the named user owns.  
+   //    Returns null if the user does not own any applications.
+   //-------------------------------------------------------------------------
+   //
+     public String getListOfOwnedApplications(Identity cube) {
+
+        String appList = null;
+
+        if (null != cube) {
+           List apps = new ArrayList();
+
+           QueryOptions ops = new QueryOptions();
+           ops.add(new Filter[] {Filter.eq("owner", cube)});
+
+           Iterator result = context.search(Application.class, ops);
+           while (result.hasNext()) {
+              Application app = (Application) result.next();
+              apps.add(app.getName());
+           }
+
+           if (apps.size() > 0) {
+              appList = Util.listToCsv(apps);
+           }
+        } else {
+            debugPrint("getListOfOwnedApplications(): null value passed");
+        }
+
+        return appList;
+     }
+
+   //-------------------------------------------------------------------------
+   // Is User in Any Workgroups...?
+   //
+   //    Returns true or false, based on the answer to this question.  
+   //-------------------------------------------------------------------------
+   //
+     public boolean isUserInWorkgroups(String userName) {
+
+        if(null != userName) {
+           String wgList = getWorkgroupMembership(userName);
+           if(null != wgList && wgList.length() > DEFINE_ZERO) {
+              return true;
+           } 
+        }
+        return false;
+     }
+   
+   //-------------------------------------------------------------------------
+   // Get a List of the Workgroups the input User is a member of 
+   //
+   //    Returns a CSV string of the workgroup the named user is a member of.  
+   //    Returns an empty string if the user is not a member of any workgroups.
+   //-------------------------------------------------------------------------
+   //
+     public String getWorkgroupMembership(String userName) {
+
+        String workgroups = "";
+
+        if(null != userName) {
+           Identity cube = (Identity) context.getObject(Identity.class, userName);
+           workgroups = getWorkgroupMembership(cube);
+           debugPrint("getWorkgroupMembership(): User [" + userName + "] is a member of these workgroups: " + workgroups);
+        } else {
+           debugPrint("getListOfOwnedApplications(): null identity name.");
+        }
+
+        return workgroups;
+     }
+
+   //-------------------------------------------------------------------------
+   // Get a List of the Workgroups the input User is a member of 
+   //
+   //    Returns a CSV string of the workgroup the named user is a member of.  
+   //    Returns an empty string if the user is not a member of any workgroups.
+   //-------------------------------------------------------------------------
+   //
+     public String getWorkgroupMembership(Identity cube) {
+
+         String workgroups = "";
+
+         if (null != cube) {
+
+            List groups = cube.getWorkgroups();
+            // sigh...
+            List groupNames = new ArrayList();
+            Iterator i = groups.iterator();
+            while (i.hasNext()) {
+               Identity id = (Identity) i.next();
+               groupNames.add(id.getName());
+            }
+
+            workgroups = Util.listToCsv(groupNames);
+            if (null == workgroups) {
+               workgroups = "";
+            }
+         } else {
+             debugPrint("getWorkgroupMembership(): null value passed");
+         }
+
+         return workgroups;
+     }
+
+
+
+
+   //=====================================================================================
+   //                         PRIVATE 'HELPER' METHODS
+   //=====================================================================================
+   //
+   //    A small set of utility methods to help support the good work done above...
+   //
+   //=====================================================================================
+   //
+     private void debugPrint(String msg) {
+        if(DEBUG_MODE) {
+           if(null != msg) {
+              System.out.println(msg);   
+           }
+        }
+     }
+
+
+  ]]> 
+  </Source>
+</Rule>

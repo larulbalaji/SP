@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+ <ImportAction name='merge'>
+  <ObjectConfig name="Identity">
+   <ObjectAttribute displayName="att_first_name"
+    editMode="ReadOnly" name="firstname" standard="true" type="string">
+    <AttributeSource name="firstname">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="att_last_name"
+    editMode="ReadOnly" name="lastname" standard="true" type="string">
+    <AttributeSource name="lastname">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="att_manager" editMode="ReadOnly"
+    groupFactory="true" name="manager" standard="true"
+    type="sailpoint.object.Identity">
+    <AttributeSource name="mgrId">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="att_email" editMode="ReadOnly"
+    name="email" standard="true" type="string">
+    <AttributeSource name="email">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute name="department">
+    <AttributeSource name="department">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute name="costCenter" />
+
+   <ObjectAttribute name="region">
+    <AttributeSource name="country">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="att_inactive" editMode="ReadOnly"
+    name="inactive" standard="true" type="boolean">
+    <AttributeSource name="term">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute name="jobTitle">
+    <AttributeSource name="title">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute name="location">
+    <AttributeSource name="city">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute name="employeeId">
+    <AttributeSource name="empid">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute name="employeeType">
+    <AttributeSource
+     name="AppRule: Employee Type Determiner Orange Human Resources">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+     <RuleRef>
+      <Reference class="sailpoint.object.Rule" name="Employee Type Determiner" />
+     </RuleRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="Phone Number" name="phone" />
+
+   <ObjectAttribute displayName="FTO End" editMode="ReadOnly"
+    name="ftoend" type="string">
+    <ListenerRule>
+     <Reference class="sailpoint.object.Rule" name="FTO date change rule" />
+    </ListenerRule>
+    <AttributeSource name="ftoend">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="FTO Start" editMode="ReadOnly"
+    name="ftostart" type="string">
+    <ListenerRule>
+     <Reference class="sailpoint.object.Rule" name="FTO date change rule" />
+    </ListenerRule>
+    <AttributeSource name="ftostart">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="Contract Start Date"
+    name="contractStartDate">
+    <AttributeSource name="contractStartDate">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+   <ObjectAttribute displayName="Contract End Date"
+    name="contractEndDate">
+    <AttributeSource name="contractEndDate">
+     <ApplicationRef>
+      <Reference class="sailpoint.object.Application" name="Human Resources" />
+     </ApplicationRef>
+    </AttributeSource>
+   </ObjectAttribute>
+  </ObjectConfig>
+ </ImportAction>
+</sailpoint>

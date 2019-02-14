@@ -1,0 +1,28 @@
+CREATE DATABASE IF NOT EXISTS idnConfig CHARACTER SET utf8;
+
+GRANT ALL PRIVILEGES ON idnConfig.*
+
+    TO 'idnReg' IDENTIFIED BY 'idnReg';
+
+GRANT ALL PRIVILEGES ON idnConfig.*
+
+    TO 'idnReg'@'%' IDENTIFIED BY 'idnReg';
+
+GRANT ALL PRIVILEGES ON idnConfig.*
+
+    TO 'idnReg'@'localhost' IDENTIFIED BY 'idnReg';
+
+
+
+USE idnConfig;
+
+DROP TABLE IDNCONFIG;
+
+CREATE TABLE IDNCONFIG
+
+  (
+
+    NAME VARCHAR(120) NOT NULL UNIQUE,
+    VALUE VARCHAR(10240) NOT NULL
+
+  );

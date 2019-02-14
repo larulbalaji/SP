@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+ <ImportAction name='include' value='ObjectConfig-Application.xml'/>
+ <ImportAction name='include' value='ObjectConfig-Application-Reactivate.xml'/>
+ <ImportAction name='include' value='Configuration-Deprovisioning.xml'/>
+ <ImportAction name='include' value='Form-ReactivateUserConfirmationForm.xml'/>
+ <ImportAction name='include' value='Form-TerminateUserConfirmationForm.xml'/>
+ <!-- These rules are used by the workflows and Lifecycle Events-->
+ <ImportAction name='include' value='Rule-EvaluateAccountReactivationRule.xml'/>
+ <ImportAction name='include' value='Rule-InitiateDeprovisioningWorkflows.xml'/> 
+ <ImportAction name='include' value='Rule-InitiateReactivationWorkflows.xml'/>
+ <ImportAction name='include' value='Rule-ParseApplicationDeprovisioningPolicies.xml'/>
+ <ImportAction name='include' value='Rule-ParseApplicationReactivationPolicies.xml'/>
+ <!-- ImportAction name='include' value='Rule-LeaveDateChangeRule.xml'/ -->
+ <ImportAction name='include' value='Rule-LeaveDateChangeRuleWithNotifications.xml'/>
+ <!-- These rules are used by applications -->
+ <ImportAction name='include' value='Rule-DeprovisionLinkSetDescription.xml'/>
+ <ImportAction name='include' value='Rule-DeprovisionPlanMoveADAccount.xml'/>
+ <ImportAction name='include' value='Rule-DeprovisionPostProvNameChangeADLink.xml'/>
+ <ImportAction name='include' value='Rule-DeprovisionPostProvMoveADAccount.xml'/>
+ <ImportAction name='include' value='Rule-ReactivatePlanMoveADAccount.xml'/>
+ <ImportAction name='include' value='Rule-ReactivateModelEnableAccounts.xml'/>
+ <ImportAction name='include' value='Rule-ReactivatePostProvADAccount.xml'/>
+ <!-- End of Rules -->
+ <ImportAction name='include' value='Workflow-LifecycleEvent-DeprovisionAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-ReactivateAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-Reactivation.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-TerminateDeleteAccounts.xml'/>
+ <ImportAction name='include' value='Workflow-LifecycleEvent-TerminateDisableAccounts.xml'/>
+ <ImportAction name="include" value="Workflow-PendingLeaverNotification.xml"/>
+ <ImportAction name='include' value='Workflow-QuickLink-ReactivateUser.xml'/> 
+ <ImportAction name='include' value='Workflow-QuickLink-TerminateUser.xml'/> 
+ <ImportAction name='include' value='QuickLink-ReactivateUser.xml'/>
+ <ImportAction name='include' value='QuickLink-TerminateUser.xml'/>
+ <ImportAction name='include' value="LifecycleEvent-Rehire.xml"/>
+ <ImportAction name='include' value='LifecycleEvent-Terminate.xml'/>
+ <!-- Now the bits that modify existing SERI objects -->
+ <ImportAction name='include' value='ObjectConfig-Attribute-TerminationDate.xml'/>
+ <ImportAction name='include' value='Configuration-SERIConfiguration.xml'/>
+ <!-- This is to enable scheduling of workflows -->
+ <ImportAction name='include' value='/seri/xml/Rule/Rule-SchedulingLibrary.xml'/>
+ <ImportAction name="include" value="EmailTemplate-ManagerNotificationLeaver.xml"/>
+</sailpoint>

@@ -1,0 +1,19 @@
+SecurityIQ 5.1 Service Startup Dependencies.
+
+sc config WBXAgentConfigurationManager depend=MSSQLServer
+ 
+sc config WBXBusinessAssetControl depend=WBXAgentConfigurationManager
+sc config WBXCentralEntitlementCollection_MAIN depend=WBXAgentConfigurationManager
+sc config WBXCollectorSynchronizer depend=WBXAgentConfigurationManager
+sc config WBXCrowdAnalyzer depend=WBXAgentConfigurationManager
+sc config "WBXDC_Windows File Server" depend=WBXAgentConfigurationManager
+sc config elasticsearch-service-x64 depend=WBXAgentConfigurationManager
+sc config WBXReportingService depend=WBXAgentConfigurationManager
+sc config WBXScheduledTaskHandler depend=WBXAgentConfigurationManager
+sc config WBXUserInterface depend=WBXAgentConfigurationManager
+sc config WBXWatchDog depend=WBXAgentConfigurationManager
+sc config WBXWorkflowService depend=WBXAgentConfigurationManager
+ 
+sc config WBXEventManager depend=elasticsearch-service-x64
+sc config "WBXBAM_SERI AD Domain" depend=WBXEventManager
+sc config "WBXBAM_Windows File Server" depend=WBXEventManager

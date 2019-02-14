@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <QuickLink name="Edit Email Template" action="workflow" enabled="true"
+    messageKey="Edit Email Template" category="Admin Tools">
+    <Attributes>
+      <Map>
+        <entry key="workflowName" value="Edit Email Template" />
+        <entry key="requester">
+          <value>
+            <Script>
+              <Source>
+                return currentUser.getName();
+              </Source>
+            </Script>
+          </value>
+        </entry>
+      </Map>
+    </Attributes>
+    <DynamicScopes>
+      <Reference class="sailpoint.object.DynamicScope"
+        name="Admins" />
+    </DynamicScopes>
+  </QuickLink>
+</sailpoint>

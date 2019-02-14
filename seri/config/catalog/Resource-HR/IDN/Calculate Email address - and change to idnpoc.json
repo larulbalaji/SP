@@ -1,0 +1,55 @@
+{
+	"id": "Calculate Email - and change to identitynowpoc.com",
+ 
+  "type": "replace", 
+  "attributes": { 
+    "regex": "sailpointdemo.com", 
+    "replacement": "identitynowpoc.com",
+    "input": {
+      "type": "lower", 
+        "attributes": { 
+          "input": {
+            "type": "firstValid",
+            "attributes": {
+              "values": [
+                  {
+                      "attributes": {
+                          "attributeName": "primaryEmail",
+                          "sourceName": "G suite"
+                      },
+                      "type": "accountAttribute"
+                  },
+                  {
+                      "attributes": {
+                          "attributeName": "mail",
+                          "sourceName": "Active Directory"
+                      },
+                      "type": "accountAttribute"
+                  },
+                  {
+                      "attributes": {
+                          "attributeName": "mail",
+                          "sourceName": "OrangeHRM"
+                      },
+                      "type": "accountAttribute"
+                  },
+                  {
+                      "attributes": {
+                          "attributeName": "EMAIL_ADDRESS_WORK",
+                          "sourceName": "Workday"
+                      },
+                      "type": "accountAttribute"
+                  },
+                  {
+                      "attributes": {
+                          "value": "(none)"
+                      },
+                      "type": "static"
+                  }
+            ]                   
+          }
+        }       
+      }
+    }
+  }
+}     

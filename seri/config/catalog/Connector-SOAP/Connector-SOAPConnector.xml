@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<!--***********************************************************
+
+  IIQ SOAP Connector
+  
+    Notice this is a merge action so this import can be shared
+    with init.xml and upgrade.xml.
+
+    The 'applicationTemplates' list contains all of the
+    applications you can select from the application
+    drop-down.  Each template application should list
+    a unique name and type, the default features,
+    the connector class and any default Schemas. It may
+    also contain an attribute named formPath which contains
+    a path to xhtml file to render the attributes when
+    an application is created or updated.
+
+*************************************************************-->
+
+<sailpoint>
+
+  <ImportAction name="merge">
+    <Configuration name="ConnectorRegistry">
+      <Attributes>
+        <Map>
+          <entry key="applicationTemplates">
+            <value>
+              <List>
+<!--  ******************************************************* SOAP Connector *********************************************** -->
+	 <!-- New connector -->
+              <Application connector="sailpoint.connector.OpenConnectorAdapter" featuresString="PROVISIONING, ENABLE, ACCOUNT_ONLY_REQUEST" name="SOAPConnec" type="SOAPConnector">
+		 		<Attributes>
+                  <Map>
+                    <entry key="connectorClass" value="sailpoint.seri.openconnector.SOAPConnector"/>
+					<entry key="formPath" value="SOAPConnector.xhtml"/>
+					<entry key="authSearchAttributes">
+						<value>
+						  <List>
+						         <String>UserID</String>
+						</List>
+					</value>
+				  </entry>
+
+
+                  </Map>
+                </Attributes>
+				 <Templates>
+					 <Template usage="Create" name="account">
+					  <Field displayName="User ID" name="biCN" required="true" section="" type="string"/>
+					  <Field displayName="Given Name" name="GivenName" required="true" section="" type="string"/>
+					  <Field displayName="Surname" name="Surname" required="true" section="" type="string"/>
+					</Template>
+				  </Templates>
+              </Application>
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+
+</sailpoint>

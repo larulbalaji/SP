@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Application PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Application connector="sailpoint.connector.JDBCConnector" featuresString="DISCOVER_SCHEMA, PROVISIONING, GROUP_PROVISIONING, SYNC_PROVISIONING, UNLOCK, ENABLE, PASSWORD" icon="databaseIcon" name="EPIC" profileClass="" type="JDBC">
+  <AccountCorrelationConfig>
+    <Reference class="sailpoint.object.CorrelationConfig" name="EPIC"/>
+  </AccountCorrelationConfig>
+  <Attributes>
+    <Map>
+      <entry key="SQL" value="select * from UserTable UT left outer join UserLinkedSubtemplateLink ULS on ULS.UserID=UT.UserID left outer join UserLinkedTemplateLink ULT on ULT.UserID=UT.UserID left outer join UserRolesLink UR on UR.UserID=UT.UserID order by UT.UserID asc"/>
+      <entry key="accountDeprovisionScenario" value="Disable Account Immediately"/>
+      <entry key="acctAggregationEnd">
+        <value>
+          <Date>1424202148018</Date>
+        </value>
+      </entry>
+      <entry key="acctAggregationStart">
+        <value>
+          <Date>1424202147855</Date>
+        </value>
+      </entry>
+      <entry key="aggregationMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="buildMapRule" value="EPIC-RuleJDBCBuildMap"/>
+      <entry key="compositeDefinition"/>
+      <entry key="daysToWaitForDeletion"/>
+      <entry key="deltaTable"/>
+      <entry key="disableOrderingCheck" value="true"/>
+      <entry key="driverClass" value="com.mysql.jdbc.Driver"/>
+      <entry key="enableOnReactivation">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="getDeltaSQL"/>
+      <entry key="getObjectSQL" value="select * from UserTable UT left outer join UserLinkedSubtemplateLink ULS on ULS.UserID=UT.UserID left outer join UserLinkedTemplateLink ULT on ULT.UserID=UT.UserID left outer join UserRolesLink UR on UR.UserID=UT.UserID where Name='$(identity)'"/>
+      <entry key="group.SQL" value="select * from LinkedTemplateTable"/>
+      <entry key="group.aggregationMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.deltaTable"/>
+      <entry key="group.driverClass" value="com.mysql.jdbc.Driver"/>
+      <entry key="group.getDeltaSQL"/>
+      <entry key="group.isAdvance">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.isPermissionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.mergeRows">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.password" value="1:T5R1LnaANY4hpeQ2GjXryQ=="/>
+      <entry key="group.url" value="jdbc:mysql://seri.sailpointdemo.com/epic"/>
+      <entry key="group.useExecuteQuery">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="group.user" value="epic"/>
+      <entry key="groupHierarchyAttribute" value="Child Roles"/>
+      <entry key="indexColumns">
+        <value>
+          <List>
+            <String>UserID</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="isAdvance">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="isPermissionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="jdbcCreateProvisioningRule" value="EPIC-RuleJDBCOperationProvisioningCreate"/>
+      <entry key="jdbcDeleteProvisioningRule" value="EPIC-RuleJDBCOperationProvisioningDisable"/>
+      <entry key="jdbcDisableProvisioningRule" value="EPIC-RuleJDBCOperationProvisioningDisable"/>
+      <entry key="jdbcEnableProvisioningRule" value="EPIC-RuleJDBCOperationProvisioningEnable"/>
+      <entry key="jdbcModifyProvisioningRule" value="EPIC-RuleJDBCOperationProvisioningModify"/>
+      <entry key="jdbcUnlockProvisioningRule" value="EPIC-RuleJDBCOperationProvisioningEnable"/>
+      <entry key="managerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeColumns">
+        <value>
+          <List>
+            <String>LinkedSubtemplateIDs</String>
+            <String>LinkedTemplateID</String>
+            <String>UserRoles</String>
+          </List>
+        </value>
+      </entry>
+      <entry key="mergeRows">
+        <value>
+          <Boolean>true</Boolean>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionAttributeScope" value="entitlements"/>
+      <entry key="nativeChangeDetectionAttributes"/>
+      <entry key="nativeChangeDetectionEnabled">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="nativeChangeDetectionOperations"/>
+      <entry key="ownerApproval">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="partitionMode">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="partitionStatements"/>
+      <entry key="password" value="1:T5R1LnaANY4hpeQ2GjXryQ=="/>
+      <entry key="provisionRule" value="operationRule"/>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+      <entry key="templateApplication" value="JDBC Template"/>
+      <entry key="url" value="jdbc:mysql://seri.sailpointdemo.com/epic"/>
+      <entry key="useExecuteQuery">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="user" value="epic"/>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Schemas>
+    <Schema displayAttribute="Name" groupAttribute="LinkedTemplateID" identityAttribute="Name" instanceAttribute="" nativeObjectType="account" objectType="account">
+      <AttributeDefinition name="AuthenticationConfigurationID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="BlockStatus" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="DefaultLoginDepartmentID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="EndDate" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="IsPasswordChangeRequired" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="LinkedProviderID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="LinkedSubtemplateIDs" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="LinkedTemplateID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="Name" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="StartDate" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="SystemLoginID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="UserAlias" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition name="UserID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+      <AttributeDefinition entitlement="true" managed="true" multi="true" name="UserRoles" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+    <Schema displayAttribute="LinkedTemplateID" identityAttribute="LinkedTemplateID" instanceAttribute="" nativeObjectType="group" objectType="group">
+      <AttributeDefinition name="LinkedTemplateID" remediationModificationType="None" type="string">
+        <Description/>
+      </AttributeDefinition>
+    </Schema>
+  </Schemas>
+  <Templates>
+    <Template name="create" usage="Create">
+      <Field displayName="Name" name="Name" type="string">
+        <Script>
+          <Source><![CDATA[return identity.getDisplayName();]]></Source>
+        </Script>
+      </Field>
+      <OwnerDefinition value=""/>
+    </Template>
+  </Templates>
+</Application>

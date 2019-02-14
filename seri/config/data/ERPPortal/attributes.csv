@@ -1,0 +1,2 @@
+employeeId,dbId,app_privileged,acct_lastLogin,app_service,app_inactive,*groupmbr
+Employee ID,Database ID,Privileged,Last Login,Service Account,Inactive,Group Membership

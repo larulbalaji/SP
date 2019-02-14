@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+     <ObjectConfig name="Identity">
+	     <Attributes>
+	        <Map>
+	           <entry key="scopeCorrelationAttribute" value="department"/>
+	           <entry key="scopeCorrelationRule" value="SERI-ScopeCorrelation"/>
+	        </Map>
+	     </Attributes>
+     </ObjectConfig>
+  </ImportAction>
+</sailpoint>
+     

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+
+  <ImportAction name='include' value='Application-Acf2.xml'/>
+  <ImportAction name='include' value='Rule-ProvisioningPolicy-RACF_USERID.xml'/>
+  <ImportAction name='include' value='TaskDefinition-Acf2.xml'/>
+</sailpoint>

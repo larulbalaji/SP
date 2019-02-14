@@ -1,0 +1,961 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="services.standard.build.config.xml">
+
+   <taskdef name="setupRelative" classname="sailpoint.seri.tools.ant.SetupRelativeTask">
+        <classpath>
+            <pathelement location="lib/services-tools.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!-- ********************************************************** -->
+    <!-- targets responsible for taking custom xml, doing environment token replacement and making a custom init.xml-->
+    <!-- ********************************************************** -->
+
+
+  <target name="import-stock">
+    <echo>Importing with: console iiqBeans -c "import '${build.iiqBinaryExtract}/WEB-INF/config/init.xml'"</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+      <!-- the second version here supports spaces in path names on Windows: -->
+      <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/init.xml"'/>  -->
+      <arg line="console iiqBeans -c &quot;import '${build.iiqBinaryExtract}/WEB-INF/config/init.xml'&quot;"/>
+      <classpath>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+      </classpath>
+    </java>
+  </target>
+    
+  <target name="demobase" depends="import-stock">
+    <echo>Importing with: console iiqBeans -c "import '${build.iiqBinaryExtract}/WEB-INF/config/seri/catalog/Utility-ArtifactImporter/setup.xml'"</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+      <!-- the second version here supports spaces in path names on Windows: -->
+      <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/seri/catalog/Utility-ArtifactImporter/setup.xml"'/>  -->
+      <arg line="console iiqBeans -c &quot;import '${build.iiqBinaryExtract}/WEB-INF/config/seri/catalog/Utility-ArtifactImporter/setup.xml'&quot;"/>
+      <classpath>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="setup-demo" depends="init-properties">
+    <IIQRunTask iiqURL="http://${application.server.host}:${application.server.port}/${instance.name}"
+                username="spadmin"
+                password="admin"
+                task="Setup Demo"/>
+  </target>
+
+  <target name="setup-demo-healthcare" depends="init-properties">
+    <IIQRunTask iiqURL="http://${application.server.host}:${application.server.port}/${instance.name}"
+                username="spadmin"
+                password="admin"
+                task="Setup Demo - Health Care"/>
+  </target>
+	
+  <target name="enableTimeMachine">
+    <echo>Importing with: console iiqBeans -c "import 'seri/xml/Configuration/Configuration-enableTimeMachine.xml'"</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+      <!-- the second version here supports spaces in path names on Windows: -->
+      <!-- <arg line='console iiqBeans -c "import seri/xml/Configuration/Configuration-enableTimeMachine.xml"'/>  -->
+      <arg line="console iiqBeans -c &quot;import 'seri/xml/Configuration/Configuration-enableTimeMachine.xml'&quot;"/>
+      <classpath>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="import-seri" depends="prepareSERI">
+    <echo>Importing objects with: console iiqBeans -c "import 'seri/init-seri.xml'"</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+      <!-- the second version here supports spaces in path names on Windows: -->
+      <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/init-seri.xml"'/-->
+      <arg line="console iiqBeans -c &quot;import 'seri/init-seri.xml'&quot;"/>
+      <classpath>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+      </classpath>
+    </java>
+    <echo> setting spadmin answers</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+      <arg line="console iiqBeans -c &quot;rule 'Setup SPADMIN'&quot;"/>
+      <classpath>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+      </classpath>
+    </java>
+    <echo>Replacing lost IPF functionality</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+      <arg line="console iiqBeans -c &quot;plugin install '${basedir}${file.separator}resources${file.separator}Deployer.7.1beta.zip'&quot;"/>
+      <classpath>
+        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+      </classpath>
+    </java>    
+    <echo>done</echo>
+  </target>
+
+    <target name="disable-passthrough">
+    	<echo>Disabling AD Passthrough Authentication iiqBeans -c "rule 'SERI - Disable Passthrough'"</echo>
+        <java classname="sailpoint.launch.Launcher" fork="true">
+        	<!-- the second version here supports spaces in path names on Windows: -->
+            <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/init-seri.xml"'/> -->
+        	<arg line="console iiqBeans -c &quot;rule 'SERI - Disable Passthrough'&quot;"/>
+            <classpath>
+                <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+                <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+
+	<target name="import-lcm" depends="prepareSERI">
+        <echo>Importing objects with: console iiqBeans -c "import '${build.iiqBinaryExtract}/WEB-INF/config/init-lcm.xml'"</echo>
+        <java classname="sailpoint.launch.Launcher" fork="true">
+            <!-- the second version here supports spaces in path names on Windows: -->
+            <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/init-seri.xml"'/> -->
+            <arg line="console iiqBeans -c &quot;import '${build.iiqBinaryExtract}/WEB-INF/config/init-lcm.xml'&quot;"/>
+            <classpath>
+                <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+                <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+	<target name="rebuild-schema" depends="init-properties">
+		<echo>Rebuilding database schema from HBM files</echo>
+    <java classname="sailpoint.launch.Launcher" fork="true">
+    	<!-- the second version here supports spaces in path names on Windows: -->
+        <!-- <arg line='schema'/>  -->
+    	<arg line="schema ${IIQVersion}"/>
+        <classpath>
+            <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+            <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+        </classpath>
+    </java>
+	  <echo>Updating database file for ${db.type} with instance name ${instance.name}</echo>
+	  <copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}"
+	                tofile="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}.orig"/>
+    <replace file="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}" casesensitive="false"
+             token="identityiq" value="${instance.name}"/>
+	</target>
+
+    <target name="runUpgrade">
+        <echo>running patch command for ${IIQVersion}${IIQPatchLevel}</echo>
+        <java classname="sailpoint.launch.Launcher" fork="true">
+            <!-- the second version here supports spaces in path names on Windows: -->
+            <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/init.xml"'/>  -->
+            <arg line="patch ${IIQVersion}${IIQPatchLevel}"/>
+            <classpath>
+                <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+                <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+            </classpath>
+        </java>
+    </target>
+
+    <target name="build-inits" depends="validate" unless="inits.uptodate">
+        <if>
+            <not>
+                <resourceexists>
+                    <file file="${build.iiqBinaryExtract}/WEB-INF/config/init-init.xml"/>
+                </resourceexists>
+            </not>
+            <then>
+                <move file="${build.iiqBinaryExtract}/WEB-INF/config/init.xml"
+                      tofile="${build.iiqBinaryExtract}/WEB-INF/config/init-init.xml" failonerror="true"/>
+            </then>
+        </if>
+		<echo>building init.xml</echo>
+		<copy toDir="${build.iiqBinaryExtract}/WEB-INF/config"
+              file="config/ExtendedAttributes/ObjectConfig-Identity-Base-SERI.xml"/>
+        <build-init initFile="${build.iiqBinaryExtract}/WEB-INF/config/init.xml">
+          <!-- 'this' directory is WEB-INF/config -->
+          <!-- fileset will look for files.. filelist includes them regardless -->
+          <!-- plus, in a fileset you can't specify '..' to look in a higher up directory -->
+          <fileset dir="${build.iiqBinaryExtract}/WEB-INF/config">
+              <include name="init-init.xml"/>
+              <include name="init-lcm.xml"/>
+              <include name="seri/catalog/EPIIQ/Workflow-Importer.xml"/>
+	<!-- This is the Identity Mappings for the merged IdentityExtended.hbm.xml -->
+              <include name="ObjectConfig-Identity-Base-SERI.xml"/>
+              <include name="seri/catalog/Utility-IDNSAML/setup.xml" if="withIDNSAML"/>
+              <!--<include name="patch/*.xml"/>-->
+              <!--include name="init-seri.xml"/-->  <!-- SERI should be an optional import -->
+              <exclude name="**/*.hbm.xml"/>
+          </fileset>
+        </build-init>
+    </target>
+
+
+    <target name="prepareSERI" depends="init-properties,prepareFiles,build-inits">
+    	<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/config/init.xml" match="\\" replace="/" flags="g" />
+    </target>
+
+   <target name="prepareFiles.setUptodate" unless="prepareFiles.setUptodate.done">
+
+		<!-- just make sure this exists, or some uptodates will fail -->
+		<mkdir dir="${build.customXMLDir}"/>
+
+		<fileset id="xmlFiles" dir="config">
+			<exclude name="**/*.bak"/>
+			<exclude name="demo/**"/>
+			<exclude name="ExtendedAttributes/**"/>
+		</fileset>
+
+   		<fileset id="setupFiles" dir="config">
+   			<include name="**/setup.xml"/>
+   		</fileset>
+
+		<fileset id="demoFiles" dir="config">
+			<include name="demo/**/*"/>
+		</fileset>
+
+		<fileset id="libFiles" dir="lib">
+			<include name="*.jar"/>
+		</fileset>
+
+
+        <uptodate property="xmlFiles.uptodate">
+			<srcfiles refid="xmlFiles"/>
+			<mapper type="glob" from="*" to="${build.customXMLDir}/*"/>
+		</uptodate>
+
+    <!-- set log4jFiles as up to date if we have an log4j.properties.orig -->
+    <!-- *and* log4j.properties is newer than build.properties -->
+    <!-- This way, if build.properties changes after a 'war' task we can rebuild log4j.properties -->
+	  <condition property="log4jFiles.uptodate">
+	    <and>
+	      <uptodate srcfile="build.properties"
+	        targetfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"/>
+	      <available file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties.orig"/>
+	    </and>
+	  </condition>
+	  
+		<!-- check the original hbm.xml files *and* our extended attributes files -->
+		<!-- against the generated schema files -->
+		<uptodate property="dbSchema.uptodate">
+			<srcfiles dir="config/ExtendedAttributes">
+				  <include name="*.hbm.xml" />
+			</srcfiles>
+			<mergemapper to="${build.iiqBinaryExtract}/WEB-INF/database/create_identityiq_tables-${IIQVersion}.${db.type}.tokenReplaced"/>
+		</uptodate>
+
+		<uptodate property="doc-catalog.uptodate">
+			<srcfiles dir="config/catalog"/>
+			<srcfiles dir="servicestools/doc"/>
+			<mergemapper to="${build.iiqBinaryExtract}/doc/seri/index.html"/>
+		</uptodate>
+
+		<!-- since the only changes we make to the init stuff are -->
+		<!-- we move init.xml to init-init.xml, and then make -->
+		<!-- init.xml include init-init, init-lcm and ObjectConfig-Identity-Base-SERI.xml -->
+		<!-- the only change we actually *should* see is the ObjectConfig. Let's use that -->
+		<!-- as our uptodate check -->
+		<uptodate property="inits.uptodate"
+			srcFile="config/ExtendedAttributes/ObjectConfig-Identity-Base-SERI.xml"
+			targetFile="${build.iiqBinaryExtract}/WEB-INF/config/ObjectConfig-Identity-Base-SERI.xml" />		
+
+		<uptodate property="overrides.uptodate">
+	        <srcfiles dir="web">
+                <include name="**/*"/>
+	        </srcfiles>
+			<globmapper from="*" to="${build.iiqBinaryExtract}/*"/>
+		</uptodate>
+
+    <!-- set iiqproperties as up to date if we have an iiq.properties.orig -->
+    <!-- *and* iiq.properties is newer than build.properties -->
+    <!-- This way, if build.properties changes after a 'war' task we can rebuild iiq.properties -->
+    <condition property="iiqproperties.uptodate">
+      <and>
+        <uptodate srcFile="build.properties"
+          targetFile="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" />		
+        <available file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties.orig"/>
+      </and>
+    </condition>
+
+		<uptodate property="demo.uptodate">
+	        <srcfiles refid="demoFiles"/>
+			<globmapper from="*" to="${build.iiqBinaryExtract}/WEB-INF/config/*"/>
+		</uptodate>		
+
+		<uptodate property="libFiles.uptodate">
+	        <srcfiles refid="libFiles"/>
+			<globmapper from="*" to="${build.iiqBinaryExtract}/WEB-INF/lib/*"/>
+		</uptodate>		
+
+		<!--echo>xmlFiles.uptodate=${xmlFiles.uptodate}</echo-->
+		<echo>log4jFiles.uptodate=${log4jFiles.uptodate}</echo>
+		<!--echo>dbSchema.uptodate=${dbSchema.uptodate}</echo>
+		<echo>doc-catalog.uptodate=${doc-catalog.uptodate}</echo>
+		<echo>inits.uptodate=${inits.uptodate}</echo>
+		<echo>overrides.uptodate=${overrides.uptodate}</echo-->
+		<!--echo>iiqproperties.uptodate=${iiqproperties.uptodate}</echo-->
+		<!--echo>demo.uptodate=${demo.uptodate}</echo-->
+		
+		
+		
+		<property name="prepareFiles.setUptodate.done" value="true"/>
+	</target>
+
+	<target name="update.default.target.properties">
+    	<!-- appending properties to default.target.properties -->
+     	<if>
+          <isset property="withLCMAttachments"/>
+          <then>
+          <if>
+            <resourcecontains resource="default.target.properties" substring="%%SP_LCM_ATTACHMENTS_BASE_PATH%%" />
+            <then>
+              <echo>Config properties already found in default.target.properties.</echo>
+            </then>
+            <else>
+              <echo>Adding config properties to default.target.properties</echo>
+              <concat destfile="default.target.properties" append="yes">
+                <filelist dir="config/catalog/UseCase-LCMAttachments" files="lcmattachments.target.properties"/>
+                <filterchain>
+              	  <expandproperties/>
+              	</filterchain>
+              </concat>
+            </else>
+          </if>
+          </then>
+      	</if>    			
+	</target>
+	
+  <target name="prepare.xmlFiles" unless="xmlFiles.uptodate">
+    <delete dir="${build.customXMLDir}"/>
+        <copy todir="${build.customXMLDir}">
+            <fileset refid="xmlFiles"/>
+        </copy>
+        <!-- Re-Added token substitution -->
+        <condition property="propFile" value="${target}.target.properties" else="default.target.properties">
+          <isset property="target"/>
+        </condition>
+        <echo>Running pattern substitution with file: ${propFile}</echo>
+        <replace dir="${build.customXMLDir}" replacefilterfile="${propFile}" includes="**/*.xml"/>
+        <!-- End re-added token substitution -->
+  	
+      <setupRelative baseDir="config">
+          <fileset dir="${build.customXMLDir}">
+          <include name="**/setup*.xml"/>
+        </fileset>
+    </setupRelative>
+  </target>
+  <target name="modifyStockFiles">
+    <!-- Here is where you put any changes to stock files -->
+    <!-- This is performed after generateDTD so that we can use the DTD if we use xmlpath to modify an XML file -->
+    <!-- Note: Currently we run this regardless. If we add anything here that is additive, we will need to introduce -->
+    <!-- an 'uptodate' check to see if this has been run since the last clean -->
+
+    <!-- Change LCM Provisioning policyScheme to "interactive" -->
+    <xmltask source="build/extract/WEB-INF/config/lcmworkflows.xml" dest="build/extract/WEB-INF/config/lcmworkflows.xml"
+      preservetype="true">
+      <xmlcatalog>
+        <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+      </xmlcatalog>
+      <attr path="/sailpoint/Workflow[@name='LCM Provisioning']/Variable[@name='policyScheme']" attr="initializer"
+               value="interactive"/>
+      <attr path="/sailpoint/Workflow[@name='LCM Provisioning']/Variable[@name='doRefresh']" attr="initializer"
+               value="true"/>
+      <attr path="/sailpoint/Workflow[@name='LCM Create and Update']/Variable[@name='doRefresh']" attr="initializer"
+               value="true"/>
+    </xmltask>
+    <!-- Enable the 'Exclude identities marked inactive' on the Task Definition 'Refresh Identity Cube' -->
+    <!-- This is for the future joiner use case, so that anyone who hasn't started doesn't get refreshed -->
+    <xmltask source="build/extract/WEB-INF/config/tasksCommonRunnable.xml" dest="build/extract/WEB-INF/config/tasksCommonRunnable.xml"
+      preservetype="true">
+      <xmlcatalog>
+        <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+      </xmlcatalog>
+      <insert path="/sailpoint/TaskDefinition[@name='Refresh Identity Cube']/Attributes/Map">
+        <![CDATA[<entry key="excludeInactive" value="true"/>]]>
+      </insert>
+    </xmltask>
+    <!-- Twilio configuration for SMS Reset -->
+    <xmltask source="build/extract/WEB-INF/config/seri/catalog/UseCase-LifecycleEvent-Joiner/Configuration-SystemConfiguration.xml" dest="build/extract/WEB-INF/config/seri/catalog/UseCase-LifecycleEvent-Joiner/Configuration-SystemConfiguration.xml"
+      preservetype="true">
+      <xmlcatalog>
+        <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+      </xmlcatalog>
+      <replace path="/sailpoint/ImportAction/Configuration/Attributes/Map/entry[@key='smsResetConfig']/value/SMSResetConfig/@accountId"
+               withText="${twilio.accountid}"/>
+      <replace path="/sailpoint/ImportAction/Configuration/Attributes/Map/entry[@key='smsResetConfig']/value/SMSResetConfig/@authToken"
+               withText="${twilio.authtoken}"/>
+      <replace path="/sailpoint/ImportAction/Configuration/Attributes/Map/entry[@key='smsResetConfig']/value/SMSResetConfig/@fromPhone"
+               withText="${twilio.fromphone}"/>
+      <replace path="/sailpoint/ImportAction/Configuration/Attributes/Map/entry[@key='smsResetConfig']/value/SMSResetConfig/@smsResetEnabled"
+               withText="true"/>
+    </xmltask>
+    <xmltask source="build/extract/WEB-INF/config/seri/xml/Configuration/Configuration-SERI.xml" dest="build/extract/WEB-INF/config/seri/xml/Configuration/Configuration-SERI.xml"
+      preservetype="true">
+      <xmlcatalog>
+        <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+      </xmlcatalog>
+      <replace path="/sailpoint/ImportAction/Configuration/Attributes/Map/entry[@key='smsphone']/@value"
+               withText="${demo.smsnumber}"/>
+    </xmltask>
+    
+    <!-- extend init-seri.xml if necessary -->
+    <if>
+      <isset property="myDemo"/>
+      <then>
+        <echo>Adding custom demo artifacts</echo>
+        <for list="${myDemo}" param="artifact">
+          <sequential>
+            <xmltask source="${build.iiqBinaryExtract}/WEB-INF/config/seri/init-seri.xml" dest="${build.iiqBinaryExtract}/WEB-INF/config/seri/init-seri.xml"
+                public="sailpoint.dtd" system="sailpoint.dtd">
+              <xmlcatalog>
+                <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+              </xmlcatalog>
+              <insert path="//ImportAction[last()]" xml="&lt;ImportAction name='include' value='seri/catalog/@{artifact}/setup.xml'/&gt;"
+                position="after"/>
+            </xmltask>
+          </sequential>
+        </for>
+      </then>
+    </if>
+
+    <if>
+      <isset property="withJavamelody"/>
+      <then>
+        <echo>Adding javamelody config</echo>
+        <!-- update web.xml for the Javamelody -->
+        <xmltask source="${build.iiqBinaryExtract}/WEB-INF/web.xml" dest="${build.iiqBinaryExtract}/WEB-INF/web.xml">
+          <remove path="/:web-app/:filter[:filter-name/text()='monitoring']"/>
+          <insert path="/:web-app/:filter[last()]" position="after" unless="modelexists">
+             <![CDATA[
+               <filter xmlns="http://java.sun.com/xml/ns/javaee">
+                 <filter-name>monitoring</filter-name>
+                 <filter-class>net.bull.javamelody.MonitoringFilter</filter-class>
+               </filter>
+             ]]>
+          </insert>
+          <remove path="/:web-app/:filter-mapping[:filter-name/text()='monitoring']"/>
+          <insert path="/:web-app/:filter-mapping[last()]" position="after" unless="modelexists">
+             <![CDATA[
+               <filter-mapping xmlns="http://java.sun.com/xml/ns/javaee">
+                 <filter-name>monitoring</filter-name>
+                 <url-pattern>/*</url-pattern>
+               </filter-mapping>
+             ]]>
+          </insert>
+          <remove path="/:web-app/:listener[:listener-class/text()='net.bull.javamelody.SessionListener']"/>
+          <insert path="/:web-app/:listener[last()]" position="after" unless="modelexists">
+             <![CDATA[
+               <listener xmlns="http://java.sun.com/xml/ns/javaee">
+                 <listener-class>net.bull.javamelody.SessionListener</listener-class>
+               </listener>
+             ]]>
+          </insert>
+        </xmltask>
+      </then>
+    </if>
+
+  	<if>
+        <isset property="withLCMAttachments"/>
+        <then>
+          <if>
+            <resourcecontains resource="${build}/extract/WEB-INF/web.xml" substring="File Upload Servlet" />
+            <then>
+              <echo>Servlet Configuration already present in web.xml</echo>
+            </then>
+            <else>
+              <echo>Adding Servlet Configuration to web.xml</echo>
+              <!-- update web.xml for LCM Attachments -->
+              <subant target="post.expansion.hook" inheritall="true">
+                <!-- Note that the file MUST NOT start with build.custom, otherwise it would be called by runCustomScript -->
+                <fileset dir="." includes="scripts/build.FileUpload-Modify-WEB-XML.xml"/>
+              </subant>
+            </else>
+          </if>
+        </then>
+      </if>
+  </target>
+
+	 <target name="modifyHealthCareFiles">
+	    <!-- change the CreateUser workflow parameters for the CreateVendor quick link setup -->
+
+	    <xmltask source="build/extract/WEB-INF/config/seri/catalog/UseCase-QuickLink-CreateUser/Workflow-CreateUser.xml" dest="build/extract/WEB-INF/config/seri/catalog/UseCase-QuickLink-CreateUser/Workflow-CreateUser.xml"
+	      preservetype="true">
+	      <xmlcatalog>
+	        <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+	      </xmlcatalog>
+	          <attr path="/sailpoint/Workflow[@name='Workflow-QuickLink-CreateUser']/Variable[@name='formName']" attr="initializer" value="CreateVendorForm"/>
+	          <attr path="/sailpoint/Workflow[@name='Workflow-QuickLink-CreateUser']/Variable[@name='refreshRequestor']" attr="initializer" value="true"/>
+              <attr path="/sailpoint/Workflow[@name='Workflow-QuickLink-CreateUser']/Variable[@name='approvalScheme']" attr="initializer" value="none"/>
+	    </xmltask>
+	 </target>
+
+  <target name="modifyEmailFiles">
+    <!-- Replace %%seriIIQlink%% with appropriate link in email templates -->
+    <replace dir="${build.iiqBinaryExtract}/WEB-INF/config/seri"
+        token="%%seriIIQlink%%"
+        value="http://${application.server.host}:${application.server.port}/${instance.name}">
+      <include name="**/*.xml"/>
+    </replace>
+  </target>
+
+  <target name="prepare.log4jFiles" unless="log4jFiles.uptodate">
+    <!-- Update log4j.properties if we need to -->
+    <!-- If we've done this before without a "ant clean", -->
+    <!-- Copy the original back before updating it -->
+    <!-- otherwise, make a backup -->
+
+    <!-- 2016/08/22 ar -->
+    <!-- extended the original mechanism to deal with log4j.info, log4j.error and log4j.off -->
+    <echo>In prepare.log4j</echo>
+    <if>
+      <or>
+        <isset property="log4j.debug"/>
+        <isset property="log4j.error"/>
+        <isset property="log4j.info"/>
+        <isset property="log4j.warn"/>
+        <isset property="log4j.off"/>
+      </or>
+      <then>
+        <!-- do the prep stuff -->
+        <if>
+          <resourceexists>
+            <file file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties.orig"/>
+          </resourceexists>
+          <then>
+            <copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties.orig"
+              tofile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"/>
+          </then>
+          <else>
+            <copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              tofile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties.orig"/>
+          </else>
+        </if>
+
+        <!-- working on log4j.debug -->
+        <if>
+          <isset property="log4j.debug"/>
+          <then>
+            <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              append="yes">${line.separator}${line.separator}# SERI specified log4j.debugs</concat>
+            <for list="${log4j.debug}" delimiter="," param = "debugLine">
+              <sequential>
+                <echo>debugLine=@{debugLine}</echo>
+                <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+                  append="yes">${line.separator}log4j.logger.@{debugLine}=debug</concat>
+              </sequential>
+            </for>
+          </then>
+        </if>
+
+        <!-- working on log4j.error -->
+        <if>
+          <isset property="log4j.error"/>
+          <then>
+            <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              append="yes">${line.separator}${line.separator}# SERI specified log4j.errors</concat>
+            <for list="${log4j.error}" delimiter="," param = "debugLine">
+              <sequential>
+                <echo>errorLine=@{debugLine}</echo>
+                <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+                  append="yes">${line.separator}log4j.logger.@{debugLine}=error</concat>
+              </sequential>
+            </for>
+          </then>
+        </if>
+
+        <!-- working on log4j.info -->
+        <if>
+          <isset property="log4j.info"/>
+          <then>
+            <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              append="yes">${line.separator}${line.separator}# SERI specified log4j.infos</concat>
+            <for list="${log4j.info}" delimiter="," param = "debugLine">
+              <sequential>
+                <echo>infoLine=@{debugLine}</echo>
+                <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+                  append="yes">${line.separator}log4j.logger.@{debugLine}=info</concat>
+              </sequential>
+            </for>
+          </then>
+        </if>
+
+        <!-- working on log4j.warn -->
+        <if>
+          <isset property="log4j.warn"/>
+          <then>
+            <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              append="yes">${line.separator}${line.separator}# SERI specified log4j.warns</concat>
+            <for list="${log4j.warn}" delimiter="," param = "debugLine">
+              <sequential>
+                <echo>warnLine=@{debugLine}</echo>
+                <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+                  append="yes">${line.separator}log4j.logger.@{debugLine}=warn</concat>
+              </sequential>
+            </for>
+          </then>
+        </if>
+
+        <!-- working on log4j.off -->
+        <if>
+          <isset property="log4j.off"/>
+          <then>
+            <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              append="yes">${line.separator}${line.separator}# SERI specified log4j.offs</concat>
+            <for list="${log4j.off}" delimiter="," param = "debugLine">
+              <sequential>
+                <echo>offLine=@{debugLine}</echo>
+                <concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+                  append="yes">${line.separator}log4j.logger.@{debugLine}=off</concat>
+              </sequential>
+            </for>
+          </then>
+        </if>
+
+        <!-- 2016/06/28 ar -->
+        <!-- if log4j.useLogfile is set, add this in -->
+        <if>
+          <isset property="log4j.useLogfile"/>
+          <then>
+            <echo>enable logging to file: ${log4j.useLogfile}</echo>
+            <replace file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties">
+              <replacefilter
+                token="#log4j.appender.file=org.apache.log4j.FileAppender"
+                value="log4j.appender.file=org.apache.log4j.FileAppender"/>
+              <replacefilter
+                token="#log4j.appender.file.layout=org.apache.log4j.PatternLayout"
+                value="log4j.appender.file.layout=org.apache.log4j.PatternLayout"/>
+              <replacefilter
+                token="#log4j.appender.file.layout.ConversionPattern=%d{ISO8601} %5p %t %c{4}:%L - %m%n"
+                value="log4j.appender.file.layout.ConversionPattern=%d{ISO8601} %5p %t %c{4}:%L - %m%n"/>
+              <replacefilter
+                token="log4j.rootLogger=warn,stdout"
+                value="#log4j.rootLogger=warn,stdout"/>
+              <replacefilter
+                token="#log4j.rootLogger=warn,file"
+                value="log4j.rootLogger=warn,file"/>
+            </replace>
+
+            <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+              match="#log4j.appender.file.File=.*"
+              replace="log4j.appender.file.File=${log4j.useLogfile}"
+              byline="true"/>
+          </then>
+        </if>
+        <!-- end enable logging -->
+
+        <!-- 2016/06/28 ar -->
+        <!-- added support for ServerSideAppender was flagged as ToDo -->
+        <if>
+           <isset property="log4j.enableServerSideAppender"/>
+           <then>
+             <echo>enabling ServerSideAppender on port: ${log4j.enableServerSideAppender}</echo>
+             <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/log4j.properties"
+                           match="(# this one is better for concurrency tests)"
+                         replace="${line.separator}log4j.appender.net=sailpoint.log4j.ServerSideAppender
+${line.separator}log4j.appender.net.port=${log4j.enableServerSideAppender}
+${line.separator}log4j.logger.sailpoint=trace,net
+${line.separator}log4j.additivity.sailpoint=false
+${line.separator}log4j.logger.SERI=debug,net
+${line.separator}log4j.additivity.SERI=false
+${line.separator}${line.separator}\1"
+                          byline="true"/>
+           </then>
+        </if>
+        <!-- end support for ServerSideAppender -->
+      </then>
+    </if>
+
+  </target>
+
+	<target name="prepare.dbSchema" unless="dbSchema.uptodate">
+		<!-- update .hbm.xml files with our extended attributes -->
+		<foreach target="mergeHBM" param="hbmFile">
+			<path>
+				<fileset dir="config/ExtendedAttributes">
+				  <include name="*.hbm.xml" />
+				</fileset>
+			</path>
+		</foreach>
+		<antcall target="rebuild-schema"/>
+	</target>
+
+	<target name="prepare.iiqproperties" unless="iiqproperties.uptodate">	
+		<echo message="Configure iiq.properties for ${instance.name}"/>    			
+        <if>
+        	<not>
+        		<available file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties.orig"/>
+        	</not>
+        	<then>
+        		<copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties"
+              tofile="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties.orig"/>
+        	</then>
+        	<else>
+        		<copy overwrite="true" file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties"
+              tofile="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties.orig"/>
+        	</else>
+    	</if>
+		
+		
+		<!-- changed the approach to disabling / enabling the lines in iiq.properties based on the dbtype -->
+		<!-- db.type can be db2,mysql,oracle,sqlserver -->
+		<echo message="Set RepositoryDB    to ${db.type} with Url: ${db.url}"/>
+	  
+	  <!-- create substitution versions of db.url -->
+	  <!-- for replace.dburl,take db.url, swap 'identityiq' for {instance.name} -->
+	  <!-- take db.url, swap 'identityiq' for {instance.name}Plugin -->
+    <script language="javascript">
+      var dbUrl = project.getProperty("db.url");
+      var instanceName = project.getProperty("instance.name");
+      
+      var pos = dbUrl.indexOf( "identityiq" );
+      if( pos != -1 ) {
+        repDBUrl = dbUrl.substring( 0, pos ) + instanceName + dbUrl.substring(pos + 10);
+        project.setProperty("replace.dburl", repDBUrl);
+    
+        repPluginUrl = dbUrl.substring( 0, pos ) + instanceName + "Plugin" +dbUrl.substring(pos + 10);
+        project.setProperty("replace.pluginurl", repPluginUrl);
+      }
+    </script>        
+	  
+		<if>
+			<equals arg1="${db.type}" arg2="mysql" />		  
+			<then>
+			  <!-- mysql is default, just insert instance name-->
+        <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties"
+          match="^dataSource\.url=jdbc:mysql.*"
+          replace="dataSource\.url=${replace.dburl}"
+          byline="true"
+        />
+       <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties"
+          match="^pluginsDataSource\.url=jdbc:mysql.*"
+          replace="pluginsDataSource\.url=${replace.pluginurl}"
+          byline="true"
+        />
+			</then>
+		  <else>
+				<!-- comment mysql -->
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^(dataSource\.url=jdbc:mysql.*)"
+					replace="#\1"					
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^(dataSource.driverClassName=com.mysql.jdbc.Driver)"
+					replace="#\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^(sessionFactory.*MySQL5.*)"
+					replace="#\1"
+				/>
+				<!-- comment mysql plugins-->
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^(pluginsDataSource.url=jdbc:mysql.*)"
+					replace="#\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^(pluginsDataSource.driverClassName=com.mysql.*)"
+					replace="#\1"
+				/>
+		  </else>
+	  </if>
+		<if>
+			<!-- uncomment sqlserver -->
+			<equals arg1="${db.type}" arg2="sqlserver" />
+			<then>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#dataSource.url=jdbc:sqlserver.*"
+					replace="dataSource\.url=${replace.dburl}"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(.*ataSource\.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver)"
+					replace="\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(sessionFactory.*SQLServerPagingDialect.*)"
+					replace="\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(scheduler.quartzProperties.*MSSQLDelegate.*)"
+					replace="\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(scheduler.quartzProperties.*LOCKS UPDLOCK.*)"
+					replace="\1"
+				/>
+		    <!-- plugins -->
+        <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+          match="^#pluginsDataSource.url=jdbc:sqlserver.*"
+          replace="pluginsDataSource\.url=${replace.pluginurl}"
+        />
+        <!--replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+          match="^#(pluginsDataSource.driverClassName=com.microsoft.*)"
+          replace="\1"
+        /-->
+			</then>
+	    </if>
+		<if>
+			<!-- uncomment oracle -->
+			<equals arg1="${db.type}" arg2="oracle" />
+			<then>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#dataSource\.url=jdbc:oracle.*"
+					replace="dataSource\.url=${replace.dburl}"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(dataSource\.driverClassName=oracle.*)"
+					replace="\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(sessionFactory.*Oracle.*)"
+					replace="\1"
+				/>				
+		    <!-- plugins -->
+      <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+        match="^#pluginsDataSource.url=jdbc:oracle.*"
+        replace="pluginsDataSource\.url=${replace.pluginurl}"
+      />
+      <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+        match="^#(pluginsDataSource.driverClassName=oracle.*)"
+        replace="\1"
+      />
+			</then>
+	  </if>
+		<if>
+  		<!-- uncomment db2 -->
+			<equals arg1="${db.type}" arg2="db2" />
+			<then>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#dataSource\.url=jdbc:db2.*"
+					replace="dataSource\.url=${replace.dburl}"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(dataSource\.driverClassName=com.ibm.*)"
+					replace="\1"
+				/>
+				<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+					match="^#(sessionFactory.*DB2.*)"
+					replace="\1"
+				/>				
+		    <!-- plugins -->
+        <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+          match="^#pluginsDataSource.url=jdbc:db2.*"
+          replace="pluginsDataSource\.url=${replace.pluginurl}"
+        />
+        <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+          match="^#(pluginsDataSource.driverClassName=com.ibm.*)"
+          replace="\1"
+        />
+			</then>
+	  </if>
+		
+		<!-- Now the general replacements -->
+	  <!-- datasource username and password are the instance name -->
+	  <!-- db.userid and db.password are the root creds to create the databases in the first place -->
+		<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+			match="^dataSource\.username.*"
+			replace="dataSource\.username=${instance.name}"
+		/>
+		<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+			match="^dataSource\.password.*"
+			replace="dataSource\.password=${instance.name}"
+		/>
+		<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+			match="^pluginsDataSource\.username.*"
+			replace="pluginsDataSource\.username=${instance.name}Plugin"
+		/>
+		<replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+			match="^pluginsDataSource\.password.*"
+			replace="pluginsDataSource\.password=${instance.name}Plugin"
+		/>
+	        <replaceregexp file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties" byline="true"
+		            match="^plugins.angularSnippetEnabled=false"
+		            replace="plugins.angularSnippetEnabled=true"
+		/>
+			
+		<touch file="${build.iiqBinaryExtract}/WEB-INF/classes/iiq.properties"/>
+	</target>
+
+  <target name="prepare.demoFiles" unless="demo.uptodate">
+        <copy todir="${build.iiqBinaryExtract}/WEB-INF/config">
+      <fileset refid="demoFiles"/>
+    </copy>
+  </target>
+
+	<target name="prepare.libFiles" unless="libFiles.uptodate">
+        <copy todir="${build.iiqBinaryExtract}/WEB-INF/lib">
+			<fileset refid="libFiles"/>
+		</copy>
+	</target>
+
+        <!-- 2016/06/28 ar changed order of depends. -->
+        <!-- Moved prepare.log4jFiles behind prepare.dbSchema and generateDTD -->
+        <!-- otherwise errors are thrown because the new location of the log file does not necessarily exist on the build platform -->
+	<target name="prepareFiles" depends="init-properties, prepareFiles.setUptodate, update.default.target.properties,
+	    prepare.xmlFiles, prepare.dbSchema,
+		doc-catalog, -laydownWebDirectoryOverrides, prepare.iiqproperties,
+		prepare.demoFiles, prepare.libFiles, generateDTD, prepare.log4jFiles, modifyStockFiles, modifyEmailFiles, plugins">
+    </target>
+
+	<target name="mergeHBM">
+		<property name="hbmFile" value=""/>
+		<basename property="hbm.filename" file="${hbmFile}"/>
+		<property name="targetFile" value="${build.iiqBinaryExtract}/WEB-INF/classes/sailpoint/object/${hbm.filename}"/>
+
+<!-- Check if the file has been SERIfied before.. -->
+		<echo message="checking ${targetFile} has been SERIfied"/>
+		<fileset id="matches" file="${targetFile}">
+		    <contains text="SERIfied" />
+		</fileset>
+		<if>
+			<resourcecount when="equal" count="0" refid="matches" />
+			<then>
+				<echo message="${hbm.filename} not SERIfied"/>
+				<concat destfile="${build.iiqBinaryExtract}/WEB-INF/classes/sailpoint/object/${hbm.filename}"
+						append="yes"
+				><fileset file="${hbmFile}"/></concat>
+			</then>
+			<else>
+			  <echo message="${targetFile} is already SERIfied"/>
+			</else>
+		</if>
+	  <if>
+	    <equals arg1="IdentityExtended.hbm.xml" arg2="${hbm.filename}"/>
+	    <then>
+	      <indexize inputFile="${build.iiqBinaryExtract}/WEB-INF/classes/sailpoint/object/${hbm.filename}"
+	                outputFile="${build.iiqBinaryExtract}/WEB-INF/classes/sailpoint/object/${hbm.filename}"/>
+	    </then>
+	  </if>
+	</target>
+
+    <!-- ********************************************************** -->
+    <!-- Target: validate                                           -->
+    <!-- Validate custom XML files                                  -->
+    <!-- ********************************************************** -->
+    <target name="validate" depends="init-properties,generateDTD" unless="dtd.uptodate">
+        <echo message="Validating Custom XML objects (dtd=${dtd})"/>
+        <xmlvalidate>
+            <fileset dir="${build.customXMLDir}" includes="**/*.xml" />
+            <xmlcatalog>
+                <dtd publicId="sailpoint.dtd" location="${dtd}"/>
+            </xmlcatalog>
+        </xmlvalidate>
+    </target>
+	
+	<target name="import-healthcare" depends="prepareSERI,modifyHealthCareFiles">
+	        <echo>Importing objects with: console iiqBeans -c "import 'seri/init-healthcare.xml'"</echo>
+	    <java classname="sailpoint.launch.Launcher" fork="true">
+	      <!-- the second version here supports spaces in path names on Windows: -->
+	      <!-- <arg line='console iiqBeans -c "import ${build.iiqBinaryExtract}/WEB-INF/config/init-healthcare.xml"'/-->
+	      <arg line="console iiqBeans -c &quot;import 'seri/init-healthcare.xml'&quot;"/>
+	      <classpath>
+	        <pathelement path="${build.iiqBinaryExtract}/WEB-INF/classes"/>
+	        <pathelement location="${build.iiqBinaryExtract}/WEB-INF/lib/identityiq.jar"/>
+	      </classpath>
+	    </java>
+	  </target>
+  
+  <target name="plugins" depends="init-properties">
+  	<echo>copy to; basedir=${basedir}</echo>
+    <copy todir="${build.iiqBinaryExtract}/seri-plugins">
+    	<fileset dir="seri-plugins">
+    		<include name="**/*.zip"/>
+      </fileset>
+  	</copy>
+  </target>
+  
+</project>

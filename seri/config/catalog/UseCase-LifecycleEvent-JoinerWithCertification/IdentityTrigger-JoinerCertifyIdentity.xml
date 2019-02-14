@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE IdentityTrigger PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<IdentityTrigger  handler="sailpoint.api.WorkflowTriggerHandler"  name="Joiner - Certify Identity" type="Create">
+  <HandlerParameters>
+    <Attributes>
+      <Map>
+        <entry key="workflow"  value="New User Certification" />
+      </Map>
+    </Attributes>
+  </HandlerParameters>
+</IdentityTrigger>

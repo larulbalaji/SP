@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+      <TaskDefinition name="Synchronize SSO Launcher"
+                    resultAction="Delete" subType="task_item_type_generic" type="Generic"
+                    executor="sailpoint.plugin.launcher.task.LauncherTaskExecutor" formPath="/plugin/include/LauncherPlugin/forms/taskDefinitionForm.xhtml">
+        <Attributes>
+            <Map>
+                <entry key="pluginName" value="LauncherPlugin" />
+                <entry key="application" value="Azure Active Directory - IIQ Integration"/>
+                <entry key="ssoProviderClassname" value="sailpoint.plugin.launcher.microsoft.AzureSSOProvider"/>
+                <entry key="createSingleLauncherGroup" value="true"/>
+                <entry key="moveUsersToSingleLauncherGroup" value="true"/>
+            </Map>
+        </Attributes>
+        <Description>SSO Launcher Synchronization</Description>
+        <Signature>
+            <Inputs>
+                <Argument name="application" required="true" type="Application">
+                    <Prompt>SSO Provider Application</Prompt>
+                </Argument>
+                <Argument name="ssoProviderClassname" required="true" type="string">
+                    <Prompt>
+                        The SSO Provider Classname for this task.
+                    </Prompt>
+                </Argument>
+                <Argument name="createSingleLauncherGroup" type="boolean">
+                    <Prompt>
+                        Create a unique group in the SSO provider for the application that all Users will be migrated
+                        into.
+                    </Prompt>
+                </Argument>
+                <Argument name="moveUsersToSingleLauncherGroup" type="boolean">
+                    <Prompt>
+                        Move all users in the launcher application to the created role.
+                    </Prompt>
+                </Argument>
+            </Inputs>
+            <Returns>
+                <Argument name="applicationScanned" type="string">
+                    <Prompt>IIQ Application scanned</Prompt>
+                </Argument>
+                <Argument name="numApplicationsScanned" type="int">
+                    <Prompt>Number of SSO Launcher Applications scanned</Prompt>
+                </Argument>
+                <Argument name="numRolesCreated" type="int">
+                    <Prompt>Number of IIQ roles created</Prompt>
+                </Argument>
+                <Argument name="numRolesUpdated" type="int">
+                    <Prompt>Number of IIQ roles updated</Prompt>
+                </Argument>
+                <Argument name="numRolesRemoved" type="int">
+                    <Prompt>Number of IIQ roles removed</Prompt>
+                </Argument>
+                <Argument name="numLauncherEntitlementsCreated" type="int">
+                    <Prompt>Number of launcher entitlements created at the SSO Provider</Prompt>
+                </Argument>
+
+            </Returns>
+        </Signature>
+    </TaskDefinition>
+</sailpoint>
+

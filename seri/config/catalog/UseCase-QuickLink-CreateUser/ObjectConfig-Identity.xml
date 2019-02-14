@@ -1,0 +1,27 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+
+<sailpoint>
+  <ImportAction name="merge">
+    <ObjectConfig name="Identity">
+ <ObjectAttribute displayName="Worker Type" editMode="ReadOnly" extendedNumber="6" groupFactory="true" name="workerType" type="string"/>
+  <ObjectAttribute displayName="Sponsor" editMode="ReadOnly" extendedNumber="1" groupFactory="true" name="sponsor" type="sailpoint.object.Identity"/>
+  <ObjectAttribute displayName="Start Date" editMode="ReadOnly" name="startDate" type="string"/>
+  <ObjectAttribute displayName="Expiration Date" editMode="ReadOnly" extendedNumber="7" groupFactory="true" name="expirationDate" type="string"/>
+  <ObjectAttribute displayName="Termination Date" editMode="ReadOnly" extendedNumber="8" name="terminationDate" type="string"/>
+  <ObjectAttribute displayName="Hire Date" editMode="ReadOnly" name="hireDate" type="string"/>
+  <ObjectAttribute displayName="Gender" editMode="ReadOnly" name="gender" type="string"/>
+  <ObjectAttribute displayName="Date Of Birth" editMode="ReadOnly" name="dateOfBirth" type="string"/>
+  <ObjectAttribute displayName="SSN" editMode="ReadOnly" name="nationalIdentifier" type="string"/>
+  <ObjectAttribute displayName="Citizenship" editMode="ReadOnly" extendedNumber="9" groupFactory="true" name="citizenship" type="string"/>
+  <ObjectAttribute displayName="Work Phone" editMode="ReadOnly" name="workPhone" type="string"/>
+  <ObjectAttribute displayName="Alternate Phone" editMode="ReadOnly" name="alternatePhone" type="string"/>
+  <ObjectAttribute displayName="Company" editMode="ReadOnly" extendedNumber="10" groupFactory="true" name="company" type="string"/>
+  <ObjectAttribute displayName="City" editMode="ReadOnly" name="city" type="string"/>
+  <ObjectAttribute displayName="State/Province" editMode="ReadOnly" name="stateProvince" type="string"/>
+  <ObjectAttribute displayName="Postal Code" editMode="ReadOnly" name="postalCode" type="string"/>
+  <ObjectAttribute displayName="Country" editMode="ReadOnly" name="country" type="string"/>
+  <ObjectAttribute displayName="Street Address" editMode="ReadOnly" name="streetAddress" type="string"/>
+    </ObjectConfig>
+  </ImportAction>
+</sailpoint>

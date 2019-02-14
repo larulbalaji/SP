@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<SPRight  displayName="create_new_user" name="CreateNewUser">
+  <Description>create_new_user</Description>
+</SPRight>
+</sailpoint>
+

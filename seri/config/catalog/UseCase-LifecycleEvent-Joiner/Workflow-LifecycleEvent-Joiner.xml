@@ -1,0 +1,188 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"  libraries="Identity,IdentityRequest"  name="Lifecycle Event - Joiner" type="IdentityLifecycle">
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event" transient="true" type="sailpoint.object.IdentityChangeEvent">
+    <Description>
+      The IdentityChangeEvent.  It can be used to build
+      the provisioning plan, but does not need to be
+      persisted with the case, so marked as transient.
+    </Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="script:(identityDisplayName != void) ? identityDisplayName : resolveDisplayName(identityName)" input="true" name="identityDisplayName">
+    <Description>
+      The displayName of the identity being updated.
+      Query for this using a projection query and fall back to the name.
+    </Description>
+  </Variable>
+  <Variable name="plan">
+    <Description>The provisioning plan, which is built by a service method. </Description>
+  </Variable>
+  <Variable initializer="string:false" name="optimisticProvisioning">
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+   <Variable initializer="string:http://localhost:8080/identityiq" name="baseURL">
+    <Description>
+      Set to true to enable optimistic provisioning.  This will cause
+      changes to the entitlements compiled from role assignments to be 
+      applied immediately to the identity cube rather than waiting
+      for the next refresh/reaggregation after the provisioning system
+      completes the request.
+    </Description>
+  </Variable>
+  
+  <Variable initializer="string:true" name="foregroundProvisioning">
+    <Description>
+      Normally provisioning is done in a step that uses the "background"
+      option to force the workflow to be suspend and be resumed in a
+      background task thread.  This prevents the browser session from
+      hanging since provision can sometimes take a long time.  For demos
+      and testing it can be better to do this in the foreground so that
+      provisioning will have been performed when control is returned to the
+      user.  This prevents having to run the Perform Maintenance task to 
+      see the resutls of the request.
+    </Description>
+  </Variable>
+  <Variable initializer="string:spadmin" input="true" name="fallbackApprover">
+    <Description>
+      A String that specifies the name of the Identity that will 
+      be assigned any approvals where the owner of the approver 
+      can't be resolved. Example if the scheme is "owner" and the 
+      application doesn't specify and owner.
+    </Description>
+  </Variable>
+  <Variable initializer="string:LCM" input="true" name="source">
+    <Description>
+      String version of sailpoint.object.Source to indicate
+      where the request originated.  Defaults to LCM.
+    </Description>
+  </Variable>
+  <Variable initializer="string:false" input="true" name="trace">
+    <Description>
+      Used for debugging this workflow and when set to true trace
+      will be sent to stdout.
+    </Description>
+  </Variable>
+  <Variable name="project">
+    <Description>
+      ProvisioningProject which is just a compiled version of the ProvisioningPlan.
+    </Description>
+  </Variable>
+  <Variable name="identityRequestId" output="true">
+    <Description>
+       The sequence id of the Identity request object which is stored in 
+       the name field of the identity request.
+    </Description>
+  </Variable>
+  <Variable initializer="Active Directory" name="appsToNotify"/>
+  <Description>Joiner workflow.  Enable Birthright roles when an employee joins the company.</Description>
+  <RuleLibraries>
+    <Reference class="sailpoint.object.Rule"  name="LCM Workflow Library"/>
+    <Reference class="sailpoint.object.Rule"  name="Scheduling Library"/>
+  </RuleLibraries>
+  <Step icon="Start" name="Start" posX="10" posY="20" resultVariable="plan">
+    <Description>Initialize a plan</Description>
+    <Script>
+      <Source><![CDATA[
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LCEJoiner.Start");
+serilog.debug("Starting Joiner Employee Workflow for: " + identityName + "::" + identityDisplayName);
+return null;
+      ]]></Source>
+    </Script>
+    <Transition to="Schedule Joiner">
+      <Script>
+        <Source>
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LCEJoiner.Transition.ScheduleJoiner");
+Identity iden=context.getObjectByName(Identity.class, identityName);
+String contractStartDate=iden.getAttribute("contractStartDate");
+serilog.debug("contractStartDate=: "+contractStartDate);
+return contractStartDate!=null;        
+        </Source>
+      </Script>
+    </Transition>
+    <Transition to="Schedule Provisioning of Assignments"/>
+  </Step>
+  <Step name="Schedule Provisioning of Assignments">
+    <Script>
+      <Source><![CDATA[
+// new Date() just means 'now'..
+Map map=new HashMap();
+map.put("appsToNotify", appsToNotify);
+scheduleWorkflow(identityName, new Date(), "Enable Joiner", map); 
+      ]]></Source>
+    </Script>
+    <Transition to="Schedule Leaver"/>
+  </Step>
+  <Step name="Schedule Joiner">
+    <Script>
+      <Source><![CDATA[
+import java.text.SimpleDateFormat;      
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LCEJoiner.ScheduleJoiner");
+serilog.debug("Schedule joiner: "+identityName);
+Identity iden=context.getObjectByName(Identity.class, identityName);
+serilog.debug("iden="+iden);
+if(iden!=null) {
+  String contractStartDate=iden.getAttribute("contractStartDate");
+  serilog.debug("contractStartDate="+contractStartDate);
+  if(contractStartDate!=null) {
+    // Disable the cube
+    // We have to do this in a separate workflow because of the way the LCE is called
+    // See 'Overzealous Locking?' thread on CIQ
+    serilog.debug("Disabling Cube");
+    Calendar c=Calendar.getInstance();
+    c.setTime(new Date());
+//    c.add(Calendar.MINUTE, 5);
+    Map pMap=new HashMap();
+    pMap.put("identityName", identityName);
+    scheduleWorkflow(identityName, c.getTime(), "PreDisable Joiner", pMap); 
+    // Schedule the thing
+    Map map=new HashMap();
+    map.put("appsToNotify", appsToNotify);
+    scheduleWorkflow(identityName, contractStartDate, "Enable Joiner", map); 
+  }
+}
+      ]]></Source>
+    </Script>
+    <Transition to="Schedule Leaver"/>
+  </Step>
+  <Step name="Schedule Leaver">
+    <Script>
+      <Source><![CDATA[
+import sailpoint.object.Identity;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.LCEJoiner.ScheduleLeaver");
+serilog.debug("Schedule leaver: "+identityName);
+
+Identity iden=context.getObjectByName(Identity.class, identityName);
+if(iden!=null) {
+  String contractEndDate=iden.getAttribute("contractEndDate");
+  serilog.debug("contractEndDate="+contractEndDate);
+  if(contractEndDate!=null) {
+    // Schedule the thing
+    scheduleWorkflow(identityName, contractEndDate, "Disable Leaver"); 
+  }
+}
+      ]]></Source>
+    </Script>
+
+    <Transition to="Stop"/>
+  </Step>
+  
+  <Step icon="Stop" name="Stop" posX="526" posY="170"/>
+  
+</Workflow>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Bundle PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Bundle displayName="Sales" name="Sales" type="organizational">
+  <Attributes>
+    <Map>
+      <entry key="accountSelectorRules"/>
+      <entry key="adminRole">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="allowDuplicateAccounts" value="false"/>
+      <entry key="allowMultipleAssignments" value="false"/>
+      <entry key="isoRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="mergeTemplates" value="false"/>
+      <entry key="nercRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="pciRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="scopeMulti">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="scopeRequired">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="soxRelevant">
+        <value>
+          <Boolean/>
+        </value>
+      </entry>
+      <entry key="sysDescriptions">
+        <value>
+          <Map>
+            <entry key="en_US"/>
+          </Map>
+        </value>
+      </entry>
+    </Map>
+  </Attributes>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+</Bundle>

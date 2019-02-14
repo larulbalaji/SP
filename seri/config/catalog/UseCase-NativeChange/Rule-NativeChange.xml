@@ -1,0 +1,219 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule   language="beanshell" name="NativeChangeRules">
+  <Source>
+  	    <![CDATA[ 
+    import sailpoint.tools.*;
+    import sailpoint.api.*;
+    import sailpoint.object.*;
+    import java.lang.Boolean;
+      
+    import java.sql.*;
+    //import java.sql.Connection;
+    //import java.sql.SQLException;
+
+    import sailpoint.object.ProvisioningPlan;
+    import sailpoint.object.ProvisioningPlan.AccountRequest;
+    import sailpoint.object.ProvisioningPlan.AttributeRequest;
+
+    import javax.naming.Context;
+	import javax.naming.NamingEnumeration;
+	import javax.naming.directory.DirContext;
+	import javax.naming.directory.InitialDirContext;
+	import javax.naming.directory.SearchControls;
+	import javax.naming.ldap.LdapContext;
+    import javax.naming.ldap.InitialLdapContext;
+    import sailpoint.object.Workflow;
+	import sailpoint.object.Identity;
+	import sailpoint.object.Application;
+    import javax.naming.NamingException;
+    import java.lang.Exception;
+    import java.util.Random;
+    import java.lang.Math;
+
+    import java.lang.StringBuilder;
+    import sailpoint.tools.JdbcUtil;
+
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// Native change detection workflow methods
+	//
+	///////////////////////////////////////////////////////////////////////////
+	/**
+	 * Convert the NativeChangeDetections into a provisioning plan
+	 * to reset the original value.
+	 * 
+	 * @param context
+	 * @param changes
+	 * @return
+	 */
+	private ProvisioningPlan changesToDisableProvisioningPlan(SailPointContext context, List changes) {
+
+	    if ( Util.size(changes) == 0 ) return null;
+
+	    ProvisioningPlan plan = new ProvisioningPlan();
+	    for ( NativeChangeDetection change : changes ) {
+	        List diffs = change.getDifferences();
+	        if ( Util.size(diffs) > 0 ) {
+		            AccountRequest acctReq = new AccountRequest();
+		            acctReq.setNativeIdentity(change.getNativeIdentity());
+		            acctReq.setApplication(change.getApplicationName());
+		            acctReq.setInstance(change.getInstance());
+		            acctReq.setOperation(ProvisioningPlan.AccountRequest.Operation.Disable);
+
+	                plan.add(acctReq);
+	            }
+	        }
+
+	    }
+	    return plan;
+	}
+
+	/**
+	 * 
+	 * Build a ProvisioningPlan that can be used to reset
+	 * the changes that are detected by our native
+	 * change detection.
+	 * 
+	 * The event is passed in using the 'event' 
+	 * argument name.
+	 * 
+	 * @param wfc
+	 * @return
+	 * @throws GeneralException
+	 */
+	private ProvisioningPlan buildDisablePlanFromChanges(WorkflowContext wfc )
+	    throws GeneralException {
+
+	    Attributes args = wfc.getArguments();
+	    IdentityChangeEvent event = (IdentityChangeEvent) Util.get(args, "event");        
+	    ProvisioningPlan plan = null;
+	    if ( event != null ) {
+	        List changes = event.getNativeChanges();
+	        if ( Util.size(changes) > 0 ) {
+	            plan = changesToDisableProvisioningPlan(wfc.getSailPointContext(),changes);
+	        }
+	    } 
+	    return plan;
+	}
+
+
+
+
+	///////////////////////////////////////////////////////////////////////////
+	//
+	// Native change detection workflow methods
+	//
+	///////////////////////////////////////////////////////////////////////////
+	/**
+	 * Convert the NativeChangeDetections into a provisioning plan
+	 * to reset the original value.
+	 * 
+	 * @param context
+	 * @param changes
+	 * @return
+	 */
+	private ProvisioningPlan changesToProvisioningPlan(SailPointContext context, List changes) {
+
+	    if ( Util.size(changes) == 0 ) return null;
+
+	    ProvisioningPlan plan = new ProvisioningPlan();
+	    for ( NativeChangeDetection change : changes ) {
+	        List diffs = change.getDifferences();
+	        if ( Util.size(diffs) > 0 ) {
+	            AccountRequest acctReq = new AccountRequest();
+	            acctReq.setNativeIdentity(change.getNativeIdentity());
+	            acctReq.setApplication(change.getApplicationName());
+	            acctReq.setInstance(change.getInstance());
+	            acctReq.setOperation(change.getOperation());
+
+	            if ( diffs != null ) {
+	                for ( Difference diff : diffs ) {    
+
+	//
+	                    // If something has been added, lets remove it.
+	                    //                    
+	                    List added = diff.getAddedValues();
+	                    if ( Util.size(added) > 0 ) {
+	                        for ( String add : added ) {
+	                            AttributeRequest attrReq = new AttributeRequest();
+	                            attrReq.setOperation(ProvisioningPlan.Operation.Remove);
+	                            attrReq.setName(diff.getAttribute());
+	                            attrReq.setValue(add);
+	                            acctReq.add(attrReq);
+	                        }
+	                    }
+	                    //
+	                    // If something has been removed, lets add it back
+	                    //
+	                    List removed = diff.getRemovedValues();
+	                    //else if ( Util.size(removed) > 0 ) {
+	                    if ( Util.size(removed) > 0 ) {
+	                        for ( String remove : removed ) {
+
+	                            AttributeRequest attrReq = new AttributeRequest();
+	                            attrReq.setOperation(ProvisioningPlan.Operation.Add);
+	                            attrReq.setName(diff.getAttribute());
+	                            attrReq.setValue(remove);
+	                            acctReq.add(attrReq);
+	                        }
+	                    }
+	
+	                    //
+	                    // If its not an Add or a Remove, maybe its a change.
+	                    // Change it back. This does not deal with multivalue!
+	                    //
+	                    String oldVal = diff.getOldValue();
+	                    //else if ( oldVal != null ) {
+	                    if ( oldVal != null ) {
+	                        AttributeRequest attrReq = new AttributeRequest();
+	                        attrReq.setOperation(ProvisioningPlan.Operation.Set);
+	                        attrReq.setName(diff.getAttribute());
+	                        attrReq.setValue(oldVal);
+	                        acctReq.add(attrReq);
+	                    }                                            
+	                }
+
+	                plan.add(acctReq);
+	            }
+	        }
+
+	    }
+	    return plan;
+	}
+
+	/**
+	 * 
+	 * Build a ProvisioningPlan that can be used to reset
+	 * the changes that are detected by our native
+	 * change detection.
+	 * 
+	 * The event is passed in using the 'event' 
+	 * argument name.
+	 * 
+	 * @param wfc
+	 * @return
+	 * @throws GeneralException
+	 */
+	private ProvisioningPlan buildProvisioningPlanFromNativeChanges(WorkflowContext wfc )
+	    throws GeneralException {
+
+	    Attributes args = wfc.getArguments();
+	    IdentityChangeEvent event = (IdentityChangeEvent) Util.get(args, "event");        
+	    ProvisioningPlan plan = null;
+	    if ( event != null ) {
+	        List changes = event.getNativeChanges();
+	        if ( Util.size(changes) > 0 ) {
+	            plan = changesToProvisioningPlan(wfc.getSailPointContext(),changes);
+	        }
+	    } 
+	    return plan;
+	}
+
+
+
+	
+	 ]]>	
+    
+  </Source>
+</Rule>

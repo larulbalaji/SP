@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE TaskDefinition PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<TaskDefinition  name="Refresh Transfer Users - Stage 2" resultAction="Delete" type="Identity" hidden="true">
+  <Attributes>
+    <Map>
+      <entry key="correlateEntitlements" value="true"/>
+      <entry key="filterGroups" value="Monitored Users"/>
+      <entry key="processTriggers" value="true"/>
+    </Map>
+  </Attributes>
+  <Description>Template for identity refresh scans.</Description>
+  <Owner>
+    <Reference class="sailpoint.object.Identity" name="spadmin"/>
+  </Owner>
+  <Parent>
+    <Reference class="sailpoint.object.TaskDefinition" name="Identity Refresh"/>
+  </Parent>
+</TaskDefinition>

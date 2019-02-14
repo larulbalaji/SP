@@ -1,0 +1,161 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+<EmailTemplate cc="$!{identity.manager.email}"   name="Remediation Notification - HTML">
+  <Body>    
+  <![CDATA[
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+
+  <title>Access Revoked by: $!{requesterName}</title>
+    
+</head>
+
+<body style="background:#00799d;margin:0;padding:0;text-align:left;">
+
+  <table cellpadding="0" cellspacing="0" width="588" border="0" align="center" style="margin:0 auto;padding:0;">
+    <tr valign="top">
+      <td> <img src="%%seriIIQlink%%/images/TopLogo1.png" height="" vspace="10">&nbsp;</td>
+    </tr>
+    <tr valign="top">
+      
+    </tr>
+    <tr valign="top">
+        <td>
+        <!-- EMAILER CONTENT BEGINS -->
+        
+        <!-- HEADER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpadding="0" cellspacing="0" width="588" style="background:#fafafa;margin:0;padding:0;text-align:left;border-bottom:5px solid #b2b2b2;">
+        <tr valign="middle">
+          <td height="85">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+            <td>
+            <!-- CHANGE COLOR STYLE BELOW: blue - #98bec6 ; tan - #b5b192 -->
+            <h2 style="color:#222222;margin:0;padding:0;font:bold 12pt Arial;text-transform:uppercase;">Revocation Notification</h2>
+            <h1 style="color:#037da1;margin:0;padding:0;font:bold 22pt Arial;">Items Revoked by $!{requesterName}</h1>             
+            </td>
+        </tr>
+        </table>
+        <!-- /HEADER -->
+
+        <!-- CONTENT -->
+     <table cellpadding="0" cellspacing="0" width="588" style="background:#dadada;margin:0;padding:0;text-align:left;border-left:0px solid #b2b2b2;border-right:0px solid #b2b2b2;">
+        <tr valign="top"> 
+          <td colspan="3"><img src="%%seriIIQlink%%/images/LogoHeader.png" height=""hspace="10" vspace="10" /></td>
+        </tr>
+        <tr valign="top">
+          <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+          <td>
+            
+            <table cellpadding="0" cellspacing="0" width="100%" border="0">
+            <tr valign="bottom">
+            <td>
+            <p style="margin:0;padding:0;color:#007080;font:bold 10pt Arial;line-height:15pt;"></p>
+            <p/>
+            <p style="margin:0;padding:0;color:#007080;font: 10pt Arial;line-height:15pt;">$!{requesterName} has revoked one or more entitlements from you.</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#007080;font: bold 10pt Arial;line-height:15pt;">Comments from $requesterName:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#007080;font: 10pt Arial;line-height:15pt;">$!{comments}</p>
+            <br/>
+
+#if ($remediationDetails.nonModifyAccountRequests &&
+     $remediationDetails.getNonModifyAccountRequests().size() > 0)
+
+            <p style="margin:0;padding:0;color:#007080;font: bold 10pt Arial;line-height:15pt;">Account Requests:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#007080;font: 10pt Arial;line-height:15pt;">
+      
+#foreach ($acctReq in $remediationDetails.nonModifyAccountRequests)
+Application: $acctReq.application <br/>
+  Operation: $acctReq.operation <br/>
+ Account ID: $acctReq.nativeIdentity <br/><br/>
+
+</p>
+
+#end
+#end
+#if ($remediationDetails.modifyAccountRequests &&
+     $remediationDetails.getModifyAccountRequests().size() > 0)
+
+      <p style="margin:0;padding:0;color:#007080;font: bold 10pt Arial;line-height:15pt;">Modification Requests:</p>
+            <br/>
+            <p style="margin:0;padding:0;color:#007080;font: 10pt Arial;line-height:15pt;">
+
+#foreach ($acctReq in $remediationDetails.modifyAccountRequests)
+Application: $acctReq.application <br/>
+#if ($acctReq.nativeIdentity) ## Role modification requests in IIQ won't have a nativeIdentity
+ Account ID: $acctReq.nativeIdentity <br/>
+#end
+
+#foreach ($attrReq in $acctReq.attributeRequests)
+  Operation: $attrReq.operation <br/>
+  Attribute: $attrReq.name <br/>
+   Value(s): $attrReq.value <br/><br/>
+
+#end
+#foreach ($permReq in $acctReq.permissionRequests)
+  Operation: $permReq.operation <br/>
+ Permission: $permReq.target <br/>
+   Right(s): $permReq.rightsList <br/><br/>
+
+#end
+
+#end
+#end                       
+            </p>
+            <br/>
+            </td>
+            </tr>
+            </table>
+           <!-- CHANGE STYLE COLOR IN anchor or a TAG BELOW and in all anchor tags that apply below : red - #a22831 ; blue - #0987a0 -->
+            <p style="margin:0;padding:0;color:#007080;font:normal %%thankYouStatementFontSize%% Arial;line-height:15pt;">Thank you for your cooperation</p>
+            <p style="margin:0 0 50px;padding:0;color:#007080;font:bold %%thankYouStatementFontSize%% Arial;line-height:15pt;">Your Security and Compliance Team</p>
+            </td>
+            <td width="40">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+        </tr>
+        <tr valign="top">
+          <td colspan="3">
+               <p style="margin:0 0 0 30px;padding:0;color:%%supportLinksSeparator%%;font:normal 12pt Arial;line-height:12pt;margin-bottom:30px"><a href="%%seriIIQlink%%/dashboard.jsf" style="color:#666666;text-decoration:none;font-weight:bold;">Help</a> &nbsp;|&nbsp; <a href="%%seriIIQlink%%/dashboard.jsf" style="color:#666666;text-decoration:none;font-weight:bold;">FAQs</a> &nbsp;|&nbsp; <a href="%%seriIIQlink%%/dashboard.jsf" style="color:#666666;text-decoration:none;font-weight:bold;">Support</a></p>
+          </td>
+        </tr>
+        </table>
+        <!-- /CONTENT -->
+        
+        <!-- FOOTER -->
+        <!-- CHANGE BACKGROUND COLOR IN STYLE BELOW: blue - #0987a0 ; tan - #847f5c -->
+        <table cellpading="0" cellspacing="0" width="588" style="background:#fafafa;margin:0;padding:0;text-align:right;border-top:0px solid #b2b2b2;">
+        <tr valign="middle">
+          <td width="180" height="60">&nbsp;&nbsp;</td>
+        </tr>
+        </table>
+        <!-- /FOOTER -->
+        
+        <!-- /EMAILER -->
+        </td>
+    </tr>
+    </table>
+	</body>
+	</html>
+  ]]>
+    
+    </Body>
+  <Description>
+      Email Template for notifying users that an item has been remediated.
+      Notice that this is setup to CC the user's manager (see CC attribute above).
+
+      Arguments
+      ---------
+      item:                The CertificationItem being remediated.
+      remediationDetails:  The ProvisioningPlan with the entitlements being removed.
+                           (Convenience accessor for item.action.remediationDetails)
+      identity:            The Identity that is having their item remediated.
+      comments:            Comments from the remediator about the remediation.
+      requester:           The Identity that remediated the item.
+      requesterName:       Full name of the Identity that remediated the item.
+                           (Convenience accessor for requestor.fullName)
+    </Description>
+  <Subject>Access is being revoked by $!{requesterName}</Subject>
+</EmailTemplate>
+</sailpoint>

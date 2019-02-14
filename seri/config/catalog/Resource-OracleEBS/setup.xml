@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC 'sailpoint.dtd' 'sailpoint.dtd'>
+<sailpoint>
+  <ImportAction name='include' value='CorrelationConfig-OracleEBS.xml'/>
+  <ImportAction name='include' value='Rule-BuildMap-OracleEBS.xml'/>
+  <ImportAction name='include' value='Application-OracleEBS.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AA-OracleEBS.xml'/>
+  <ImportAction name='include' value='TaskDefinition-AGA-OracleEBS.xml'/>
+  <ImportAction name='include' value='LocalizedAttribute-OracleEBS.xml'/>
+</sailpoint>

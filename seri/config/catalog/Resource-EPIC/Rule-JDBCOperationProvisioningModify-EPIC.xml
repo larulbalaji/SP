@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Rule PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Rule language="beanshell" name="EPIC-RuleJDBCOperationProvisioningModify" type="JDBCOperationProvisioning">
+  <Description>This rule is used by the JDBC connector to do provisioning of the data .</Description>
+  <Signature returnType="ProvisioningResult">
+    <Inputs>
+      <Argument name="log">
+        <Description>
+          The log object associated with the SailPointContext.
+        </Description>
+      </Argument>
+      <Argument name="context">
+        <Description>
+          A sailpoint.api.SailPointContext object that can be used to query the database if necessary.
+        </Description>
+      </Argument>
+      <Argument name="application">
+        <Description>The application whose data file is being processed.</Description>
+      </Argument>
+      <Argument name="schema">
+        <Description>The Schema currently in use.</Description>
+      </Argument>
+      <Argument name="connection">
+        <Description>A connection object to connect to database.</Description>
+      </Argument>
+      <Argument name="plan">
+        <Description>The ProvisioningPlan created against the logical application.</Description>
+      </Argument>
+      <Argument name="request">
+        <Description>The ProvisioningRequest created against the logical application.</Description>
+      </Argument>
+    </Inputs>
+    <Returns>
+      <Argument name="result">
+        <Description>A Provisioning Result object is desirable to return the status.IT can be a new object or part of  Provisioning Plan</Description>
+      </Argument>
+    </Returns>
+  </Signature>
+  <Source><![CDATA[
+import java.sql.*;
+import java.util.*;
+import java.text.*;
+import sailpoint.object.Identity;
+import sailpoint.object.ProvisioningPlan;
+import sailpoint.object.ProvisioningPlan.AccountRequest;
+import sailpoint.object.ProvisioningPlan.AttributeRequest;
+import sailpoint.object.ProvisioningResult;
+boolean bProvisioningResultCommitted = true;
+try
+{
+  String appName = "EPIC";
+  System.out.println("JDBCOperationProvisioningModify"+appName+"\n"+plan.toXml());
+  java.util.Date now = new java.util.Date();
+  String SQLStmt = "";
+  boolean bTest = true;
+  List accounts = plan.getAccountRequests(appName);
+  if (accounts == null) {bProvisioningResultCommitted = false;System.out.println("accounts list is empty");}
+  if (bProvisioningResultCommitted)
+  {
+    for (AccountRequest account : accounts)
+    {
+      Identity user = plan.getIdentity();
+      int userid = 0;
+      String username = user.getDisplayName();
+      bTest = false;
+      try
+      {//test if username exists - we don't want to duplicate!
+        SQLStmt = "select userid from usertable where Name=?";
+        PreparedStatement statement = connection.prepareStatement(SQLStmt);
+        statement.setString(1, username);
+        ResultSet rsTable = statement.executeQuery();
+        if(rsTable.next())
+        {
+          userid = rsTable.getInt("UserID");
+          bTest = true;
+        }
+        rsTable.close();
+      }
+      catch (Exception e1)
+      {
+        bProvisioningResultCommitted = false;
+        System.out.println("Failed: Check if userid exists for "+username+" on "+appName+"\nError: "+e1);
+      }
+      if (bProvisioningResultCommitted)
+      {
+        if (!bTest)
+        {
+          try
+          {
+            SQLStmt = "insert into usertable (Name,UserAlias,BlockStatus,DefaultLoginDepartmentID) values (?,?,?,?)";
+            PreparedStatement statement = connection.prepareStatement(SQLStmt);
+            statement.setString(1, username);
+            statement.setString(2, username);
+            statement.setString(3, "Active");
+            statement.setString(4, "Nursing");
+            statement.executeUpdate();
+            System.out.println("Completed: Modify "+username+" on "+appName);
+            bTest = true;
+          }
+          catch (Exception e1)
+          {
+            bProvisioningResultCommitted = false;
+            System.out.println("Failed: Modify "+username+" on "+appName+"\nError: "+e1);
+          }
+        }
+      }
+      if (bProvisioningResultCommitted)
+      {
+        try
+        {
+          SQLStmt = "select userid from usertable where Name=?";
+          PreparedStatement statement = connection.prepareStatement(SQLStmt);
+          statement.setString(1, username);
+          ResultSet rsTable = statement.executeQuery();
+          if(rsTable.next())
+          {
+            userid = rsTable.getInt("UserID");
+          }
+          rsTable.close();
+          if (userid!=0)
+          {
+            System.out.println("Completed: Retrieve userid for "+username+" on "+appName);
+          }
+          else
+          {
+            bProvisioningResultCommitted = false;
+            System.out.println("Failed: Retrieve userid for "+username+" on "+appName);
+          }
+        }
+        catch (Exception e1)
+        {
+          bProvisioningResultCommitted = false;
+          System.out.println("Failed: Retrieve userid for "+username+" on "+appName+"\nError: "+e1);
+        }
+        if (bProvisioningResultCommitted)
+        {
+          List attrrequests = account.getAttributeRequests();
+          if (attrrequests == null) {bProvisioningResultCommitted = false;}
+          if (bProvisioningResultCommitted)
+          {
+            for (AttributeRequest attrrequest : attrrequests)
+            {
+              String attrname = attrrequest.getName();
+              List attrvalues = new ArrayList();
+              if (attrrequest.getValue() instanceof String) {attrvalues.add(attrrequest.getValue());} else {attrvalues = attrrequest.getValue();}
+              for (String attrval : attrvalues)
+              {
+                String attrvalue = attrval;
+                if (attrname.equals("UserRoles"))
+                {
+                  if (attrrequest.getOp().equals(ProvisioningPlan.Operation.Add))
+                  {SQLStmt = "insert into UserRolesLink (UserID,UserRoles) values (?,?)";}
+                  else
+                  {SQLStmt = "delete from UserRolesLink where UserID=? and UserRoles=?";}
+                }
+                if (attrname.equals("LinkedSubtemplateIDs"))
+                {
+                  if (attrrequest.getOp().equals(ProvisioningPlan.Operation.Add))
+                  {SQLStmt = "insert into UserLinkedSubtemplateLink (UserID,LinkedSubtemplateIDs) values (?,?)";}
+                  else
+                  {SQLStmt = "delete from UserLinkedSubtemplateLink where UserID=? and LinkedSubtemplateIDs=?";}
+                }
+                if (attrname.equals("LinkedTemplateID"))
+                {
+                  if (attrrequest.getOp().equals(ProvisioningPlan.Operation.Add))
+                  {SQLStmt = "insert into UserLinkedTemplateLink (UserID,LinkedTemplateID) values (?,?)";}
+                  else
+                  {SQLStmt = "delete from UserLinkedTemplateLink where UserID=? and LinkedTemplateID=?";}
+                }
+                try
+                {
+                  PreparedStatement statement = connection.prepareStatement(SQLStmt);
+                  statement.setInt(1, userid);
+                  statement.setString(2, attrvalue);
+                  statement.executeUpdate();
+                  System.out.println("Completed: "+attrrequest.getOp()+" "+attrvalue+" for "+username+" on "+appName);
+                }
+                catch (Exception e1)
+                {
+                  bProvisioningResultCommitted = false;
+                  System.out.println("Failed: "+attrrequest.getOp()+" "+attrvalue+" for "+username+" on "+appName+"\nError: "+e1);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+catch (Exception e)
+{
+  bProvisioningResultCommitted = false;
+  System.out.println("Failed: JDBCOperationProvisioningModify"+appName+"\nError: "+e);
+}
+if (bProvisioningResultCommitted) {return ProvisioningResult.STATUS_COMMITTED;}
+return ProvisioningResult.STATUS_FAILED;]]></Source>
+</Rule>

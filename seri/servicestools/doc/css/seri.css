@@ -1,0 +1,67 @@
+@CHARSET "UTF-8";
+#page {
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+}
+
+table: {
+}
+
+td {
+  padding: 0px;
+}
+
+.header-right, .spacer-right, .main-right {
+	width: 800px;
+}
+
+.header-left, .header-right {
+	background-color: #414041;
+}
+
+.spacer-left {
+	background-color: #2b3077;
+}
+
+.spacer-right {
+	background-color: #4e509c;
+	margin-left: 8px;
+}
+
+.main-left {
+	background-color: #909093;
+	height: 1000px;
+}
+
+.main-right {
+	height: 1000px;
+	padding-left: 8px;
+}
+
+h1 {
+	font-family: "Helvetica Neue Lt Std", Helvetica;
+	font-size: 3em;
+	color: white;	
+}
+
+h2 {
+	font-family: "Helvetica Neue Lt Std", Helvetica;
+	font-size: 2em;
+	color: #2b3077;	
+	border-bottom: 2px dotted #bcbfc1;
+}
+
+.list {
+	font-family: "Helvetica Neue Lt Std", Helvetica;
+	color: #bcbfc1;
+}
+.list>a:link {
+	color: #bcbfc1;
+}
+.list>a:visited {
+	color: #bcbfc1;
+}
+.list>a:hover {
+	color: #909093;
+}

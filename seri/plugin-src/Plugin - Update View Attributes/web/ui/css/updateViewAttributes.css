@@ -1,0 +1,8 @@
+.attributeObject {
+  margin: 4px;
+  padding: 4px;
+  color: red;
+  text-align: center;
+  border-color: black;
+  border: inset 2px
+}

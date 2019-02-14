@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd"
+                           "sailpoint.dtd">
+<sailpoint>
+    <ImportAction name="include" value="Workflow-LifecycleEvent-Joiner.xml"/>
+    <ImportAction name="include" value="Workflow-PreDisableJoiner.xml"/>
+    <ImportAction name="include" value="Workflow-EnableJoiner.xml"/>
+    <ImportAction name="include" value="Workflow-DisableLeaver.xml"/>
+    <ImportAction name="include" value="EmailTemplate-NewUserCreation.xml"/>
+    <ImportAction name="include" value="EmailTemplate-ManagerNotificationJoiner.xml"/>
+    <ImportAction name="include" value="PasswordPolicy_BaseAD.xml"/>
+    <ImportAction name="include" value="IdentityTrigger-Joiner.xml"/>
+    <ImportAction name="include" value="TaskDefinition-ProcessEvents.xml"/>
+    <ImportAction name="include" value="TaskDefinition-ProcessHRJoiners.xml"/>
+    <ImportAction name="include" value="Configuration-SystemConfiguration.xml"/>
+    <ImportAction name="include" value="Rule-SetPhoneIdentityAttribute.xml"/>
+    <ImportAction name="include" value="ObjectConfig-Identity.xml"/>
+    <!-- This is to enable scheduling of workflows -->
+    <ImportAction name='include' value='/seri/xml/Rule/Rule-SchedulingLibrary.xml'/>
+
+</sailpoint>

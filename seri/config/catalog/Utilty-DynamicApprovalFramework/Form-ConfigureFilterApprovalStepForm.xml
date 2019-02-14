@@ -1,0 +1,690 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Form PUBLIC "sailpoint.dtd" "sailpoint.dtd">     
+<Form name="Configure Filter Approval Step Form" type="Workflow">
+  <Attributes>
+    <Map>
+      <entry key="pageTitle" value="Configure Filter Approval Step Form"/>
+    </Map>
+  </Attributes>
+  <Description/>
+  <Section  label="Base Approval Type Configuration">
+  
+  <Field displayName="Approval Description" name="workItemDescription" type="string">
+      
+    </Field>
+    <Field displayName="Include Rejected Items" name="includeRejected" type="boolean"/>
+    <Field displayName="Force Decision" name="forceDecision" type="boolean"/>
+    
+     <Field displayName="Approval Owner Type" name="approvalOwnerType" type="string" postBack="true">
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <String>Manager</String>
+            <String>Object Owner</String>
+            <String>Application Owner</String>
+            <String>Specific User</String>
+            <String>Rule</String>
+            <String>Attribute</String>
+            <String>Rule Attribute</String>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+    </Field>
+     <Field displayName="Approval Owner" name="approvalOwner" type="Identity" dynamic="true">    
+      <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+   
+
+if (form.getField("approvalOwnerType")==null || form.getField("approvalOwnerType").getValue()==null || form.getField("approvalOwnerType").getValue().equals("Specific User")) {
+    return false;
+}
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>    
+     </Field>
+        
+    <Field displayName="Approval Owner Rule" name="approvalOwnerRule" dynamic="true" type="Rule">
+     <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;     
+
+
+if (form.getField("approvalOwnerType")==null || form.getField("approvalOwnerType").getValue()==null || form.getField("approvalOwnerType").getValue().equals("Rule")) {
+    return false;
+}
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>         
+          </Map>
+        </Attributes>
+    </Field>
+      <Field displayName="Approval Owner Rule Attribute" name="approvalOwnerRuleAttribute" dynamic="true" type="string">
+     <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;     
+
+
+if (form.getField("approvalOwnerType")==null || form.getField("approvalOwnerType").getValue()==null || form.getField("approvalOwnerType").getValue().equals("Rule Attribute")) {
+    return false;
+}
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>         
+          </Map>
+        </Attributes>
+         <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+         import sailpoint.object.ObjectConfig;
+         
+         import sailpoint.object.*;  
+         import sailpoint.web.*;     
+
+List attrs= new ArrayList();
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("entitlement") || form.getField("attributeObjectType").getValue().equals("any"))) {
+ 
+         
+         ObjectConfig manConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "ManagedAttribute");
+         Map attrMap = manConfig.getObjectAttributeMap();
+         
+      
+         if(attrMap!= null)
+         {
+             attrs.addAll(attrMap.keySet());
+         }
+ }
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("role") || form.getField("attributeObjectType").getValue().equals("any"))) {
+      
+         ObjectConfig bundleConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "Bundle");
+         
+         Map bundleMap =bundleConfig.getObjectAttributeMap();
+         if(bundleConfig!= null)
+         {
+             attrs.addAll(bundleMap.keySet());
+         }
+ }
+         return attrs;
+            ]]>
+              </Source>
+           </Script>
+      </AllowedValuesDefinition>
+    </Field>
+        <Field displayName="Approval Owner Attribute" name="approvalOwnerAttribute" dynamic="true" type="string">
+     <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;     
+
+
+if (form.getField("approvalOwnerType")==null || form.getField("approvalOwnerType").getValue()==null || form.getField("approvalOwnerType").getValue().equals("Attribute")) {
+    return false;
+}
+return true;
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>         
+          </Map>
+        </Attributes>
+        
+         <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+         import sailpoint.object.ObjectConfig;
+         
+         import sailpoint.object.*;  
+         import sailpoint.web.*;     
+
+List attrs= new ArrayList();
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("entitlement") || form.getField("attributeObjectType").getValue().equals("any"))) {
+ 
+         
+         ObjectConfig manConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "ManagedAttribute");
+         Map attrMap = manConfig.getObjectAttributeMap();
+         
+      
+         if(attrMap!= null)
+         {
+             attrs.addAll(attrMap.keySet());
+         }
+ }
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("role") || form.getField("attributeObjectType").getValue().equals("any"))) {
+      
+         ObjectConfig bundleConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "Bundle");
+         
+         Map bundleMap =bundleConfig.getObjectAttributeMap();
+         if(bundleConfig!= null)
+         {
+             attrs.addAll(bundleMap.keySet());
+         }
+ }
+         return attrs;
+            ]]>
+              </Source>
+           </Script>
+      </AllowedValuesDefinition>
+    </Field>
+</Section>
+<Section label="Approval Configuration">
+<Field displayName="Disable Metadata based Approval Functionality" name="disableMetadataApproval" type="boolean"  postBack="true"/>
+  <Field displayName="Metadata AttributeSource" name="attributeObjectType" type="string" dynamic="true">
+   <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+if(form.getField("disableMetadataApproval").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableMetadataApproval").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableMetadataApproval").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableMetadataApproval")==null || (boolean)form.getField("disableMetadataApproval").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+      <AllowedValuesDefinition>
+        <Value>
+          <List>
+           <List><String>application</String><String>Application Defined</String></List>
+            <List><String>entitlement</String><String>Entitlement Defined</String></List>
+            <List><String>role</String> <String>Role Defined </String></List>
+            <List><String>any</String><String>Entitlement or Role Defined</String></List>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>
+      <Script>
+            <Source>return "any";   </Source>
+           </Script>
+    </Field>
+     <Field displayName="Metadata Attribute Name" name="attributeName" type="string" dynamic="true">
+       <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+if(form.getField("disableMetadataApproval").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableMetadataApproval").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableMetadataApproval").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableMetadataApproval")==null || (boolean)form.getField("disableMetadataApproval").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+    <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+         import sailpoint.object.ObjectConfig;
+         
+         import sailpoint.object.*;  
+import sailpoint.web.*;     
+
+   List attrs= new ArrayList();
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("entitlement") || form.getField("attributeObjectType").getValue().equals("any"))) {
+ 
+         
+         ObjectConfig manConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "ManagedAttribute");
+         Map attrMap = manConfig.getObjectAttributeMap();
+         
+      
+         if(attrMap!= null)
+         {
+             attrs.addAll(attrMap.keySet());
+         }
+ }
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("role") || form.getField("attributeObjectType").getValue().equals("any"))) {
+      
+         ObjectConfig bundleConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "Bundle");
+         
+         Map bundleMap =bundleConfig.getObjectAttributeMap();
+         if(bundleConfig!= null)
+         {
+             attrs.addAll(bundleMap.keySet());
+         }
+ }
+         return attrs;
+            ]]>
+              </Source>
+           </Script>
+      </AllowedValuesDefinition>
+    </Field>
+    <Field displayName="Metadata Attribute Value" name="attributeValue" type="string" dynamic="true">
+      <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+if(form.getField("disableMetadataApproval").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableMetadataApproval").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableMetadataApproval").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableMetadataApproval")==null || (boolean)form.getField("disableMetadataApproval").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+ <!--   <AllowedValuesDefinition>
+        <Value>
+          <List>
+            <String>true</String>
+            <String>false</String>
+          </List>
+        </Value>
+      </AllowedValuesDefinition>-->
+       <!-- <ValidationScript>
+          <Source><![CDATA[     
+import sailpoint.web.messages.MessageKeys;
+import sailpoint.tools.Message;
+
+List errors = null;
+if(form.getField("attributeValue")!= null && ((List)form.getField("attributeValue").getValue()).size()>1)
+{
+    errors = new ArrayList();
+    Message msg = new Message();
+    msg.setKey("Only one value may be selected. Please select only one value and try again.");
+    errors.add(msg);
+}
+
+return errors; 
+          ]]></Source>
+        </ValidationScript> -->
+    </Field> 
+</Section>
+<Section label="Approval Risk Thresholds">
+<Field displayName="Disable Approval Risk Threshold Functionality" name="disableApprovalRisk" type="boolean"  postBack="true"/>
+   <Field displayName="Identity Risk Score Threshold" name="identityRiskThreshold" type="int" dynamic="true">
+    <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+if(form.getField("disableApprovalRisk").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableApprovalRisk").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableApprovalRisk").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableApprovalRisk")==null || (boolean)form.getField("disableApprovalRisk").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+   </Field>
+    <Field displayName="Entitlement/Role Risk Score Threshold" name="entitlementRiskThreshold" type="int" dynamic="true">
+    <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+
+if(form.getField("disableApprovalRisk").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableApprovalRisk").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableApprovalRisk").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableApprovalRisk")==null || (boolean)form.getField("disableApprovalRisk").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+    </Field>
+</Section>
+<Section label="Approval Required Configuration">
+<Field displayName="Disable Approval Required Functionality" name="disableApprovalRequired" type="boolean"  postBack="true"/>
+    <Field displayName="Approval Required Rule" name="approvalRequiredRule" type="Rule" dynamic="true">
+       <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+
+if(form.getField("disableApprovalRequired").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableApprovalRequired").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableApprovalRequired").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableApprovalRequired")==null || (boolean)form.getField("disableApprovalRequired").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+    </Field>
+      <Field displayName="Approval Required Rule Attribute" name="approvalRequiredRuleAttribute" type="string" dynamic="true">
+       <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+         import sailpoint.object.ObjectConfig;
+         
+         import sailpoint.object.*;  
+import sailpoint.web.*;     
+
+   List attrs= new ArrayList();
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("entitlement") || form.getField("attributeObjectType").getValue().equals("any"))) {
+ 
+         
+         ObjectConfig manConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "ManagedAttribute");
+         Map attrMap = manConfig.getObjectAttributeMap();
+         
+      
+         if(attrMap!= null)
+         {
+             attrs.addAll(attrMap.keySet());
+         }
+ }
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("role") || form.getField("attributeObjectType").getValue().equals("any"))) {
+      
+         ObjectConfig bundleConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "Bundle");
+         
+         Map bundleMap =bundleConfig.getObjectAttributeMap();
+         if(bundleConfig!= null)
+         {
+             attrs.addAll(bundleMap.keySet());
+         }
+ }
+         return attrs;
+            ]]>
+              </Source>
+           </Script>
+      </AllowedValuesDefinition>
+       <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+
+if(form.getField("disableApprovalRequired").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableApprovalRequired").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableApprovalRequired").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableApprovalRequired")==null || (boolean)form.getField("disableApprovalRequired").getValue() != false){
+			return true;   
+		}
+		else{
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+    </Field>
+</Section>
+<Section label="Auto Approved Configuration">
+<Field displayName="Disable Auto-Approve Functionality" name="disableAutoApprove" type="boolean"  postBack="true"/>
+ <Field displayName="Auto-Approved Rule" name="autoApprovedRule" type="Rule" dynamic="true">
+    <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+if(form.getField("disableAutoApprove").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableAutoApprove").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableAutoApprove").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableAutoApprove")==null || (boolean)form.getField("disableAutoApprove").getValue() != false){
+			return true;   
+		}
+		else{
+			System.out.println("XXXXXXXXXXXXXXXX: returning false");
+			return false;
+		}
+}
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+    </Field>
+      <Field displayName="Auto-Approved Rule Attribute" name="autoApprovedRuleAttribute" type="string" dynamic="true">
+       <Attributes>
+          <Map>
+            <entry key="hidden">
+              <value>
+                <Script>
+                  <Source><![CDATA[
+import sailpoint.object.*;  
+import sailpoint.web.*;  
+
+System.out.println("XXXXXXXXXXXXXXXX:  " + form.getField("disableAutoApprove").getValue());
+
+if(form.getField("disableAutoApprove").getValue() instanceof String)
+{
+	  if(((String)form.getField("disableAutoApprove").getValue()).equals("false")){
+		return false; 
+	  }
+	  else{
+	  	return true;
+	  }
+}
+else if(form.getField("disableAutoApprove").getValue() instanceof Boolean)
+{ 
+		if (form.getField("disableAutoApprove")==null || (boolean)form.getField("disableAutoApprove").getValue() != false){
+			return true;   
+		}
+		else{
+			System.out.println("XXXXXXXXXXXXXXXX: returning false");
+			return false;
+		}
+}
+
+                  ]]></Source>
+                </Script>
+              </value>
+            </entry>          
+          </Map>
+        </Attributes>  
+       <AllowedValuesDefinition>
+          <Script>
+            <Source><![CDATA[
+         import sailpoint.object.ObjectConfig;
+         
+         import sailpoint.object.*;  
+         import sailpoint.web.*;     
+
+List attrs= new ArrayList();
+
+
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("entitlement") || form.getField("attributeObjectType").getValue().equals("any"))) {
+ 
+         
+         ObjectConfig manConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "ManagedAttribute");
+         Map attrMap = manConfig.getObjectAttributeMap();
+         
+      
+         if(attrMap!= null)
+         {
+             attrs.addAll(attrMap.keySet());
+         }
+ }
+   
+if (form.getField("attributeObjectType").getValue()!=null && (form.getField("attributeObjectType").getValue().equals("role") || form.getField("attributeObjectType").getValue().equals("any"))) {
+      
+         ObjectConfig bundleConfig = (ObjectConfig)context.getObjectByName(ObjectConfig.class, "Bundle");
+         
+         Map bundleMap =bundleConfig.getObjectAttributeMap();
+         if(bundleConfig!= null)
+         {
+             attrs.addAll(bundleMap.keySet());
+         }
+ }
+         return attrs;
+            ]]>
+              </Source>
+           </Script>
+      </AllowedValuesDefinition>
+    </Field>
+</Section>
+</Form>

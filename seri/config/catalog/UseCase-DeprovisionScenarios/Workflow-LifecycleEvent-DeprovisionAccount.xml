@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow  explicitTransitions="true"   name="Lifecycle Event - Deprovision Accounts" type="IdentityLifecycle">
+  <Variable input="true" name="identityName">
+    <Description>The name of the identity.</Description>
+  </Variable>
+  <Variable initializer="rule:DeReProvisioning - Parse Application Deprovisioning Policies" name="accountDeprovisioningMap"/>
+  <Variable input="true" name="trigger">
+    <Description>The IdentityTrigger</Description>
+  </Variable>
+  <Variable input="true" name="event">
+    <Description>The IdentityChangeEvent</Description>
+  </Variable>
+  <Variable name="userName">
+    <Description>The display name of the identity.</Description>
+  </Variable>
+  <Variable initializer="string:false" name="trace"/>
+  <Variable name="project"/>
+  <Variable name="plan"/>
+  <Description>Disable all user accounts when an employee leaves the company.  Send
+       email notifications to the person's Manager and to any Application Owners
+       of non-authoritative Applications.  In other words, there is no reason
+       to alert the HR team, since they triggered this event in the first place.</Description>
+  <Step icon="Start" name="Start">
+    <Transition to="Initiate Deprovisioning Tasks"/>
+  </Step>
+  <Step action="rule:DeReProvisioning - Initiate Deprovisioning Workflows" icon="Default" name="Initiate Deprovisioning Tasks" posX="190" posY="20">
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="355" posY="19"/>
+</Workflow>

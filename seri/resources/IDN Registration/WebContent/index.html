@@ -1,0 +1,30 @@
+<html>
+  <script src="webjars/angular/1.6.6/angular.min.js"></script>
+  <script src="app.js"></script>
+  <script src="idnRegCtrl.js"></script>
+  <script src="idnRegService.js"></script>
+  <script src="configService.js"></script>
+  <script src="base64.js"></script>
+  
+  <link rel="stylesheet" type="text/css" href="idnReg.css">
+  <body>
+
+    <div ng-app="idnRegApp" ng-controller="idnRegCtrl">
+      <form name="regForm" ng-submit="regForm.$valid && register()" novalidate>
+        <table>
+          <tr><td colspan="2">Display Name</td><td>{{displayName}}</td></tr>
+          <tr ng-repeat="field in fields">
+          <td>{{field.label}}</td><td><span ng-show="field.required">*</span></td>
+          <td><input type="text" ng-model="field.value" ng-required="field.required"/></td>
+        </table>
+        <input type="submit" value="Register" ng-disabled="regForm.$invalid"/>
+      </form>
+      <p color="red">{{regForm.$invalid?"One or more required fields are missing":""}}</p>
+      <p style="color: green" ng-show="successMessage">{{successMessage}}</p>
+      <p style="color: red" ng-show="errorMessage">{{errorMessage}}</p>
+    </div>
+
+    <a href="configuration.html">Configure</a>
+
+  </body>
+</html>

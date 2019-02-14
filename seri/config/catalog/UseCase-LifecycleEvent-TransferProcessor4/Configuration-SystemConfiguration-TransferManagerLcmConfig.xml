@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="SystemConfiguration">
+     <Attributes>
+      <Map>
+        <entry key="managerRequestControls">
+          <value>
+            <Map>
+              <entry key="allowAccountOnlyRequests">
+                <value>
+                  <Boolean>true</Boolean>
+                </value>
+              </entry>
+              <entry key="allowManageAccountsAdditionalAccountRequests">
+                <value>
+                  <Boolean></Boolean>
+                </value>
+              </entry>
+              <entry key="allowManageExistingAccounts">
+                <value>
+                  <Boolean>true</Boolean>
+                </value>
+              </entry>
+              <entry key="allowRequestEntitlementsAdditionalAccountRequests">
+                <value>
+                  <Boolean></Boolean>
+                </value>
+              </entry>
+              <entry key="allowRequestEntitlementsShowPopulation">
+                <value>
+                  <Boolean>true</Boolean>
+                </value>
+              </entry>
+              <entry key="allowRequestRolesAdditionalAccountRequests">
+                <value>
+                  <Boolean></Boolean>
+                </value>
+              </entry>
+              <entry key="allowRequestRolesShowPopulation">
+                <value>
+                  <Boolean>true</Boolean>
+                </value>
+              </entry>
+              <entry key="applicationSelectorRule" value="2c90c28a4a38a71a014a38a744af015c"/>
+              <entry key="attributeFilterControl">
+                <value>
+                  <IdentityAttributeFilterControl displayName="Previous Manager" name="transferManager"/>
+                </value>
+              </entry>
+              <entry key="enableAttributeControl">
+                <value>
+                  <Boolean>true</Boolean>
+                </value>
+              </entry>
+              <entry key="enableSubordinateControl">
+                <value>
+                  <Boolean>true</Boolean>
+                </value>
+              </entry>
+              <entry key="managedAttributeSelectorRule" value="2c90c28a4a38a71a014a38a7456e0160"/>
+              <entry key="matchAnyOrAll" value="matchAny"/>
+              <entry key="maxHierarchyDepth" value="10"/>
+              <entry key="roleSelectorRule" value="2c90c28a4a38a71a014a38a744af015c"/>
+              <entry key="subordinateChoice" value="directOrIndirect"/>
+            </Map>
+          </value>
+        </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>
+       

@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE Workflow PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<Workflow explicitTransitions="true" name="Pending Leaver Notification">
+  <Variable input="true" name="daysUntilLeave">
+    <Description>Number of days until the identity leaves the organization</Description>
+  </Variable>
+  <Variable input="true" name="manager">
+    <Description>The identity&amp;#39;s manager</Description>
+  </Variable>
+  <Variable input="true" name="identityName">
+    <Description>The name of the Identity</Description>
+  </Variable>
+  <Step icon="Start" name="Start" posX="20" posY="20">
+    <Transition to="Notify Manager"/>
+  </Step>
+  <Step action="sendEmail" icon="Default" name="Notify Manager" posX="267" posY="33">
+     <Arg name="template" value="string:Manager Notification Pending Leaver"/>
+    <Arg name="to" value="script:getManagersEmail(identityName)"/>
+    <Arg name="userId" value="ref:userId"/>
+    <Arg name="nativeIdentity" value="ref:identityDisplayName"/>
+    <Arg name="firstName" value="ref:firstName"/>
+    <Arg name="lastName" value="ref:lastName"/>
+    <Arg name="ProvisioningPlan" value="ref:plan"/>
+    <Arg name="Notify User" value="ref:json"/>
+    <Arg name="identityName" value="ref:identityName"/>
+    <Arg name="appsToNotify" value="ref:appsToNotify"/>
+    <Arg name="phone">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Identity;
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.PendingLeaver.NotifyManager.phone");
+
+serilog.debug("getting attribute 'phone' for identity "+identityName);
+Identity identity=context.getObjectByName(Identity.class, identityName);
+if(identity!=null) {
+  String phone=identity.getAttribute("phone");
+  serilog.debug("returning "+phone);
+  return phone;
+}
+serilog.warn("No phone attribute found");
+return null;
+        ]]></Source>
+      </Script>  
+    </Arg>
+    <Arg name="appMap">
+      <Script>
+        <Source><![CDATA[
+import sailpoint.object.Application;
+import sailpoint.object.Identity;
+import sailpoint.object.Link;
+
+serilog=org.apache.commons.logging.LogFactory.getLog("SERI.Workflow.PendingLeaver.NotifyManager.appMap");
+
+serilog.debug("Checking apps to notify for identity "+identityName+" ("+appsToNotify+")");
+Identity identity=context.getObjectByName(Identity.class, identityName);
+
+List links = identity.getLinks();
+List mapAppList = new ArrayList();
+if (links!=null && appsToNotify!=null) {
+  serilog.debug("Found "+links.size()+" links on "+identityName);
+  for (Link link : links) {
+   
+    Application app = link.getApplication();
+    if (app == null) {
+      serilog.debug("App is null");
+      return false;
+    }
+  
+    //if this app is not in the list of apps to notify mgr skip it
+    if (appsToNotify.indexOf(app.getName()) == -1) {
+      serilog.debug("Application " + app.getName() + " not marked to notify");
+      continue;
+    } else {
+      serilog.debug("Application " + app.getName() + " is marked to notify");
+    }
+      
+    String accountId = link.getDisplayableName();
+    if (accountId == null )
+        accountId = link.getNativeIdentity();
+  
+    Map appParam = new HashMap();
+    appParam.put("application", app.getName());
+    appParam.put("accountid", accountId);
+  
+    mapAppList.add(appParam);
+  }
+} else {
+  serilog.debug("No links found on identity "+identityName);
+}
+return mapAppList;
+        ]]></Source>
+      </Script>  
+    </Arg>
+    <Transition to="Stop"/>
+  </Step>
+  <Step icon="Stop" name="Stop" posX="362" posY="46"/>
+</Workflow>

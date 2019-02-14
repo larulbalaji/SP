@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE EmailTemplate PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<EmailTemplate name="ContractorEmployee">
+  <Body><![CDATA[
+<html>
+	<head><link rel="stylesheet" type="text/css" href="$spTools.formatURL('/css/iiq-custom.css')"></head>
+	<body>
+		<div >
+  		<img src="$spTools.formatURL('/images/TopLogo1.png')" alt="company logo"><br>
+		<br>
+		<br>
+		You are a designated approver for this request.  Please validate that the Identities noted below represent the same individual who is transitioning from a Contractor position to an Employee position.<br>
+		<br>
+		If these identities do not represent a single individual - please click <b>Reject</b>!<br>
+		<br>
+		Please login to IdentityIQ and view your inbox to complete this approval at your earliest convenience.</br>
+		</br>
+		<a href="$spTools.formatURL('/workitem/workItem.jsf?id=$!{item.id}')">Click here to get started on this task.</a>
+	</body>
+</html>
+  ]]></Body>
+  <Description>
+  </Description>
+  <Signature>
+    <Inputs>
+      <Argument name="workflow" type="Workflow">
+        <Description>The Workflow object being executed</Description>
+      </Argument>
+      <Argument name="item" type="WorkItem">
+        <Description>The WorkItem representing the review</Description>
+      </Argument>
+    </Inputs>
+  </Signature>
+  <Subject>APPROVAL:  Contractor to Employee transition</Subject>
+</EmailTemplate>

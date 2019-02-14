@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE sailpoint PUBLIC "sailpoint.dtd" "sailpoint.dtd">
+<sailpoint>
+  <ImportAction name='merge'>
+    <Configuration name="SystemConfiguration">
+      <Attributes>
+      	<Map>
+      	  <entry key="timeMachineEnabled" value="true"/>
+      	  <entry key="loginPassThrough">
+      	    <value>
+      	      <List>
+            		<Reference class="sailpoint.object.Application"  name="Active Directory"/>
+      	      </List>
+      	    </value>
+      	  </entry>
+          <entry key="managerRequestControls">
+            <value>
+              <Map>
+                <entry key="allowAccountOnlyRequests">
+                  <value>
+                    <Boolean>true</Boolean>
+                  </value>
+                </entry>
+              </Map>
+            </value>
+          </entry>
+      	  <entry key="promptForAuthQuestionAnswersAfterLogin">
+      	    <value>
+      	      <Boolean>true</Boolean>
+      	    </value>
+      	  </entry>
+      	  <entry key="enableForgotPassword">
+      	    <value>
+      	      <Boolean>true</Boolean>
+      	    </value>
+      	  </entry>
+      	  <entry key="lcmEnableFulltext">
+      	    <value>
+      	      <Boolean>true</Boolean>
+      	    </value>
+      	  </entry>
+      	  <entry key="enableSelfServiceRegistration">
+      	    <value>
+      	      <Boolean>true</Boolean>
+      	    </value>
+      	  </entry>
+      	  <entry key="defaultEmailFromAddress" value="iiq-noreply@sailpointdemo.com"/>
+      	  <entry key="defaultEmailHost" value="seri.sailpointdemo.com"/>
+      	  <entry key="certificationEmailTemplate" value="New Certification - HTML"/>
+      	  <entry key="scopingEnabled">
+      	    <value>
+      	      <Boolean>true</Boolean>
+      	    </value>
+      	  </entry>
+      	  <entry key="enableRoleSunAssign">
+      	    <value>
+      	      <Boolean>true</Boolean>
+      	    </value>
+      	  </entry>
+          <entry key='quickLinkCategories'>
+            <value>
+              <List>
+                <QuickLinkCategory
+                  name="Admin Tools" messageKey="Admin Tools"
+                  enabled="true" icon="quickLinkCategoryAdmin" />
+                <QuickLinkCategory 
+                  name="ITServices" messageKey="IT Services"
+                  enabled="true" icon="quickLinkCategoryCustom" />
+              </List>
+            </value>
+          </entry>
+        </Map>
+      </Attributes>
+    </Configuration>
+  </ImportAction>
+</sailpoint>
